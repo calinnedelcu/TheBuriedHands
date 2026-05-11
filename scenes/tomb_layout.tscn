@@ -1,0 +1,470 @@
+[gd_scene load_steps=23 format=3 uid="uid://b1tomblayout001"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
+sky_top_color = Color(0.04, 0.04, 0.07, 1)
+sky_horizon_color = Color(0.12, 0.10, 0.10, 1)
+ground_bottom_color = Color(0.02, 0.02, 0.02, 1)
+ground_horizon_color = Color(0.08, 0.07, 0.06, 1)
+sun_angle_max = 30.0
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("Sky_proc")
+
+[sub_resource type="Environment" id="Env_main"]
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_color = Color(0.5, 0.45, 0.35, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 2
+
+; ---- Floor materials ----
+[sub_resource type="StandardMaterial3D" id="Mat_workshop"]
+albedo_color = Color(0.62, 0.42, 0.25, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_storage"]
+albedo_color = Color(0.55, 0.42, 0.30, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_corridor"]
+albedo_color = Color(0.30, 0.28, 0.25, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_guard"]
+albedo_color = Color(0.40, 0.35, 0.30, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_hidden"]
+albedo_color = Color(0.32, 0.22, 0.35, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_mercury"]
+albedo_color = Color(0.55, 0.58, 0.62, 1)
+roughness = 0.3
+metallic = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_gate"]
+albedo_color = Color(0.45, 0.40, 0.35, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_mechanism"]
+albedo_color = Color(0.55, 0.38, 0.20, 1)
+roughness = 0.6
+metallic = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_exit"]
+albedo_color = Color(0.22, 0.28, 0.20, 1)
+roughness = 0.95
+
+; ---- Wall + ground materials ----
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.42, 0.36, 0.30, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.05, 0.05, 0.06, 1)
+roughness = 1.0
+
+[sub_resource type="LabelSettings" id="Label_settings"]
+font_size = 64
+font_color = Color(1, 0.85, 0.4, 1)
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="PlaneMesh" id="Plane_ground"]
+size = Vector2(220, 160)
+material = SubResource("Mat_ground")
+
+[sub_resource type="BoxShape3D" id="Box_ground"]
+size = Vector3(220, 0.2, 160)
+
+[sub_resource type="CapsuleMesh" id="Cap_player"]
+radius = 0.5
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_player"]
+albedo_color = Color(0.9, 0.2, 0.2, 1)
+
+[sub_resource type="CapsuleShape3D" id="Cap_player_shape"]
+radius = 0.5
+height = 2.0
+
+[node name="World" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_main")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7, -0.5, 0.5, 0, 0.707, 0.707, -0.7, -0.5, 0.5, 0, 40, 0)
+light_color = Color(1, 0.92, 0.78, 1)
+light_energy = 0.9
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("Plane_ground")
+
+[node name="GroundCollider" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+shape = SubResource("Box_ground")
+
+[node name="Rooms" type="Node3D" parent="."]
+
+; ============================================================
+; 1. Terracotta Workshop (Start)  size 28 x 20
+; ============================================================
+[node name="01_TerracottaWorkshop" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 0, -15)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop"]
+size = Vector3(28, 0.4, 20)
+material = SubResource("Mat_workshop")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -10)
+size = Vector3(28, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 10)
+size = Vector3(28, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 3, 0)
+size = Vector3(0.5, 6, 20)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 3, 0)
+size = Vector3(0.5, 6, 20)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/01_TerracottaWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.015
+billboard = 1
+text = "1. Terracotta Workshop (Start)"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 2. Storage Room  size 10 x 10
+; ============================================================
+[node name="02_StorageRoom" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0, -33)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/02_StorageRoom"]
+size = Vector3(10, 0.4, 10)
+material = SubResource("Mat_storage")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/02_StorageRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -5)
+size = Vector3(10, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/02_StorageRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 5)
+size = Vector3(10, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/02_StorageRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3, 0)
+size = Vector3(0.5, 6, 10)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/02_StorageRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 3, 0)
+size = Vector3(0.5, 6, 10)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/02_StorageRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "2. Storage Room"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 3. Crossbow Trap Corridor  size 56 x 6
+; ============================================================
+[node name="03_CrossbowCorridor" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -2)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor"]
+size = Vector3(56, 0.4, 6)
+material = SubResource("Mat_corridor")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -3)
+size = Vector3(56, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3)
+size = Vector3(56, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 3, 0)
+size = Vector3(0.5, 6, 6)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3, 0)
+size = Vector3(0.5, 6, 6)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/03_CrossbowCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "3. Crossbow Trap Corridor"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 4. Guard Post  size 8 x 8
+; ============================================================
+[node name="04_GuardPost" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -10)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/04_GuardPost"]
+size = Vector3(8, 0.4, 8)
+material = SubResource("Mat_guard")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/04_GuardPost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -4)
+size = Vector3(8, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/04_GuardPost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 4)
+size = Vector3(8, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/04_GuardPost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 3, 0)
+size = Vector3(0.5, 6, 8)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/04_GuardPost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 0)
+size = Vector3(0.5, 6, 8)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/04_GuardPost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "4. Guard Post"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 5. Hidden Service Passage  size 44 x 4
+; ============================================================
+[node name="05_HiddenPassage" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0, 6)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/05_HiddenPassage"]
+size = Vector3(44, 0.4, 4)
+material = SubResource("Mat_hidden")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/05_HiddenPassage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -2)
+size = Vector3(44, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/05_HiddenPassage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 2)
+size = Vector3(44, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/05_HiddenPassage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3, 0)
+size = Vector3(0.5, 6, 4)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/05_HiddenPassage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 3, 0)
+size = Vector3(0.5, 6, 4)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/05_HiddenPassage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "5. Hidden Service Passage"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 6. Mercury Hall  size 40 x 30
+; ============================================================
+[node name="06_MercuryHall" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, -12)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/06_MercuryHall"]
+size = Vector3(40, 0.4, 30)
+material = SubResource("Mat_mercury")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/06_MercuryHall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -15)
+size = Vector3(40, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/06_MercuryHall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 15)
+size = Vector3(40, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/06_MercuryHall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3, 0)
+size = Vector3(0.5, 6, 30)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/06_MercuryHall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3, 0)
+size = Vector3(0.5, 6, 30)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/06_MercuryHall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+pixel_size = 0.02
+billboard = 1
+text = "6. Mercury Hall"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 7. Middle Gate  size 12 x 12
+; ============================================================
+[node name="07_MiddleGate" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 10)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/07_MiddleGate"]
+size = Vector3(12, 0.4, 12)
+material = SubResource("Mat_gate")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/07_MiddleGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6)
+size = Vector3(12, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/07_MiddleGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 6)
+size = Vector3(12, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/07_MiddleGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3, 0)
+size = Vector3(0.5, 6, 12)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/07_MiddleGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3, 0)
+size = Vector3(0.5, 6, 12)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/07_MiddleGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "7. Middle Gate"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 8. Mechanism Room  size 16 x 12
+; ============================================================
+[node name="08_MechanismRoom" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 16)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/08_MechanismRoom"]
+size = Vector3(16, 0.4, 12)
+material = SubResource("Mat_mechanism")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/08_MechanismRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6)
+size = Vector3(16, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/08_MechanismRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 6)
+size = Vector3(16, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/08_MechanismRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 3, 0)
+size = Vector3(0.5, 6, 12)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/08_MechanismRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 3, 0)
+size = Vector3(0.5, 6, 12)
+material = SubResource("Mat_wall")
+
+[node name="Label" type="Label3D" parent="Rooms/08_MechanismRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "8. Mechanism Room"
+label_settings = SubResource("Label_settings")
+
+; ============================================================
+; 9. Drainage Exit Tunnel  size 12 x 6 + vertical shaft
+; ============================================================
+[node name="09_DrainageExit" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 0, 18)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/09_DrainageExit"]
+size = Vector3(12, 0.4, 6)
+material = SubResource("Mat_exit")
+
+[node name="WallN" type="CSGBox3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -3)
+size = Vector3(12, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallS" type="CSGBox3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3)
+size = Vector3(12, 6, 0.5)
+material = SubResource("Mat_wall")
+
+[node name="WallE" type="CSGBox3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3, 0)
+size = Vector3(0.5, 6, 6)
+material = SubResource("Mat_wall")
+
+[node name="WallW" type="CSGBox3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3, 0)
+size = Vector3(0.5, 6, 6)
+material = SubResource("Mat_wall")
+
+[node name="ExitShaft" type="CSGCylinder3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 0)
+radius = 3.0
+height = 8.0
+material = SubResource("Mat_exit")
+
+[node name="Label" type="Label3D" parent="Rooms/09_DrainageExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+pixel_size = 0.012
+billboard = 1
+text = "9. Drainage Exit"
+label_settings = SubResource("Label_settings")
+
+; ---- Player spawn marker ----
+[node name="PlayerSpawn" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.2, -15)
+
+[node name="Mesh" type="MeshInstance3D" parent="PlayerSpawn"]
+mesh = SubResource("Cap_player")
+material_override = SubResource("Mat_player")
+
+[node name="Collider" type="CollisionShape3D" parent="PlayerSpawn"]
+shape = SubResource("Cap_player_shape")
+
+; ---- Overview camera ----
+[node name="OverviewCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, -10, 95, 80)
+current = true
+fov = 55.0
