@@ -1,6 +1,6 @@
-[gd_scene load_steps=24 format=3 uid="uid://djlbq8yofaeu7"]
+[gd_scene format=3 uid="uid://djlbq8yofaeu7"]
 
-[ext_resource type="Script" path="res://scripts/player_controller.gd" id="Script_player"]
+[ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://scripts/player_controller.gd" id="Script_player"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
 sky_top_color = Color(0.04, 0.04, 0.07, 1)
@@ -404,7 +404,7 @@ pixel_size = 0.012
 billboard = 1
 text = "9. Drainage Exit"
 
-[node name="player" type="StaticBody3D" parent="." unique_id=945651234]
+[node name="player" type="CharacterBody3D" parent="." unique_id=945651234]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.2, -15)
 script = ExtResource("Script_player")
 
@@ -415,11 +415,12 @@ mesh = SubResource("Cap_player")
 [node name="Collider" type="CollisionShape3D" parent="player" unique_id=1255260568]
 shape = SubResource("Cap_player_shape")
 
-[node name="PlayerCamera" type="Camera3D" parent="player" unique_id=1000000001]
+[node name="CameraPivot" type="Node3D" parent="player" unique_id=1000000002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="player/CameraPivot" unique_id=1000000001]
 current = true
 
 [node name="OverviewCamera" type="Camera3D" parent="." unique_id=1226790639]
 transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, -10, 95, 80)
-current = false
 fov = 55.0

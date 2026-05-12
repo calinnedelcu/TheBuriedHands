@@ -15,6 +15,10 @@ run/main_scene="res://scenes/tomb_layout.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/Tripo3d_Godot_Bridge/plugin.cfg")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
@@ -22,3 +26,7 @@ config/icon="res://icon.svg"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+
+[tripo_bridge]
+
+last_cleanup="2026-05-12T16:41:18"
