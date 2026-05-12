@@ -19,6 +19,13 @@ config/icon="res://icon.svg"
 
 enabled=PackedStringArray("res://addons/Tripo3d_Godot_Bridge/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://Scripts/": "yellow",
+"res://TripoModels/": "red"
+}
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
