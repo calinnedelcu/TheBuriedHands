@@ -102,3 +102,33 @@ Observație critică: modelul cu nume samurai poate fi util temporar pentru prot
 - obiecte interactive reale;
 - structură clară de camere și rute în level.
 
+## Checkpoint productie - 2026-05-12 seara
+
+Starea curenta dupa sesiunea de prototipare:
+
+- Jocul ruleaza prin `res://scenes/main_menu.tscn`, iar Play intra in `res://scenes/tomb_layout.tscn`.
+- Meniul principal are muzica din `res://audio/music/main_menu_theme.mp3`, fade-in, sunet de click si sunet special la Play.
+- HUD-ul de vitalitate este sus-stanga si foloseste imaginile importate in `scenes/ui/`: `vitality_0_full.png` pana la `vitality_8_empty.png`.
+- Ordinea corecta a surselor originale pentru vitalitate a fost: 1 full, apoi 8, 4, 6, 3, 9, 7, 2, iar 5 este zero viata.
+- Efectul de damage exista in `Scripts/hud_debug.gd`: schimbarea vitalitatii are un flash rosu slab si shake discret. Butonul temporar de debug pentru damage a fost scos.
+- Controllerul jucatorului din `Scripts/player_controller.gd` are mers, sprint, crouch si crawl pe burta. Crawl este pe `C`.
+- Jucatorul este ajustat sa se simta in jur de 1.80 m.
+- Mainile POV importate din `TripoModels/viewmodel/bound_arms_pov.glb` au fost scoase momentan din scena, pentru ca nu aratau bine in camera.
+- Paznicii / guardianii folosesc inca `TripoModels/guard1-idle.glb`, scalati la `3.25`, tinta vizuala fiind aproximativ 1.90 m.
+- Atmosfera atelierului a fost mutata de la rosu agresiv spre intuneric cald de atelier: ceata mai mica, saturatie mai mica, lumini de ulei mai galbene.
+- `scenes/items/oil_lamp.tscn` si `Scripts/lamp.gd` au lumina mai calda, mai putin rosie si cu volumetric mai discret.
+
+Audio player:
+
+- `Scripts/player_controller.gd` creeaza runtime playere audio pentru pasi, jump si landing.
+- Pasii folosesc `AudioStreamRandomizer`, pitch/volum usor variate si detectie simpla de suprafata prin raycast in jos.
+- Exista directoare pregatite pentru suprafete: `audio/sfx/player/footsteps/clay`, `stone`, `wood`, `wet_stone`.
+- Exista deja mostre CC0 de pasi default in `audio/sfx/player/footsteps/`.
+- Exista sunete CC0 pentru jump in `audio/sfx/player/jump/` si landing in `audio/sfx/player/land/`.
+- Sursele/licentele pentru sample-uri sunt notate in `audio/sfx/player/README.md`.
+
+De retinut pentru urmatoarea sesiune:
+
+- Urmatorul pas recomandat este audio 3D pentru gardieni: pasi spatiali, apropiere/departare si eventual sunete discrete de armura/textil.
+- Dupa gardieni, merita facut un bus/reverb de mormant pentru SFX, ca pasii si obiectele sa sune mai mult ca intr-un spatiu interior de piatra/pamant.
+- Inca trebuie adaugate seturi dedicate de pasi pentru clay/stone/wood/wet_stone; momentan suprafetele sunt pregatite, dar pot folosi fallback daca folderele sunt goale.

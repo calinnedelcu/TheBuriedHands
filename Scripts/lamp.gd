@@ -7,8 +7,8 @@ signal extinguished()
 @export var oil_max: float = 100.0
 @export var oil_level: float = 100.0
 @export var oil_drain_rate: float = 0.6
-@export var base_energy: float = 1.6
-@export var base_range: float = 7.0
+@export var base_energy: float = 1.15
+@export var base_range: float = 5.8
 @export var raised_energy_multiplier: float = 1.6
 @export var raised_range_multiplier: float = 1.35
 @export var flicker_range: float = 0.32
@@ -74,7 +74,7 @@ func _apply_flicker() -> void:
 	var range_mult: float = lerp(1.0, raised_range_multiplier, _raise_blend)
 	var flicker := 1.0 + n * flicker_range
 	light.light_energy = base_energy * energy_mult * flicker
-	light.light_volumetric_fog_energy = base_energy * energy_mult * flicker * 1.5
+	light.light_volumetric_fog_energy = base_energy * energy_mult * flicker * 0.4
 	light.omni_range = base_range * range_mult * (0.9 + n * 0.1)
 	var s := 1.0 + _noise.get_noise_1d(_time * flicker_speed + 100.0) * 0.18
 	flame.scale = _flame_base_scale * s

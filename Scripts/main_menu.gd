@@ -1,7 +1,13 @@
 extends Control
 
 const GAME_SCENE := "res://scenes/tomb_layout.tscn"
+const MUSIC_TARGET_VOLUME_DB := -16.0
+const MUSIC_FADE_SECONDS := 3.0
+const PLAY_START_DELAY_SECONDS := 0.42
 
+@onready var music: AudioStreamPlayer = $Music
+@onready var click_sound: AudioStreamPlayer = $ClickSound
+@onready var play_start_sound: AudioStreamPlayer = $PlayStartSound
 @onready var background: TextureRect = $MenuArea/Content/Background
 @onready var flicker: ColorRect = $MenuArea/Content/FlickerOverlay
 @onready var dust: CPUParticles2D = $MenuArea/Content/Dust
@@ -10,9 +16,11 @@ const GAME_SCENE := "res://scenes/tomb_layout.tscn"
 @onready var content: Control = $MenuArea/Content
 
 var _button_glows: Dictionary = {}
+var _is_starting_game := false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	_start_music()
 
 	_button_glows = {
 		$MenuArea/Content/PlayButton: $MenuArea/Content/PlayGlow,
@@ -20,11 +28,6 @@ func _ready() -> void:
 		$MenuArea/Content/OptionsButton: $MenuArea/Content/OptionsGlow,
 		$MenuArea/Content/QuitButton: $MenuArea/Content/QuitGlow,
 	}
-
-	$MenuArea/Content/PlayButton.pressed.connect(_on_play)
-	$MenuArea/Content/ContinueButton.pressed.connect(_on_continue)
-	$MenuArea/Content/OptionsButton.pressed.connect(_on_options)
-	$MenuArea/Content/QuitButton.pressed.connect(_on_quit)
 
 	for btn in _button_glows.keys():
 		var glow: Panel = _button_glows[btn]
@@ -34,11 +37,33 @@ func _ready() -> void:
 		btn.resized.connect(_sync_glow.bind(btn, glow))
 		_sync_glow(btn, glow)
 
+	$MenuArea/Content/PlayButton.pressed.connect(_on_play)
+	$MenuArea/Content/ContinueButton.pressed.connect(_on_continue)
+	$MenuArea/Content/OptionsButton.pressed.connect(_on_options)
+	$MenuArea/Content/QuitButton.pressed.connect(_on_quit)
+
 	content.resized.connect(_on_content_resized)
 	_on_content_resized()
 
 	_animate_background()
 	_animate_flicker()
+
+func _start_music() -> void:
+	if not music or not music.stream:
+		return
+
+	if music.stream is AudioStreamMP3:
+		var mp3_stream: AudioStreamMP3 = music.stream
+		mp3_stream.loop = true
+
+	music.volume_db = -48.0
+	if not music.playing:
+		music.play()
+
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(music, "volume_db", MUSIC_TARGET_VOLUME_DB, MUSIC_FADE_SECONDS)
 
 func _sync_glow(btn: Button, glow: Panel) -> void:
 	# Match the glow to the button's actual rect, ignoring its own anchors.
@@ -90,17 +115,41 @@ func _on_button_hover(glow: Panel, entered: bool) -> void:
 	t.tween_property(glow, "modulate:a", target, 0.22)
 
 func _on_button_pressed(glow: Panel) -> void:
+	_play_click_sound()
 	glow.modulate.a = 1.0
 	glow.pivot_offset = glow.size * 0.5
 	var t := create_tween()
 	t.tween_property(glow, "scale", Vector2(1.03, 1.03), 0.08)
 	t.tween_property(glow, "scale", Vector2(1.0, 1.0), 0.12)
 
+func _play_click_sound() -> void:
+	if click_sound:
+		click_sound.stop()
+		click_sound.play()
+
 func _on_play() -> void:
+	if _is_starting_game:
+		return
+
+	_is_starting_game = true
+	_set_buttons_disabled(true)
+	if play_start_sound:
+		play_start_sound.play()
+
+	var music_fade := create_tween()
+	music_fade.set_trans(Tween.TRANS_SINE)
+	music_fade.set_ease(Tween.EASE_OUT)
+	music_fade.tween_property(music, "volume_db", -28.0, PLAY_START_DELAY_SECONDS)
+
+	await get_tree().create_timer(PLAY_START_DELAY_SECONDS).timeout
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 func _on_continue() -> void:
 	get_tree().change_scene_to_file(GAME_SCENE)
+
+func _set_buttons_disabled(disabled: bool) -> void:
+	for btn in _button_glows.keys():
+		btn.disabled = disabled
 
 func _on_options() -> void:
 	var dlg := AcceptDialog.new()

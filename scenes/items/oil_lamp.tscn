@@ -35,10 +35,10 @@ size = Vector2(0.04, 0.06)
 [sub_resource type="StandardMaterial3D" id="Mat_flame"]
 transparency = 1
 shading_mode = 0
-albedo_color = Color(1, 0.7, 0.3, 0.95)
+albedo_color = Color(1, 0.78, 0.42, 0.9)
 emission_enabled = true
-emission = Color(1, 0.55, 0.18, 1)
-emission_energy_multiplier = 3.0
+emission = Color(1, 0.72, 0.34, 1)
+emission_energy_multiplier = 2.3
 billboard_mode = 1
 billboard_keep_scale = true
 disable_receive_shadows = true
@@ -59,10 +59,10 @@ material_override = SubResource("Mat_wick")
 
 [node name="Light" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
-light_color = Color(1, 0.55, 0.2, 1)
-light_energy = 1.6
-light_volumetric_fog_energy = 2.4
-omni_range = 7.0
+light_color = Color(1, 0.76, 0.48, 1)
+light_energy = 1.15
+light_volumetric_fog_energy = 0.45
+omni_range = 5.8
 omni_attenuation = 1.6
 shadow_enabled = true
 

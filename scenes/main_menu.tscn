@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bx1ocmp23h5qc" path="res://Scripts/main_menu.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://d2002eqtnhf0t" path="res://scenes/ui/main_menu_bg.png" id="2_bg"]
+[ext_resource type="AudioStreamMP3" uid="uid://bt80gxcqbxve5" path="res://audio/music/main_menu_theme.mp3" id="3_music"]
+[ext_resource type="AudioStreamWAV" uid="uid://bmg5iic5vw4qk" path="res://audio/sfx/menu_click.wav" id="4_click"]
+[ext_resource type="AudioStreamWAV" uid="uid://cferqjjomqhml" path="res://audio/sfx/menu_play_start.wav" id="5_play_start"]
 
 [sub_resource type="StyleBoxFlat" id="Glow_style"]
 bg_color = Color(1, 0.65, 0.3, 0)
@@ -24,6 +27,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=2095595641]
+stream = ExtResource("3_music")
+volume_db = -16.0
+
+[node name="ClickSound" type="AudioStreamPlayer" parent="." unique_id=998540431]
+stream = ExtResource("4_click")
+volume_db = -8.0
+
+[node name="PlayStartSound" type="AudioStreamPlayer" parent="." unique_id=1603051835]
+stream = ExtResource("5_play_start")
+volume_db = -5.0
 
 [node name="LetterboxBG" type="ColorRect" parent="." unique_id=794126400]
 layout_mode = 1

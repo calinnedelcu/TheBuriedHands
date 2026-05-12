@@ -8,6 +8,7 @@ extends Node3D
 @export var breath_amount: float = 0.0035
 @export var breath_speed: float = 1.6
 @export var crouch_offset: Vector3 = Vector3(0, -0.04, 0.02)
+@export var crawl_offset: Vector3 = Vector3(0, -0.11, 0.08)
 @export var land_kick: float = 0.05
 
 @onready var _player: CharacterBody3D = get_node_or_null(player_path) if not player_path.is_empty() else _find_player()
@@ -63,6 +64,11 @@ func _process(delta: float) -> void:
 	_land_blend = lerp(_land_blend, 0.0, clamp(delta * 6.0, 0.0, 1.0))
 	var land := Vector3(0, -_land_blend * land_kick, 0)
 
-	var crouch := crouch_offset if (_player != null and _player.has_method("is_crouching") and _player.is_crouching()) else Vector3.ZERO
+	var stance_offset := Vector3.ZERO
+	if _player != null:
+		if _player.has_method("is_crawling") and _player.is_crawling():
+			stance_offset = crawl_offset
+		elif _player.has_method("is_crouching") and _player.is_crouching():
+			stance_offset = crouch_offset
 
-	position = position.lerp(_base_pos + _sway_target + bob + breath + land + crouch, clamp(delta * sway_smoothing, 0.0, 1.0))
+	position = position.lerp(_base_pos + _sway_target + bob + breath + land + stance_offset, clamp(delta * sway_smoothing, 0.0, 1.0))
