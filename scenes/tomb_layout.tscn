@@ -3,25 +3,61 @@
 [ext_resource type="PackedScene" uid="uid://c2h7g0dm88sa3" path="res://TripoModels/samurai_armor_3d_model/samurai_armor_3d_model.fbx" id="2_f8c7l"]
 [ext_resource type="Texture2D" uid="uid://cy3v3u4yi14nj" path="res://TripoModels/samurai_armor_3d_model/tripo_convert_8c8823eb-5f0d-4b1b-a072-242c4197459c.fbm/samuraiarmor3dmodel_basecolor.JPEG" id="3_2bvp5"]
 [ext_resource type="PackedScene" uid="uid://brd4w4eu5kj5m" path="res://TripoModels/guard1-idle.glb" id="4_2bvp5"]
+[ext_resource type="Script" uid="uid://bj0m4hf5aqj73" path="res://Scripts/auto_play_first_animation.gd" id="Script_guard_auto"]
+[ext_resource type="Script" uid="uid://c75v4nrbr5m1q" path="res://Scripts/hud_debug.gd" id="Script_hud_debug"]
 [ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://Scripts/player_controller.gd" id="Script_player"]
-[ext_resource type="Script" path="res://Scripts/auto_play_first_animation.gd" id="Script_guard_auto"]
+[ext_resource type="Texture2D" uid="uid://cmuceog3rt21n" path="res://scenes/ui/vitality_hud.png" id="Texture_vitality"]
+[ext_resource type="PackedScene" uid="uid://c3kx7lampoil0" path="res://scenes/items/oil_lamp.tscn" id="Scene_oil_lamp"]
+[ext_resource type="PackedScene" uid="uid://b3kx5pov2hud0" path="res://scenes/ui/hud_pov.tscn" id="Scene_hud_pov"]
+[ext_resource type="Script" path="res://Scripts/interaction.gd" id="Script_interaction"]
+[ext_resource type="Script" path="res://Scripts/viewmodel_sway.gd" id="Script_viewmodel_sway"]
+[ext_resource type="Script" path="res://Scripts/inventory.gd" id="Script_inventory"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
-sky_top_color = Color(0.04, 0.04, 0.07, 1)
-sky_horizon_color = Color(0.12, 0.1, 0.1, 1)
-ground_bottom_color = Color(0.02, 0.02, 0.02, 1)
-ground_horizon_color = Color(0.08, 0.07, 0.06, 1)
+sky_top_color = Color(0.01, 0.01, 0.015, 1)
+sky_horizon_color = Color(0.03, 0.025, 0.02, 1)
+ground_bottom_color = Color(0, 0, 0, 1)
+ground_horizon_color = Color(0.02, 0.015, 0.01, 1)
 
 [sub_resource type="Sky" id="Sky_main"]
 sky_material = SubResource("Sky_proc")
 
 [sub_resource type="Environment" id="Env_main"]
-background_mode = 2
+background_mode = 1
+background_color = Color(0.015, 0.012, 0.01, 1)
 sky = SubResource("Sky_main")
 ambient_light_source = 3
-ambient_light_color = Color(0.5, 0.45, 0.35, 1)
-ambient_light_energy = 0.4
+ambient_light_color = Color(0.35, 0.22, 0.12, 1)
+ambient_light_energy = 0.08
 tonemap_mode = 2
+tonemap_exposure = 1.1
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 1.4
+ssao_light_affect = 0.2
+ssao_ao_channel_affect = 0.6
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.1
+glow_hdr_threshold = 1.2
+fog_enabled = true
+fog_light_color = Color(0.18, 0.12, 0.07, 1)
+fog_light_energy = 0.6
+fog_density = 0.018
+fog_aerial_perspective = 0.3
+fog_sky_affect = 0.4
+fog_height_density = 0.08
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.035
+volumetric_fog_albedo = Color(0.85, 0.7, 0.5, 1)
+volumetric_fog_emission = Color(0.05, 0.03, 0.02, 1)
+volumetric_fog_emission_energy = 0.4
+volumetric_fog_anisotropy = 0.3
+volumetric_fog_ambient_inject = 0.4
+adjustment_enabled = true
+adjustment_contrast = 1.15
+adjustment_saturation = 0.85
 
 [sub_resource type="StandardMaterial3D" id="Mat_ground"]
 albedo_color = Color(0.05, 0.05, 0.06, 1)
@@ -40,6 +76,42 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="Mat_wall"]
 albedo_color = Color(0.42, 0.36, 0.3, 1)
 roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_ceiling"]
+albedo_color = Color(0.12, 0.1, 0.08, 1)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProc_dust"]
+emission_shape = 3
+emission_box_extents = Vector3(13, 2.5, 9)
+direction = Vector3(0, -1, 0)
+spread = 60.0
+flatness = 0.5
+initial_velocity_min = 0.02
+initial_velocity_max = 0.12
+angular_velocity_min = -8.0
+angular_velocity_max = 8.0
+gravity = Vector3(0.05, -0.04, 0)
+linear_accel_max = 0.05
+damping_min = 0.05
+damping_max = 0.15
+scale_min = 0.015
+scale_max = 0.045
+color = Color(1, 0.85, 0.6, 0.55)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dust"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.88, 0.62, 0.55)
+disable_receive_shadows = true
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="Quad_dust"]
+material = SubResource("Mat_dust")
+size = Vector2(0.05, 0.05)
 
 [sub_resource type="StandardMaterial3D" id="Mat_storage"]
 albedo_color = Color(0.55, 0.42, 0.3, 1)
@@ -62,6 +134,11 @@ albedo_color = Color(0.55, 0.58, 0.62, 1)
 metallic = 0.6
 roughness = 0.3
 
+[sub_resource type="StandardMaterial3D" id="Mat_ceiling_mercury"]
+albedo_color = Color(0.18, 0.2, 0.22, 1)
+metallic = 0.1
+roughness = 0.9
+
 [sub_resource type="StandardMaterial3D" id="Mat_gate"]
 albedo_color = Color(0.45, 0.4, 0.35, 1)
 roughness = 0.85
@@ -81,6 +158,10 @@ albedo_color = Color(0.9, 0.2, 0.2, 1)
 [sub_resource type="CapsuleMesh" id="Cap_player"]
 
 [sub_resource type="CapsuleShape3D" id="Cap_player_shape"]
+
+[sub_resource type="AtlasTexture" id="Atlas_vitality_hud"]
+atlas = ExtResource("Texture_vitality")
+region = Rect2(20, 143, 545, 102)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vwohe"]
 resource_name = "tripo_mat_8c8823eb"
@@ -237,7 +318,7 @@ bind/40/name = &"R_Hand"
 bind/40/bone = -1
 bind/40/pose = Transform3D(0.7521668, -0.5675624, 0.33484063, 0.26728475, -0.20168564, -0.94227505, 0.6023322, 0.7982457, -2.3841875e-07, -0.28820875, 0.44276172, 0.16641064)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d33ke"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x1oae"]
 resource_local_to_scene = true
 resource_name = "tripo_mat_8c8823eb"
 vertex_color_use_as_albedo = true
@@ -251,9 +332,15 @@ environment = SubResource("Env_main")
 
 [node name="SunLight" type="DirectionalLight3D" parent="." unique_id=495555816]
 transform = Transform3D(0.7, -0.5, 0.5, 0, 0.707, 0.707, -0.7, -0.5, 0.5, 0, 40, 0)
-light_color = Color(1, 0.92, 0.78, 1)
-light_energy = 0.9
+light_color = Color(0.42, 0.5, 0.7, 1)
+light_energy = 0.06
+light_indirect_energy = 0.0
+light_volumetric_fog_energy = 0.15
 shadow_enabled = true
+shadow_bias = 0.05
+shadow_normal_bias = 1.2
+directional_shadow_mode = 1
+directional_shadow_max_distance = 80.0
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1827806653]
 
@@ -300,21 +387,62 @@ pixel_size = 0.015
 billboard = 1
 text = "1. Terracotta Workshop (Start)"
 
-[node name="TerracottaGuard01" parent="Rooms/01_TerracottaWorkshop" instance=ExtResource("4_2bvp5")]
+[node name="TerracottaGuard01" parent="Rooms/01_TerracottaWorkshop" unique_id=1082562726 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -8, 0.2, -4)
 script = ExtResource("Script_guard_auto")
 
-[node name="TerracottaGuard02" parent="Rooms/01_TerracottaWorkshop" instance=ExtResource("4_2bvp5")]
+[node name="TerracottaGuard02" parent="Rooms/01_TerracottaWorkshop" unique_id=687064041 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -3, 0.2, 4)
 script = ExtResource("Script_guard_auto")
 
-[node name="TerracottaGuard03" parent="Rooms/01_TerracottaWorkshop" instance=ExtResource("4_2bvp5")]
+[node name="TerracottaGuard03" parent="Rooms/01_TerracottaWorkshop" unique_id=482079970 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4, 0.2, -3.5)
 script = ExtResource("Script_guard_auto")
 
-[node name="TerracottaGuard04" parent="Rooms/01_TerracottaWorkshop" instance=ExtResource("4_2bvp5")]
+[node name="TerracottaGuard04" parent="Rooms/01_TerracottaWorkshop" unique_id=1869779454 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.2, 3.5)
 script = ExtResource("Script_guard_auto")
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1855240834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(28, 0.5, 20)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp_W" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=635832878]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.6, 2)
+light_color = Color(1, 0.5, 0.18, 1)
+light_energy = 2.2
+light_volumetric_fog_energy = 2.0
+shadow_enabled = true
+omni_range = 11.0
+omni_attenuation = 1.6
+
+[node name="Lamp_E" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1739101086]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.6, -2)
+light_color = Color(1, 0.55, 0.22, 1)
+light_energy = 1.9
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 11.0
+omni_attenuation = 1.5
+
+[node name="Brazier_Glow" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1481515781]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.9, -7)
+light_color = Color(1, 0.42, 0.12, 1)
+light_energy = 3.6
+light_volumetric_fog_energy = 3.0
+omni_range = 8.0
+omni_attenuation = 1.8
+
+[node name="Dust" type="GPUParticles3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1107479786]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+amount = 220
+lifetime = 14.0
+preprocess = 8.0
+randomness = 0.6
+visibility_aabb = AABB(-14, -3, -10, 28, 6, 20)
+process_material = SubResource("ParticleProc_dust")
+draw_pass_1 = SubResource("Quad_dust")
 
 [node name="02_StorageRoom" type="Node3D" parent="Rooms" unique_id=1271464678]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0, -33)
@@ -349,6 +477,20 @@ pixel_size = 0.012
 billboard = 1
 text = "2. Storage Room"
 
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/02_StorageRoom" unique_id=683502477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(10, 0.5, 10)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp" type="OmniLight3D" parent="Rooms/02_StorageRoom" unique_id=1339879808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+light_color = Color(1, 0.6, 0.25, 1)
+light_energy = 1.6
+light_volumetric_fog_energy = 1.6
+shadow_enabled = true
+omni_range = 8.0
+omni_attenuation = 1.7
+
 [node name="03_CrossbowCorridor" type="Node3D" parent="Rooms" unique_id=2104431143]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -2)
 
@@ -381,6 +523,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
 pixel_size = 0.012
 billboard = 1
 text = "3. Crossbow Trap Corridor"
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/03_CrossbowCorridor" unique_id=768060491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(56, 0.5, 6)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp_W" type="OmniLight3D" parent="Rooms/03_CrossbowCorridor" unique_id=1254049491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4.4, 0)
+light_color = Color(1, 0.5, 0.18, 1)
+light_energy = 1.8
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.6
+
+[node name="Lamp_C" type="OmniLight3D" parent="Rooms/03_CrossbowCorridor" unique_id=80613195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+light_color = Color(0.95, 0.45, 0.15, 1)
+light_energy = 1.5
+light_volumetric_fog_energy = 1.6
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.6
+
+[node name="Lamp_E" type="OmniLight3D" parent="Rooms/03_CrossbowCorridor" unique_id=1849972732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 4.4, 0)
+light_color = Color(1, 0.5, 0.2, 1)
+light_energy = 1.8
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.6
 
 [node name="04_GuardPost" type="Node3D" parent="Rooms" unique_id=1571816428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -10)
@@ -415,6 +589,20 @@ pixel_size = 0.012
 billboard = 1
 text = "4. Guard Post"
 
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/04_GuardPost" unique_id=1964854850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(8, 0.5, 8)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp" type="OmniLight3D" parent="Rooms/04_GuardPost" unique_id=1082132701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+light_color = Color(1, 0.55, 0.22, 1)
+light_energy = 2.0
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 8.0
+omni_attenuation = 1.6
+
 [node name="05_HiddenPassage" type="Node3D" parent="Rooms" unique_id=1954796299]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0, 6)
 
@@ -447,6 +635,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
 pixel_size = 0.012
 billboard = 1
 text = "5. Hidden Service Passage"
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/05_HiddenPassage" unique_id=1278033799]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, 0)
+size = Vector3(44, 0.5, 4)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp_W" type="OmniLight3D" parent="Rooms/05_HiddenPassage" unique_id=295755611]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 3.8, 0)
+light_color = Color(1, 0.42, 0.15, 1)
+light_energy = 1.2
+light_volumetric_fog_energy = 1.4
+shadow_enabled = true
+omni_range = 7.0
+omni_attenuation = 1.8
+
+[node name="Lamp_E" type="OmniLight3D" parent="Rooms/05_HiddenPassage" unique_id=972426666]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 3.8, 0)
+light_color = Color(1, 0.4, 0.12, 1)
+light_energy = 1.1
+light_volumetric_fog_energy = 1.4
+shadow_enabled = true
+omni_range = 7.0
+omni_attenuation = 1.8
 
 [node name="06_MercuryHall" type="Node3D" parent="Rooms" unique_id=834488888]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, -12)
@@ -481,6 +692,45 @@ pixel_size = 0.02
 billboard = 1
 text = "6. Mercury Hall"
 
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/06_MercuryHall" unique_id=574998174]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+size = Vector3(40, 0.5, 30)
+material = SubResource("Mat_ceiling_mercury")
+
+[node name="Lamp_W" type="OmniLight3D" parent="Rooms/06_MercuryHall" unique_id=848475834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 5, -10)
+light_color = Color(1, 0.55, 0.2, 1)
+light_energy = 1.8
+light_volumetric_fog_energy = 1.6
+shadow_enabled = true
+omni_range = 12.0
+omni_attenuation = 1.6
+
+[node name="Lamp_E" type="OmniLight3D" parent="Rooms/06_MercuryHall" unique_id=2008479985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 5, 10)
+light_color = Color(1, 0.5, 0.18, 1)
+light_energy = 1.6
+light_volumetric_fog_energy = 1.6
+shadow_enabled = true
+omni_range = 12.0
+omni_attenuation = 1.6
+
+[node name="MercuryGlow_A" type="OmniLight3D" parent="Rooms/06_MercuryHall" unique_id=824556793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+light_color = Color(0.45, 0.95, 0.95, 1)
+light_energy = 1.6
+light_volumetric_fog_energy = 3.0
+omni_range = 18.0
+omni_attenuation = 2.0
+
+[node name="MercuryGlow_B" type="OmniLight3D" parent="Rooms/06_MercuryHall" unique_id=1923221307]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.5, -6)
+light_color = Color(0.35, 0.85, 0.95, 1)
+light_energy = 1.2
+light_volumetric_fog_energy = 2.6
+omni_range = 14.0
+omni_attenuation = 2.0
+
 [node name="07_MiddleGate" type="Node3D" parent="Rooms" unique_id=1748971080]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 10)
 
@@ -514,6 +764,20 @@ pixel_size = 0.012
 billboard = 1
 text = "7. Middle Gate"
 
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/07_MiddleGate" unique_id=1515403455]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(12, 0.5, 12)
+material = SubResource("Mat_ceiling")
+
+[node name="GateBrazier" type="OmniLight3D" parent="Rooms/07_MiddleGate" unique_id=436572348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+light_color = Color(1, 0.38, 0.1, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 2.8
+shadow_enabled = true
+omni_range = 10.0
+omni_attenuation = 1.6
+
 [node name="08_MechanismRoom" type="Node3D" parent="Rooms" unique_id=357358163]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 16)
 
@@ -546,6 +810,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
 pixel_size = 0.012
 billboard = 1
 text = "8. Mechanism Room"
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/08_MechanismRoom" unique_id=600518911]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(16, 0.5, 12)
+material = SubResource("Mat_ceiling")
+
+[node name="Lamp_W" type="OmniLight3D" parent="Rooms/08_MechanismRoom" unique_id=2071823169]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 4.4, 0)
+light_color = Color(1, 0.55, 0.22, 1)
+light_energy = 1.8
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.6
+
+[node name="Lamp_E" type="OmniLight3D" parent="Rooms/08_MechanismRoom" unique_id=1318833459]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 4.4, 0)
+light_color = Color(1, 0.5, 0.2, 1)
+light_energy = 1.7
+light_volumetric_fog_energy = 1.8
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.6
 
 [node name="09_DrainageExit" type="Node3D" parent="Rooms" unique_id=843333580]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 0, 18)
@@ -586,6 +873,30 @@ pixel_size = 0.012
 billboard = 1
 text = "9. Drainage Exit"
 
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/09_DrainageExit" unique_id=675369704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 0)
+size = Vector3(12, 0.5, 6)
+material = SubResource("Mat_ceiling")
+
+[node name="ExitMoonShaft" type="SpotLight3D" parent="Rooms/09_DrainageExit" unique_id=1365785283]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 10, 10, 0)
+light_color = Color(0.55, 0.7, 0.95, 1)
+light_energy = 2.2
+light_volumetric_fog_energy = 3.5
+shadow_enabled = true
+spot_range = 14.0
+spot_attenuation = 1.4
+spot_angle = 28.0
+spot_angle_attenuation = 1.2
+
+[node name="Lamp" type="OmniLight3D" parent="Rooms/09_DrainageExit" unique_id=1331910019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.5, 0)
+light_color = Color(1, 0.45, 0.18, 1)
+light_volumetric_fog_energy = 1.4
+shadow_enabled = true
+omni_range = 6.0
+omni_attenuation = 1.8
+
 [node name="player" type="CharacterBody3D" parent="." unique_id=945651234]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.2, -15)
 script = ExtResource("Script_player")
@@ -593,6 +904,7 @@ bob_amplitude = 0.04
 bob_frequency = 4.0
 
 [node name="Mesh" type="MeshInstance3D" parent="player" unique_id=1859343329]
+visible = false
 material_override = SubResource("Mat_player")
 mesh = SubResource("Cap_player")
 
@@ -604,10 +916,54 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="player/CameraPivot" unique_id=1000000001]
 current = true
+fov = 75.0
+near = 0.05
+
+[node name="InteractionRay" type="RayCast3D" parent="player/CameraPivot/Camera3D"]
+target_position = Vector3(0, 0, -2.5)
+collide_with_areas = false
+collide_with_bodies = true
+script = ExtResource("Script_interaction")
+
+[node name="ViewmodelRig" type="Node3D" parent="player/CameraPivot/Camera3D"]
+script = ExtResource("Script_viewmodel_sway")
+
+[node name="LampSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig"]
+transform = Transform3D(0.94, 0, 0.342, 0, 1, 0, -0.342, 0, 0.94, -0.32, -0.26, -0.55)
+
+[node name="OilLamp" parent="player/CameraPivot/Camera3D/ViewmodelRig/LampSocket" instance=ExtResource("Scene_oil_lamp")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)
+
+[node name="ToolSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig"]
+transform = Transform3D(0.94, 0, -0.342, 0, 1, 0, 0.342, 0, 0.94, 0.28, -0.22, -0.5)
+
+[node name="Inventory" type="Node" parent="player"]
+script = ExtResource("Script_inventory")
+tool_socket_path = NodePath("../CameraPivot/Camera3D/ViewmodelRig/ToolSocket")
+
+[node name="HUDPov" parent="player" instance=ExtResource("Scene_hud_pov")]
+player_path = NodePath("..")
+lamp_path = NodePath("../CameraPivot/Camera3D/ViewmodelRig/LampSocket/OilLamp")
+interaction_path = NodePath("../CameraPivot/Camera3D/InteractionRay")
+inventory_path = NodePath("../Inventory")
 
 [node name="OverviewCamera" type="Camera3D" parent="." unique_id=1226790639]
 transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, -10, 95, 80)
 fov = 55.0
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1243915817]
+layer = 10
+script = ExtResource("Script_hud_debug")
+
+[node name="Vitality" type="TextureRect" parent="HUD" unique_id=84964764]
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 351.0
+offset_bottom = 79.0
+mouse_filter = 2
+texture = SubResource("Atlas_vitality_hud")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="samurai_armor_3d_model" parent="." unique_id=1307363076 instance=ExtResource("2_f8c7l")]
 
@@ -731,7 +1087,7 @@ bones/40/scale = Vector3(0.9999999, 0.99999976, 0.9999998)
 [node name="tripo_node_8c8823eb" parent="samurai_armor_3d_model/Armature/Skeleton3D" index="0" unique_id=1394878421]
 mesh = SubResource("ArrayMesh_63580")
 skin = SubResource("Skin_mafwv")
-surface_material_override/0 = SubResource("StandardMaterial3D_d33ke")
+surface_material_override/0 = SubResource("StandardMaterial3D_x1oae")
 
 [node name="guard1-idle" parent="." unique_id=1308289344 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.37211, -0.1000016, 48.119118)
