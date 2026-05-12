@@ -1,0 +1,263 @@
+[gd_scene format=3 uid="uid://bextcrfqlkkfp"]
+
+[ext_resource type="Script" uid="uid://bx1ocmp23h5qc" path="res://Scripts/main_menu.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d2002eqtnhf0t" path="res://scenes/ui/main_menu_bg.png" id="2_bg"]
+
+[sub_resource type="StyleBoxFlat" id="Glow_style"]
+bg_color = Color(1, 0.65, 0.3, 0)
+border_width_bottom = 1
+border_color = Color(1, 0.82, 0.5, 0.75)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(1, 0.55, 0.22, 0.18)
+shadow_size = 6
+shadow_offset = Vector2(0, 0)
+
+[node name="MainMenu" type="Control" unique_id=1452672964]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="LetterboxBG" type="ColorRect" parent="." unique_id=794126400]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="MenuArea" type="AspectRatioContainer" parent="." unique_id=1609906052]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+ratio = 1.7768
+
+[node name="Content" type="Control" parent="MenuArea" unique_id=835294531]
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Background" type="TextureRect" parent="MenuArea/Content" unique_id=1837696048]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="FlickerOverlay" type="ColorRect" parent="MenuArea/Content" unique_id=1083965112]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0.55, 0.22, 0)
+
+[node name="Dust" type="CPUParticles2D" parent="MenuArea/Content" unique_id=1385401943]
+amount = 50
+lifetime = 16.0
+preprocess = 8.0
+randomness = 1.0
+emission_shape = 3
+emission_rect_extents = Vector2(800, 8)
+direction = Vector2(0, -1)
+spread = 25.0
+gravity = Vector2(0, -2)
+initial_velocity_min = 2.0
+initial_velocity_max = 6.0
+angular_velocity_min = -10.0
+angular_velocity_max = 10.0
+scale_amount_min = 0.5
+scale_amount_max = 1.4
+color = Color(1, 0.85, 0.6, 0.28)
+
+[node name="Embers" type="CPUParticles2D" parent="MenuArea/Content" unique_id=2050001001]
+amount = 18
+lifetime = 9.0
+preprocess = 5.0
+randomness = 1.0
+emission_shape = 3
+emission_rect_extents = Vector2(820, 10)
+direction = Vector2(0, -1)
+spread = 14.0
+gravity = Vector2(0, -10)
+initial_velocity_min = 6.0
+initial_velocity_max = 14.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+scale_amount_min = 0.5
+scale_amount_max = 1.1
+color = Color(1, 0.62, 0.22, 0.7)
+
+[node name="Drift" type="CPUParticles2D" parent="MenuArea/Content" unique_id=2050001003]
+amount = 20
+lifetime = 18.0
+preprocess = 10.0
+randomness = 1.0
+emission_shape = 3
+emission_rect_extents = Vector2(900, 500)
+direction = Vector2(-0.3, -1)
+spread = 45.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 1.5
+initial_velocity_max = 3.5
+angular_velocity_min = -5.0
+angular_velocity_max = 5.0
+scale_amount_min = 0.4
+scale_amount_max = 1.0
+color = Color(1, 0.78, 0.45, 0.14)
+
+[node name="PlayGlow" type="Panel" parent="MenuArea/Content" unique_id=416686825]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.335
+anchor_top = 0.39400002
+anchor_right = 0.45000002
+anchor_bottom = 0.44900003
+offset_left = -0.024536133
+offset_top = -0.31201172
+offset_right = -0.43170166
+offset_bottom = -0.31201172
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Glow_style")
+
+[node name="ContinueGlow" type="Panel" parent="MenuArea/Content" unique_id=730394820]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.38
+anchor_top = 0.459
+anchor_right = 0.58
+anchor_bottom = 0.514
+offset_left = -104.83603
+offset_top = -3.4320068
+offset_right = -104.836
+offset_bottom = -3.4320068
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Glow_style")
+
+[node name="OptionsGlow" type="Panel" parent="MenuArea/Content" unique_id=780400255]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.38
+anchor_top = 0.523
+anchor_right = 0.58
+anchor_bottom = 0.578
+offset_left = -103.83603
+offset_top = -2.9039917
+offset_right = -103.836
+offset_bottom = -2.9039917
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Glow_style")
+
+[node name="QuitGlow" type="Panel" parent="MenuArea/Content" unique_id=487446223]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.38
+anchor_top = 0.588
+anchor_right = 0.58
+anchor_bottom = 0.643
+offset_left = -100.83603
+offset_top = -3.0239868
+offset_right = -100.836
+offset_bottom = -3.0239868
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Glow_style")
+
+[node name="PlayButton" type="Button" parent="MenuArea/Content" unique_id=1869307104]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.335
+anchor_top = 0.39400002
+anchor_right = 0.45000002
+anchor_bottom = 0.44900003
+offset_left = -0.024536133
+offset_top = -0.31201172
+offset_right = -0.43170166
+offset_bottom = -0.31201172
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="ContinueButton" type="Button" parent="MenuArea/Content" unique_id=937047131]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.335
+anchor_top = 0.459
+anchor_right = 0.45
+anchor_bottom = 0.514
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="OptionsButton" type="Button" parent="MenuArea/Content" unique_id=1323131192]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.335
+anchor_top = 0.523
+anchor_right = 0.45
+anchor_bottom = 0.578
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="QuitButton" type="Button" parent="MenuArea/Content" unique_id=257145562]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.335
+anchor_top = 0.588
+anchor_right = 0.45
+anchor_bottom = 0.643
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+flat = true
