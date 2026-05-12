@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://djlbq8yofaeu7"]
 
-[ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://scripts/player_controller.gd" id="Script_player"]
+[ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://Scripts/player_controller.gd" id="Script_player"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
 sky_top_color = Color(0.04, 0.04, 0.07, 1)
@@ -407,6 +407,8 @@ text = "9. Drainage Exit"
 [node name="player" type="CharacterBody3D" parent="." unique_id=945651234]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.2, -15)
 script = ExtResource("Script_player")
+bob_amplitude = 0.04
+bob_frequency = 4.0
 
 [node name="Mesh" type="MeshInstance3D" parent="player" unique_id=1859343329]
 material_override = SubResource("Mat_player")
