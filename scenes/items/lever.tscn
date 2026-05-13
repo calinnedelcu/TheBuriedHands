@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://clever0000001"]
+
+[ext_resource type="Script" path="res://Scripts/lever.gd" id="1_lever"]
+[ext_resource type="Script" path="res://Scripts/interactable.gd" id="2_interact"]
+
+[sub_resource type="BoxShape3D" id="Shape_base"]
+size = Vector3(0.3, 0.4, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_base"]
+size = Vector3(0.3, 0.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_base"]
+albedo_color = Color(0.28, 0.2, 0.12, 1)
+roughness = 0.75
+metallic = 0.3
+
+[sub_resource type="CylinderMesh" id="Mesh_handle"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.6
+radial_segments = 8
+
+[sub_resource type="StandardMaterial3D" id="Mat_handle"]
+albedo_color = Color(0.4, 0.28, 0.16, 1)
+roughness = 0.6
+metallic = 0.45
+
+[node name="Lever" type="Node3D"]
+script = ExtResource("1_lever")
+
+[node name="Base" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collider" type="CollisionShape3D" parent="Base"]
+shape = SubResource("Shape_base")
+
+[node name="Mesh" type="MeshInstance3D" parent="Base"]
+mesh = SubResource("Mesh_base")
+material_override = SubResource("Mat_base")
+
+[node name="Handle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+
+[node name="HandleMesh" type="MeshInstance3D" parent="Handle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("Mesh_handle")
+material_override = SubResource("Mat_handle")
+
+[node name="LeverAudio" type="AudioStreamPlayer3D" parent="."]
+volume_db = -8.0
+unit_size = 8.0
+max_distance = 18.0
+
+[node name="Interactable" type="Node" parent="."]
+script = ExtResource("2_interact")
+prompt_text = "Trage pârghia"
+one_shot = true

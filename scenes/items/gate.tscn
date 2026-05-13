@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://cgate00000001"]
+
+[ext_resource type="Script" path="res://Scripts/gate.gd" id="1_gate"]
+
+[sub_resource type="BoxShape3D" id="Shape_door"]
+size = Vector3(3.0, 3.4, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_door"]
+size = Vector3(3.0, 3.4, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_door"]
+albedo_color = Color(0.22, 0.16, 0.1, 1)
+roughness = 0.75
+metallic = 0.25
+
+[sub_resource type="BoxMesh" id="Mesh_frame_side"]
+size = Vector3(0.4, 4.0, 0.5)
+
+[node name="Gate" type="Node3D"]
+script = ExtResource("1_gate")
+slide_offset = Vector3(0, 3.4, 0)
+
+[node name="FrameLeft" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 2.0, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collider" type="CollisionShape3D" parent="FrameLeft"]
+shape = SubResource("Shape_door")
+
+[node name="Mesh" type="MeshInstance3D" parent="FrameLeft"]
+mesh = SubResource("Mesh_frame_side")
+material_override = SubResource("Mat_door")
+
+[node name="FrameRight" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 2.0, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collider" type="CollisionShape3D" parent="FrameRight"]
+shape = SubResource("Shape_door")
+
+[node name="Mesh" type="MeshInstance3D" parent="FrameRight"]
+mesh = SubResource("Mesh_frame_side")
+material_override = SubResource("Mat_door")
+
+[node name="Door" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collider" type="CollisionShape3D" parent="Door"]
+shape = SubResource("Shape_door")
+
+[node name="Mesh" type="MeshInstance3D" parent="Door"]
+mesh = SubResource("Mesh_door")
+material_override = SubResource("Mat_door")
+
+[node name="GateAudio" type="AudioStreamPlayer3D" parent="."]
+volume_db = -4.0
+unit_size = 12.0
+max_distance = 30.0

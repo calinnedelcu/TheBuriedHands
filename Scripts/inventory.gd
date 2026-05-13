@@ -1,6 +1,8 @@
 extends Node
 
 signal slot_changed(index: int, item_name: String)
+signal slot_acquired(index: int, item_name: String)
+signal ceramic_changed(count: int)
 
 class ItemDef:
 	var item_name: String
@@ -14,10 +16,13 @@ class ItemDef:
 		offset = o
 
 @export var tool_socket_path: NodePath
+@export var auto_acquire_all: bool = true
 
 var _socket: Node3D
 var _current_index: int = 0
 var _spawned: Node3D = null
+var _acquired: Array[bool] = []
+var _ceramic_count: int = 0
 
 # Slot 0 = empty/free hand
 # Slot 1..4 = placeholder tools, easily replaced by real .glb meshes later
@@ -32,10 +37,18 @@ var _items: Array[ItemDef] = [
 func _ready() -> void:
 	if not tool_socket_path.is_empty():
 		_socket = get_node(tool_socket_path)
+	_acquired.resize(_items.size())
+	for i in _items.size():
+		_acquired[i] = auto_acquire_all
+	_acquired[0] = true
+	if auto_acquire_all:
+		_ceramic_count = 5
 	_apply_slot(_current_index)
 
 func set_slot(index: int) -> void:
 	if index < 0 or index >= _items.size() or index == _current_index:
+		return
+	if not is_acquired(index):
 		return
 	_current_index = index
 	_apply_slot(index)
@@ -45,6 +58,34 @@ func current_slot() -> int:
 
 func current_name() -> String:
 	return _items[_current_index].item_name
+
+func is_acquired(index: int) -> bool:
+	return index >= 0 and index < _acquired.size() and _acquired[index]
+
+func acquire(index: int) -> bool:
+	if index < 0 or index >= _items.size():
+		return false
+	if _acquired[index]:
+		return false
+	_acquired[index] = true
+	slot_acquired.emit(index, _items[index].item_name)
+	if _current_index == 0:
+		set_slot(index)
+	return true
+
+func ceramic_count() -> int:
+	return _ceramic_count
+
+func add_ceramic(amount: int = 1) -> void:
+	_ceramic_count = max(0, _ceramic_count + amount)
+	ceramic_changed.emit(_ceramic_count)
+
+func consume_ceramic() -> bool:
+	if _ceramic_count <= 0:
+		return false
+	_ceramic_count -= 1
+	ceramic_changed.emit(_ceramic_count)
+	return true
 
 func _apply_slot(index: int) -> void:
 	if _spawned != null and is_instance_valid(_spawned):

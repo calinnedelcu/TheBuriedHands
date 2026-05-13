@@ -1,0 +1,71 @@
+[gd_scene load_steps=8 format=3 uid="uid://c5guardprot00"]
+
+[ext_resource type="Script" path="res://Scripts/guard.gd" id="1_guard"]
+[ext_resource type="PackedScene" uid="uid://brd4w4eu5kj5m" path="res://TripoModels/guard1-idle.glb" id="2_guard_model"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+height = 1.8
+radius = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Mat_eye"]
+albedo_color = Color(1, 0.6, 0.25, 1)
+emission_enabled = true
+emission = Color(1, 0.55, 0.22, 1)
+emission_energy_multiplier = 1.4
+
+[sub_resource type="SphereMesh" id="Mesh_eye"]
+radius = 0.05
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_vision"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.85, 0.85, 0.6, 0.18)
+disable_receive_shadows = true
+no_depth_test = false
+
+[node name="Guard" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_guard")
+
+[node name="Body" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_body")
+
+[node name="Model" parent="." instance=ExtResource("2_guard_model")]
+transform = Transform3D(3.25, 0, 0, 0, 3.25, 0, 0, 0, 3.25, 0, 0, 0)
+
+[node name="VisionOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, -0.2)
+
+[node name="EyeIndicator" type="MeshInstance3D" parent="VisionOrigin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_eye")
+material_override = SubResource("Mat_eye")
+
+[node name="VisionIndicator" type="MeshInstance3D" parent="VisionOrigin"]
+visible = true
+transform = Transform3D(0.7, 0, 0, 0, 0.55, 0, 0, 0, 1, 0, -0.2, -3.5)
+mesh = SubResource("Mesh_eye")
+material_override = SubResource("Mat_vision")
+
+[node name="FootstepAudio" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+volume_db = -8.0
+unit_size = 8.0
+max_distance = 20.0
+attenuation_filter_cutoff_hz = 4000.0
+
+[node name="AlertAudio" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+volume_db = -4.0
+unit_size = 12.0
+max_distance = 30.0
+
+[node name="AmbientAudio" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+autoplay = false
+volume_db = -16.0
+unit_size = 6.0
+max_distance = 14.0

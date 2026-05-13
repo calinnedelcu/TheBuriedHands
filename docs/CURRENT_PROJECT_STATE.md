@@ -132,3 +132,25 @@ De retinut pentru urmatoarea sesiune:
 - Urmatorul pas recomandat este audio 3D pentru gardieni: pasi spatiali, apropiere/departare si eventual sunete discrete de armura/textil.
 - Dupa gardieni, merita facut un bus/reverb de mormant pentru SFX, ca pasii si obiectele sa sune mai mult ca intr-un spatiu interior de piatra/pamant.
 - Inca trebuie adaugate seturi dedicate de pasi pentru clay/stone/wood/wet_stone; momentan suprafetele sunt pregatite, dar pot folosi fallback daca folderele sunt goale.
+
+## Checkpoint productie - 2026-05-13 (prefab-uri inainte de asseturile de camere)
+
+Sisteme adaugate ca prefab-uri reutilizabile, fara modificari pe geometria existenta din `tomb_layout.tscn`:
+
+- Autoload nou `Objectives` (`Scripts/objectives.gd`) cu `set_objective(id, text)` / `complete_objective(id)`; HUD-ul (`scenes/ui/hud_pov.tscn`) afiseaza textul curent sus-dreapta.
+- Autoload nou `GameEvents` (`Scripts/game_events.gd`) cu `player_failed(reason)` / `player_succeeded(ending_id)` ca bus pentru fail/win.
+- `Scripts/objective_trigger.gd` + clasa `ObjectiveTrigger` (Area3D) care seteaza / completeaza obiective la intrare; util pentru poarta intre camere.
+- Meniu de pauza: `scenes/ui/pause_menu.tscn` + `Scripts/pause_menu.gd`. Tasta `pause` (Escape) ataseaza/scoate pauza, captureaza/elibereaza mouse-ul, Reia / Reia de la inceput / Meniu principal / Iesire. Instantiat in `tomb_layout.tscn`.
+- Ecran de fail: `scenes/ui/fail_screen.tscn` + `Scripts/fail_screen.gd`. Se aprinde cand orice sistem cheama `GameEvents.fail("motiv")`. Instantiat in `tomb_layout.tscn`.
+- AI paznic prototip: `scenes/entities/guard.tscn` + `Scripts/guard.gd`. Stari `PATROL/SUSPICIOUS/ALERT/DETECT`, patrulare pe waypoints (NodePath spre un Node3D parinte cu copii Node3D ca puncte), con vizual cu raycast LoS, ascultare pe `NoiseBus`, crouch/crawl scad rata de detectie. La detect complet trimite `GameEvents.fail("Ai fost descoperit.")`. Audio 3D inclus (`FootstepAudio`, `AlertAudio`, `AmbientAudio`).
+- Capcana arbaleta prototip: `scenes/items/crossbow_trap.tscn` + `Scripts/crossbow_trap.gd`. Placa de presiune (Area3D, mask = 1), housing static, muzzle directionat. La declansare trage o sageata vizuala (`Scripts/bolt.gd`) si verifica damage prin raycast → `hud_debug.apply_damage(steps)`. Doua interactabile copii (`ToolRequiredInteractable`): "Dezactiveaza cu dalta" (slot 1) si "Blocheaza cu pana" (slot 2) — orice succes dezarmeaza capcana.
+- `Scripts/tool_required_interactable.gd` extinde `Interactable` cu cerinta de slot din inventar; prompt-ul HUD se schimba in functie de uneltea echipata.
+- Bus audio nou `Tomb` cu `AudioEffectReverb` in `audio/default_bus_layout.tres`; project.godot foloseste acum acest bus layout. Sursele 3D pot opta cu `bus = "Tomb"`.
+- Player adaugat in grupul `player` la `_ready()`; HUD damage adaugat in grupul `hud_damage`. Capcanele si paznicii folosesc aceste grupuri pentru lookup.
+- `ui_cancel` toggle de mouse a fost scos din `player_controller.gd` — pauza gestioneaza acum complet starea mouse-ului.
+
+Ce trebuie facut dupa ce sosesc asseturile de camere:
+
+- Plaseaza instante `scenes/entities/guard.tscn` in camere, fiecare cu propriul `Waypoints` (Node3D parinte cu copii marcatori) si `waypoints_path` setat.
+- Plaseaza `scenes/items/crossbow_trap.tscn` in coridorul arbaletelor; orienteaza `Housing/Muzzle` (axa -Z = directia de tragere) catre placa de presiune.
+- Pune `ObjectiveTrigger` Area3D la pragul fiecarei camere pentru a actualiza obiectivul curent.
