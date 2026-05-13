@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbcx8cijexx64"
-path="res://.godot/imported/vitality_2.png-fb411a7159c94f1ea6a606478a6372a0.ctex"
+uid="uid://dk18ks1vs06qr"
+path="res://.godot/imported/Oil.png-1ea5aaddbdf01815ba70f3d62bd01719.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/ui/vitality_2.png"
-dest_files=["res://.godot/imported/vitality_2.png-fb411a7159c94f1ea6a606478a6372a0.ctex"]
+source_file="res://scenes/ui/Oil/Oil.png"
+dest_files=["res://.godot/imported/Oil.png-1ea5aaddbdf01815ba70f3d62bd01719.ctex"]
 
 [params]
 

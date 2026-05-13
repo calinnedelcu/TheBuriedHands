@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bevrstv3lnkha"
-path="res://.godot/imported/vitality_7.png-a6d849bbca4789564497c9d444079976.ctex"
+uid="uid://cwki7qnsqnxyk"
+path="res://.godot/imported/vitality_1.png-53e095be4670ec62e0195d49762fe3f8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/ui/vitality_7.png"
-dest_files=["res://.godot/imported/vitality_7.png-a6d849bbca4789564497c9d444079976.ctex"]
+source_file="res://scenes/ui/Vitalitate/vitality_1.png"
+dest_files=["res://.godot/imported/vitality_1.png-53e095be4670ec62e0195d49762fe3f8.ctex"]
 
 [params]
 
