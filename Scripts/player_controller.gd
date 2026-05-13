@@ -48,6 +48,11 @@ signal stance_changed(stance: String)
 @export var noise_crouch: float = 0.2
 @export var noise_crawl: float = 0.08
 
+@export_group("Throw")
+@export var throw_speed: float = 11.0
+@export var throw_arc_up: float = 1.5
+@export var ceramic_shard_scene: PackedScene
+
 @export_group("Movement Audio")
 @export var movement_audio_enabled: bool = true
 @export var footstep_audio_dir: String = "res://audio/sfx/player/footsteps"
@@ -124,6 +129,7 @@ func _setup_input_actions() -> void:
 		"slot_2": [KEY_2],
 		"slot_3": [KEY_3],
 		"slot_4": [KEY_4],
+		"throw": [KEY_G],
 	}
 	for action_name in actions:
 		if not InputMap.has_action(action_name):
@@ -140,6 +146,7 @@ func _setup_input_actions() -> void:
 				InputMap.action_add_event(action_name, key_event)
 
 func _ready() -> void:
+	add_to_group("player")
 	_initial_camera_local_position = camera.position
 	if camera_pivot != null:
 		camera_pivot.position.y = stand_camera_y
@@ -167,12 +174,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
 		camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, tilt_lower_limit, tilt_upper_limit)
-
-	if event.is_action_pressed("ui_cancel"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 	if event.is_action_pressed("jump"):
 		jump_buffer_timer = jump_buffer_duration
@@ -202,6 +203,25 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("slot_%d" % i):
 			if inventory != null and inventory.has_method("set_slot"):
 				inventory.set_slot(i)
+
+	if event.is_action_pressed("throw"):
+		_try_throw_ceramic()
+
+func _try_throw_ceramic() -> void:
+	if inventory == null or ceramic_shard_scene == null:
+		return
+	if inventory.has_method("current_slot") and inventory.current_slot() != 3:
+		return
+	if inventory.has_method("consume_ceramic") and not inventory.consume_ceramic():
+		return
+	var shard: RigidBody3D = ceramic_shard_scene.instantiate()
+	get_tree().current_scene.add_child(shard)
+	var spawn_origin: Vector3 = camera.global_position - camera.global_transform.basis.z * 0.3
+	shard.global_position = spawn_origin
+	var forward: Vector3 = -camera.global_transform.basis.z
+	shard.linear_velocity = forward * throw_speed + Vector3.UP * throw_arc_up
+	shard.angular_velocity = Vector3(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
+	_emit_noise(noise_walk * 0.4)
 
 func _physics_process(delta: float) -> void:
 	var was_on_floor := is_on_floor()

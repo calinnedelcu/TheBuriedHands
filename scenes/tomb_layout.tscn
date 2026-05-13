@@ -3,15 +3,26 @@
 [ext_resource type="PackedScene" uid="uid://c2h7g0dm88sa3" path="res://TripoModels/samurai_armor_3d_model/samurai_armor_3d_model.fbx" id="2_f8c7l"]
 [ext_resource type="Texture2D" uid="uid://cy3v3u4yi14nj" path="res://TripoModels/samurai_armor_3d_model/tripo_convert_8c8823eb-5f0d-4b1b-a072-242c4197459c.fbm/samuraiarmor3dmodel_basecolor.JPEG" id="3_2bvp5"]
 [ext_resource type="PackedScene" uid="uid://brd4w4eu5kj5m" path="res://TripoModels/guard1-idle.glb" id="4_2bvp5"]
+[ext_resource type="PackedScene" uid="uid://chfs6dd8ohavx" path="res://TripoModels/ucenic.glb" id="15_8nro2"]
+[ext_resource type="PackedScene" uid="uid://co4inv4kgo1e2" path="res://TripoModels/mester-mestesugar-real.glb" id="23_ih8h4"]
+[ext_resource type="PackedScene" path="res://scenes/items/ceramic_shard.tscn" id="Scene_ceramic_shard"]
+[ext_resource type="PackedScene" path="res://scenes/items/crossbow_trap.tscn" id="Scene_crossbow_trap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/fail_screen.tscn" id="Scene_fail_screen"]
+[ext_resource type="PackedScene" path="res://scenes/items/gate.tscn" id="Scene_gate"]
+[ext_resource type="PackedScene" uid="uid://c5guardprot00" path="res://scenes/entities/guard.tscn" id="Scene_guard"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_pov.tscn" id="Scene_hud_pov"]
+[ext_resource type="PackedScene" path="res://scenes/items/lever.tscn" id="Scene_lever"]
+[ext_resource type="PackedScene" uid="uid://c3kx7lampoil0" path="res://scenes/items/oil_lamp.tscn" id="Scene_oil_lamp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="Scene_pause_menu"]
+[ext_resource type="PackedScene" path="res://scenes/items/pickup_item.tscn" id="Scene_pickup"]
 [ext_resource type="Script" uid="uid://bj0m4hf5aqj73" path="res://Scripts/auto_play_first_animation.gd" id="Script_guard_auto"]
 [ext_resource type="Script" uid="uid://c75v4nrbr5m1q" path="res://Scripts/hud_debug.gd" id="Script_hud_debug"]
+[ext_resource type="Script" uid="uid://bkvs61rtwqvkh" path="res://Scripts/interaction.gd" id="Script_interaction"]
+[ext_resource type="Script" uid="uid://bgkhlpltto3d7" path="res://Scripts/inventory.gd" id="Script_inventory"]
 [ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://Scripts/player_controller.gd" id="Script_player"]
+[ext_resource type="Script" uid="uid://r5n4otcjkhsm" path="res://Scripts/cycle_animations_preview.gd" id="Script_ucenic_animation_preview"]
+[ext_resource type="Script" uid="uid://boopyekfojmr2" path="res://Scripts/viewmodel_sway.gd" id="Script_viewmodel_sway"]
 [ext_resource type="Texture2D" uid="uid://cmuceog3rt21n" path="res://scenes/ui/vitality_hud.png" id="Texture_vitality"]
-[ext_resource type="PackedScene" uid="uid://c3kx7lampoil0" path="res://scenes/items/oil_lamp.tscn" id="Scene_oil_lamp"]
-[ext_resource type="PackedScene" uid="uid://b3kx5pov2hud0" path="res://scenes/ui/hud_pov.tscn" id="Scene_hud_pov"]
-[ext_resource type="Script" path="res://Scripts/interaction.gd" id="Script_interaction"]
-[ext_resource type="Script" path="res://Scripts/viewmodel_sway.gd" id="Script_viewmodel_sway"]
-[ext_resource type="Script" path="res://Scripts/inventory.gd" id="Script_inventory"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
 sky_top_color = Color(0.01, 0.01, 0.015, 1)
@@ -26,35 +37,29 @@ sky_material = SubResource("Sky_proc")
 background_mode = 1
 background_color = Color(0.015, 0.012, 0.01, 1)
 sky = SubResource("Sky_main")
-ambient_light_source = 3
-ambient_light_color = Color(0.11, 0.105, 0.1, 1)
-ambient_light_energy = 0.05
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.46, 0.34, 1)
+ambient_light_sky_contribution = 0.0
+ambient_light_energy = 0.7
+reflected_light_source = 2
 tonemap_mode = 2
-tonemap_exposure = 1.0
+tonemap_exposure = 1.3
 tonemap_white = 6.0
 ssao_enabled = true
-ssao_radius = 1.2
-ssao_intensity = 1.4
-ssao_light_affect = 0.2
-ssao_ao_channel_affect = 0.6
+ssao_intensity = 1.0
+ssao_light_affect = 0.15
+ssao_ao_channel_affect = 0.5
 glow_enabled = true
-glow_intensity = 0.45
-glow_bloom = 0.06
-glow_hdr_threshold = 1.2
+glow_intensity = 0.35
+glow_bloom = 0.05
+glow_hdr_threshold = 1.3
 fog_enabled = true
-fog_light_color = Color(0.055, 0.052, 0.048, 1)
-fog_light_energy = 0.22
-fog_density = 0.006
-fog_aerial_perspective = 0.12
-fog_sky_affect = 0.12
-fog_height_density = 0.02
-volumetric_fog_enabled = true
-volumetric_fog_density = 0.007
-volumetric_fog_albedo = Color(0.34, 0.33, 0.3, 1)
-volumetric_fog_emission = Color(0.004, 0.004, 0.003, 1)
-volumetric_fog_emission_energy = 0.04
-volumetric_fog_anisotropy = 0.3
-volumetric_fog_ambient_inject = 0.08
+fog_light_color = Color(0.22, 0.18, 0.13, 1)
+fog_light_energy = 0.4
+fog_density = 0.0008
+fog_aerial_perspective = 0.05
+fog_sky_affect = 0.05
+fog_height_density = 0.003
 adjustment_enabled = true
 adjustment_contrast = 1.15
 adjustment_saturation = 0.68
@@ -79,6 +84,59 @@ roughness = 0.95
 
 [sub_resource type="StandardMaterial3D" id="Mat_ceiling"]
 albedo_color = Color(0.12, 0.1, 0.08, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_lamp_bowl"]
+albedo_color = Color(0.32, 0.22, 0.12, 1)
+metallic = 0.55
+roughness = 0.55
+
+[sub_resource type="CylinderMesh" id="Mesh_lamp_bowl"]
+top_radius = 0.22
+bottom_radius = 0.12
+height = 0.1
+radial_segments = 14
+
+[sub_resource type="StandardMaterial3D" id="Mat_lamp_chain"]
+albedo_color = Color(0.18, 0.13, 0.08, 1)
+metallic = 0.55
+roughness = 0.7
+
+[sub_resource type="CylinderMesh" id="Mesh_lamp_chain"]
+top_radius = 0.018
+bottom_radius = 0.018
+height = 1.6
+radial_segments = 6
+
+[sub_resource type="StandardMaterial3D" id="Mat_lamp_flame"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.8, 0.45, 0.95)
+disable_receive_shadows = true
+billboard_mode = 1
+
+[sub_resource type="QuadMesh" id="Mesh_lamp_flame"]
+size = Vector2(0.22, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="Mat_brazier_bowl"]
+albedo_color = Color(0.28, 0.18, 0.1, 1)
+metallic = 0.4
+roughness = 0.7
+
+[sub_resource type="SphereMesh" id="Mesh_brazier_bowl"]
+height = 0.5
+radial_segments = 18
+rings = 8
+is_hemisphere = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_brazier_flame"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.7, 0.32, 0.95)
+disable_receive_shadows = true
+billboard_mode = 1
+
+[sub_resource type="QuadMesh" id="Mesh_brazier_flame"]
+size = Vector2(0.55, 0.7)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProc_dust"]
 emission_shape = 3
@@ -318,7 +376,7 @@ bind/40/name = &"R_Hand"
 bind/40/bone = -1
 bind/40/pose = Transform3D(0.7521668, -0.5675624, 0.33484063, 0.26728475, -0.20168564, -0.94227505, 0.6023322, 0.7982457, -2.3841875e-07, -0.28820875, 0.44276172, 0.16641064)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x1oae"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rsccm"]
 resource_local_to_scene = true
 resource_name = "tripo_mat_8c8823eb"
 vertex_color_use_as_albedo = true
@@ -332,10 +390,10 @@ environment = SubResource("Env_main")
 
 [node name="SunLight" type="DirectionalLight3D" parent="." unique_id=495555816]
 transform = Transform3D(0.7, -0.5, 0.5, 0, 0.707, 0.707, -0.7, -0.5, 0.5, 0, 40, 0)
-light_color = Color(0.42, 0.5, 0.7, 1)
-light_energy = 0.06
-light_indirect_energy = 0.0
-light_volumetric_fog_energy = 0.15
+light_color = Color(0.95, 0.85, 0.7, 1)
+light_energy = 0.35
+light_indirect_energy = 0.8
+light_volumetric_fog_energy = 0.0
 shadow_enabled = true
 shadow_bias = 0.05
 shadow_normal_bias = 1.2
@@ -411,28 +469,257 @@ material = SubResource("Mat_ceiling")
 [node name="Lamp_W" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=635832878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.6, 2)
 light_color = Color(1, 0.76, 0.48, 1)
-light_energy = 1.45
-light_volumetric_fog_energy = 0.45
+light_energy = 3.2
+light_volumetric_fog_energy = 0.5
 shadow_enabled = true
-omni_range = 11.0
-omni_attenuation = 1.6
+omni_range = 16.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_W" unique_id=110001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_W" unique_id=110002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_W" unique_id=110003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
 
 [node name="Lamp_E" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1739101086]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.6, -2)
 light_color = Color(1, 0.78, 0.5, 1)
-light_energy = 1.25
-light_volumetric_fog_energy = 0.4
+light_energy = 3.0
+light_volumetric_fog_energy = 0.45
 shadow_enabled = true
-omni_range = 11.0
-omni_attenuation = 1.5
+omni_range = 16.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_E" unique_id=110011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_E" unique_id=110012]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_E" unique_id=110013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
+
+[node name="Lamp_NW" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.6, -7)
+light_color = Color(1, 0.74, 0.46, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 0.45
+shadow_enabled = true
+omni_range = 15.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NW" unique_id=110101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NW" unique_id=110102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NW" unique_id=110103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
+
+[node name="Lamp_NE" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.6, -7)
+light_color = Color(1, 0.76, 0.48, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 0.45
+shadow_enabled = true
+omni_range = 15.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NE" unique_id=110111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NE" unique_id=110112]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_NE" unique_id=110113]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
+
+[node name="Lamp_SW" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110120]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.6, 7)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 0.45
+shadow_enabled = true
+omni_range = 15.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SW" unique_id=110121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SW" unique_id=110122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SW" unique_id=110123]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
+
+[node name="Lamp_SE" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110130]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.6, 7)
+light_color = Color(1, 0.74, 0.46, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 0.45
+shadow_enabled = true
+omni_range = 15.0
+omni_attenuation = 1.4
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SE" unique_id=110131]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SE" unique_id=110132]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_SE" unique_id=110133]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
+
+[node name="Lamp_Center" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110140]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.4, 0)
+light_color = Color(1, 0.8, 0.55, 1)
+light_energy = 3.5
+light_volumetric_fog_energy = 0.5
+shadow_enabled = true
+omni_range = 18.0
+omni_attenuation = 1.3
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_Center" unique_id=110141]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0.05, 0)
+material_override = SubResource("Mat_lamp_bowl")
+mesh = SubResource("Mesh_lamp_bowl")
+
+[node name="Chain" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_Center" unique_id=110142]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+material_override = SubResource("Mat_lamp_chain")
+mesh = SubResource("Mesh_lamp_chain")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Lamp_Center" unique_id=110143]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.25, 0)
+material_override = SubResource("Mat_lamp_flame")
+mesh = SubResource("Mesh_lamp_flame")
 
 [node name="Brazier_Glow" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1481515781]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.9, -7)
 light_color = Color(1, 0.68, 0.36, 1)
-light_energy = 2.0
-light_volumetric_fog_energy = 0.55
-omni_range = 8.0
-omni_attenuation = 1.8
+light_energy = 3.0
+light_volumetric_fog_energy = 0.6
+omni_range = 12.0
+omni_attenuation = 1.6
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Brazier_Glow" unique_id=110201]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
+material_override = SubResource("Mat_brazier_bowl")
+mesh = SubResource("Mesh_brazier_bowl")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Brazier_Glow" unique_id=110202]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = SubResource("Mat_brazier_flame")
+mesh = SubResource("Mesh_brazier_flame")
+
+[node name="Brazier_E" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop" unique_id=110210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.9, 7)
+light_color = Color(1, 0.7, 0.38, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 0.6
+omni_range = 12.0
+omni_attenuation = 1.6
+
+[node name="Bowl" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Brazier_E" unique_id=110211]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
+material_override = SubResource("Mat_brazier_bowl")
+mesh = SubResource("Mesh_brazier_bowl")
+
+[node name="Flame" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/Brazier_E" unique_id=110212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+material_override = SubResource("Mat_brazier_flame")
+mesh = SubResource("Mesh_brazier_flame")
+
+[node name="Pickup_Chisel" parent="Rooms/01_TerracottaWorkshop" unique_id=120001 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.4, 6)
+custom_prompt = "Ridică dalta (slot 1)"
+
+[node name="Pickup_Wedge" parent="Rooms/01_TerracottaWorkshop" unique_id=120002 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.4, -6)
+grants_slot = 2
+custom_prompt = "Ridică pana de lemn (slot 2)"
+
+[node name="Pickup_Ceramic" parent="Rooms/01_TerracottaWorkshop" unique_id=120003 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.4, -8)
+kind = 1
+ceramic_amount = 5
+custom_prompt = "Ridică cioburi de ceramică (×5)"
+
+[node name="Pickup_Oil" parent="Rooms/01_TerracottaWorkshop" unique_id=120004 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.4, 6)
+kind = 2
+oil_amount = 50.0
+custom_prompt = "Reumple lampa cu ulei"
+
+[node name="CrossbowTrap" parent="Rooms/01_TerracottaWorkshop" unique_id=120010 instance=ExtResource("Scene_crossbow_trap")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 3)
+
+[node name="GuardWaypoints" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=120020]
+
+[node name="WP_NW" type="Node3D" parent="Rooms/01_TerracottaWorkshop/GuardWaypoints" unique_id=120021]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -8)
+
+[node name="WP_NE" type="Node3D" parent="Rooms/01_TerracottaWorkshop/GuardWaypoints" unique_id=120022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -8)
+
+[node name="WP_SE" type="Node3D" parent="Rooms/01_TerracottaWorkshop/GuardWaypoints" unique_id=120023]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 8)
+
+[node name="WP_SW" type="Node3D" parent="Rooms/01_TerracottaWorkshop/GuardWaypoints" unique_id=120024]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 8)
+
+[node name="GuardLive" parent="Rooms/01_TerracottaWorkshop" unique_id=120025 instance=ExtResource("Scene_guard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -8)
+waypoints_path = NodePath("../GuardWaypoints")
+patrol_speed = 1.4
+
+[node name="Gate" parent="Rooms/01_TerracottaWorkshop" unique_id=120030 instance=ExtResource("Scene_gate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 7)
+open_complete_objective = "test_gate"
+
+[node name="Lever" parent="Rooms/01_TerracottaWorkshop" unique_id=120031 instance=ExtResource("Scene_lever")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 8)
+target_gate_path = NodePath("../Gate")
 
 [node name="Dust" type="GPUParticles3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1107479786]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
@@ -902,6 +1189,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.2, -15)
 script = ExtResource("Script_player")
 bob_amplitude = 0.04
 bob_frequency = 4.0
+ceramic_shard_scene = ExtResource("Scene_ceramic_shard")
 
 [node name="Mesh" type="MeshInstance3D" parent="player" unique_id=1859343329]
 visible = false
@@ -916,32 +1204,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="player/CameraPivot" unique_id=1000000001]
 current = true
-fov = 75.0
-near = 0.05
 
-[node name="InteractionRay" type="RayCast3D" parent="player/CameraPivot/Camera3D"]
+[node name="InteractionRay" type="RayCast3D" parent="player/CameraPivot/Camera3D" unique_id=1631372379]
 target_position = Vector3(0, 0, -2.5)
-collide_with_areas = false
-collide_with_bodies = true
 script = ExtResource("Script_interaction")
+player_path = NodePath("../../..")
 
-[node name="ViewmodelRig" type="Node3D" parent="player/CameraPivot/Camera3D"]
+[node name="ViewmodelRig" type="Node3D" parent="player/CameraPivot/Camera3D" unique_id=138348451]
 script = ExtResource("Script_viewmodel_sway")
 
-[node name="LampSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig"]
+[node name="LampSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig" unique_id=250891720]
 transform = Transform3D(0.94, 0, 0.342, 0, 1, 0, -0.342, 0, 0.94, -0.32, -0.26, -0.55)
 
-[node name="OilLamp" parent="player/CameraPivot/Camera3D/ViewmodelRig/LampSocket" instance=ExtResource("Scene_oil_lamp")]
+[node name="OilLamp" parent="player/CameraPivot/Camera3D/ViewmodelRig/LampSocket" unique_id=1464999399 instance=ExtResource("Scene_oil_lamp")]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)
 
-[node name="ToolSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig"]
+[node name="ToolSocket" type="Node3D" parent="player/CameraPivot/Camera3D/ViewmodelRig" unique_id=1171013496]
 transform = Transform3D(0.94, 0, -0.342, 0, 1, 0, 0.342, 0, 0.94, 0.28, -0.22, -0.5)
 
-[node name="Inventory" type="Node" parent="player"]
+[node name="Inventory" type="Node" parent="player" unique_id=1097429905]
 script = ExtResource("Script_inventory")
 tool_socket_path = NodePath("../CameraPivot/Camera3D/ViewmodelRig/ToolSocket")
+auto_acquire_all = false
 
-[node name="HUDPov" parent="player" instance=ExtResource("Scene_hud_pov")]
+[node name="HUDPov" parent="player" unique_id=1570003358 instance=ExtResource("Scene_hud_pov")]
 player_path = NodePath("..")
 lamp_path = NodePath("../CameraPivot/Camera3D/ViewmodelRig/LampSocket/OilLamp")
 interaction_path = NodePath("../CameraPivot/Camera3D/InteractionRay")
@@ -1087,9 +1373,20 @@ bones/40/scale = Vector3(0.9999999, 0.99999976, 0.9999998)
 [node name="tripo_node_8c8823eb" parent="samurai_armor_3d_model/Armature/Skeleton3D" index="0" unique_id=1394878421]
 mesh = SubResource("ArrayMesh_63580")
 skin = SubResource("Skin_mafwv")
-surface_material_override/0 = SubResource("StandardMaterial3D_x1oae")
+surface_material_override/0 = SubResource("StandardMaterial3D_rsccm")
 
 [node name="guard1-idle" parent="." unique_id=1308289344 instance=ExtResource("4_2bvp5")]
 transform = Transform3D(3.25, 0, 0, 0, 3.25, 0, 0, 0, 3.25, -20.37211, -0.1000016, 48.119118)
+
+[node name="PauseMenu" parent="." unique_id=196474767 instance=ExtResource("Scene_pause_menu")]
+
+[node name="FailScreen" parent="." unique_id=1751438856 instance=ExtResource("Scene_fail_screen")]
+
+[node name="ucenic" parent="." unique_id=2010134544 instance=ExtResource("15_8nro2")]
+transform = Transform3D(2.75, 0, 0, 0, 2.75, 0, 0, 0, 2.75, -61.985104, 0.21505696, -18.349316)
+script = ExtResource("Script_ucenic_animation_preview")
+
+[node name="mester-mestesugar-real" parent="." unique_id=756807570 instance=ExtResource("23_ih8h4")]
+transform = Transform3D(-0.059295796, 0, -3.099433, 0, 3.1, 0, 3.099433, 0, -0.059295796, -58.316265, 0.20261644, -19.127403)
 
 [editable path="samurai_armor_3d_model"]

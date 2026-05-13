@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://dacshard00001"]
+
+[ext_resource type="Script" path="res://Scripts/ceramic_shard.gd" id="1_shard"]
+
+[sub_resource type="SphereShape3D" id="Shape_shard"]
+radius = 0.06
+
+[sub_resource type="SphereMesh" id="Mesh_shard"]
+radius = 0.06
+height = 0.12
+radial_segments = 10
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Mat_shard"]
+albedo_color = Color(0.78, 0.55, 0.35, 1)
+roughness = 0.7
+metallic = 0.05
+
+[sub_resource type="PhysicsMaterial" id="Phys_shard"]
+friction = 0.4
+bounce = 0.35
+
+[node name="CeramicShard" type="RigidBody3D"]
+mass = 0.4
+physics_material_override = SubResource("Phys_shard")
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_shard")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_shard")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_shard")
+material_override = SubResource("Mat_shard")
+
+[node name="ImpactAudio" type="AudioStreamPlayer3D" parent="."]
+volume_db = -6.0
+unit_size = 10.0
+max_distance = 28.0

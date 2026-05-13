@@ -33,6 +33,7 @@ var damage_tween: Tween
 
 
 func _ready() -> void:
+	add_to_group("hud_damage")
 	for i in VITALITY_SOURCES.size():
 		var atlas_texture := AtlasTexture.new()
 		atlas_texture.atlas = VITALITY_SOURCES[i]
