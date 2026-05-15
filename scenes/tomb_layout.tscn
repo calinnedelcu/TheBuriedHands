@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://co4inv4kgo1e2" path="res://TripoModels/mester-mestesugar-real.glb" id="23_ih8h4"]
 [ext_resource type="Texture2D" uid="uid://7v8ec1ookmu5" path="res://scenes/items/MapWithoutTreasure_stonefountain3dmodel_basecolor.jpg" id="25_lv726"]
 [ext_resource type="Texture2D" uid="uid://d3ymovc4trvp0" path="res://scenes/items/MapWithoutTreasure_stonelegs3dmodel_basecolor.jpg" id="27_6latm"]
-[ext_resource type="PackedScene" path="res://scenes/items/ceramic_shard.tscn" id="Scene_ceramic_shard"]
+[ext_resource type="PackedScene" uid="uid://dacshard00001" path="res://scenes/items/ceramic_shard.tscn" id="Scene_ceramic_shard"]
 [ext_resource type="PackedScene" uid="uid://coknxkpqxm8gn" path="res://scenes/items/claybowl.glb" id="Scene_claybowl"]
 [ext_resource type="PackedScene" path="res://scenes/ui/fail_screen.tscn" id="Scene_fail_screen"]
 [ext_resource type="PackedScene" uid="uid://c5guardprot00" path="res://scenes/entities/guard.tscn" id="Scene_guard"]
@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://damcndlfm8jo4" path="res://scenes/items/tunele.glb" id="Scene_tunele"]
 [ext_resource type="Script" uid="uid://cdxvffxevudq6" path="res://Scripts/add_lamp_lights.gd" id="Script_add_lamp_lights"]
 [ext_resource type="Script" uid="uid://cwfuqcryr2xt4" path="res://Scripts/breakable_interactable.gd" id="Script_breakable"]
+[ext_resource type="Script" uid="uid://x5cvcurbcwp2" path="res://Scripts/clay_application_station.gd" id="Script_clay_app_station"]
 [ext_resource type="Script" uid="uid://bsh7iw504p23e" path="res://Scripts/dialogue_sequence_interactable.gd" id="Script_dialogue_sequence"]
 [ext_resource type="Script" uid="uid://bj0m4hf5aqj73" path="res://Scripts/auto_play_first_animation.gd" id="Script_guard_auto"]
 [ext_resource type="Script" uid="uid://c75v4nrbr5m1q" path="res://Scripts/hud_debug.gd" id="Script_hud_debug"]
@@ -26,7 +27,6 @@
 [ext_resource type="Script" uid="uid://d4expc1nd75ry" path="res://Scripts/npc_dialogue_interactable.gd" id="Script_npc_dialogue"]
 [ext_resource type="Script" uid="uid://d00sfk2bhy2ur" path="res://Scripts/player_controller.gd" id="Script_player"]
 [ext_resource type="Script" uid="uid://bf3y24t3uref5" path="res://Scripts/quest_step_interactable.gd" id="Script_quest_step"]
-[ext_resource type="Script" path="res://Scripts/clay_application_station.gd" id="Script_clay_app_station"]
 [ext_resource type="Script" uid="uid://bulf10mwloyfg" path="res://Scripts/runtime_trimesh_collision.gd" id="Script_runtime_col"]
 [ext_resource type="Script" uid="uid://dicp6ektk6b3n" path="res://Scripts/scene_intro_dialogue.gd" id="Script_scene_intro_dialogue"]
 [ext_resource type="Script" uid="uid://r5n4otcjkhsm" path="res://Scripts/cycle_animations_preview.gd" id="Script_ucenic_animation_preview"]
@@ -739,7 +739,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 8)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 8)
 
 [node name="GuardLive2" parent="Rooms/01_TerracottaWorkshop" unique_id=1679780140 instance=ExtResource("Scene_guard")]
-transform = Transform3D(0.82682544, 0, 0.56245863, 0, 1, 0, -0.56245863, 0, 0.82682544, -13.828908, 0.20141923, 6.706074)
+transform = Transform3D(0.82682544, 0, 0.56245863, 0, 1, 0, -0.56245863, 0, 0.82682544, -6.626583, 0.20141923, -17.898413)
 waypoints_path = NodePath("../GuardWaypoints")
 patrol_speed = 1.4
 
@@ -759,10 +759,11 @@ oil_level = 60.0
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină."
+pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Aprind sau sting lampa cu L. Țin Alt pentru mai multă lumină — dar consumă mai repede.", "Meșteșugar: Când merg cu lampa sau alerg, uleiul se varsă și se pierde mult mai repede.", "Meșteșugar: Ca să economisesc, mă mișc încet și o țin jos — folosesc Alt doar când chiar trebuie să văd departe.")
-empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — vezi indicatorul din stânga jos.", "Meșteșugar: Trebuie să ajung repede la o lampă de pe perete ca să iau ulei.", "Meșteșugar: Țin apăsat E lângă ea ca să torn în vasul meu.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
+empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
 [node name="WorkshopLamp_W2" parent="Rooms/01_TerracottaWorkshop" unique_id=1443442757 instance=ExtResource("Scene_oil_lamp")]
 transform = Transform3D(-1.8803513, 0, 3.5304785, 0, 4, 0, -3.5304785, 0, -1.8803513, 33.94333, 1.9308048, -9.159989)
@@ -770,10 +771,11 @@ oil_level = 60.0
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină."
+pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Aprind sau sting lampa cu L. Țin Alt pentru mai multă lumină — dar consumă mai repede.", "Meșteșugar: Când merg cu lampa sau alerg, uleiul se varsă și se pierde mult mai repede.", "Meșteșugar: Ca să economisesc, mă mișc încet și o țin jos — folosesc Alt doar când chiar trebuie să văd departe.")
-empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — vezi indicatorul din stânga jos.", "Meșteșugar: Trebuie să ajung repede la o lampă de pe perete ca să iau ulei.", "Meșteșugar: Țin apăsat E lângă ea ca să torn în vasul meu.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
+empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
 [node name="WorkshopLamp_E" parent="Rooms/01_TerracottaWorkshop" unique_id=1107479901 instance=ExtResource("Scene_oil_lamp")]
 transform = Transform3D(3.9750714, 0, 0.44587597, 0, 4, 0, -0.44587597, 0, 3.9750714, 14.58539, 1.9590977, -18.740036)
@@ -782,10 +784,11 @@ start_lit = false
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină."
+pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Aprind sau sting lampa cu L. Țin Alt pentru mai multă lumină — dar consumă mai repede.", "Meșteșugar: Când merg cu lampa sau alerg, uleiul se varsă și se pierde mult mai repede.", "Meșteșugar: Ca să economisesc, mă mișc încet și o țin jos — folosesc Alt doar când chiar trebuie să văd departe.")
-empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — vezi indicatorul din stânga jos.", "Meșteșugar: Trebuie să ajung repede la o lampă de pe perete ca să iau ulei.", "Meșteșugar: Țin apăsat E lângă ea ca să torn în vasul meu.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
+empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
 [node name="WorkshopLamp_E2" parent="Rooms/01_TerracottaWorkshop" unique_id=1939014968 instance=ExtResource("Scene_oil_lamp")]
 transform = Transform3D(-3.4570992, 0, -2.0120795, 0, 4, 0, 2.0120795, 0, -3.4570992, 34.868702, 1.3538048, -22.647682)
@@ -794,10 +797,11 @@ start_lit = false
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină."
+pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Aprind sau sting lampa cu L. Țin Alt pentru mai multă lumină — dar consumă mai repede.", "Meșteșugar: Când merg cu lampa sau alerg, uleiul se varsă și se pierde mult mai repede.", "Meșteșugar: Ca să economisesc, mă mișc încet și o țin jos — folosesc Alt doar când chiar trebuie să văd departe.")
-empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — vezi indicatorul din stânga jos.", "Meșteșugar: Trebuie să ajung repede la o lampă de pe perete ca să iau ulei.", "Meșteșugar: Țin apăsat E lângă ea ca să torn în vasul meu.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
+empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
 [node name="WorkshopQuestProps" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1655002563]
 
@@ -825,12 +829,12 @@ required_objective_id = "fetch_clay_slip"
 objective_after_id = "drop_clay_bowl"
 objective_after_text = "Adu bolul lângă ucenic și pune-l jos (apasă X)."
 dialogue_text = "Meșteșugar: E plin. Trebuie să-l duc lângă statuetă și să-l pun jos."
-prompt_text = "Ia bolul cu barbotină"
 hide_node_on_interact = NodePath("../ClayBowlModel")
 carried_scene = ExtResource("Scene_claybowl")
 carried_node_name = "HeldClayBowl"
 carried_transform = Transform3D(0.22, 0, 0, 0, 0.22, 0, 0, 0, 0.22, 0.02, -0.025, -0.09)
 inventory_add_id = "clay_bowl"
+prompt_text = "Ia bolul cu barbotină"
 
 [node name="ClaySlipStation2" type="StaticBody3D" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps" unique_id=186926230]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.001307, 2.5864704, -23.362045)
@@ -856,12 +860,12 @@ required_objective_id = "fetch_clay_slip"
 objective_after_id = "drop_clay_bowl"
 objective_after_text = "Adu bolul lângă ucenic și pune-l jos (apasă X)."
 dialogue_text = "Meșteșugar: E plin. Trebuie să-l duc lângă statuetă și să-l pun jos."
-prompt_text = "Ia bolul cu barbotină"
 hide_node_on_interact = NodePath("../ClayBowlModel")
 carried_scene = ExtResource("Scene_claybowl")
 carried_node_name = "HeldClayBowl"
 carried_transform = Transform3D(0.22, 0, 0, 0, 0.22, 0, 0, 0, 0.22, 0.02, -0.025, -0.09)
 inventory_add_id = "clay_bowl"
+prompt_text = "Ia bolul cu barbotină"
 
 [node name="TerracottaWorkTarget" type="StaticBody3D" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps" unique_id=635602679]
 transform = Transform3D(0.5109512, 0, 0.29500648, 0, 0.59, 0, -0.29500648, 0, 0.5109512, -15.987091, 1.4100385, 8.293998)
@@ -872,7 +876,7 @@ shape = SubResource("Shape_terracotta_work_interaction")
 [node name="MarkerMesh" type="MeshInstance3D" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps/TerracottaWorkTarget" unique_id=387241438]
 mesh = SubResource("Mesh_terracotta_work_marker")
 
-[node name="AppliedClayBowlModel" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps/TerracottaWorkTarget" instance=ExtResource("Scene_claybowl")]
+[node name="AppliedClayBowlModel" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps/TerracottaWorkTarget" unique_id=1821368124 instance=ExtResource("Scene_claybowl")]
 transform = Transform3D(0.35, 0, 0, 0, 0.35, 0, 0, 0, 0.35, 0.55, -0.22, 0.12)
 visible = false
 
@@ -883,13 +887,7 @@ objective_after_id = "retrieve_chisel"
 objective_after_text = "Recuperează dalta căzută sub masă."
 refill_objective_id = "take_clay_slip"
 refill_objective_text = "Mai ia o porție de barbotină din bol."
-total_cycles = 3
-slip_hold_duration = 1.0
 applied_visual_path = NodePath("../AppliedClayBowlModel")
-apply_slip_prompt = "Aplică barbotina (ține E)"
-tap_chisel_prompt = "Bate cu dalta (apasă E)"
-need_slip_hint = "Selectează barbotina"
-need_chisel_hint = "Selectează dalta"
 apply_dialogue = "Meșteșugar: Pasta se prinde. Trebuie bătută bine."
 chisel_dialogue = "Meșteșugar: Mai e nevoie de un strat."
 done_dialogue = "Meșteșugar: Picioarele trebuie legate bine de postament. Totul aici trebuie să pară veșnic."
@@ -904,7 +902,7 @@ objective_after_text = "Găsește-l pe Liang în atelierul secundar."
 prompt_text = "Continuă modelarea"
 
 [node name="player" type="CharacterBody3D" parent="." unique_id=945651234]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -79.43242, 1.1999999, -9.820801)
+transform = Transform3D(-0.010977926, 0, -0.99993974, 0, 1, 0, 0.99993974, 0, -0.010977926, -79.33568, 1.1999999, -10.825011)
 safe_margin = 0.08
 script = ExtResource("Script_player")
 bob_amplitude = 0.04
@@ -937,9 +935,9 @@ spot_angle = 75.0
 spot_angle_attenuation = 1.1
 
 [node name="InteractionRay" type="RayCast3D" parent="player/CameraPivot/Camera3D" unique_id=1631372379]
+target_position = Vector3(0, 0, -2.5)
 collision_mask = 3
 hit_from_inside = true
-target_position = Vector3(0, 0, -2.5)
 script = ExtResource("Script_interaction")
 player_path = NodePath("../../..")
 
@@ -991,7 +989,7 @@ stretch_mode = 5
 [node name="IntroMonologue" type="Node" parent="." unique_id=1023916205]
 script = ExtResource("Script_scene_intro_dialogue")
 start_delay = 0.25
-dialogue_lines = PackedStringArray("Meșteșugar: Împăratul Qin Shi Huang a murit deja de câteva săptămâni, iar noi încă muncim la armata lui de teracotă... E aproape gata. Doar câteva statui și terminăm.")
+dialogue_lines = PackedStringArray("Meșteșugar: Împăratul Qin Shi Huang a murit deja de câteva săptămâni, iar noi încă muncim la armata lui de teracotă...", "Meșteșugar: E aproape gata. Doar câteva statui și terminăm.")
 dialogue_line_duration = 7.5
 
 [node name="ucenic" parent="." unique_id=2010134544 instance=ExtResource("15_8nro2")]
@@ -1041,6 +1039,22 @@ y_offset = -0.23
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
 script = ExtResource("Script_add_lamp_lights")
 
+[node name="Chair" parent="MapWithoutTreasure" index="286" unique_id=1424562466]
+transform = Transform3D(0.42874613, 0, 0.01414612, 0, 0.025, 0, -0.29423928, 0, 0.020612795, -8.476694, 0.30141315, 7.3182197)
+
+[node name="Vase2_024" parent="MapWithoutTreasure" index="487" unique_id=391347594]
+transform = Transform3D(0, 0, 0.17017335, 0, 0.21584196, 0, -0.17017335, 0, 0, 18.998272, 0.2917711, -9.585827)
+
+[node name="Vase2_030" parent="MapWithoutTreasure" index="496" unique_id=14057825]
+transform = Transform3D(0, 0, 0.21069308, 0, 0.21069308, 0, -0.21069308, 0, 0, 19.013302, 1.6595014, -12.321662)
+
+[node name="BreakableInteractable" type="Node" parent="MapWithoutTreasure/TunnelEntrance2" parent_id_path=PackedInt32Array(1259806216, 1019996704) index="1" unique_id=556031109]
+script = ExtResource("Script_breakable")
+required_items = PackedStringArray("wedge", "hammer")
+
+[node name="Cube_266" parent="MapWithoutTreasure" index="753" unique_id=557380339]
+visible = false
+
 [node name="tripo_node_50f1d62e-4661-4fcc-9639-fb0d08fe7406_017" type="MeshInstance3D" parent="MapWithoutTreasure" unique_id=1116840414]
 transform = Transform3D(-0.5762367, 0, 0.9057139, 0, 1.0734835, 0, -0.9057139, 0, -0.5762367, -7.8307877, 0.006500816, 8.036896)
 mesh = SubResource("ArrayMesh_14bmi")
@@ -1053,22 +1067,6 @@ metadata/generated_trimesh_collision = true
 visible = false
 shape = SubResource("ConcavePolygonShape3D_4kksd")
 metadata/generated_trimesh_collision = true
-
-[node name="Chair" parent="MapWithoutTreasure" index="287" unique_id=1424562466]
-transform = Transform3D(0.42874613, 0, 0.01414612, 0, 0.025, 0, -0.29423928, 0, 0.020612795, -8.476694, 0.30141315, 7.3182197)
-
-[node name="Vase2_024" parent="MapWithoutTreasure" index="488" unique_id=391347594]
-transform = Transform3D(0, 0, 0.17017335, 0, 0.21584196, 0, -0.17017335, 0, 0, 18.998272, 0.2917711, -9.585827)
-
-[node name="Vase2_030" parent="MapWithoutTreasure" index="497" unique_id=14057825]
-transform = Transform3D(0, 0, 0.21069308, 0, 0.21069308, 0, -0.21069308, 0, 0, 19.013302, 1.6595014, -12.321662)
-
-[node name="BreakableInteractable" type="Node" parent="MapWithoutTreasure/TunnelEntrance2" parent_id_path=PackedInt32Array(1259806216, 1019996704) index="1" unique_id=556031109]
-script = ExtResource("Script_breakable")
-required_items = PackedStringArray("wedge", "hammer")
-
-[node name="Cube_266" parent="MapWithoutTreasure" index="754" unique_id=557380339]
-visible = false
 
 [node name="tripo_node_e3fb4dc2-3f04-4dc6-bfe3-05852a43ea6f_068" type="MeshInstance3D" parent="MapWithoutTreasure" unique_id=1166857193]
 transform = Transform3D(0.04110758, 0.00082571816, 0.67571986, 0.00028062024, 0.6769691, -0.00084431615, -0.6757202, 0.0003313715, 0.041107193, 21.529995, 2.0752082, -5.60269)

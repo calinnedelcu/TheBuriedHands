@@ -54,13 +54,18 @@ signal extinguished()
 @export_multiline var pickup_dialogue_text: String = ""
 
 @export_group("Tutorial Sequences")
-## Optional multi-line tutorial played the first time THIS lamp is picked up.
-## Fires after `pickup_dialogue_text`. Use to teach controls / oil economy.
+## Multi-line monologue played the first time THIS lamp is picked up.
+## Pure character speech only — control hints belong on the objective bar.
 @export var pickup_tutorial_lines: PackedStringArray = []
-## Optional multi-line tutorial played the first time ANY lamp runs out of
-## oil (gated globally via GameEvents.lamp_empty_tutorial_played).
+## Multi-line monologue played the first time ANY lamp runs out of oil
+## (gated globally via GameEvents.lamp_empty_tutorial_played).
 @export var empty_tutorial_lines: PackedStringArray = []
 @export var tutorial_line_duration: float = 5.0
+## Transient objective shown for the duration of the empty monologue
+## (e.g. "Reumple lampa la o sconcă (ține apăsat E)"). Prior objective is saved
+## and restored at the end if it hasn't been overwritten by another system.
+@export var empty_tutorial_objective_id: String = "lamp_refill_hint"
+@export_multiline var empty_tutorial_objective_text: String = ""
 
 @onready var light: OmniLight3D = $FlameSocket/Light
 @onready var spot: SpotLight3D = _find_lamp_spot()
@@ -283,7 +288,21 @@ func _play_empty_tutorial() -> void:
 		return
 	if "lamp_empty_tutorial_played" in events:
 		events.set("lamp_empty_tutorial_played", true)
-	_play_tutorial_sequence(empty_tutorial_lines, false)
+	var objectives := get_node_or_null("/root/Objectives")
+	var saved_id: String = ""
+	var saved_text: String = ""
+	if objectives != null and empty_tutorial_objective_text != "":
+		if objectives.has_method("current_id"):
+			saved_id = str(objectives.call("current_id"))
+		if objectives.has_method("current_text"):
+			saved_text = str(objectives.call("current_text"))
+		if objectives.has_method("set_objective"):
+			objectives.call("set_objective", empty_tutorial_objective_id, empty_tutorial_objective_text)
+	await _play_tutorial_sequence(empty_tutorial_lines, false)
+	# Restore the prior objective only if no quest progression overwrote ours.
+	if objectives != null and empty_tutorial_objective_text != "" and objectives.has_method("current_id"):
+		if str(objectives.call("current_id")) == empty_tutorial_objective_id and objectives.has_method("set_objective"):
+			objectives.call("set_objective", saved_id, saved_text)
 
 func _play_tutorial_sequence(lines: PackedStringArray, skip_first_delay: bool) -> void:
 	var events := get_node_or_null("/root/GameEvents")
