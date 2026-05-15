@@ -14,6 +14,10 @@ extends Interactable
 ## player back to the bowl to scoop more slip (empty = no objective set).
 @export var refill_objective_id: String = ""
 @export_multiline var refill_objective_text: String = ""
+## Objective set after the very first slip apply if the player does not yet
+## have a chisel in inventory — sends them to fetch one before they can tap.
+@export var chisel_retrieve_objective_id: String = "retrieve_chisel"
+@export_multiline var chisel_retrieve_objective_text: String = ""
 
 @export_group("Cycle")
 @export var total_cycles: int = 3
@@ -88,6 +92,14 @@ func _do_slip_apply(by: Node) -> void:
 	hold_action = false
 	_show_applied_visual()
 	_show_dialogue(apply_dialogue)
+	if chisel_retrieve_objective_text != "" and not _player_has_chisel(by):
+		_set_objective(chisel_retrieve_objective_id, chisel_retrieve_objective_text)
+
+func _player_has_chisel(by: Node) -> bool:
+	var inv := _inventory(by)
+	if inv == null or not inv.has_method("has_item"):
+		return false
+	return bool(inv.call("has_item", "chisel"))
 
 func _do_chisel_tap(by: Node) -> void:
 	_cycle += 1

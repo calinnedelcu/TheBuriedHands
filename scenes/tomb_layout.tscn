@@ -673,8 +673,8 @@ script = ExtResource("Script_guard_auto")
 transform = Transform3D(0.966, 0, -0.259, 0, 1, 0, 0.259, 0, 0.966, -14.28, 1.7584251, 9.55)
 custom_prompt = "Ridică dalta"
 pickup_required_objective_id = "retrieve_chisel"
-pickup_objective_after_id = "continue_modeling"
-pickup_objective_after_text = "Continuă modelarea picioarelor soldatului."
+pickup_objective_after_id = "apply_clay_slip"
+pickup_objective_after_text = "Întoarce-te la statuetă și bate cu dalta."
 pickup_dialogue_text = "Meșteșugar: Acolo era. Cu dalta pot termina picioarele."
 
 [node name="Workbench_Hammer_W" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=366263078 instance=ExtResource("Scene_pickup")]
@@ -691,8 +691,8 @@ custom_prompt = "Ridică pana de lemn"
 transform = Transform3D(0.707, 0, 0.707, 0, 1, 0, -0.707, 0, 0.707, 3.17, 1.82, -16.88)
 custom_prompt = "Ridică dalta"
 pickup_required_objective_id = "retrieve_chisel"
-pickup_objective_after_id = "continue_modeling"
-pickup_objective_after_text = "Continuă modelarea picioarelor soldatului."
+pickup_objective_after_id = "apply_clay_slip"
+pickup_objective_after_text = "Întoarce-te la statuetă și bate cu dalta."
 pickup_dialogue_text = "Meșteșugar: Acolo era. Cu dalta pot termina picioarele."
 
 [node name="Table_Hammer_N" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=204732197 instance=ExtResource("Scene_pickup")]
@@ -714,8 +714,8 @@ custom_prompt = "Ridică ciocanul"
 transform = Transform3D(0.906, 0, -0.423, 0, 1, 0, 0.423, 0, 0.906, 10.52, 1.87, -18.96)
 custom_prompt = "Ridică dalta"
 pickup_required_objective_id = "retrieve_chisel"
-pickup_objective_after_id = "continue_modeling"
-pickup_objective_after_text = "Continuă modelarea picioarelor soldatului."
+pickup_objective_after_id = "apply_clay_slip"
+pickup_objective_after_text = "Întoarce-te la statuetă și bate cu dalta."
 pickup_dialogue_text = "Meșteșugar: Acolo era. Cu dalta pot termina picioarele."
 
 [node name="Table_Ceramic_E" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=1478853763 instance=ExtResource("Scene_pickup")]
@@ -759,9 +759,10 @@ oil_level = 60.0
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
+pickup_objective_after_text = "Ia bolul cu barbotină din celălalt capăt.
+L: aprinde lampa   Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.")
 empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
 empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
@@ -771,9 +772,10 @@ oil_level = 60.0
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
+pickup_objective_after_text = "Ia bolul cu barbotină din celălalt capăt.
+L: aprinde lampa   Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.")
 empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
 empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
@@ -784,9 +786,10 @@ start_lit = false
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
+pickup_objective_after_text = "Ia bolul cu barbotină din celălalt capăt.
+L: aprinde lampa   Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.")
 empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
 empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
@@ -797,9 +800,10 @@ start_lit = false
 start_equipped = false
 pickup_required_objective_id = "take_lamp"
 pickup_objective_after_id = "fetch_clay_slip"
-pickup_objective_after_text = "Mergi în camera din celălalt capăt și ia bolul cu barbotină.  ·  L: aprinde lampa  ·  Alt (ține): mai multă lumină"
+pickup_objective_after_text = "Ia bolul cu barbotină din celălalt capăt.
+L: aprinde lampa   Alt (ține): mai multă lumină"
 pickup_dialogue_text = "Meșteșugar: Fără lumină, camera te înghite înainte să vezi rafturile."
-pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.", "Meșteșugar: Mai bine cu pas așezat. O ridic doar când chiar am nevoie să văd departe.")
+pickup_tutorial_lines = PackedStringArray("Meșteșugar: Trebuie să fiu atent cu lampa — când mă mișc prea repede, uleiul se varsă.")
 empty_tutorial_lines = PackedStringArray("Meșteșugar: Nu mai am ulei în lampă — se stinge curând.", "Meșteșugar: Trebuie să găsesc repede o lampă de pe perete ca să torn în vasul meu.")
 empty_tutorial_objective_text = "Reumple lampa la o sconcă de pe perete. Ține apăsat E."
 
@@ -883,10 +887,12 @@ visible = false
 [node name="Interactable" type="Node" parent="Rooms/01_TerracottaWorkshop/WorkshopQuestProps/TerracottaWorkTarget" unique_id=863896113]
 script = ExtResource("Script_clay_app_station")
 required_objective_id = "apply_clay_slip"
-objective_after_id = "retrieve_chisel"
-objective_after_text = "Recuperează dalta căzută sub masă."
+objective_after_id = "continue_modeling"
+objective_after_text = "Continuă modelarea picioarelor soldatului."
 refill_objective_id = "take_clay_slip"
 refill_objective_text = "Mai ia o porție de barbotină din bol."
+chisel_retrieve_objective_id = "retrieve_chisel"
+chisel_retrieve_objective_text = "Recuperează dalta căzută sub masă.  ·  Ctrl: crouch  ·  C: crawl"
 applied_visual_path = NodePath("../AppliedClayBowlModel")
 apply_dialogue = "Meșteșugar: Pasta se prinde. Trebuie bătută bine."
 chisel_dialogue = "Meșteșugar: Mai e nevoie de un strat."
@@ -1009,7 +1015,7 @@ shape = SubResource("Cap_apprentice_interaction")
 
 [node name="Dialogue" type="Node" parent="ApprenticeInteractBody" unique_id=62159889]
 script = ExtResource("Script_npc_dialogue")
-dialogue_lines = PackedStringArray("Ucenic: Maestre, după ritual ne lasă să mergem acasă?", "Meșteșugar: După un asemenea mormânt, nimeni nu mai pleacă neschimbat.", "Ucenic: Mai avem nevoie de barbotină pentru picioarele soldatului. O aduceți din magazie?", "Meșteșugar: Va trebui să iau bolul cu barbotina din camera din celălalt capăt.")
+dialogue_lines = PackedStringArray("Ucenic: Maestre, după ritual ne lasă să mergem acasă?", "Meșteșugar: După un asemenea mormânt, nimeni nu mai pleacă neschimbat.", "Ucenic: Mai avem nevoie de barbotină pentru picioarele soldatului. O aduceți din magazie?", "Meșteșugar: Va trebui să iau bolul cu barbotina din camera din celălalt capăt.", "Meșteșugar: Și să-mi iau o lampă — fără lumină nu văd nimic pe acolo.")
 set_initial_objective_on_ready = true
 initial_objective_id = "talk_to_apprentice"
 initial_objective_text = "Vorbește cu ucenicul."

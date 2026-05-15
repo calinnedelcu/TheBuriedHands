@@ -15,10 +15,13 @@ extends CanvasLayer
 @onready var _left_hand_icon: TextureRect = $Anchor/Bottom/LeftHandSlot/Icon
 @onready var _interact_label: Label = $Anchor/Center/InteractLabel
 @onready var _item_label: Label = $Anchor/Bottom/ItemLabel
-@onready var _stance_label: Label = $Anchor/TopLeft/StanceLabel
 @warning_ignore("unused_private_class_variable")
 @onready var _dot: Panel = $Anchor/Center/CrosshairDot
-@onready var _objective_label: Label = $Anchor/TopRight/ObjectiveLabel
+@onready var _objective_card: TextureRect = $Anchor/TopRight/ObjectiveCard
+@onready var _objective_label: Label = $Anchor/TopRight/ObjectiveCard/ObjectiveLabel
+var _objective_visible_pos: Vector2 = Vector2.ZERO
+var _objective_tween: Tween = null
+const _OBJ_HIDDEN_OFFSET := Vector2(60.0, -16.0)
 @onready var _slot_panels: Array[TextureRect] = [
 	$Anchor/Bottom/SlotBar/Slot1,
 	$Anchor/Bottom/SlotBar/Slot2,
@@ -108,6 +111,10 @@ func _ready() -> void:
 	_oil_phial.visible = false
 	_set_left_hand_slot(false)
 	_objective_label.text = ""
+	_objective_visible_pos = _objective_card.position
+	_objective_card.position = _objective_visible_pos + _OBJ_HIDDEN_OFFSET
+	_objective_card.modulate.a = 0.0
+	_objective_label.modulate.a = 0.0
 	_prepare_slot_count_labels()
 
 	if has_node("/root/Objectives"):
@@ -116,6 +123,7 @@ func _ready() -> void:
 		var current_text: String = obj.current_text()
 		if current_text != "":
 			_objective_label.text = current_text
+			_animate_objective_in()
 
 	if has_node("/root/GameEvents"):
 		var events := get_node("/root/GameEvents")
@@ -147,10 +155,6 @@ func _ready() -> void:
 	# Sincronizam o data dupa frame ca initial_lamp_path (deferred) sa apuce
 	# sa fie procesat de inventory.
 	call_deferred("_sync_active_lamp")
-	if not player_path.is_empty():
-		var p := get_node_or_null(player_path)
-		if p != null and p.has_signal("stance_changed"):
-			p.stance_changed.connect(_on_stance_changed)
 
 func _prepare_slot_count_labels() -> void:
 	_slot_count_labels.clear()
@@ -524,11 +528,47 @@ func _detach_lamp() -> void:
 	_oil_phial.visible = false
 	_set_left_hand_slot(false)
 
-func _on_stance_changed(stance: String) -> void:
-	_stance_label.text = stance
-
 func _on_objective_changed(_id: String, text: String) -> void:
+	if text == "":
+		_animate_objective_out()
+		return
+	var was_empty: bool = _objective_label.text == "" or _objective_card.modulate.a < 0.05
 	_objective_label.text = text
+	if was_empty:
+		_animate_objective_in()
+	else:
+		_animate_objective_replace()
+
+func _kill_objective_tween() -> void:
+	if _objective_tween != null and _objective_tween.is_running():
+		_objective_tween.kill()
+	_objective_tween = null
+
+func _animate_objective_in() -> void:
+	_kill_objective_tween()
+	_objective_card.position = _objective_visible_pos + _OBJ_HIDDEN_OFFSET
+	_objective_card.modulate.a = 0.0
+	_objective_label.modulate.a = 0.0
+	_objective_tween = create_tween().set_parallel(true)
+	_objective_tween.tween_property(_objective_card, "position", _objective_visible_pos, 0.55).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	_objective_tween.tween_property(_objective_card, "modulate:a", 1.0, 0.45)
+	_objective_tween.tween_property(_objective_label, "modulate:a", 1.0, 0.4).set_delay(0.18)
+
+func _animate_objective_replace() -> void:
+	_kill_objective_tween()
+	_objective_tween = create_tween().set_parallel(true)
+	_objective_tween.tween_property(_objective_label, "modulate:a", 0.0, 0.12)
+	_objective_tween.chain().tween_property(_objective_label, "modulate:a", 1.0, 0.25)
+	var pulse_tween := create_tween()
+	pulse_tween.tween_property(_objective_card, "scale", Vector2(1.04, 1.04), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	pulse_tween.tween_property(_objective_card, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+func _animate_objective_out() -> void:
+	_kill_objective_tween()
+	_objective_tween = create_tween().set_parallel(true)
+	_objective_tween.tween_property(_objective_label, "modulate:a", 0.0, 0.2)
+	_objective_tween.tween_property(_objective_card, "modulate:a", 0.0, 0.32).set_delay(0.05)
+	_objective_tween.tween_property(_objective_card, "position", _objective_visible_pos + _OBJ_HIDDEN_OFFSET, 0.4).set_delay(0.05).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
 
 func _on_dialogue_changed(text: String, duration: float) -> void:
 	if _dialogue_panel == null or _dialogue_label == null:
