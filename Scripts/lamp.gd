@@ -310,9 +310,23 @@ func _play_tutorial_sequence(lines: PackedStringArray, skip_first_delay: bool) -
 		return
 	if skip_first_delay:
 		await get_tree().create_timer(4.0).timeout
+	# Wait for any unrelated dialogue (guards, NPCs, dropped-bowl prompts) to
+	# clear so the tutorial doesn't talk over them.
+	await _await_dialogue_clear(events)
 	for line in lines:
 		events.show_dialogue(str(line), tutorial_line_duration)
 		await get_tree().create_timer(tutorial_line_duration).timeout
+
+func _await_dialogue_clear(events: Node) -> void:
+	if events == null or not events.has_method("is_dialogue_active"):
+		return
+	while bool(events.call("is_dialogue_active")):
+		await get_tree().create_timer(0.3).timeout
+	# Grace window so we don't slip in between two consecutive lines from a
+	# sequence (e.g. guard reveal). If another line landed meanwhile, wait again.
+	await get_tree().create_timer(0.5).timeout
+	if bool(events.call("is_dialogue_active")):
+		await _await_dialogue_clear(events)
 
 func _resolve_player(by: Node) -> Node:
 	var n: Node = by
