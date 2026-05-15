@@ -56,11 +56,15 @@ Pentru UI:
 
 > Ancient Qin-inspired game UI, parchment, wood, bronze, simple geometric border, readable Romanian text, clean white background for asset sheets, transparent in-game overlays, no modern sci-fi elements.
 
-## Prioritate actuală de producție
+## Prioritate actuală de producție (2026-05-15)
 
-1. Blocare clară a hărții mari și a rutelor.
-2. HUD minimal mereu vizibil.
-3. Interacțiuni de bază: lampă, daltă, pană de lemn, prompt E.
-4. Stealth simplu cu stări: niciun risc, suspiciune, văzut.
-5. Coridorul arbaletelor și Sala Mercurului ca primele zone cu gameplay distinct.
+Sisteme de bază sunt complete (controller, lumini, lampi cu offhand, oil reservoirs, HUD slot bar cu texturi Qin, keybinds F/E/X). Următoarele priorități:
+
+1. **Right-hand HUD frame + iconițe tool** pentru slot-urile 1-4 (asset prompt în `docs/IMAGE_PROMPTS.md`).
+2. **Plasare gardieni patrulanți** + walk cycle pentru `guard1-idle.glb`.
+3. **Crossbow Trap funcțional** în `03_CrossbowCorridor` (plăci presiune, dezactivare cu daltă, blocare cu pană).
+4. **Sala Mercurului — damage gameplay** peste vizualul vaporilor existent.
+5. **ObjectiveTriggers** plasate la praguri pentru flow narrativ.
+
+Pentru detalii: `docs/IMPLEMENTATION_ROADMAP.md`, `docs/CURRENT_PROJECT_STATE.md`.
 

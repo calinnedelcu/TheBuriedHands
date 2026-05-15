@@ -1,5 +1,8 @@
 extends CharacterBody3D
 
+const _FALLBACK_CLICK_SFX = preload("res://audio/sfx/menu_click.wav")
+const _FALLBACK_ACTION_SFX = preload("res://audio/sfx/menu_play_start.wav")
+
 signal stance_changed(stance: String)
 
 @export_group("Movement")
@@ -15,6 +18,18 @@ signal stance_changed(stance: String)
 @export var jump_apex_gravity_multiplier: float = 2.0
 @export var coyote_time_duration: float = 0.1
 @export var jump_buffer_duration: float = 0.15
+
+@export_group("Movement Feel")
+@export var sprint_acceleration_multiplier: float = 0.58
+@export var sprint_deceleration_multiplier: float = 0.92
+@export var crouch_acceleration_multiplier: float = 0.78
+@export var crawl_acceleration_multiplier: float = 0.58
+@export var direction_change_acceleration_multiplier: float = 0.72
+@export var sprint_bob_multiplier: float = 1.18
+@export var crouch_bob_multiplier: float = 0.42
+@export var crawl_bob_multiplier: float = 0.24
+@export var land_camera_kick: float = 0.035
+@export var land_camera_recover_speed: float = 10.0
 
 @export_group("Look Settings")
 @export var mouse_sensitivity: float = 0.002
@@ -35,11 +50,6 @@ signal stance_changed(stance: String)
 @export var crawl_camera_y: float = 0.35
 @export var stance_lerp_speed: float = 10.0
 
-@export_group("Lean")
-@export var lean_angle_deg: float = 14.0
-@export var lean_offset: float = 0.22
-@export var lean_lerp_speed: float = 8.0
-
 @export_group("Noise")
 @export var step_distance: float = 1.4
 @export var noise_sneak: float = 0.4
@@ -52,6 +62,13 @@ signal stance_changed(stance: String)
 @export var throw_speed: float = 11.0
 @export var throw_arc_up: float = 1.5
 @export var ceramic_shard_scene: PackedScene
+
+@export_group("Lamp Drop")
+@export var lamp_drop_distance: float = 1.1
+@export var lamp_drop_probe_up: float = 1.1
+@export var lamp_drop_probe_down: float = 2.4
+@export var lamp_drop_surface_offset: float = 0.08
+@export var lamp_drop_scale: float = 4.0
 
 @export_group("Movement Audio")
 @export var movement_audio_enabled: bool = true
@@ -76,9 +93,24 @@ signal stance_changed(stance: String)
 @export var jump_pitch_random: float = 1.04
 @export var land_pitch_random: float = 1.04
 
+@export_group("Interaction Audio")
+@export var interaction_audio_enabled: bool = true
+@export var pickup_sfx_stream: AudioStream
+@export var drop_sfx_stream: AudioStream
+@export var lamp_toggle_sfx_stream: AudioStream
+@export var lamp_select_sfx_stream: AudioStream
+@export var refill_sfx_stream: AudioStream
+@export var pickup_sfx_volume_db: float = -18.0
+@export var drop_sfx_volume_db: float = -15.0
+@export var lamp_toggle_sfx_volume_db: float = -19.0
+@export var lamp_select_sfx_volume_db: float = -21.0
+@export var refill_sfx_volume_db: float = -24.0
+@export var refill_sfx_interval: float = 0.32
+
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var collider: CollisionShape3D = get_node_or_null("Collider")
+@onready var lamp_socket: Node3D = get_node_or_null("CameraPivot/Camera3D/ViewmodelRig/LampSocket")
 @onready var lamp: Node = get_node_or_null("CameraPivot/Camera3D/ViewmodelRig/LampSocket/OilLamp")
 @onready var interaction: Node = get_node_or_null("CameraPivot/Camera3D/InteractionRay")
 @onready var inventory: Node = get_node_or_null("Inventory")
@@ -94,10 +126,12 @@ var is_jump_held: bool = false
 var _is_crouching: bool = false
 var _is_crawling: bool = false
 var _is_sprinting: bool = false
-var _lean_axis: float = 0.0
-var _lean_blend: float = 0.0
 var _distance_since_step: float = 0.0
 var _current_stance: String = "În picioare"
+var _camera_land_offset: float = 0.0
+var _debug_accel_multiplier: float = 1.0
+var _debug_decel_multiplier: float = 1.0
+var _debug_head_bob_multiplier: float = 1.0
 var _capsule_shape: CapsuleShape3D
 var _initial_capsule_height: float
 var _initial_capsule_radius: float
@@ -108,6 +142,13 @@ var _footstep_stream: AudioStreamRandomizer
 var _footstep_streams_by_surface: Dictionary = {}
 var _jump_stream: AudioStreamRandomizer
 var _land_stream: AudioStreamRandomizer
+var _lamp_held_transform: Transform3D = Transform3D.IDENTITY
+var _pickup_sfx_player: AudioStreamPlayer
+var _drop_sfx_player: AudioStreamPlayer
+var _lamp_toggle_sfx_player: AudioStreamPlayer
+var _lamp_select_sfx_player: AudioStreamPlayer
+var _refill_sfx_player: AudioStreamPlayer
+var _refill_sfx_cooldown: float = 0.0
 
 func _setup_input_actions() -> void:
 	var actions := {
@@ -119,9 +160,10 @@ func _setup_input_actions() -> void:
 		"crouch": [KEY_CTRL],
 		"crawl": [KEY_C],
 		"sprint": [KEY_SHIFT],
-		"interact": [KEY_F],
-		"lean_left": [KEY_Q],
-		"lean_right": [KEY_E],
+		"interact": [KEY_E],
+		"pickup": [KEY_F],
+		"drop": [KEY_X],
+		"select_lamp": [KEY_Z],
 		"toggle_lamp": [KEY_L],
 		"raise_lamp": [KEY_ALT],
 		"slot_0": [KEY_0],
@@ -158,6 +200,9 @@ func _ready() -> void:
 		_initial_capsule_height = _capsule_shape.height
 		_initial_capsule_radius = _capsule_shape.radius
 	_setup_movement_audio()
+	if lamp is Node3D:
+		_lamp_held_transform = (lamp as Node3D).transform
+	_setup_interaction_audio()
 	stance_changed.emit(_current_stance)
 
 func is_crouching() -> bool:
@@ -168,6 +213,30 @@ func is_crawling() -> bool:
 
 func is_sprinting() -> bool:
 	return _is_sprinting
+
+func current_stance_text() -> String:
+	return _current_stance
+
+func horizontal_speed() -> float:
+	return Vector2(velocity.x, velocity.z).length()
+
+func current_target_speed() -> float:
+	return _current_speed()
+
+func current_step_noise() -> float:
+	return _step_noise()
+
+func current_surface_key() -> String:
+	return _detect_surface_key()
+
+func current_acceleration_multiplier() -> float:
+	return _debug_accel_multiplier
+
+func current_deceleration_multiplier() -> float:
+	return _debug_decel_multiplier
+
+func current_head_bob_multiplier() -> float:
+	return _debug_head_bob_multiplier
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -188,21 +257,38 @@ func _unhandled_input(event: InputEvent) -> void:
 		if interaction != null and interaction.has_method("try_interact"):
 			interaction.try_interact()
 
+	if event.is_action_pressed("pickup"):
+		if interaction != null and interaction.has_method("try_pickup"):
+			interaction.try_pickup()
+
+	if event.is_action_pressed("drop"):
+		_try_drop_active_item()
+
+	if event.is_action_pressed("select_lamp"):
+		if inventory != null and inventory.has_method("select_lamp"):
+			if bool(inventory.call("select_lamp")):
+				play_feedback_sfx("lamp_select")
+
 	if event.is_action_pressed("toggle_lamp"):
-		if lamp != null and lamp.has_method("toggle"):
-			lamp.toggle()
+		var l := _active_lamp()
+		if l != null and l.has_method("toggle"):
+			l.toggle()
+			play_feedback_sfx("lamp_toggle")
 
 	if event.is_action_pressed("raise_lamp"):
-		if lamp != null and lamp.has_method("set_raised"):
-			lamp.set_raised(true)
+		var l := _active_lamp()
+		if l != null and l.has_method("set_raised"):
+			l.set_raised(true)
 	elif event.is_action_released("raise_lamp"):
-		if lamp != null and lamp.has_method("set_raised"):
-			lamp.set_raised(false)
+		var l := _active_lamp()
+		if l != null and l.has_method("set_raised"):
+			l.set_raised(false)
 
+	# slot_0 = free hands, slot_1..slot_4 map to inventory slots 0..3.
 	for i in 5:
 		if event.is_action_pressed("slot_%d" % i):
 			if inventory != null and inventory.has_method("set_slot"):
-				inventory.set_slot(i)
+				inventory.set_slot(i - 1)
 
 	if event.is_action_pressed("throw"):
 		_try_throw_ceramic()
@@ -210,9 +296,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _try_throw_ceramic() -> void:
 	if inventory == null or ceramic_shard_scene == null:
 		return
-	if inventory.has_method("current_slot") and inventory.current_slot() != 3:
+	if not inventory.has_method("current_item_id") or inventory.current_item_id() != "ceramic":
 		return
-	if inventory.has_method("consume_ceramic") and not inventory.consume_ceramic():
+	if not inventory.has_method("consume_current_stack") or not inventory.consume_current_stack():
 		return
 	var shard: RigidBody3D = ceramic_shard_scene.instantiate()
 	get_tree().current_scene.add_child(shard)
@@ -223,10 +309,118 @@ func _try_throw_ceramic() -> void:
 	shard.angular_velocity = Vector3(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
 	_emit_noise(noise_walk * 0.4)
 
+func get_fallback_interaction_prompt() -> String:
+	if inventory != null and inventory.has_method("current_item_id") and inventory.current_item_id() != "":
+		var item_name: String = inventory.current_name() if inventory.has_method("current_name") else ""
+		return "Pune jos %s" % item_name if item_name != "" else "Pune jos"
+	if inventory != null and inventory.has_method("active_lamp") and inventory.call("active_lamp") != null:
+		return "Pune jos lampa"
+	if inventory != null:
+		return ""
+	if _has_held_lamp():
+		return "Pune jos lampa"
+	return ""
+
+## Called by lamp.gd when the player interacts with a lamp lying in the world.
+func equip_lamp(lamp_node: Node) -> void:
+	if lamp_node == null or not (lamp_node is Node3D):
+		return
+	if inventory == null or not inventory.has_method("add_item"):
+		_equip_lamp_direct(lamp_node)
+		return
+	if inventory.add_item("lamp", lamp_node) < 0:
+		return  # inventory full — the lamp stays in the world
+	_emit_noise(noise_walk * 0.25)
+	play_feedback_sfx("pickup")
+
+func _active_lamp() -> Node:
+	if inventory != null and inventory.has_method("active_lamp"):
+		var inv_lamp: Node = inventory.call("active_lamp")
+		if inv_lamp != null:
+			return inv_lamp
+	if inventory != null:
+		return null
+	if _has_held_lamp():
+		return lamp
+	return null
+
+func _try_drop_active_item() -> bool:
+	if inventory != null and inventory.has_method("drop_current") and bool(inventory.call("drop_current", self)):
+		_emit_noise(noise_walk * 0.35)
+		play_feedback_sfx("drop")
+		return true
+	if inventory != null:
+		return false
+	return _try_drop_held_lamp()
+
+func _equip_lamp_direct(lamp_node: Node) -> void:
+	if lamp_socket == null or not (lamp_node is Node3D):
+		return
+	lamp = lamp_node
+	var lamp_3d := lamp_node as Node3D
+	lamp_3d.reparent(lamp_socket)
+	lamp_3d.transform = _lamp_held_transform
+	if lamp_node.has_method("set_equipped"):
+		lamp_node.set_equipped(true)
+	_emit_noise(noise_walk * 0.25)
+	play_feedback_sfx("pickup")
+
+func _has_held_lamp() -> bool:
+	return lamp != null and is_instance_valid(lamp) and lamp_socket != null and lamp.get_parent() == lamp_socket
+
+func _try_drop_held_lamp() -> bool:
+	if not _has_held_lamp() or not (lamp is Node3D):
+		return false
+	var world_parent := get_tree().current_scene
+	if world_parent == null:
+		world_parent = get_parent()
+	if world_parent == null:
+		return false
+	if lamp.has_method("set_raised"):
+		lamp.set_raised(false)
+	var lamp_3d := lamp as Node3D
+	lamp_3d.reparent(world_parent)
+	lamp_3d.global_transform = get_drop_transform(true)
+	if lamp.has_method("set_equipped"):
+		lamp.set_equipped(false)
+	_emit_noise(noise_walk * 0.35)
+	play_feedback_sfx("drop")
+	return true
+
+## Where a dropped item lands: a floor-probed spot a short distance ahead.
+## `scaled` applies lamp_drop_scale (the lamp's hand model is tiny otherwise).
+func get_drop_transform(scaled: bool) -> Transform3D:
+	var flat_forward := -global_transform.basis.z
+	flat_forward.y = 0.0
+	if flat_forward.length_squared() < 0.001:
+		flat_forward = Vector3.FORWARD
+	flat_forward = flat_forward.normalized()
+
+	var probe_center := global_position + flat_forward * lamp_drop_distance
+	var from := probe_center + Vector3.UP * lamp_drop_probe_up
+	var to := probe_center + Vector3.DOWN * lamp_drop_probe_down
+	var params := PhysicsRayQueryParameters3D.create(from, to)
+	params.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(params)
+	var drop_position := probe_center + Vector3.DOWN * 0.9
+	if not hit.is_empty():
+		var hit_pos: Vector3 = hit.get("position")
+		var hit_normal: Vector3 = hit.get("normal")
+		drop_position = hit_pos + hit_normal.normalized() * lamp_drop_surface_offset
+
+	var scale_factor: float = lamp_drop_scale if scaled else 1.0
+	var yaw_basis := Basis(Vector3.UP, rotation.y).scaled(Vector3.ONE * scale_factor)
+	return Transform3D(yaw_basis, drop_position)
+
 func _physics_process(delta: float) -> void:
 	var was_on_floor := is_on_floor()
+	_refill_sfx_cooldown = maxf(0.0, _refill_sfx_cooldown - delta)
 	is_jump_held = Input.is_action_pressed("jump")
 	_is_sprinting = Input.is_action_pressed("sprint") and not _is_crouching and not _is_crawling and is_on_floor()
+
+	# Hold-action interact: cat timp E e tinut, transmitem dt catre Interactable curent.
+	if interaction != null and Input.is_action_pressed("interact") and interaction.has_method("try_interact_hold"):
+		interaction.try_interact_hold(delta)
 
 	if is_on_floor():
 		coyote_timer = coyote_time_duration
@@ -255,27 +449,21 @@ func _physics_process(delta: float) -> void:
 
 	var accel_rate := acceleration
 	var decel_rate := deceleration
+	_debug_accel_multiplier = _movement_acceleration_multiplier(direction)
+	_debug_decel_multiplier = _movement_deceleration_multiplier()
+	accel_rate *= _debug_accel_multiplier
+	decel_rate *= _debug_decel_multiplier
 	if not is_on_floor():
 		accel_rate *= air_control_factor
 		decel_rate *= air_control_factor
 
 	if direction:
-		velocity.x = lerp(velocity.x, target_vx, accel_rate * delta)
-		velocity.z = lerp(velocity.z, target_vz, accel_rate * delta)
+		var accel_t: float = clamp(accel_rate * delta, 0.0, 1.0)
+		velocity.x = lerp(velocity.x, target_vx, accel_t)
+		velocity.z = lerp(velocity.z, target_vz, accel_t)
 	else:
 		velocity.x = move_toward(velocity.x, 0, decel_rate * delta)
 		velocity.z = move_toward(velocity.z, 0, decel_rate * delta)
-
-	# Lean
-	var lean_input := 0.0
-	if Input.is_action_pressed("lean_left"):
-		lean_input -= 1.0
-	if Input.is_action_pressed("lean_right"):
-		lean_input += 1.0
-	_lean_axis = lean_input
-	_lean_blend = lerp(_lean_blend, _lean_axis, clamp(delta * lean_lerp_speed, 0.0, 1.0))
-	camera_pivot.rotation.z = -deg_to_rad(lean_angle_deg) * _lean_blend
-	camera.position.x = _initial_camera_local_position.x + _lean_blend * lean_offset
 
 	# Stance height lerp
 	var target_cam_y := _target_camera_y()
@@ -286,14 +474,18 @@ func _physics_process(delta: float) -> void:
 		_capsule_shape.height = lerp(_capsule_shape.height, target_h, clamp(delta * stance_lerp_speed, 0.0, 1.0))
 		_capsule_shape.radius = lerp(_capsule_shape.radius, target_radius, clamp(delta * stance_lerp_speed, 0.0, 1.0))
 
+	_camera_land_offset = lerp(_camera_land_offset, 0.0, clamp(delta * land_camera_recover_speed, 0.0, 1.0))
+
 	# Head bob (Y), applied on top of stance height
+	var bob_offset_y := 0.0
+	_debug_head_bob_multiplier = _head_bob_multiplier()
 	if is_on_floor() and input_dir.length() > 0:
-		_bob_time += delta * target_speed * bob_speed_multiplier
-		var bob_offset_y := sin(_bob_time * bob_frequency) * bob_amplitude
-		camera.position.y = _initial_camera_local_position.y + bob_offset_y
+		_bob_time += delta * target_speed * bob_speed_multiplier * _debug_head_bob_multiplier
+		bob_offset_y = sin(_bob_time * bob_frequency) * bob_amplitude * _debug_head_bob_multiplier
+		camera.position.y = _initial_camera_local_position.y + bob_offset_y - _camera_land_offset
 	else:
 		_bob_time = 0.0
-		camera.position.y = lerp(camera.position.y, _initial_camera_local_position.y, delta * 10.0)
+		camera.position.y = lerp(camera.position.y, _initial_camera_local_position.y - _camera_land_offset, delta * 10.0)
 
 	# Footstep noise
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length() > 0.2:
@@ -307,6 +499,8 @@ func _physics_process(delta: float) -> void:
 	var fall_speed_before_slide := -velocity.y
 	move_and_slide()
 	if not was_on_floor and is_on_floor() and fall_speed_before_slide > 1.0:
+		var impact: float = clamp(fall_speed_before_slide / hard_land_velocity, 0.0, 1.0)
+		_camera_land_offset = maxf(_camera_land_offset, land_camera_kick * impact)
 		_play_land_sound(fall_speed_before_slide)
 
 func _current_speed() -> float:
@@ -318,6 +512,39 @@ func _current_speed() -> float:
 		return sprint_speed
 	return walk_speed
 
+func _movement_acceleration_multiplier(direction: Vector3) -> float:
+	var mult := 1.0
+	if _is_crawling:
+		mult *= crawl_acceleration_multiplier
+	elif _is_crouching:
+		mult *= crouch_acceleration_multiplier
+	elif _is_sprinting:
+		mult *= sprint_acceleration_multiplier
+	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
+	if direction != Vector3.ZERO and horizontal_velocity.length_squared() > 0.16:
+		var current_dir := horizontal_velocity.normalized()
+		if current_dir.dot(direction.normalized()) < -0.2:
+			mult *= direction_change_acceleration_multiplier
+	return mult
+
+func _movement_deceleration_multiplier() -> float:
+	if _is_sprinting:
+		return sprint_deceleration_multiplier
+	if _is_crawling:
+		return crawl_acceleration_multiplier
+	if _is_crouching:
+		return crouch_acceleration_multiplier
+	return 1.0
+
+func _head_bob_multiplier() -> float:
+	if _is_crawling:
+		return crawl_bob_multiplier
+	if _is_crouching:
+		return crouch_bob_multiplier
+	if _is_sprinting:
+		return sprint_bob_multiplier
+	return 1.0
+
 func _step_noise() -> float:
 	if _is_crawling:
 		return noise_crawl
@@ -326,6 +553,48 @@ func _step_noise() -> float:
 	if _is_sprinting:
 		return noise_sprint
 	return noise_walk
+
+func play_feedback_sfx(kind: String) -> void:
+	if not interaction_audio_enabled:
+		return
+	match kind:
+		"pickup":
+			_play_feedback_player(_pickup_sfx_player, pickup_sfx_volume_db, 1.05)
+		"drop":
+			_play_feedback_player(_drop_sfx_player, drop_sfx_volume_db, 0.72)
+		"lamp_toggle":
+			_play_feedback_player(_lamp_toggle_sfx_player, lamp_toggle_sfx_volume_db, 1.18)
+		"lamp_select":
+			_play_feedback_player(_lamp_select_sfx_player, lamp_select_sfx_volume_db, 1.32)
+		"refill":
+			if _refill_sfx_cooldown > 0.0:
+				return
+			_refill_sfx_cooldown = refill_sfx_interval
+			_play_feedback_player(_refill_sfx_player, refill_sfx_volume_db, 1.48)
+
+func _setup_interaction_audio() -> void:
+	if not interaction_audio_enabled:
+		return
+	_pickup_sfx_player = _make_feedback_player("PickupSFX", pickup_sfx_stream, _FALLBACK_CLICK_SFX, pickup_sfx_volume_db)
+	_drop_sfx_player = _make_feedback_player("DropSFX", drop_sfx_stream, _FALLBACK_ACTION_SFX, drop_sfx_volume_db)
+	_lamp_toggle_sfx_player = _make_feedback_player("LampToggleSFX", lamp_toggle_sfx_stream, _FALLBACK_CLICK_SFX, lamp_toggle_sfx_volume_db)
+	_lamp_select_sfx_player = _make_feedback_player("LampSelectSFX", lamp_select_sfx_stream, _FALLBACK_CLICK_SFX, lamp_select_sfx_volume_db)
+	_refill_sfx_player = _make_feedback_player("RefillSFX", refill_sfx_stream, _FALLBACK_CLICK_SFX, refill_sfx_volume_db)
+
+func _make_feedback_player(player_name: String, stream: AudioStream, fallback: AudioStream, volume_db: float) -> AudioStreamPlayer:
+	var player := AudioStreamPlayer.new()
+	player.name = player_name
+	player.stream = stream if stream != null else fallback
+	player.volume_db = volume_db
+	add_child(player)
+	return player
+
+func _play_feedback_player(player: AudioStreamPlayer, volume_db: float, pitch: float) -> void:
+	if player == null or player.stream == null:
+		return
+	player.volume_db = volume_db
+	player.pitch_scale = pitch * randf_range(0.96, 1.04)
+	player.play()
 
 func _emit_noise(loudness: float) -> void:
 	if has_node("/root/NoiseBus"):
@@ -492,7 +761,7 @@ func _set_crawl(active: bool) -> void:
 
 func _is_blocked_above() -> bool:
 	# Simple test: short ray up from head height
-	var current_height := crawl_height if _is_crawling else crouch_height
+	var current_height: float = crawl_height if _is_crawling else crouch_height
 	var from := global_position + Vector3(0, current_height, 0)
 	var to := global_position + Vector3(0, stand_height + 0.1, 0)
 	var space := get_world_3d().direct_space_state
@@ -507,7 +776,7 @@ func _update_stance_label() -> void:
 			_current_stance = "Taras"
 			stance_changed.emit(_current_stance)
 		return
-	var s := "Ghemuit" if _is_crouching else ("Aleargă" if _is_sprinting else "În picioare")
+	var s: String = "Ghemuit" if _is_crouching else ("Aleargă" if _is_sprinting else "În picioare")
 	if s != _current_stance:
 		_current_stance = s
 		stance_changed.emit(s)

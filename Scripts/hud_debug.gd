@@ -1,15 +1,15 @@
 extends CanvasLayer
 
 const VITALITY_SOURCES: Array[Texture2D] = [
-	preload("res://scenes/ui/vitality_0_full.png"),
-	preload("res://scenes/ui/vitality_1.png"),
-	preload("res://scenes/ui/vitality_2.png"),
-	preload("res://scenes/ui/vitality_3.png"),
-	preload("res://scenes/ui/vitality_4.png"),
-	preload("res://scenes/ui/vitality_5.png"),
-	preload("res://scenes/ui/vitality_6.png"),
-	preload("res://scenes/ui/vitality_7.png"),
-	preload("res://scenes/ui/vitality_8_empty.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_0_full.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_1.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_2.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_3.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_4.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_5.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_6.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_7.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_8_empty.png"),
 ]
 
 const VITALITY_REGIONS: Array[Rect2] = [

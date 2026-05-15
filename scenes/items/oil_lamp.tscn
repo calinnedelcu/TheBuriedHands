@@ -1,72 +1,93 @@
-[gd_scene load_steps=8 format=3 uid="uid://c3kx7lampoil0"]
+[gd_scene format=3 uid="uid://c3kx7lampoil0"]
 
-[ext_resource type="Script" path="res://Scripts/lamp.gd" id="1_lamp"]
+[ext_resource type="Script" uid="uid://bwm5baqfkjugw" path="res://Scripts/lamp.gd" id="1_lamp"]
+[ext_resource type="PackedScene" uid="uid://cij630i0dcwah" path="res://TripoModels/in-hand-lamp.glb" id="2_in_hand_lamp"]
+[ext_resource type="ArrayMesh" uid="uid://cgp5qimptvr4n" path="res://scenes/items/flame_teardrop.obj" id="3_flame_mesh"]
+[ext_resource type="Shader" uid="uid://c4v5lu1flwuv5" path="res://scenes/items/oil_flame.gdshader" id="4_flame_shader"]
+[ext_resource type="Script" path="res://Scripts/interactable.gd" id="5_interact"]
 
-[sub_resource type="CylinderMesh" id="Mesh_body"]
-top_radius = 0.06
-bottom_radius = 0.05
-height = 0.035
-radial_segments = 10
-rings = 1
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flame"]
+render_priority = 0
+shader = ExtResource("4_flame_shader")
+shader_parameter/outer_color = Color(1, 0.28, 0.045, 0.72)
+shader_parameter/core_color = Color(1, 0.82, 0.28, 0.92)
+shader_parameter/tip_color = Color(1, 0.54, 0.08, 0.52)
+shader_parameter/emission_strength = 3.4
+shader_parameter/alpha_scale = 0.78
 
-[sub_resource type="StandardMaterial3D" id="Mat_body"]
-albedo_color = Color(0.32, 0.22, 0.14, 1)
-roughness = 0.85
-metallic = 0.05
-no_depth_test = true
-render_priority = 8
+[sub_resource type="ParticleProcessMaterial" id="ParticleProc_smoke"]
+direction = Vector3(0, 1, 0)
+spread = 18.0
+initial_velocity_min = 0.025
+initial_velocity_max = 0.075
+angular_velocity_min = -18.0
+angular_velocity_max = 18.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = 0.004
+linear_accel_max = 0.012
+scale_min = 0.55
+scale_max = 1.15
 
-[sub_resource type="CylinderMesh" id="Mesh_wick"]
-top_radius = 0.004
-bottom_radius = 0.004
-height = 0.02
-radial_segments = 6
-rings = 1
-
-[sub_resource type="StandardMaterial3D" id="Mat_wick"]
-albedo_color = Color(0.12, 0.08, 0.05, 1)
-roughness = 1.0
-no_depth_test = true
-render_priority = 8
-
-[sub_resource type="QuadMesh" id="Mesh_flame"]
-size = Vector2(0.04, 0.06)
-
-[sub_resource type="StandardMaterial3D" id="Mat_flame"]
+[sub_resource type="StandardMaterial3D" id="Mat_smoke"]
+render_priority = 10
 transparency = 1
+no_depth_test = true
 shading_mode = 0
-albedo_color = Color(1, 0.78, 0.42, 0.9)
-emission_enabled = true
-emission = Color(1, 0.72, 0.34, 1)
-emission_energy_multiplier = 2.3
+albedo_color = Color(0.28, 0.23, 0.18, 0.22)
+disable_receive_shadows = true
 billboard_mode = 1
 billboard_keep_scale = true
-disable_receive_shadows = true
-no_depth_test = true
-render_priority = 10
 
-[node name="OilLamp" type="Node3D"]
+[sub_resource type="QuadMesh" id="Mesh_smoke"]
+material = SubResource("Mat_smoke")
+size = Vector2(0.035, 0.035)
+
+[sub_resource type="BoxShape3D" id="Shape_pickup"]
+size = Vector3(0.62, 0.26, 0.46)
+
+[node name="OilLamp" type="Node3D" unique_id=1443442757]
 script = ExtResource("1_lamp")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-mesh = SubResource("Mesh_body")
-material_override = SubResource("Mat_body")
+[node name="Body" parent="." unique_id=1860220164 instance=ExtResource("2_in_hand_lamp")]
+transform = Transform3D(0.24, 0, 0, 0, 0.24, 0, 0, 0, 0.24, 0, -0.04, 0)
 
-[node name="Wick" type="MeshInstance3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.028, 0)
-mesh = SubResource("Mesh_wick")
-material_override = SubResource("Mat_wick")
+[node name="PickupBody" type="StaticBody3D" parent="."]
+collision_layer = 0
+collision_mask = 0
 
-[node name="Light" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
-light_color = Color(1, 0.76, 0.48, 1)
-light_energy = 1.15
-light_volumetric_fog_energy = 0.45
-omni_range = 5.8
+[node name="PickupCollider" type="CollisionShape3D" parent="PickupBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.045, 0)
+shape = SubResource("Shape_pickup")
+disabled = true
+
+[node name="Interactable" type="Node" parent="PickupBody"]
+script = ExtResource("5_interact")
+prompt_text = "Ia lampa"
+is_pickup = true
+
+[node name="FlameSocket" type="Node3D" parent="." unique_id=695214890]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0.114648715, -0.014096413, 0.06859)
+
+[node name="Light" type="OmniLight3D" parent="FlameSocket" unique_id=822246729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, -0.095)
+light_color = Color(1, 0.62, 0.28, 1)
+light_energy = 5.0
+light_volumetric_fog_energy = 2.2
+shadow_enabled = false
+omni_range = 20.0
 omni_attenuation = 1.6
-shadow_enabled = true
 
-[node name="Flame" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
-mesh = SubResource("Mesh_flame")
-material_override = SubResource("Mat_flame")
+[node name="Flame" type="MeshInstance3D" parent="FlameSocket" unique_id=1093963823]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.108, -0.098)
+material_override = SubResource("ShaderMaterial_flame")
+mesh = ExtResource("3_flame_mesh")
+
+[node name="Smoke" type="GPUParticles3D" parent="FlameSocket" unique_id=1048773525]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, -0.098)
+amount = 9
+lifetime = 1.6
+preprocess = 0.45
+randomness = 0.72
+visibility_aabb = AABB(-0.08, -0.05, -0.08, 0.16, 0.28, 0.16)
+process_material = SubResource("ParticleProc_smoke")
+draw_pass_1 = SubResource("Mesh_smoke")

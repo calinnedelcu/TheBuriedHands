@@ -1,29 +1,35 @@
 class_name ToolRequiredInteractable
 extends Interactable
 
-@export var required_inventory_slot: int = -1
+## An interactable that is only usable while the player has a specific item
+## selected as the active inventory slot.
+
+@export var required_item_id: String = ""
 @export var success_prompt: String = ""
 @export var failure_prompt: String = ""
 
 func get_prompt(by: Node) -> String:
-	if required_inventory_slot < 0:
+	if required_item_id == "":
 		return prompt_text
 	var inv := _get_inventory(by)
 	if inv == null:
 		return prompt_text
-	if inv.current_slot() == required_inventory_slot:
+	if _has_required_tool(inv):
 		return success_prompt if success_prompt != "" else prompt_text
 	return failure_prompt if failure_prompt != "" else prompt_text
 
 func can_interact(by: Node) -> bool:
 	if not super.can_interact(by):
 		return false
-	if required_inventory_slot < 0:
+	if required_item_id == "":
 		return true
 	var inv := _get_inventory(by)
 	if inv == null:
 		return false
-	return inv.current_slot() == required_inventory_slot
+	return _has_required_tool(inv)
+
+func _has_required_tool(inv: Node) -> bool:
+	return inv.has_method("current_item_id") and inv.current_item_id() == required_item_id
 
 func _get_inventory(by: Node) -> Node:
 	if by == null:

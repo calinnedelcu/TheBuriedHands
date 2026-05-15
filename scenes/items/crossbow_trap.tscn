@@ -80,13 +80,13 @@ max_distance = 24.0
 [node name="DisableWithChisel" type="Node" parent="."]
 script = ExtResource("2_tool_int")
 prompt_text = "Dezactivează capcana"
-required_inventory_slot = 1
+required_item_id = "chisel"
 success_prompt = "Dezactivează capcana cu dalta"
 failure_prompt = "Nevoie de daltă"
 
 [node name="BlockWithWedge" type="Node" parent="."]
 script = ExtResource("2_tool_int")
 prompt_text = "Blochează mecanismul"
-required_inventory_slot = 2
+required_item_id = "wedge"
 success_prompt = "Blochează mecanismul cu pana"
 failure_prompt = "Nevoie de pană de lemn"

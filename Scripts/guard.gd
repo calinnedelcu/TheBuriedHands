@@ -76,11 +76,14 @@ func _physics_process(delta: float) -> void:
 			_tick_patrol(delta)
 		State.SUSPICIOUS:
 			_tick_move_to(_last_known_position, patrol_speed, delta, State.PATROL)
+			_face_toward_player()
 		State.ALERT:
 			_tick_move_to(_last_known_position, alert_speed, delta, State.PATROL)
+			_face_toward_player()
 		State.DETECT:
 			velocity.x = 0
 			velocity.z = 0
+			_face_toward_player()
 
 	var horizontal := Vector2(velocity.x, velocity.z).length()
 	if horizontal > 0.1:
@@ -137,7 +140,16 @@ func _face_direction(dir: Vector3) -> void:
 	if dir.length() < 0.001:
 		return
 	var target_yaw := atan2(dir.x, dir.z)
-	rotation.y = lerp_angle(rotation.y, target_yaw, 0.15)
+	rotation.y = lerp_angle(rotation.y, target_yaw, 0.08)
+
+func _face_toward_player() -> void:
+	if _player == null:
+		return
+	var to_player := _player.global_position - global_position
+	to_player.y = 0
+	if to_player.length() < 0.01:
+		return
+	_face_direction(to_player.normalized())
 
 func _update_vision(delta: float) -> void:
 	if _player == null:

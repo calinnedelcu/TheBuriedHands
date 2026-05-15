@@ -1,6 +1,6 @@
 # Current Project State
 
-Ultima inventariere: 2026-05-12.
+Ultima inventariere: 2026-05-15.
 
 ## Engine
 
@@ -18,15 +18,55 @@ Ultima inventariere: 2026-05-12.
 ├── scenes/
 │   ├── main_menu.tscn
 │   ├── tomb_layout.tscn
+│   ├── entities/
+│   │   └── guard.tscn
+│   ├── items/
+│   │   ├── oil_lamp.tscn
+│   │   ├── pickup_item.tscn
+│   │   ├── crossbow_trap.tscn
+│   │   ├── ceramic_shard.tscn
+│   │   ├── lever.tscn
+│   │   └── TerracottaRoom2.glb
 │   └── ui/
-│       └── main_menu_bg.png
+│       ├── hud_pov.tscn
+│       ├── pause_menu.tscn
+│       ├── fail_screen.tscn
+│       ├── main_menu_bg.png
+│       ├── OilPhial/                   # texturi phial ulei (frame/backing/oil/surface)
+│       ├── Vitalitate/                 # texturi vitalitate
+│       └── Slots/                      # slot_1.png ... slot_4.png + slot_left_hand.png + Icons/*
 ├── Scripts/
 │   ├── player_controller.gd
 │   ├── main_menu.gd
-│   └── auto_play_first_animation.gd
+│   ├── auto_play_first_animation.gd
+│   ├── lamp.gd
+│   ├── guard.gd
+│   ├── cycle_animations_preview.gd
+│   ├── add_lamp_lights.gd
+│   ├── static_lamp_flicker.gd          # flicker generic per Light3D
+│   ├── oil_reservoir.gd                # rezervor de ulei attached la AddedLight-uri
+│   ├── inventory.gd
+│   ├── interactable.gd
+│   ├── interaction.gd
+│   ├── hud_debug.gd
+│   ├── pickup_item.gd
+│   ├── game_events.gd
+│   ├── objectives.gd
+│   ├── noise_bus.gd
+│   ├── objective_trigger.gd
+│   ├── tool_required_interactable.gd
+│   ├── viewmodel_sway.gd
+│   ├── crossbow_trap.gd
+│   ├── bolt.gd
+│   ├── fail_screen.gd
+│   └── pause_menu.gd
 ├── TripoModels/
 │   ├── guard1-idle.glb
 │   ├── statue1-idle.glb
+│   ├── ucenic.glb
+│   ├── mester-mestesugar-real.glb
+│   ├── in-hand-lamp.glb
+│   ├── samurai_armor_3d_model/
 │   └── imported FBX/texture folders
 └── addons/
     └── Tripo3d_Godot_Bridge/
@@ -44,113 +84,245 @@ Controller 3D pe `CharacterBody3D`, cu:
 - jump buffer;
 - mouse look;
 - head bob;
-- capturare / eliberare mouse cu `ui_cancel`.
+- sneak, walk, sprint, crouch, crawl.
+- **Movement Feel**: sprintul accelerează mai progresiv (`sprint_acceleration_multiplier=0.58`), schimbările bruște de direcție sunt încetinite discret (`direction_change_acceleration_multiplier=0.72`), crouch/crawl au accelerație și headbob reduse, iar landing-ul aplică un mic camera dip (`land_camera_kick=0.035`).
+- Helper-e debug pentru HUD F3: `horizontal_speed()`, `current_target_speed()`, `current_step_noise()`, `current_surface_key()`, `current_acceleration_multiplier()`, `current_deceleration_multiplier()`, `current_head_bob_multiplier()`.
+- **Interaction Audio**: player-ul creează runtime `AudioStreamPlayer` pentru pickup/drop/lamp select/lamp toggle/refill. Are stream-uri exportabile, dar fallback imediat pe `menu_click.wav` / `menu_play_start.wav` până avem SFX dedicate.
 
-Observație de design: jocul țintește stealth lent. Controllerul existent poate fi refolosit, dar va avea nevoie de stări de mers încet, alergare, crouch/strecurare, zgomot și interacțiune.
+### `Scripts/lamp.gd`
 
-### `Scripts/main_menu.gd`
+Lampă cu ulei pe Node3D:
+- OmniLight cu flicker + SpotLight pe cameră (direcțional în față)
+- `toggle()` (L), `set_raised()` (Shift), `refill()`
+- `set_stored()` păstrează starea internă a flăcării, dar inventory ascunde lampa; `set_equipped(false)` lasă lampa drop-uită să lumineze pe jos dacă era aprinsă
+- Drop cu lampa aprinsă = lampa luminează pe jos (OmniLight), SpotLight cameră se stinge
+- `base_energy = 5.0`, `base_range = 20.0`, `spot_base_energy = 4.2`, `spot_base_range = 32.0`
+- Fără umbre pe OmniLight (previne auto-blocarea de corpul lămpii)
+- **`start_equipped` (export, default true)**: pune `false` pentru lămpi în lume → pickup activ
+- **`dropped_drain_multiplier` (0.25)**: lampa pe jos consumă 4× mai încet decât în mână
+- **Movement Oil Spill**: consum diferențiat când lampa este în mână. Statul pe loc consumă cel mai puțin, crouch/crawl și mersul atent consumă puțin, mersul normal consumă moderat, iar sprint/jump/airborne consumă mult mai mult ca efect de ulei vărsat. Setări curente: `idle_drain_multiplier=0.25`, `careful_walk_drain_multiplier=0.72`, `crouch_drain_multiplier=0.48`, `crawl_drain_multiplier=0.35`, `sprint_drain_multiplier=3.4`, `airborne_drain_multiplier=2.4`, `jump_spill_drain_multiplier=3.1`. Cache pe `CharacterBody3D` parent găsit prin traversare.
+- **Low Oil Light**: sub `low_oil_warning_threshold_pct=0.14`, flacăra portabilă pierde treptat energie/range și devine mai instabilă înainte să se stingă. F3 afișează `light` strength.
 
-Meniu principal cu:
+### `Scripts/oil_reservoir.gd`
 
-- background animat subtil;
-- particule de dust/embers/drift;
-- butoane Play, Continue, Options, Quit;
-- Play/Continue încarcă `res://scenes/tomb_layout.tscn`;
-- Options este placeholder.
+Rezervor de ulei atașat la orice nod (de obicei lângă o `Light3D`):
+- `oil_amount` / `oil_max` (export) — capacitate rezervor
+- `idle_drain_rate` (0.025 default; suprascris la 0.2 pe `TerracottaRoom2`) — drain pasiv per secundă
+- `refill_per_second` (8) — viteză transfer rezervor → lampa player-ului
+- `reservoir_drain_multiplier` (2.0) — rezervorul pierde dublu față de cât câștigă lampa (pierderi prin vărsare)
+- `light_path` (NodePath) — Light3D pe care îl stinge când oil_amount=0
+- **Low Oil Light**: sub `low_oil_warning_threshold_pct=0.14`, rezervorul trimite `set_oil_light_strength()` către `static_lamp_flicker.gd`, deci lămpile statice se sting gradual înainte de depletion.
+- Necesită copii: `Interactable` (cu `hold_action = true`) + `StaticBody3D + CollisionShape3D` pentru raycast
+- Semnale: `oil_changed`, `depleted`
 
-Observație: brief-ul cere și buton Credits. Main menu-ul poate fi extins.
+### `Scripts/static_lamp_flicker.gd`
 
-### `Scripts/auto_play_first_animation.gd`
+Flicker generic pentru lumini statice (`extends Light3D`):
+- Capturează în `_ready` energy, fog_energy, omni_range
+- Modulează cu `FastNoiseLite` per lampă cu `seed_offset` unic (ritm independent)
+- Opțional `breath_amount` + `breath_period` pentru pulsație lentă suprapusă (folosit pe MercuryGlow)
+- Detectează OmniLight3D vs SpotLight3D runtime via `"omni_range" in self`
+- `set_oil_light_strength(strength)` permite rezervorului să reducă gradual energy/fog/range când uleiul e aproape terminat
 
-Script util pentru redarea primei animații dintr-un model importat.
+### `Scripts/add_lamp_lights.gd` (@tool)
 
-## Scene existente
+Atașat la nodul `TerracottaRoom2`. La `_ready()` caută noduri după `name_filter` (default `"tripo_node_e3fb4dc2"`) și adaugă pentru fiecare:
+1. `OmniLight3D` (numit `AddedLight`) — parametri din inspector
+2. `OilReservoir` (Node3D cu script `oil_reservoir.gd`) — copil cu `StaticBody3D + CollisionShape3D + Interactable` + light_path pe AddedLight-ul vecin
+3. Oil-ul inițial este randomizat per instanță între `reservoir_initial_oil_min_pct` și `reservoir_initial_oil_max_pct` (50%–100% default)
+4. În editor randomul nu fluctuează — folosește max-ul
 
-### `scenes/main_menu.tscn`
+Setări curente pe `TerracottaRoom2` în scenă: `reservoir_idle_drain = 0.2` (lămpi durează ~17 min idle).
 
-Scena de meniu principal. Are deja atmosferă vizuală și background importat.
+### `Scripts/cycle_animations_preview.gd`
 
-### `scenes/tomb_layout.tscn`
+Script pentru preview animații pe modele importate:
+- `animation_name` – setează o singură animație fixă (fără cycle)
+- `lock_y_position` + `y_offset` – anulează root motion pe Y
+- `move_with_animation` – oprește glisarea stânga-dreapta
+- Folosit pe `ucenic` (`NlaTrack_003_Armature`, y_offset=-0.15) și `mester-mestesugar-real` (`NlaTrack_004_Armature`, y_offset=-0.23)
 
-Scenă mare de nivel. Conține deja geometrie / asseturi importate. Trebuie tratată ca prototip sau blockout inițial, nu ca formă finală.
+### `Scripts/viewmodel_sway.gd`
 
-## Asseturi importate
+Sway pentru `ViewmodelRig`:
+- mouse sway + bob + breathing + land kick
+- offset diferit pentru crouch/crawl
+- multiplicatori de stance: sprint/airborne cresc sway-ul, crouch/crawl îl reduc
+- `movement_sway_amount` adaugă inerție laterală/forward din viteza playerului
 
-În `TripoModels/` există:
+### `Scripts/guard.gd`
 
-- `guard1-idle.glb`
-- `statue1-idle.glb`
-- model FBX într-un folder cu id UUID;
-- model `samurai_armor_3d_model`.
+AI paznic cu stări PATROL/SUSPICIOUS/ALERT/DETECT:
+- `_face_toward_player()` – se uită spre player în SUSPICIOUS/ALERT/DETECT
+- Rotație smooth (`lerp 0.08`)
+- Modelul din `guard.tscn` e rotit -90° pe Y pentru aliniere forward corectă
+- Modelul e `guard1-idle.glb` – **are doar animație idle, NU are walk cycle**
 
-Observație critică: modelul cu nume samurai poate fi util temporar pentru prototip, dar pentru jocul final paznicii trebuie să arate Qin / China antică, nu samurai.
+## Atmosferă și lighting (setat 2026-05-15)
 
-## Lipsuri majore
+### Environment (`tomb_layout.tscn`)
+- **Ambient light**: `energy 0.0` (zero – doar lămpile produc lumină)
+- **Tonemap**: ACES (mode 3), `exposure 0.85`, `white 6.0`
+- **Fog (depth)**: `density 0.022`, culoare caldă `(0.06, 0.035, 0.012)`, `height_density 0.008`, `aerial_perspective 0.18`
+- **Volumetric fog**: **ENABLED**. `density 0.038`, `albedo (0.85, 0.7, 0.5)`, `anisotropy 0.45`, `length 36.0`. Produce raze vizibile prin praf din fiecare lampă care are `light_volumetric_fog_energy` setat
+- **Glow**: `intensity 0.55`, `strength 1.0`, `bloom 0.1`, `hdr_threshold 0.9`, `hdr_scale 2.2`
+- **SSAO**: `intensity 1.7`, `radius 1.4`, `light_affect 0.18`
+- **SSIL**: enabled, `radius 3.5`, `intensity 0.6` – indirect light bounce de la lămpi
+- **Adjustment**: `brightness 0.98`, `contrast 1.18`, `saturation 0.62`
+- **Background**: aproape negru `(0.003, 0.002, 0.0015)`
+- **SunLight**: practic stins (`energy 0.02`)
 
-- HUD complet;
-- sistem de interacțiune `E`;
-- inventar rapid;
-- stealth cu stări;
-- noise system;
-- lampă / ulei;
-- vapori / toxicitate;
-- obiective;
-- logică de capcane;
-- puzzle de mecanisme;
-- fail screen;
-- pause menu complet;
-- obiecte interactive reale;
-- structură clară de camere și rute în level.
+### Lămpi cameră
+- Lămpile decorative (Bowl/Chain/Flame) din Workshop au fost șterse complet
+- Lămpile din TerracottaRoom2 primesc auto OmniLight prin `add_lamp_lights.gd`
+- Pickup items: Glow oprit (`visible=false`, `energy=0`)
+- **Toate lămpile statice din `Rooms/*`** au atașat `Scripts/static_lamp_flicker.gd` cu seed_offset unic – flicker independent per lampă, modulează `light_energy`, `light_volumetric_fog_energy` și `omni_range`
+- **MercuryGlow_A / MercuryGlow_B** au `breath_amount` 0.22 / 0.26 și `breath_period` ~7–9s → pulsație lentă, ne-naturală, peste flicker subtil
+- **GateBrazier**: flicker mai puternic (`amount 0.32`, `speed 6.5`) — e foc deschis, nu lampă cu ulei
 
-## Checkpoint productie - 2026-05-12 seara
+### Particule
+- **GlobalDust** (`GPUParticles3D` la `World/GlobalDust`): 350 particule pe 240×6×160m, drift lent, culoare caldă. Material `shading_mode=1` (per_pixel) → praful **se aprinde** doar când trece prin conul unei lămpi (efect „dust shaft")
+- **TerracottaWorkshop/Dust**: 220 particule local mai dense, același tratament shading_mode=1
+- **06_MercuryHall/MercuryVapor**: 70 puffs de vapori cyan-verzui aproape de podea, drift orizontal foarte lent, emission slabă; reprezintă vaporii toxici ai râurilor de mercur (Sima Qian)
+- **07_MiddleGate/BrazierEmbers**: 90 scântei mici care urcă din brazier, self-emissive portocaliu, lifetime 2.4s
 
-Starea curenta dupa sesiunea de prototipare:
+### Sub-resources noi
+- `ParticleProc_mercury_vapor`, `Mat_mercury_vapor`, `Quad_mercury_vapor`
+- `ParticleProc_brazier_embers`, `Mat_brazier_embers`, `Quad_brazier_embers`
 
-- Jocul ruleaza prin `res://scenes/main_menu.tscn`, iar Play intra in `res://scenes/tomb_layout.tscn`.
-- Meniul principal are muzica din `res://audio/music/main_menu_theme.mp3`, fade-in, sunet de click si sunet special la Play.
-- HUD-ul de vitalitate este sus-stanga si foloseste imaginile importate in `scenes/ui/`: `vitality_0_full.png` pana la `vitality_8_empty.png`.
-- Ordinea corecta a surselor originale pentru vitalitate a fost: 1 full, apoi 8, 4, 6, 3, 9, 7, 2, iar 5 este zero viata.
-- Efectul de damage exista in `Scripts/hud_debug.gd`: schimbarea vitalitatii are un flash rosu slab si shake discret. Butonul temporar de debug pentru damage a fost scos.
-- Controllerul jucatorului din `Scripts/player_controller.gd` are mers, sprint, crouch si crawl pe burta. Crawl este pe `C`.
-- Jucatorul este ajustat sa se simta in jur de 1.80 m.
-- Mainile POV importate din `TripoModels/viewmodel/bound_arms_pov.glb` au fost scoase momentan din scena, pentru ca nu aratau bine in camera.
-- Paznicii / guardianii folosesc inca `TripoModels/guard1-idle.glb`, scalati la `3.25`, tinta vizuala fiind aproximativ 1.90 m.
-- Atmosfera atelierului a fost mutata de la rosu agresiv spre intuneric cald de atelier: ceata mai mica, saturatie mai mica, lumini de ulei mai galbene.
-- `scenes/items/oil_lamp.tscn` si `Scripts/lamp.gd` au lumina mai calda, mai putin rosie si cu volumetric mai discret.
+### Scripturi noi
+- `Scripts/static_lamp_flicker.gd`: extinde `Light3D`. Capturează în `_ready` valorile de bază, modulează cu `FastNoiseLite` per lampă (`seed_offset` unic = ritm independent). Opțional `breath_amount` + `breath_period` pentru pulsație lentă suprapusă.
 
-Audio player:
+## Sistem control și interacțiuni (setat 2026-05-15)
 
-- `Scripts/player_controller.gd` creeaza runtime playere audio pentru pasi, jump si landing.
-- Pasii folosesc `AudioStreamRandomizer`, pitch/volum usor variate si detectie simpla de suprafata prin raycast in jos.
-- Exista directoare pregatite pentru suprafete: `audio/sfx/player/footsteps/clay`, `stone`, `wood`, `wet_stone`.
-- Exista deja mostre CC0 de pasi default in `audio/sfx/player/footsteps/`.
-- Exista sunete CC0 pentru jump in `audio/sfx/player/jump/` si landing in `audio/sfx/player/land/`.
-- Sursele/licentele pentru sample-uri sunt notate in `audio/sfx/player/README.md`.
+### Keybinds
+| Tasta | Acțiune | Cod |
+|---|---|---|
+| WASD | Mișcare | `move_*` |
+| Space | Jump | `jump` |
+| Shift | Sprint | `sprint` |
+| Ctrl | Crouch | `crouch` |
+| C | Crawl | `crawl` |
+| **E** | Use (lever, hold-to-refill) | `interact` |
+| **F** | Pickup item | `pickup` |
+| **X** | Drop tool activ / lampă doar dacă lampa e selectată | `drop` |
+| **Z** | Selectează lampa din offhand | `select_lamp` |
+| L | Toggle lamp on/off (doar când e selectată cu Z) | `toggle_lamp` |
+| Alt | Ridică lampa (doar când e selectată cu Z) | `raise_lamp` |
+| 1-4 | Selectează slot tool | `slot_1`..`slot_4` |
+| 0 | Mâini libere | `slot_0` |
+| G | Throw ceramic | `throw` |
 
-De retinut pentru urmatoarea sesiune:
+**Q și R sunt libere** — lean stânga/dreapta a fost eliminat complet.
 
-- Urmatorul pas recomandat este audio 3D pentru gardieni: pasi spatiali, apropiere/departare si eventual sunete discrete de armura/textil.
-- Dupa gardieni, merita facut un bus/reverb de mormant pentru SFX, ca pasii si obiectele sa sune mai mult ca intr-un spatiu interior de piatra/pamant.
-- Inca trebuie adaugate seturi dedicate de pasi pentru clay/stone/wood/wet_stone; momentan suprafetele sunt pregatite, dar pot folosi fallback daca folderele sunt goale.
+### `Scripts/interactable.gd`
+- `prompt_text`, `enabled`, `one_shot` — props standard
+- `hold_action: bool` — dacă true, folosește `interact_held()` apelat per frame; `interact()` devine no-op
+- `is_pickup: bool` — dacă true, necesită tasta F (nu E)
+- Semnale: `interacted(by)`, `held(by, dt)`
 
-## Checkpoint productie - 2026-05-13 (prefab-uri inainte de asseturile de camere)
+### `Scripts/interaction.gd`
+- `try_interact()` — E pressed (skip pickup și hold)
+- `try_pickup()` — F pressed (doar pe Interactable cu `is_pickup=true`)
+- `try_interact_hold(dt)` — apelat din `_physics_process` cât timp E e ținut; refill-ul de rezervor are efect doar dacă lampa este selectată cu Z (`active_lamp()`)
+- `prompt_linger_time=0.08` — menține promptul o fracțiune de secundă când raycast-ul pierde marginea colliderului, ca să reducă pâlpâirea prompturilor
+- `prompt_changed(text, key)` semnal — HUD afișează `[F] Ia lampa`, `[E] Toarnă ulei`, `[X] Pune jos`
 
-Sisteme adaugate ca prefab-uri reutilizabile, fara modificari pe geometria existenta din `tomb_layout.tscn`:
+## Inventory și mâini
 
-- Autoload nou `Objectives` (`Scripts/objectives.gd`) cu `set_objective(id, text)` / `complete_objective(id)`; HUD-ul (`scenes/ui/hud_pov.tscn`) afiseaza textul curent sus-dreapta.
-- Autoload nou `GameEvents` (`Scripts/game_events.gd`) cu `player_failed(reason)` / `player_succeeded(ending_id)` ca bus pentru fail/win.
-- `Scripts/objective_trigger.gd` + clasa `ObjectiveTrigger` (Area3D) care seteaza / completeaza obiective la intrare; util pentru poarta intre camere.
-- Meniu de pauza: `scenes/ui/pause_menu.tscn` + `Scripts/pause_menu.gd`. Tasta `pause` (Escape) ataseaza/scoate pauza, captureaza/elibereaza mouse-ul, Reia / Reia de la inceput / Meniu principal / Iesire. Instantiat in `tomb_layout.tscn`.
-- Ecran de fail: `scenes/ui/fail_screen.tscn` + `Scripts/fail_screen.gd`. Se aprinde cand orice sistem cheama `GameEvents.fail("motiv")`. Instantiat in `tomb_layout.tscn`.
-- AI paznic prototip: `scenes/entities/guard.tscn` + `Scripts/guard.gd`. Stari `PATROL/SUSPICIOUS/ALERT/DETECT`, patrulare pe waypoints (NodePath spre un Node3D parinte cu copii Node3D ca puncte), con vizual cu raycast LoS, ascultare pe `NoiseBus`, crouch/crawl scad rata de detectie. La detect complet trimite `GameEvents.fail("Ai fost descoperit.")`. Audio 3D inclus (`FootstepAudio`, `AlertAudio`, `AmbientAudio`).
-- Capcana arbaleta prototip: `scenes/items/crossbow_trap.tscn` + `Scripts/crossbow_trap.gd`. Placa de presiune (Area3D, mask = 1), housing static, muzzle directionat. La declansare trage o sageata vizuala (`Scripts/bolt.gd`) si verifica damage prin raycast → `hud_debug.apply_damage(steps)`. Doua interactabile copii (`ToolRequiredInteractable`): "Dezactiveaza cu dalta" (slot 1) si "Blocheaza cu pana" (slot 2) — orice succes dezarmeaza capcana.
-- `Scripts/tool_required_interactable.gd` extinde `Interactable` cu cerinta de slot din inventar; prompt-ul HUD se schimba in functie de uneltea echipata.
-- Bus audio nou `Tomb` cu `AudioEffectReverb` in `audio/default_bus_layout.tres`; project.godot foloseste acum acest bus layout. Sursele 3D pot opta cu `bus = "Tomb"`.
-- Player adaugat in grupul `player` la `_ready()`; HUD damage adaugat in grupul `hud_damage`. Capcanele si paznicii folosesc aceste grupuri pentru lookup.
-- `ui_cancel` toggle de mouse a fost scos din `player_controller.gd` — pauza gestioneaza acum complet starea mouse-ului.
+### `Scripts/inventory.gd`
+- 4 sloturi pentru unelte (`_slots`) + 1 slot offhand separat pentru lampă (`_lamp_entry`)
+- Lampa NU intră în cele 4 sloturi — merge automat în offhand (mâna stângă, `LampSocket`)
+- Selecția 1-4 schimbă tool-ul din mâna dreaptă (`ToolSocket`); lampa rămâne mereu echipată în stânga
+- **Z / `select_lamp()`** selectează lampa ca slot special (`LAMP_SLOT_INDEX=-2`). Doar când e selectată poți face refill cu E sau drop cu X.
+- **`add_item("lamp", node)`** rutează la `_set_lamp_offhand` — auto-swap dacă există deja una (ejecție la sol)
+- **`find_lamp()`** — returnează lampa din `_lamp_entry`, pentru HUD/OilPhial.
+- **`active_lamp()`** — returnează lampa doar dacă este selectată cu Z; rezervorul de ulei și pickup-urile de oil folosesc asta pentru refill.
+- **`drop_current(player)`** contextual:
+  - Tool selectat → aruncă tool-ul, lampa rămâne în stânga
+  - Lampa selectată cu Z → aruncă lampa din offhand
+  - Mâini libere (slot 0) → nu aruncă lampa
+- **`lamp_equipped_transform: Transform3D`** (export) — transform-ul cu care lampa se așază în LampSocket (setat în scenă pe nodul Inventory)
 
-Ce trebuie facut dupa ce sosesc asseturile de camere:
+### Sockete în scenă (`tomb_layout.tscn`)
+- `LampSocket` la `(-0.32, -0.26, -0.55)` — mâna stângă (offhand pentru lampă)
+- `ToolSocket` la `(0.28, -0.22, -0.5)` — mâna dreaptă (unelte din slot 1-4)
 
-- Plaseaza instante `scenes/entities/guard.tscn` in camere, fiecare cu propriul `Waypoints` (Node3D parinte cu copii marcatori) si `waypoints_path` setat.
-- Plaseaza `scenes/items/crossbow_trap.tscn` in coridorul arbaletelor; orienteaza `Housing/Muzzle` (axa -Z = directia de tragere) catre placa de presiune.
-- Pune `ObjectiveTrigger` Area3D la pragul fiecarei camere pentru a actualiza obiectivul curent.
+### Player start
+- Player **nu mai pornește cu lampa în mână**. `OilLamp` din `LampSocket` a fost eliminat din scenă.
+- `initial_lamp_path` golit pe Inventory.
+- Lampa trebuie ridicată din lume (F) — instanțe disponibile: `WorkshopLamp_W` și `WorkshopLamp_E` în Workshop, oricare alte instanțe `oil_lamp.tscn` plasate.
+
+## HUD (setat 2026-05-15)
+
+### `scenes/ui/hud_pov.tscn`
+- **OilPhial** (jos-stânga, ~133×270) — phial cu ulei, vizibil **doar când o lampă e în offhand**. Animație drain + bob (slosh aplicat și pe fill și pe surface în sincron), plus tint/pulse low-oil sub ~14%. Conectat dinamic la lampa din offhand prin `_sync_active_lamp`.
+- **LeftHandSlot** (jos-stânga, lângă OilPhial) — frame separat pentru lampa din offhand, cu `icon_lamp.png`; dim când nu ai lampă, owned când ai lampă, warm active + pulse subtil când lampa este selectată cu Z.
+- **SlotBar** (jos-dreapta, ~274×68) — 4 sloturi 64×68 ca `TextureRect` cu texturile `scenes/ui/Slots/slot_N.png`. Modulate per stare:
+  - Active: `Color(1.25, 1.08, 0.78)` — bronz cald-luminos
+  - Owned (item în slot): `Color.WHITE`
+  - Empty: `Color(0.62, 0.62, 0.62, 0.88)` — dim
+- **Tool icons** — iconițe în `scenes/ui/Slots/Icons/` mapate dinamic pentru `chisel`, `wedge`, `ceramic`, `hammer`, `wax_tablet`; există și iconițe pregătite pentru `lamp`, `rope`, `wet_cloth`, `qin_seal`.
+- **Debug overlay F3** — ascuns implicit; afișează stance, speed, movement feel multipliers, surface, noise, oil level, drain/sec, oil multiplier, light strength, slot activ și interactable curent.
+- **ItemLabel** deasupra SlotBar — numele tool-ului din slotul selectat
+- **InteractLabel** central-jos — `[E/F/X] Acțiune` cu key prefix dinamic
+- **ObjectiveLabel** dreapta-sus, **StanceLabel** stânga-sus
+
+### `Scripts/hud_pov.gd`
+- `_sync_active_lamp()` — atașează signal-urile `oil_changed`/`lit_changed` la `find_lamp()`; OilPhial visible doar dacă există lampă în offhand
+- `_attach_lamp(lamp)` / `_detach_lamp()` — connect/disconnect curat la schimbarea de lampă (auto-swap, drop, pickup)
+- `_refresh_slots()` — modulate state + icon per slot pe baza `inventory.slot_item_id` și `current_slot`
+- `debug_overlay` input action (F3) este creată runtime de HUD pentru tuning.
+
+## Lămpi de inventar plasate
+
+| Loc | Nod | Oil inițial | Stare | Notă |
+|---|---|---|---|---|
+| `Rooms/01_TerracottaWorkshop/WorkshopLamp_W` | instance `oil_lamp.tscn` | 60 | aprinsă | scale 4× |
+| `Rooms/01_TerracottaWorkshop/WorkshopLamp_E` | instance `oil_lamp.tscn` | 35 | stinsă | scale 4× |
+
+Lămpile-rezervor de pe pereții `TerracottaRoom2` (~21 instanțe) sunt auto-create de `add_lamp_lights.gd` cu oil random 50-100% × 200.
+
+## Personaje în scenă
+
+| Personaj | Model | Animație | Y Offset | Mișcare |
+|----------|-------|----------|----------|---------|
+| Ucenic | `ucenic.glb` | NlaTrack_003_Armature | -0.15 | oprită |
+| Meșter | `mester-mestesugar-real.glb` | NlaTrack_004_Armature | -0.23 | oprită |
+
+## De reținut
+
+- **Guard model**: `guard1-idle.glb` are DOAR animație idle. Pentru walk/chase animație trebuie model nou cu walk cycle.
+- **Guard rotation**: Modelul din `guard.tscn` e rotit `Transform3D(0, 0, -3.25, 0, 3.25, 0, 3.25, 0, 0, ...)` – dacă se înlocuiește modelul, verifică alinierea forward.
+- **Lampă (in-hand)**: SpotLight-ul e pe `Camera3D/LampSpot` și e controlat dinamic de `lamp.gd`. Când e pe jos, doar OmniLight-ul lămpii luminează.
+- **add_lamp_lights.gd**: Dacă adaugi modele noi cu lămpi, ajustează `name_filter` pe `TerracottaRoom2`. Reservoir-urile se creează automat alături.
+- **y_offset**: Dacă personajele levitează după schimbarea animației, ajustează `y_offset` în inspector (negativ = mai jos).
+- **Lamp scale în lume**: când plasezi instanțe `oil_lamp.tscn` în scenă, folosește scale `(4, 4, 4)` ca să compense scale 0.24 al corpului în mână. Tot scale 4 e aplicat automat de player la drop.
+- **Bug existent în inventory**: dacă ai deja un tool de tip X în slot și ridici altul de același id non-stackable, al doilea face `queue_free()` (dedup pe id). Lampile NU mai au această problemă (rutate separat în offhand).
+- **Bug existent în inventory pentru lampă duală**: doar UN slot de lampă în offhand. Pickup a doua lampă auto-ejectează prima la sol — comportament Minecraft-like. Dacă vrem să cărăm mai multe simultan, ar trebui extins `_lamp_entry` la array.
+
+## Ce urmează
+
+### Imediat (UI/gameplay)
+- **Frame mare „mâna dreaptă"** pe HUD (analog OilPhial-ului stânga) — dezign descris în `IMAGE_PROMPTS.md`, asset încă neegnerat
+- **Tuning movement/lamp feel** cu overlay-ul F3: ajustează multiplicatorii de consum ulei, sway, bob și viteze până când stealth-ul se simte tensionat dar corect.
+- (opțional) **Refill rezervor de la player** — momentan transfer e doar rezervor → lampă, nu invers
+- (opțional) **Tuning prag low-oil** pentru lampa portabilă și lămpile-rezervor după test în joc
+
+### Niveluri și entități
+- Model nou pentru gardieni cu animație de mers
+- Audio 3D pentru gardieni: pași spațiali
+- Bus/reverb de mormânt pentru SFX
+- Seturi dedicate de pași pentru clay/stone/wood/wet_stone
+- Plasează gardieni și capcane în camerele corespunzătoare
+- `ObjectiveTrigger` la pragul fiecărei camere
+
+### Asseturi de generat (vezi `docs/IMAGE_PROMPTS.md`)
+- Frame mare „mâna dreaptă" (oglindă OilPhial)
+- (opțional) iconițe pentru iteme viitoare dacă se adaugă noi `item_id`-uri în inventar. Iconițele actuale pentru tool-uri există deja în `scenes/ui/Slots/Icons/`.
+
+### Roadmap general (vezi `docs/IMPLEMENTATION_ROADMAP.md`)
+- Faza 5 (capcane + AI gardian)
+- Faza 6 (Sala Mercurului — gameplay vapori)
+- Faza 7 (poarta + mecanisme)
+- Faza 8 (finaluri)

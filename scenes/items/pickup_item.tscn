@@ -30,13 +30,14 @@ mesh = SubResource("Mesh_default")
 material_override = SubResource("Mat_default")
 
 [node name="Glow" type="OmniLight3D" parent="."]
+visible = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 light_color = Color(1, 0.88, 0.55, 1)
-light_energy = 0.6
-omni_range = 1.8
-omni_attenuation = 1.6
+light_energy = 0.0
+omni_range = 1.2
+omni_attenuation = 1.9
 
 [node name="Interactable" type="Node" parent="."]
 script = ExtResource("2_interact")
 prompt_text = "Ridică"
-one_shot = true
+is_pickup = true
