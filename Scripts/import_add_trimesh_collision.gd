@@ -15,7 +15,10 @@ func _add_collision_recursive(node: Node, owner_root: Node) -> void:
 		body.owner = owner_root
 
 		var shape := CollisionShape3D.new()
-		shape.shape = node.mesh.create_trimesh_shape()
+		var tri := node.mesh.create_trimesh_shape()
+		if tri is ConcavePolygonShape3D:
+			(tri as ConcavePolygonShape3D).backface_collision = true
+		shape.shape = tri
 		shape.visible = false
 		shape.set_meta("generated_trimesh_collision", true)
 		shape.set("debug_color", Color(0.0, 0.0, 0.0, 0.0))

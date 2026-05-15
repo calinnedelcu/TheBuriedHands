@@ -102,12 +102,12 @@ func _update_preview_motion(delta: float) -> void:
 
 
 func _play_current_animation() -> void:
-	var animation_name := StringName(_animations[_current_index])
-	var animation := _animation_player.get_animation(animation_name)
+	var current_anim := StringName(_animations[_current_index])
+	var animation := _animation_player.get_animation(current_anim)
 	if animation != null:
 		animation.loop_mode = Animation.LOOP_LINEAR
 
-	_animation_player.play(animation_name)
+	_animation_player.play(current_anim)
 	_animation_player.seek(0.0, true)
 	_time_left = seconds_per_animation
 

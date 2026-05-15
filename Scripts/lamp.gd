@@ -47,6 +47,21 @@ signal extinguished()
 @export var start_equipped: bool = true
 @export var pickup_prompt_text: String = "Ia lampa"
 
+@export_group("Objective On Pickup")
+@export var pickup_required_objective_id: String = ""
+@export var pickup_objective_after_id: String = ""
+@export_multiline var pickup_objective_after_text: String = ""
+@export_multiline var pickup_dialogue_text: String = ""
+
+@export_group("Tutorial Sequences")
+## Optional multi-line tutorial played the first time THIS lamp is picked up.
+## Fires after `pickup_dialogue_text`. Use to teach controls / oil economy.
+@export var pickup_tutorial_lines: PackedStringArray = []
+## Optional multi-line tutorial played the first time ANY lamp runs out of
+## oil (gated globally via GameEvents.lamp_empty_tutorial_played).
+@export var empty_tutorial_lines: PackedStringArray = []
+@export var tutorial_line_duration: float = 5.0
+
 @onready var light: OmniLight3D = $FlameSocket/Light
 @onready var spot: SpotLight3D = _find_lamp_spot()
 @onready var flame: MeshInstance3D = $FlameSocket/Flame
@@ -67,6 +82,8 @@ var _flame_base_pos: Vector3
 var _raise_blend: float = 0.0
 var _selected_blend: float = 0.0
 var _movement_drain_mult: float = 1.0
+var _has_been_collected: bool = false
+var _pickup_tutorial_played: bool = false
 
 func _ready() -> void:
 	_noise.seed = randi()
@@ -77,6 +94,9 @@ func _ready() -> void:
 	if pickup_interactable != null:
 		pickup_interactable.prompt_text = pickup_prompt_text
 		pickup_interactable.interacted.connect(_on_pickup_interacted)
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives != null and objectives.has_signal("objective_changed"):
+		objectives.objective_changed.connect(_on_objective_changed)
 	# Sane default. Lampa de start (din LampSocket) este equipped si inventarul
 	# preia ownership ulterior. Lampile din lume au start_equipped = false.
 	set_equipped(start_equipped)
@@ -102,13 +122,7 @@ func set_equipped(active: bool) -> void:
 	equipped = active
 	_cached_player = null  # re-detect dupa reparent
 	_movement_drain_mult = 1.0
-	if pickup_interactable != null:
-		pickup_interactable.enabled = not equipped
-	if pickup_collider != null:
-		pickup_collider.disabled = equipped
-	if pickup_body != null:
-		pickup_body.collision_layer = 0 if equipped else 1
-		pickup_body.collision_mask = 0
+	_refresh_pickup_availability()
 	if equipped:
 		set_raised(false)
 		set_selected(false)
@@ -170,6 +184,7 @@ func _process(delta: float) -> void:
 			_refresh()
 			extinguished.emit()
 			lit_changed.emit(false)
+			_play_empty_tutorial()
 			return
 		_apply_flicker()
 
@@ -210,7 +225,75 @@ func _refresh() -> void:
 func _on_pickup_interacted(by: Node) -> void:
 	var player_node := _resolve_player(by)
 	if player_node != null and player_node.has_method("equip_lamp"):
+		_has_been_collected = true
 		player_node.equip_lamp(self)
+		_advance_pickup_objective()
+
+func _on_objective_changed(_id: String, _text: String) -> void:
+	_refresh_pickup_availability()
+
+func _refresh_pickup_availability() -> void:
+	var available := not equipped and _pickup_allowed_by_objective()
+	if pickup_interactable != null:
+		pickup_interactable.enabled = available
+	if pickup_collider != null:
+		pickup_collider.disabled = not available
+	if pickup_body != null:
+		pickup_body.collision_layer = 1 if available else 0
+		pickup_body.collision_mask = 0
+
+func _pickup_allowed_by_objective() -> bool:
+	if _has_been_collected:
+		return true
+	if pickup_required_objective_id == "":
+		return true
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives == null or not objectives.has_method("current_id"):
+		return false
+	return str(objectives.call("current_id")) == pickup_required_objective_id
+
+func _advance_pickup_objective() -> void:
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives == null:
+		return
+	if pickup_required_objective_id != "" and objectives.has_method("current_id"):
+		if str(objectives.call("current_id")) != pickup_required_objective_id:
+			return
+	if pickup_dialogue_text != "":
+		var events := get_node_or_null("/root/GameEvents")
+		if events != null and events.has_method("show_dialogue"):
+			events.show_dialogue(pickup_dialogue_text, 4.0)
+	if pickup_objective_after_text != "" and objectives.has_method("set_objective"):
+		objectives.set_objective(pickup_objective_after_id, pickup_objective_after_text)
+	_play_pickup_tutorial()
+
+func _play_pickup_tutorial() -> void:
+	if _pickup_tutorial_played or pickup_tutorial_lines.is_empty():
+		return
+	_pickup_tutorial_played = true
+	_play_tutorial_sequence(pickup_tutorial_lines, pickup_dialogue_text != "")
+
+func _play_empty_tutorial() -> void:
+	if empty_tutorial_lines.is_empty():
+		return
+	var events := get_node_or_null("/root/GameEvents")
+	if events == null:
+		return
+	if "lamp_empty_tutorial_played" in events and bool(events.get("lamp_empty_tutorial_played")):
+		return
+	if "lamp_empty_tutorial_played" in events:
+		events.set("lamp_empty_tutorial_played", true)
+	_play_tutorial_sequence(empty_tutorial_lines, false)
+
+func _play_tutorial_sequence(lines: PackedStringArray, skip_first_delay: bool) -> void:
+	var events := get_node_or_null("/root/GameEvents")
+	if events == null or not events.has_method("show_dialogue"):
+		return
+	if skip_first_delay:
+		await get_tree().create_timer(4.0).timeout
+	for line in lines:
+		events.show_dialogue(str(line), tutorial_line_duration)
+		await get_tree().create_timer(tutorial_line_duration).timeout
 
 func _resolve_player(by: Node) -> Node:
 	var n: Node = by

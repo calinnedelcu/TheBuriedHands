@@ -6,3 +6,6 @@
 
 # Optional generated Android export folder
 /android/
+
+# Large map asset (268 MB, over GitHub 100 MB limit) — keep local only
+/scenes/items/MapWithoutTreasure.glb

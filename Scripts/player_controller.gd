@@ -58,6 +58,10 @@ signal stance_changed(stance: String)
 @export var noise_crouch: float = 0.2
 @export var noise_crawl: float = 0.08
 
+@export_group("Safety")
+## Sub aceasta inaltime, player-ul e teleportat inapoi la spawn (in caz de cadere intr-un void).
+@export var fall_kill_y: float = -30.0
+
 @export_group("Throw")
 @export var throw_speed: float = 11.0
 @export var throw_arc_up: float = 1.5
@@ -187,8 +191,11 @@ func _setup_input_actions() -> void:
 			if not already_mapped:
 				InputMap.action_add_event(action_name, key_event)
 
+var _spawn_transform: Transform3D
+
 func _ready() -> void:
 	add_to_group("player")
+	_spawn_transform = global_transform
 	_initial_camera_local_position = camera.position
 	if camera_pivot != null:
 		camera_pivot.position.y = stand_camera_y
@@ -413,6 +420,9 @@ func get_drop_transform(scaled: bool) -> Transform3D:
 	return Transform3D(yaw_basis, drop_position)
 
 func _physics_process(delta: float) -> void:
+	if global_position.y < fall_kill_y:
+		_respawn()
+		return
 	var was_on_floor := is_on_floor()
 	_refill_sfx_cooldown = maxf(0.0, _refill_sfx_cooldown - delta)
 	is_jump_held = Input.is_action_pressed("jump")
@@ -432,6 +442,9 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 		if velocity.y < 0 and not is_jump_held:
 			velocity.y -= gravity * (jump_apex_gravity_multiplier - 1.0) * delta
+		# Plafonam viteza de cadere ca sa nu tunelam prin trimesh-uri subtiri.
+		if velocity.y < -22.0:
+			velocity.y = -22.0
 
 	if jump_buffer_timer > 0 and coyote_timer > 0 and not _is_crouching and not _is_crawling:
 		velocity.y = jump_velocity
@@ -799,3 +812,8 @@ func _target_capsule_radius() -> float:
 	if _is_crawling:
 		return minf(_initial_capsule_radius, 0.28)
 	return _initial_capsule_radius
+
+func _respawn() -> void:
+	velocity = Vector3.ZERO
+	global_transform = _spawn_transform
+	print("[player] fell below y=%.1f — teleported to spawn" % fall_kill_y)

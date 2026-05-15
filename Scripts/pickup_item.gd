@@ -14,6 +14,12 @@ signal picked_up(kind: int, value: int)
 @export var oil_amount: float = 35.0
 @export_multiline var custom_prompt: String = ""
 
+@export_group("Objective On Pickup")
+@export var pickup_required_objective_id: String = ""
+@export var pickup_objective_after_id: String = ""
+@export_multiline var pickup_objective_after_text: String = ""
+@export_multiline var pickup_dialogue_text: String = ""
+
 @onready var _interactable: Interactable = get_node_or_null("Interactable")
 @onready var _mesh: MeshInstance3D = get_node_or_null("Mesh")
 @onready var _glow: OmniLight3D = get_node_or_null("Glow")
@@ -99,6 +105,7 @@ func _on_interacted(by: Node) -> void:
 					return  # inventory full — leave the pickup in the world
 			if player_node.has_method("play_feedback_sfx"):
 				player_node.call("play_feedback_sfx", "pickup")
+			_advance_pickup_objective()
 			picked_up.emit(kind, stack)
 		PickupKind.LAMP_OIL:
 			var lamp: Node = inv.call("active_lamp") if inv != null and inv.has_method("active_lamp") else null
@@ -109,8 +116,23 @@ func _on_interacted(by: Node) -> void:
 			lamp.refill(oil_amount)
 			if player_node.has_method("play_feedback_sfx"):
 				player_node.call("play_feedback_sfx", "refill")
+			_advance_pickup_objective()
 			picked_up.emit(kind, int(oil_amount))
 	queue_free()
+
+func _advance_pickup_objective() -> void:
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives == null:
+		return
+	if pickup_required_objective_id != "" and objectives.has_method("current_id"):
+		if str(objectives.call("current_id")) != pickup_required_objective_id:
+			return
+	if pickup_dialogue_text != "":
+		var events := get_node_or_null("/root/GameEvents")
+		if events != null and events.has_method("show_dialogue"):
+			events.show_dialogue(pickup_dialogue_text, 4.0)
+	if pickup_objective_after_text != "" and objectives.has_method("set_objective"):
+		objectives.set_objective(pickup_objective_after_id, pickup_objective_after_text)
 
 func _refresh_visual() -> void:
 	_clear_preview_visual()

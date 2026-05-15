@@ -1,4 +1,3 @@
-@tool
 extends Node3D
 
 const OilReservoirScript = preload("res://Scripts/oil_reservoir.gd")

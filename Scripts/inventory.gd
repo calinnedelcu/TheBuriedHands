@@ -44,6 +44,12 @@ class SlotEntry:
 @export var lamp_equipped_transform: Transform3D = Transform3D.IDENTITY
 @export var pickup_scene: PackedScene
 
+## Per-item override for the world prop spawned when an item is dropped.
+## When set, replaces the generic pickup_scene for that item id.
+const _DROP_SCENE_OVERRIDES: Dictionary = {
+	"clay_bowl": preload("res://scenes/items/placed_clay_bowl.tscn"),
+}
+
 var _types: Dictionary = {}
 var _slots: Array = []
 var _current_index: int = -1
@@ -89,6 +95,8 @@ func _register_types() -> void:
 	_add_type(ItemType.new("ceramic", "Cioburi de ceramică", Color(0.7, 0.55, 0.4), Vector3(0.07, 0.05, 0.07), Vector3(0.0, 0.0, -0.03), true))
 	_add_type(ItemType.new("hammer", "Ciocan de lemn", Color(0.45, 0.28, 0.13), Vector3(0.14, 0.07, 0.22), Vector3(0.0, 0.0, -0.06)))
 	_add_type(ItemType.new("wax_tablet", "Tăbliță de ceară", Color(0.55, 0.45, 0.3), Vector3(0.14, 0.01, 0.09), Vector3(0.0, 0.0, -0.06)))
+	_add_type(ItemType.new("clay_bowl", "Vas de barbotină", Color(0.55, 0.32, 0.2), Vector3.ZERO, Vector3.ZERO))
+	_add_type(ItemType.new("clay_slip", "Barbotină", Color(0.62, 0.5, 0.36), Vector3.ZERO, Vector3.ZERO))
 	_add_type(ItemType.new("lamp", "Lampă cu ulei", Color(0, 0, 0, 0), Vector3.ZERO, Vector3.ZERO, false, true))
 
 func _add_type(t: ItemType) -> void:
@@ -226,6 +234,7 @@ func drop_current(player: Node) -> bool:
 	var entry: SlotEntry = _slots[_current_index]
 	if entry == null:
 		return false
+	var dropped_id := entry.id
 	var dropped_index := _current_index
 	if _spawned_placeholder != null and is_instance_valid(_spawned_placeholder):
 		_spawned_placeholder.queue_free()
@@ -236,9 +245,35 @@ func drop_current(player: Node) -> bool:
 	_spawn_world_pickup(entry, world, _ask_drop_transform(player, false))
 	_slots[dropped_index] = null
 	_current_index = -1
+	_cleanup_quest_carried(dropped_id)
 	slots_changed.emit()
 	slot_selected.emit(-1)
+	_on_item_dropped(dropped_id)
 	return true
+
+## Removes lingering held-item visuals spawned by QuestStepInteractable when
+## the matching inventory entry leaves player hands.
+func _cleanup_quest_carried(item_id: String) -> void:
+	if _tool_socket == null:
+		return
+	match item_id:
+		"clay_bowl":
+			var held := _tool_socket.get_node_or_null("HeldClayBowl")
+			if held != null:
+				held.queue_free()
+
+## Quest-specific objective advancement on drop. Kept here so the inventory
+## drop API stays single-source-of-truth for tutorial step progression.
+func _on_item_dropped(item_id: String) -> void:
+	if item_id != "clay_bowl":
+		return
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives == null or not objectives.has_method("current_id"):
+		return
+	if str(objectives.call("current_id")) != "drop_clay_bowl":
+		return
+	if objectives.has_method("set_objective"):
+		objectives.call("set_objective", "take_clay_slip", "Ia barbotina din bol.")
 
 ## Removes one unit from the active stackable slot (e.g. a thrown ceramic shard).
 func consume_current_stack() -> bool:
@@ -300,6 +335,24 @@ func has_item(id: String) -> bool:
 	for i in SLOT_COUNT:
 		if _slots[i] != null and _slots[i].id == id:
 			return true
+	return false
+
+## Removes the first slot holding `id` (no world drop). Used by quest steps that
+## consume the item silently (e.g. applying barbotină onto the soldier).
+func remove_item(id: String) -> bool:
+	for i in SLOT_COUNT:
+		var entry: SlotEntry = _slots[i]
+		if entry == null or entry.id != id:
+			continue
+		if _current_index == i:
+			_clear_active_view()
+			_current_index = -1
+			slot_selected.emit(-1)
+		if entry.node != null and is_instance_valid(entry.node):
+			entry.node.queue_free()
+		_slots[i] = null
+		slots_changed.emit()
+		return true
 	return false
 
 ## Returns the lamp instance from the offhand slot, else null.
@@ -421,6 +474,13 @@ func _ask_drop_transform(player: Node, scaled: bool) -> Transform3D:
 	return Transform3D.IDENTITY
 
 func _spawn_world_pickup(entry: SlotEntry, world: Node, xform: Transform3D) -> void:
+	var override_scene: PackedScene = _DROP_SCENE_OVERRIDES.get(entry.id, null)
+	if override_scene != null:
+		var override_node := override_scene.instantiate()
+		world.add_child(override_node)
+		if override_node is Node3D:
+			(override_node as Node3D).global_transform = xform
+		return
 	if pickup_scene == null:
 		return
 	var pickup := pickup_scene.instantiate()

@@ -16,6 +16,7 @@ extends CanvasLayer
 @onready var _interact_label: Label = $Anchor/Center/InteractLabel
 @onready var _item_label: Label = $Anchor/Bottom/ItemLabel
 @onready var _stance_label: Label = $Anchor/TopLeft/StanceLabel
+@warning_ignore("unused_private_class_variable")
 @onready var _dot: Panel = $Anchor/Center/CrosshairDot
 @onready var _objective_label: Label = $Anchor/TopRight/ObjectiveLabel
 @onready var _slot_panels: Array[TextureRect] = [
@@ -48,6 +49,8 @@ const _ITEM_ICON_TEXTURES: Dictionary = {
 	"ceramic": preload("res://scenes/ui/Slots/Icons/icon_ceramic.png"),
 	"hammer": preload("res://scenes/ui/Slots/Icons/icon_hammer.png"),
 	"wax_tablet": preload("res://scenes/ui/Slots/Icons/icon_wax_tablet.png"),
+	"clay_bowl": preload("res://scenes/ui/Slots/Icons/icon_clay_bowl.png"),
+	"clay_slip": preload("res://scenes/ui/Slots/Icons/icon_clay_slip.png"),
 	"lamp": preload("res://scenes/ui/Slots/Icons/icon_lamp.png"),
 	"rope": preload("res://scenes/ui/Slots/Icons/icon_rope.png"),
 	"wet_cloth": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
@@ -64,6 +67,9 @@ var _debug_label: Label = null
 var _debug_overlay_visible: bool = false
 var _debug_overlay_timer: float = 0.0
 var _left_hand_selected: bool = false
+var _dialogue_panel: PanelContainer = null
+var _dialogue_label: Label = null
+var _dialogue_hide_timer: float = 0.0
 
 const _OIL_DRAIN_AMOUNT: float = 152.0
 const _OIL_BOB_AMPLITUDE: float = 0.4
@@ -90,6 +96,7 @@ var _oil_pct: float = 1.0
 func _ready() -> void:
 	_setup_debug_overlay_input()
 	_build_debug_overlay()
+	_build_dialogue_panel()
 	_interact_label.text = ""
 	_oil_fill_base_y = _oil_fill.position.y
 	_oil_surface_base_y = _oil_surface.position.y
@@ -109,6 +116,11 @@ func _ready() -> void:
 		var current_text: String = obj.current_text()
 		if current_text != "":
 			_objective_label.text = current_text
+
+	if has_node("/root/GameEvents"):
+		var events := get_node("/root/GameEvents")
+		if events.has_signal("dialogue_changed"):
+			events.dialogue_changed.connect(_on_dialogue_changed)
 
 	if not interaction_path.is_empty():
 		var inter := get_node_or_null(interaction_path)
@@ -217,6 +229,7 @@ func _apply_oil_phial_tone(lit: bool) -> void:
 
 func _process(delta: float) -> void:
 	_oil_bob_time += delta
+	_update_dialogue_timer(delta)
 	var t: float = clamp(delta * 4.0, 0.0, 1.0)
 	_oil_smooth_drain = lerp(_oil_smooth_drain, _oil_target_drain, t)
 	# Bob = sloshing-ul intregii mase de ulei; aplicat identic la fill si surface
@@ -309,6 +322,57 @@ func _build_debug_overlay() -> void:
 	_debug_label.add_theme_constant_override("outline_size", 3)
 	_debug_label.add_theme_font_size_override("font_size", 12)
 	_debug_panel.add_child(_debug_label)
+
+func _build_dialogue_panel() -> void:
+	_dialogue_panel = PanelContainer.new()
+	_dialogue_panel.name = "DialoguePanel"
+	_dialogue_panel.visible = false
+	_dialogue_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$Anchor.add_child(_dialogue_panel)
+	_dialogue_panel.anchor_left = 0.5
+	_dialogue_panel.anchor_top = 1.0
+	_dialogue_panel.anchor_right = 0.5
+	_dialogue_panel.anchor_bottom = 1.0
+	_dialogue_panel.offset_left = -390.0
+	_dialogue_panel.offset_top = -205.0
+	_dialogue_panel.offset_right = 390.0
+	_dialogue_panel.offset_bottom = -132.0
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.035, 0.023, 0.014, 0.78)
+	style.border_color = Color(0.72, 0.46, 0.2, 0.72)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_bottom_left = 4
+	style.set_content_margin(SIDE_LEFT, 18.0)
+	style.set_content_margin(SIDE_TOP, 12.0)
+	style.set_content_margin(SIDE_RIGHT, 18.0)
+	style.set_content_margin(SIDE_BOTTOM, 12.0)
+	_dialogue_panel.add_theme_stylebox_override("panel", style)
+
+	_dialogue_label = Label.new()
+	_dialogue_label.name = "DialogueText"
+	_dialogue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dialogue_label.add_theme_color_override("font_color", Color(1.0, 0.91, 0.72, 1.0))
+	_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.86))
+	_dialogue_label.add_theme_constant_override("outline_size", 5)
+	_dialogue_label.add_theme_font_size_override("font_size", 18)
+	_dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_dialogue_panel.add_child(_dialogue_label)
+
+func _update_dialogue_timer(delta: float) -> void:
+	if _dialogue_hide_timer <= 0.0:
+		return
+	_dialogue_hide_timer -= delta
+	if _dialogue_hide_timer <= 0.0 and _dialogue_panel != null:
+		_dialogue_panel.visible = false
 
 func _update_debug_overlay(delta: float) -> void:
 	if not _debug_overlay_visible or _debug_label == null:
@@ -465,3 +529,15 @@ func _on_stance_changed(stance: String) -> void:
 
 func _on_objective_changed(_id: String, text: String) -> void:
 	_objective_label.text = text
+
+func _on_dialogue_changed(text: String, duration: float) -> void:
+	if _dialogue_panel == null or _dialogue_label == null:
+		return
+	if text.strip_edges() == "":
+		_dialogue_label.text = ""
+		_dialogue_panel.visible = false
+		_dialogue_hide_timer = 0.0
+		return
+	_dialogue_label.text = text
+	_dialogue_panel.visible = true
+	_dialogue_hide_timer = max(0.0, duration)

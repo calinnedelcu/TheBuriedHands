@@ -22,6 +22,7 @@ enum State { PATROL, SUSPICIOUS, ALERT, DETECT }
 @onready var _vision_origin: Node3D = (get_node_or_null("VisionOrigin") as Node3D) if has_node("VisionOrigin") else self
 @onready var _footstep_audio: AudioStreamPlayer3D = get_node_or_null("FootstepAudio")
 @onready var _alert_audio: AudioStreamPlayer3D = get_node_or_null("AlertAudio")
+@warning_ignore("unused_private_class_variable")
 @onready var _ambient_audio: AudioStreamPlayer3D = get_node_or_null("AmbientAudio")
 @onready var _vision_indicator: MeshInstance3D = get_node_or_null("VisionOrigin/VisionIndicator")
 
@@ -191,16 +192,16 @@ func _update_vision(delta: float) -> void:
 	if _detect_timer >= detect_seconds:
 		_trigger_detect()
 
-func _on_noise(position: Vector3, loudness: float, source: Node) -> void:
+func _on_noise(noise_pos: Vector3, loudness: float, source: Node) -> void:
 	if source == self:
 		return
 	if _state == State.DETECT:
 		return
-	var distance := global_position.distance_to(position)
+	var distance := global_position.distance_to(noise_pos)
 	var heard := loudness / maxf(1.0, distance * 0.5)
 	if heard < noise_threshold_suspicious:
 		return
-	_last_known_position = position
+	_last_known_position = noise_pos
 	_suspicion += heard
 	if heard >= noise_threshold_alert or _suspicion >= suspicion_to_alert:
 		_set_state(State.ALERT)

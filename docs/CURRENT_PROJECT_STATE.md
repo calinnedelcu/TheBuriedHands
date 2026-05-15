@@ -2,6 +2,40 @@
 
 Ultima inventariere: 2026-05-15.
 
+## Checkpoint atelier si narațiune (2026-05-15 seara)
+
+Am ramas la flow-ul de inceput din `scenes/tomb_layout.tscn`, in Atelierul de Teracota. Scena are acum un traseu jucabil mai clar:
+
+1. Monolog intro despre moartea lui Qin Shi Huang si armata aproape terminata.
+2. Obiectiv initial: vorbeste cu ucenicul.
+3. Dupa dialogul cu ucenicul apare obiectivul: ia lampa de pe suport.
+4. Lampile din atelier sunt blocate pana la obiectivul `take_lamp`, deci promptul de pickup nu apare prea devreme.
+5. Dupa ce iei lampa, obiectivul devine: ia barbotina din magazie.
+6. Modelul `claybowl.glb` a fost adaugat in scena pentru bolul cu barbotina.
+7. Cand iei barbotina, bolul dispare de la statie si apare in mana dreapta a playerului.
+8. Cand aplici barbotina pe soldatul de teracota, bolul din mana dispare si apare langa zona de lucru.
+9. Textul si replicile au fost corectate sa vorbeasca despre picioarele soldatului, nu despre mana/brat.
+10. Dupa recuperarea daltei, obiectivul cere continuarea modelarii picioarelor.
+11. Continuarea modelarii porneste secventa cu gardienii si ordinul de sigilare, apoi obiectivul devine gasirea lui Liang.
+
+Scripturi noi/recente care sustin flow-ul:
+
+- `Scripts/npc_dialogue_interactable.gd` - dialog secvential pe interactiune, cu obiective inainte/dupa dialog.
+- `Scripts/dialogue_sequence_interactable.gd` - secvente automate de replici dupa o interactiune.
+- `Scripts/scene_intro_dialogue.gd` - monolog de inceput la pornirea scenei.
+- `Scripts/quest_step_interactable.gd` - interactiuni conditionate de obiectiv; suporta ascundere/afisare noduri si obiect purtat in mana dreapta.
+
+Asset nou/folosit:
+
+- `scenes/items/claybowl.glb` - bolul cu barbotina/lut fluid. Daca pozitia sau scara in mana nu se simte bine la test, ajusteaza `carried_transform` pe interactable-urile `ClaySlipStation`.
+
+De retinut pentru urmatorul pas:
+
+- Userul a testat promptul de la ucenic/lampa si a confirmat ca e bine.
+- Ultima modificare a fost pentru pickup vizual la bolul de barbotina si corectarea textelor catre "picioarele soldatului".
+- Urmatorul test recomandat in Godot: verifica daca bolul apare natural in mana, daca dispare corect cand aplici barbotina si daca prompturile raman in ordinea corecta.
+- Dupa ce acest inceput e validat, continuam cu zona urmatoare: drumul catre Liang / Coridorul Arbaletelor / Camera Administrativa, in functie de ce vrea userul sa construiasca mai intai.
+
 ## Engine
 
 - Godot 4.6
