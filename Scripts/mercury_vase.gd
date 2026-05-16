@@ -13,10 +13,20 @@ var is_held: bool = false
 
 func _ready() -> void:
 	add_to_group("mercury_vase")
+	if _body != null:
+		_body.position = Vector3.ZERO
 	if _interactable != null:
 		_interactable.prompt_text = pickup_prompt
 		_interactable.is_pickup = true
 		_interactable.interacted.connect(_on_pickup)
+
+func _process(_delta: float) -> void:
+	if not is_held or not is_inside_tree():
+		return
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	global_transform = cam.global_transform * Transform3D(Basis(), Vector3(0.25, -0.35, -0.55))
 
 func _on_pickup(by: Node) -> void:
 	if is_held:
@@ -25,7 +35,7 @@ func _on_pickup(by: Node) -> void:
 		return
 	is_held = true
 	add_to_group("mercury_vase_held")
-	_set_in_world(false)
+	_set_collision(false)
 	var player := _resolve_player(by)
 	if player != null and player.has_method("play_feedback_sfx"):
 		player.play_feedback_sfx("pickup")
@@ -40,17 +50,15 @@ func drop_at(pos: Vector3) -> void:
 	is_held = false
 	remove_from_group("mercury_vase_held")
 	global_position = pos
-	_set_in_world(true)
+	_set_collision(true)
 
-func _set_in_world(in_world: bool) -> void:
-	if _body != null:
-		_body.visible = in_world
+func _set_collision(enabled: bool) -> void:
 	if _pickup_body != null:
-		_pickup_body.collision_layer = 1 if in_world else 0
+		_pickup_body.collision_layer = 1 if enabled else 0
 	if _pickup_collider != null:
-		_pickup_collider.disabled = not in_world
+		_pickup_collider.disabled = not enabled
 	if _interactable != null:
-		_interactable.enabled = in_world
+		_interactable.enabled = enabled
 
 func _resolve_player(by: Node) -> Node:
 	var n: Node = by

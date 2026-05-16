@@ -2,7 +2,7 @@ extends Node3D
 
 signal mercury_poured()
 
-@export var pour_duration: float = 3.0
+@export var pour_duration: float = 1.5
 @export var prompt_pour: String = "Toarnă mercurul (ține E)"
 @export var prompt_no_vase: String = "Ai nevoie de o vază cu mercur"
 @export var prompt_empty_vase: String = "Vaza e goală"
@@ -13,6 +13,7 @@ signal mercury_poured()
 @onready var _audio: AudioStreamPlayer3D = $Audio
 
 var _pour_progress: float = 0.0
+var _held_this_frame: bool = false
 
 func _ready() -> void:
 	_interactable.hold_action = true
@@ -23,12 +24,16 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_refresh_prompt()
+	if not _held_this_frame:
+		if _audio.playing:
+			_audio.stop()
+		_pour_progress = 0.0
+	_held_this_frame = false
 
 func _on_held(_by: Node, dt: float) -> void:
+	_held_this_frame = true
 	var vase := _get_held_vase()
 	if vase == null or not vase.is_filled:
-		_audio.stop()
-		_pour_progress = 0.0
 		return
 	if not _audio.playing:
 		_audio.play()
