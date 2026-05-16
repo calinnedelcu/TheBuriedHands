@@ -7,6 +7,9 @@ extends Interactable
 @export_multiline var dialogue_text: String = ""
 @export var dialogue_duration: float = 4.0
 @export var disable_after_interact: bool = true
+## Daca true, sterge nodul parinte (StaticBody3D) dupa interactiune — util cand un
+## pickup inline trebuie sa dispara complet din lume (ex. re-ridicarea bolului).
+@export var free_parent_on_interact: bool = false
 
 @export_group("Visual Changes")
 @export var hide_node_on_interact: NodePath
@@ -46,6 +49,10 @@ func interact(by: Node) -> void:
 			objectives.set_objective(objective_after_id, objective_after_text)
 	if disable_after_interact:
 		enabled = false
+	if free_parent_on_interact:
+		var p := get_parent()
+		if p != null:
+			p.queue_free()
 
 func _apply_visual_changes(by: Node) -> void:
 	_set_node_visible(hide_node_on_interact, false)

@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://cs18cnwrdhvr6" path="res://scenes/ui/Slots/slot_left_hand.png" id="11_left_hand_slot"]
 [ext_resource type="Texture2D" uid="uid://bny7vxsik52fw" path="res://scenes/ui/Slots/Icons/icon_lamp.png" id="12_icon_lamp"]
 [ext_resource type="Texture2D" uid="uid://bpikmcmpsbelu" path="res://scenes/ui/Objectives/card_obiective.png" id="13_obj_card"]
+[ext_resource type="Texture2D" uid="uid://cmuceog3rt21n" path="res://scenes/ui/Vitalitate/vitality_hud.png" id="14_vitality"]
+[ext_resource type="Texture2D" uid="uid://tumwx0gvn5e4" path="res://scenes/ui/Mercur/frames/vapor_0.png" id="15_vapor_frame_preview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_dot"]
 bg_color = Color(1, 0.85, 0.65, 0.7)
@@ -41,6 +43,14 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="AtlasTexture" id="Atlas_vitality_hud"]
+atlas = ExtResource("14_vitality")
+region = Rect2(20, 143, 545, 102)
+
+[sub_resource type="AtlasTexture" id="Atlas_vapor_frame_preview"]
+atlas = ExtResource("15_vapor_frame_preview")
+region = Rect2(17, 260, 1081, 202)
 
 [node name="HUDPov" type="CanvasLayer" unique_id=205194570]
 script = ExtResource("1_hud")
@@ -488,3 +498,23 @@ theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="Vitality" type="TextureRect" parent="." unique_id=49885634]
+offset_left = 24.0
+offset_top = 9.0
+offset_right = 351.0
+offset_bottom = 70.0
+mouse_filter = 2
+texture = SubResource("Atlas_vitality_hud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VaporFrame" type="TextureRect" parent="." unique_id=2001672101]
+offset_left = 23.0
+offset_top = 78.0
+offset_right = 350.96307
+offset_bottom = 139.0
+mouse_filter = 2
+texture = SubResource("Atlas_vapor_frame_preview")
+expand_mode = 1
+stretch_mode = 5

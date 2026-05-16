@@ -5,6 +5,8 @@ extends CanvasLayer
 @export var interaction_path: NodePath
 @export var inventory_path: NodePath
 @export var debug_overlay_update_interval: float = 0.15
+@export var vapor_preview_cycle_enabled: bool = true
+@export var vapor_preview_cycle_interval: float = 1.0
 
 @onready var _oil_phial: Control = $Anchor/Bottom/OilPhial
 @onready var _oil_halo: ColorRect = $Anchor/Bottom/OilPhial/WarmHalo
@@ -21,7 +23,24 @@ extends CanvasLayer
 @onready var _objective_label: Label = $Anchor/TopRight/ObjectiveCard/ObjectiveLabel
 var _objective_visible_pos: Vector2 = Vector2.ZERO
 var _objective_tween: Tween = null
-const _OBJ_HIDDEN_OFFSET := Vector2(60.0, -16.0)
+const _OBJ_HIDDEN_OFFSET := Vector2(110.0, -24.0)
+const _OBJ_FLASH_TINT := Color(1.55, 1.32, 0.92, 1.0)
+const _OBJ_NORMAL_TINT := Color(1.0, 1.0, 1.0, 1.0)
+static var _OBJ_FONT_NAMES: PackedStringArray = PackedStringArray([
+	"Trajan Pro",
+	"Trajan",
+	"Cinzel",
+	"IM FELL English",
+	"Cormorant Garamond",
+	"Cardo",
+	"Cambria",
+	"Constantia",
+	"Palatino Linotype",
+	"Book Antiqua",
+	"Garamond",
+	"Georgia",
+	"serif",
+])
 @onready var _slot_panels: Array[TextureRect] = [
 	$Anchor/Bottom/SlotBar/Slot1,
 	$Anchor/Bottom/SlotBar/Slot2,
@@ -40,6 +59,7 @@ const _OBJ_HIDDEN_OFFSET := Vector2(60.0, -16.0)
 	$Anchor/Bottom/OilPhial/DustLayer/Dust3,
 	$Anchor/Bottom/OilPhial/DustLayer/Dust4,
 ]
+@onready var _vapor_frame: TextureRect = $VaporFrame
 
 ## Modulate state pentru sloturile noi cu textura proprie:
 ## empty = dim, owned = neutral, active = warm bright
@@ -59,6 +79,19 @@ const _ITEM_ICON_TEXTURES: Dictionary = {
 	"wet_cloth": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
 	"qin_seal": preload("res://scenes/ui/Slots/Icons/icon_qin_seal.png"),
 }
+const _VAPOR_FRAME_REGION: Rect2 = Rect2(17, 260, 1081, 202)
+const _VAPOR_FRAME_SOURCES: Array[Texture2D] = [
+	preload("res://scenes/ui/Mercur/frames/vapor_0.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_1.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_2.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_3.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_4.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_5.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_6.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_7.png"),
+	preload("res://scenes/ui/Mercur/frames/vapor_8.png"),
+]
+var _vapor_frame_textures: Array[AtlasTexture] = []
 var _slot_count_labels: Array[Label] = []
 var _inventory: Node = null
 var _active_lamp_node: Node = null
@@ -71,8 +104,28 @@ var _debug_overlay_visible: bool = false
 var _debug_overlay_timer: float = 0.0
 var _left_hand_selected: bool = false
 var _dialogue_panel: PanelContainer = null
-var _dialogue_label: Label = null
+var _dialogue_label: RichTextLabel = null
 var _dialogue_hide_timer: float = 0.0
+var _dialogue_tween: Tween = null
+var _dialogue_reveal_tween: Tween = null
+var _dialogue_anim_elapsed: float = 0.0
+var _dialogue_anim_duration: float = 0.0
+var _dialogue_anim_start_top: float = 0.0
+var _dialogue_anim_start_bottom: float = 0.0
+var _dialogue_anim_start_alpha: float = 1.0
+var _dialogue_anim_start_scale: Vector2 = Vector2.ONE
+var _dialogue_anim_end_top: float = 0.0
+var _dialogue_anim_end_bottom: float = 0.0
+var _dialogue_anim_end_alpha: float = 1.0
+var _dialogue_anim_end_scale: Vector2 = Vector2.ONE
+var _dialogue_hide_on_anim_done: bool = false
+var _dialogue_reveal_elapsed: float = 0.0
+var _dialogue_reveal_duration: float = 0.0
+var _dialogue_reveal_active: bool = false
+const _DLG_BASE_OFFSET_TOP: float = -220.0
+const _DLG_BASE_OFFSET_BOTTOM: float = -132.0
+const _DLG_HIDDEN_SHIFT: float = 28.0
+const _DLG_SPEAKER_COLOR: String = "e8b86a"
 
 const _OIL_DRAIN_AMOUNT: float = 152.0
 const _OIL_BOB_AMPLITUDE: float = 0.4
@@ -95,8 +148,12 @@ var _oil_target_drain: float = 0.0
 var _oil_smooth_drain: float = 0.0
 var _oil_bob_time: float = 0.0
 var _oil_pct: float = 1.0
+var _vapor_step: int = 0
+var _vapor_preview_timer: float = 0.0
 
 func _ready() -> void:
+	add_to_group("hud_vapors")
+	_build_vapor_frame_textures()
 	_setup_debug_overlay_input()
 	_build_debug_overlay()
 	_build_dialogue_panel()
@@ -113,9 +170,12 @@ func _ready() -> void:
 	_objective_label.text = ""
 	_objective_visible_pos = _objective_card.position
 	_objective_card.position = _objective_visible_pos + _OBJ_HIDDEN_OFFSET
-	_objective_card.modulate.a = 0.0
+	_objective_card.modulate = Color(_OBJ_NORMAL_TINT.r, _OBJ_NORMAL_TINT.g, _OBJ_NORMAL_TINT.b, 0.0)
+	_objective_card.scale = Vector2(0.88, 0.88)
 	_objective_label.modulate.a = 0.0
+	_apply_objective_font()
 	_prepare_slot_count_labels()
+	_set_vapor_step(0)
 
 	if has_node("/root/Objectives"):
 		var obj := get_node("/root/Objectives")
@@ -156,6 +216,38 @@ func _ready() -> void:
 	# sa fie procesat de inventory.
 	call_deferred("_sync_active_lamp")
 
+func set_vapor_step(step: int) -> void:
+	_set_vapor_step(step)
+
+func set_vapor_level(step: int) -> void:
+	_set_vapor_step(step)
+
+func set_vapor_fraction(fraction: float) -> void:
+	_set_vapor_step(roundi(clampf(fraction, 0.0, 1.0) * float(_vapor_frame_textures.size() - 1)))
+
+func add_vapor_steps(steps: int = 1) -> void:
+	_set_vapor_step(_vapor_step + steps)
+
+func apply_vapor(steps: int = 1) -> void:
+	add_vapor_steps(steps)
+
+func reset_vapors() -> void:
+	_set_vapor_step(0)
+
+func _set_vapor_step(step: int) -> void:
+	if _vapor_frame == null or _vapor_frame_textures.is_empty():
+		return
+	_vapor_step = clampi(step, 0, _vapor_frame_textures.size() - 1)
+	_vapor_frame.texture = _vapor_frame_textures[_vapor_step]
+
+func _build_vapor_frame_textures() -> void:
+	_vapor_frame_textures.clear()
+	for source in _VAPOR_FRAME_SOURCES:
+		var atlas_texture := AtlasTexture.new()
+		atlas_texture.atlas = source
+		atlas_texture.region = _VAPOR_FRAME_REGION
+		_vapor_frame_textures.append(atlas_texture)
+
 func _prepare_slot_count_labels() -> void:
 	_slot_count_labels.clear()
 	for i in _slot_panels.size():
@@ -173,8 +265,8 @@ func _prepare_slot_count_labels() -> void:
 			count_label.offset_top = -16.0
 			count_label.offset_right = -2.0
 			count_label.offset_bottom = -2.0
-			count_label.grow_horizontal = 0
-			count_label.grow_vertical = 0
+			count_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+			count_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
 			count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 			count_label.add_theme_color_override("font_color", Color(1, 0.92, 0.6, 1))
@@ -233,7 +325,10 @@ func _apply_oil_phial_tone(lit: bool) -> void:
 
 func _process(delta: float) -> void:
 	_oil_bob_time += delta
+	_update_vapor_preview(delta)
 	_update_dialogue_timer(delta)
+	_update_dialogue_animation(delta)
+	_update_dialogue_reveal(delta)
 	var t: float = clamp(delta * 4.0, 0.0, 1.0)
 	_oil_smooth_drain = lerp(_oil_smooth_drain, _oil_target_drain, t)
 	# Bob = sloshing-ul intregii mase de ulei; aplicat identic la fill si surface
@@ -244,6 +339,15 @@ func _process(delta: float) -> void:
 	_update_oil_effects(delta)
 	_update_left_hand_selection_effect()
 	_update_debug_overlay(delta)
+
+func _update_vapor_preview(delta: float) -> void:
+	if not vapor_preview_cycle_enabled or _vapor_frame_textures.is_empty():
+		return
+	_vapor_preview_timer += delta
+	if _vapor_preview_timer < vapor_preview_cycle_interval:
+		return
+	_vapor_preview_timer = 0.0
+	_set_vapor_step((_vapor_step + 1) % _vapor_frame_textures.size())
 
 func _update_oil_effects(delta: float) -> void:
 	var target_intensity: float = 1.0 if _oil_effect_lit else 0.18
@@ -337,38 +441,67 @@ func _build_dialogue_panel() -> void:
 	_dialogue_panel.anchor_top = 1.0
 	_dialogue_panel.anchor_right = 0.5
 	_dialogue_panel.anchor_bottom = 1.0
-	_dialogue_panel.offset_left = -390.0
-	_dialogue_panel.offset_top = -205.0
-	_dialogue_panel.offset_right = 390.0
-	_dialogue_panel.offset_bottom = -132.0
+	_dialogue_panel.offset_left = -440.0
+	_dialogue_panel.offset_top = _DLG_BASE_OFFSET_TOP
+	_dialogue_panel.offset_right = 440.0
+	_dialogue_panel.offset_bottom = _DLG_BASE_OFFSET_BOTTOM
+	_dialogue_panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_dialogue_panel.pivot_offset = Vector2(440.0, 44.0)
 
+	# Panou sepia-pergament cu border cald dublu + drop shadow pentru profunzime.
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.035, 0.023, 0.014, 0.78)
-	style.border_color = Color(0.72, 0.46, 0.2, 0.72)
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_bottom_left = 4
-	style.set_content_margin(SIDE_LEFT, 18.0)
-	style.set_content_margin(SIDE_TOP, 12.0)
-	style.set_content_margin(SIDE_RIGHT, 18.0)
-	style.set_content_margin(SIDE_BOTTOM, 12.0)
+	style.bg_color = Color(0.05, 0.032, 0.018, 0.88)
+	style.border_color = Color(0.92, 0.66, 0.32, 0.85)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_right = 6
+	style.corner_radius_bottom_left = 6
+	style.set_content_margin(SIDE_LEFT, 28.0)
+	style.set_content_margin(SIDE_TOP, 20.0)
+	style.set_content_margin(SIDE_RIGHT, 28.0)
+	style.set_content_margin(SIDE_BOTTOM, 20.0)
+	style.shadow_color = Color(0, 0, 0, 0.55)
+	style.shadow_size = 10
+	style.shadow_offset = Vector2(0, 4)
 	_dialogue_panel.add_theme_stylebox_override("panel", style)
 
-	_dialogue_label = Label.new()
+	_dialogue_label = RichTextLabel.new()
 	_dialogue_label.name = "DialogueText"
 	_dialogue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_dialogue_label.add_theme_color_override("font_color", Color(1.0, 0.91, 0.72, 1.0))
-	_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.86))
-	_dialogue_label.add_theme_constant_override("outline_size", 5)
-	_dialogue_label.add_theme_font_size_override("font_size", 18)
-	_dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_dialogue_label.bbcode_enabled = true
+	_dialogue_label.fit_content = true
+	_dialogue_label.scroll_active = false
 	_dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_dialogue_label.custom_minimum_size = Vector2(820.0, 0.0)
+	_dialogue_label.add_theme_color_override("default_color", Color(1.0, 0.92, 0.74, 1.0))
+	_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_dialogue_label.add_theme_constant_override("outline_size", 5)
+	_dialogue_label.add_theme_constant_override("line_separation", 4)
+	_dialogue_label.add_theme_font_size_override("normal_font_size", 19)
+	_dialogue_label.add_theme_font_size_override("bold_font_size", 19)
+	_dialogue_label.add_theme_font_size_override("italics_font_size", 19)
+	_dialogue_label.add_theme_font_size_override("bold_italics_font_size", 19)
+	# Acelasi font serif "in tema" ca pe cardul de obiective.
+	var font := SystemFont.new()
+	font.font_names = _OBJ_FONT_NAMES
+	font.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	font.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_AUTO
+	var bold_font := SystemFont.new()
+	bold_font.font_names = _OBJ_FONT_NAMES
+	bold_font.font_weight = 700
+	bold_font.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	var italic_font := SystemFont.new()
+	italic_font.font_names = _OBJ_FONT_NAMES
+	italic_font.font_italic = true
+	italic_font.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	_dialogue_label.add_theme_font_override("normal_font", font)
+	_dialogue_label.add_theme_font_override("bold_font", bold_font)
+	_dialogue_label.add_theme_font_override("italics_font", italic_font)
+	_dialogue_label.add_theme_font_override("bold_italics_font", bold_font)
 	_dialogue_panel.add_child(_dialogue_label)
 
 func _update_dialogue_timer(delta: float) -> void:
@@ -376,7 +509,7 @@ func _update_dialogue_timer(delta: float) -> void:
 		return
 	_dialogue_hide_timer -= delta
 	if _dialogue_hide_timer <= 0.0 and _dialogue_panel != null:
-		_dialogue_panel.visible = false
+		_animate_dialogue_hide()
 
 func _update_debug_overlay(delta: float) -> void:
 	if not _debug_overlay_visible or _debug_label == null:
@@ -533,11 +666,11 @@ func _on_objective_changed(_id: String, text: String) -> void:
 		_animate_objective_out()
 		return
 	var was_empty: bool = _objective_label.text == "" or _objective_card.modulate.a < 0.05
-	_objective_label.text = text
 	if was_empty:
+		_objective_label.text = text
 		_animate_objective_in()
 	else:
-		_animate_objective_replace()
+		_animate_objective_replace(text)
 
 func _kill_objective_tween() -> void:
 	if _objective_tween != null and _objective_tween.is_running():
@@ -547,37 +680,184 @@ func _kill_objective_tween() -> void:
 func _animate_objective_in() -> void:
 	_kill_objective_tween()
 	_objective_card.position = _objective_visible_pos + _OBJ_HIDDEN_OFFSET
-	_objective_card.modulate.a = 0.0
+	_objective_card.modulate = Color(_OBJ_FLASH_TINT.r, _OBJ_FLASH_TINT.g, _OBJ_FLASH_TINT.b, 0.0)
+	_objective_card.scale = Vector2(0.86, 0.86)
 	_objective_label.modulate.a = 0.0
-	_objective_tween = create_tween().set_parallel(true)
-	_objective_tween.tween_property(_objective_card, "position", _objective_visible_pos, 0.55).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	_objective_tween.tween_property(_objective_card, "modulate:a", 1.0, 0.45)
-	_objective_tween.tween_property(_objective_label, "modulate:a", 1.0, 0.4).set_delay(0.18)
+	_objective_tween = create_tween()
+	# Faza 1 (paralel): slide-in, scale-up, fade-in spre tinta FLASH calda.
+	_objective_tween.tween_property(_objective_card, "modulate", _OBJ_FLASH_TINT, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(_objective_card, "position", _objective_visible_pos, 0.95).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(_objective_card, "scale", Vector2.ONE, 0.8).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(_objective_label, "modulate:a", 1.0, 0.55).set_delay(0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# Faza 2: tintul cald se topeste lent in alb neutru.
+	_objective_tween.tween_property(_objective_card, "modulate", _OBJ_NORMAL_TINT, 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-func _animate_objective_replace() -> void:
+func _animate_objective_replace(new_text: String) -> void:
 	_kill_objective_tween()
-	_objective_tween = create_tween().set_parallel(true)
-	_objective_tween.tween_property(_objective_label, "modulate:a", 0.0, 0.12)
-	_objective_tween.chain().tween_property(_objective_label, "modulate:a", 1.0, 0.25)
-	var pulse_tween := create_tween()
-	pulse_tween.tween_property(_objective_card, "scale", Vector2(1.04, 1.04), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	pulse_tween.tween_property(_objective_card, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	var label := _objective_label
+	var card := _objective_card
+	# 1) confirm vechiul obiectiv: flash cald + scale up + slide usor in afara
+	_objective_tween = create_tween()
+	_objective_tween.tween_property(card, "modulate", _OBJ_FLASH_TINT, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(card, "scale", Vector2(1.07, 1.07), 0.22).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(label, "modulate:a", 0.0, 0.32).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_objective_tween.parallel().tween_property(card, "position", _objective_visible_pos + Vector2(-12.0, 0.0), 0.32).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# 2) pauza ca jucatorul sa observe schimbarea
+	_objective_tween.tween_interval(0.45)
+	# 3) schimba textul (label-ul e inca invizibil) inainte de re-fade.
+	_objective_tween.tween_callback(func() -> void:
+		label.text = new_text)
+	# 4) revine cardul: pop-back si re-fade in
+	_objective_tween.tween_property(card, "scale", Vector2(0.95, 0.95), 0.05)
+	_objective_tween.tween_property(card, "modulate", _OBJ_NORMAL_TINT, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(card, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(card, "position", _objective_visible_pos, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_objective_tween.parallel().tween_property(label, "modulate:a", 1.0, 0.5).set_delay(0.08).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _animate_objective_out() -> void:
 	_kill_objective_tween()
-	_objective_tween = create_tween().set_parallel(true)
-	_objective_tween.tween_property(_objective_label, "modulate:a", 0.0, 0.2)
-	_objective_tween.tween_property(_objective_card, "modulate:a", 0.0, 0.32).set_delay(0.05)
-	_objective_tween.tween_property(_objective_card, "position", _objective_visible_pos + _OBJ_HIDDEN_OFFSET, 0.4).set_delay(0.05).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+	_objective_tween = create_tween()
+	_objective_tween.set_parallel(true)
+	_objective_tween.tween_property(_objective_card, "modulate", _OBJ_FLASH_TINT, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_objective_tween.tween_property(_objective_card, "scale", Vector2(1.05, 1.05), 0.2).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	_objective_tween.tween_property(_objective_label, "modulate:a", 0.0, 0.28).set_delay(0.05)
+	_objective_tween.tween_property(_objective_card, "modulate:a", 0.0, 0.45).set_delay(0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_objective_tween.tween_property(_objective_card, "position", _objective_visible_pos + _OBJ_HIDDEN_OFFSET, 0.55).set_delay(0.22).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+	_objective_tween.tween_property(_objective_card, "scale", Vector2(0.88, 0.88), 0.55).set_delay(0.22).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+
+func _apply_objective_font() -> void:
+	# Font serif cu cascada de fallback-uri — SystemFont alege primul instalat
+	# pe masina jucatorului. Daca nu gaseste niciunul, cade pe "serif" generic.
+	var font := SystemFont.new()
+	font.font_names = _OBJ_FONT_NAMES
+	font.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	font.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_AUTO
+	_objective_label.add_theme_font_override("font", font)
+	_objective_label.add_theme_font_size_override("font_size", 18)
+	# Inscriptie "incizata": text sepia inchis pe cardul de hartie, cu un outline
+	# foarte subtil pentru lizibilitate.
+	_objective_label.add_theme_color_override("font_color", Color(0.11, 0.06, 0.025, 0.97))
+	_objective_label.add_theme_color_override("font_outline_color", Color(0.92, 0.78, 0.5, 0.35))
+	_objective_label.add_theme_constant_override("outline_size", 2)
+	_objective_label.add_theme_constant_override("line_spacing", 2)
 
 func _on_dialogue_changed(text: String, duration: float) -> void:
 	if _dialogue_panel == null or _dialogue_label == null:
 		return
 	if text.strip_edges() == "":
-		_dialogue_label.text = ""
-		_dialogue_panel.visible = false
+		_animate_dialogue_hide()
+		return
+	var was_hidden: bool = not _dialogue_panel.visible or _dialogue_panel.modulate.a < 0.05
+	_dialogue_label.text = _format_dialogue_text(text)
+	_dialogue_label.visible_ratio = 0.0
+	_dialogue_hide_timer = max(0.0, duration)
+	if was_hidden:
+		_animate_dialogue_show()
+	else:
+		_animate_dialogue_text_swap()
+
+func _format_dialogue_text(text: String) -> String:
+	# "Speaker: corp" → speaker bold/aurit + corp italic. Pentru linii fara
+	# prefix sau cu prefix prea lung (>26 caractere) afisam doar italic.
+	var colon: int = text.find(":")
+	if colon <= 0 or colon > 26:
+		return "[i]%s[/i]" % text
+	var speaker: String = text.substr(0, colon)
+	var body: String = text.substr(colon + 1).strip_edges()
+	return "[color=#%s][b]%s[/b][/color]  [i]%s[/i]" % [_DLG_SPEAKER_COLOR, speaker, body]
+
+func _kill_dialogue_tweens() -> void:
+	if _dialogue_tween != null and _dialogue_tween.is_running():
+		_dialogue_tween.kill()
+	_dialogue_tween = null
+	if _dialogue_reveal_tween != null and _dialogue_reveal_tween.is_running():
+		_dialogue_reveal_tween.kill()
+	_dialogue_reveal_tween = null
+	_dialogue_anim_duration = 0.0
+	_dialogue_anim_elapsed = 0.0
+	_dialogue_hide_on_anim_done = false
+	_dialogue_reveal_active = false
+
+func _animate_dialogue_show() -> void:
+	_kill_dialogue_tweens()
+	_dialogue_panel.visible = true
+	_dialogue_panel.offset_top = _DLG_BASE_OFFSET_TOP + _DLG_HIDDEN_SHIFT
+	_dialogue_panel.offset_bottom = _DLG_BASE_OFFSET_BOTTOM + _DLG_HIDDEN_SHIFT
+	_dialogue_panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_dialogue_panel.scale = Vector2(0.96, 0.96)
+	_start_dialogue_panel_anim(_DLG_BASE_OFFSET_TOP, _DLG_BASE_OFFSET_BOTTOM, 1.0, Vector2.ONE, 0.45, false)
+	_start_dialogue_reveal()
+
+func _animate_dialogue_text_swap() -> void:
+	_kill_dialogue_tweens()
+	# Mic puls de scale ca sa simta jucatorul ca textul s-a schimbat.
+	_dialogue_panel.scale = Vector2(1.03, 1.03)
+	_start_dialogue_panel_anim(_dialogue_panel.offset_top, _dialogue_panel.offset_bottom, _dialogue_panel.modulate.a, Vector2.ONE, 0.22, false)
+	_start_dialogue_reveal()
+
+func _start_dialogue_reveal() -> void:
+	_dialogue_label.visible_ratio = 0.0
+	var char_count: int = _dialogue_label.get_total_character_count()
+	if char_count <= 0:
+		_dialogue_label.visible_ratio = 1.0
+		return
+	# ~42 caractere/secunda, intre 0.5s si 2.6s — destul de lent ca sa para
+	# "narativ" dar nu prea lent incat sa enerveze.
+	var reveal_time: float = clampf(float(char_count) / 42.0, 0.5, 2.6)
+	_dialogue_reveal_elapsed = 0.0
+	_dialogue_reveal_duration = reveal_time
+	_dialogue_reveal_active = true
+
+func _animate_dialogue_hide() -> void:
+	if not _dialogue_panel.visible:
 		_dialogue_hide_timer = 0.0
 		return
-	_dialogue_label.text = text
-	_dialogue_panel.visible = true
-	_dialogue_hide_timer = max(0.0, duration)
+	_kill_dialogue_tweens()
+	_dialogue_hide_timer = 0.0
+	_start_dialogue_panel_anim(_DLG_BASE_OFFSET_TOP + _DLG_HIDDEN_SHIFT, _DLG_BASE_OFFSET_BOTTOM + _DLG_HIDDEN_SHIFT, 0.0, _dialogue_panel.scale, 0.35, true)
+
+func _start_dialogue_panel_anim(target_top: float, target_bottom: float, target_alpha: float, target_scale: Vector2, duration: float, hide_on_done: bool) -> void:
+	if _dialogue_panel == null:
+		return
+	_dialogue_anim_elapsed = 0.0
+	_dialogue_anim_duration = maxf(0.001, duration)
+	_dialogue_anim_start_top = _dialogue_panel.offset_top
+	_dialogue_anim_start_bottom = _dialogue_panel.offset_bottom
+	_dialogue_anim_start_alpha = _dialogue_panel.modulate.a
+	_dialogue_anim_start_scale = _dialogue_panel.scale
+	_dialogue_anim_end_top = target_top
+	_dialogue_anim_end_bottom = target_bottom
+	_dialogue_anim_end_alpha = target_alpha
+	_dialogue_anim_end_scale = target_scale
+	_dialogue_hide_on_anim_done = hide_on_done
+	_apply_dialogue_panel_anim(0.0)
+
+func _update_dialogue_animation(delta: float) -> void:
+	if _dialogue_panel == null or _dialogue_anim_duration <= 0.0:
+		return
+	_dialogue_anim_elapsed += delta
+	var t: float = clampf(_dialogue_anim_elapsed / _dialogue_anim_duration, 0.0, 1.0)
+	var s: float = t * t * (3.0 - 2.0 * t)
+	_apply_dialogue_panel_anim(s)
+	if t >= 1.0:
+		_dialogue_anim_duration = 0.0
+		if _dialogue_hide_on_anim_done:
+			_dialogue_panel.visible = false
+			_dialogue_hide_on_anim_done = false
+
+func _apply_dialogue_panel_anim(t: float) -> void:
+	if _dialogue_panel == null:
+		return
+	_dialogue_panel.offset_top = lerpf(_dialogue_anim_start_top, _dialogue_anim_end_top, t)
+	_dialogue_panel.offset_bottom = lerpf(_dialogue_anim_start_bottom, _dialogue_anim_end_bottom, t)
+	_dialogue_panel.scale = _dialogue_anim_start_scale.lerp(_dialogue_anim_end_scale, t)
+	_dialogue_panel.modulate.a = lerpf(_dialogue_anim_start_alpha, _dialogue_anim_end_alpha, t)
+
+func _update_dialogue_reveal(delta: float) -> void:
+	if not _dialogue_reveal_active or _dialogue_label == null:
+		return
+	_dialogue_reveal_elapsed += delta
+	var t: float = clampf(_dialogue_reveal_elapsed / maxf(0.001, _dialogue_reveal_duration), 0.0, 1.0)
+	_dialogue_label.visible_ratio = t
+	if t >= 1.0:
+		_dialogue_reveal_active = false
