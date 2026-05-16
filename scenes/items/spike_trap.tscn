@@ -13,7 +13,7 @@ size = Vector3(2.8, 1.2, 1.8)
 script = ExtResource("1_script")
 
 [node name="SpikesMesh" parent="." unique_id=1974351076 instance=ExtResource("2_spikes_glb")]
-transform = Transform3D(1.44, 0, 0, 0, 1.44, 0, 0, 0, 1.44, -28.283667, 9.42776, -32.86793)
+transform = Transform3D(1.44, 0, 0, 0, 1.44, 0, 0, 0, 1.44, 0, 0, 0)
 
 [node name="SpikeFloor" type="StaticBody3D" parent="." unique_id=519786829]
 collision_mask = 0

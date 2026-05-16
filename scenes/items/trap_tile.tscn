@@ -45,7 +45,7 @@ settle_stream = ExtResource("5_settle")
 shape = SubResource("BoxShape3D_tile")
 
 [node name="TileMesh" parent="." unique_id=83840282 instance=ExtResource("2_glb")]
-transform = Transform3D(0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0, 0.84569025, -20.925, 0, -19.3)
+transform = Transform3D(0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0)
 
 [node name="SealDecal" type="Decal" parent="." unique_id=1046959799]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
