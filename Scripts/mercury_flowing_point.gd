@@ -2,6 +2,7 @@ extends Node3D
 
 @export var flow_stream: AudioStream
 @export var auto_stop_after: float = 8.0
+@export var flow_volume_db: float = -8.0
 
 @onready var _audio: AudioStreamPlayer3D = $Audio
 @onready var _particles: CPUParticles3D = $FlowParticles
@@ -14,6 +15,7 @@ func _ready() -> void:
 	add_to_group("mercury_flow")
 	if flow_stream != null:
 		_audio.stream = flow_stream
+	_audio.volume_db = flow_volume_db
 	_anim = _find_anim_player()
 
 func _process(delta: float) -> void:

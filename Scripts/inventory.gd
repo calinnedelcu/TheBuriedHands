@@ -98,6 +98,7 @@ func _register_types() -> void:
 	_add_type(ItemType.new("clay_bowl", "Vas de barbotină", Color(0.55, 0.32, 0.2), Vector3.ZERO, Vector3.ZERO))
 	_add_type(ItemType.new("clay_slip", "Barbotină", Color(0.62, 0.5, 0.36), Vector3.ZERO, Vector3.ZERO))
 	_add_type(ItemType.new("lamp", "Lampă cu ulei", Color(0, 0, 0, 0), Vector3.ZERO, Vector3.ZERO, false, true))
+	_add_type(ItemType.new("mercury_vase", "Vază cu mercur", Color(0.42, 0.45, 0.48), Vector3.ZERO, Vector3.ZERO))
 
 func _add_type(t: ItemType) -> void:
 	_types[t.id] = t
@@ -358,6 +359,20 @@ func remove_item(id: String) -> bool:
 		return true
 	return false
 
+func release_node_item(node: Node3D) -> bool:
+	if node == null:
+		return false
+	for i in SLOT_COUNT:
+		var entry: SlotEntry = _slots[i]
+		if entry == null or entry.node != node:
+			continue
+		if _current_index == i:
+			_current_index = -1
+			slot_selected.emit(-1)
+		_slots[i] = null
+		slots_changed.emit()
+		return true
+
 ## Returns the lamp instance from the offhand slot, else null.
 func find_lamp() -> Node:
 	if _lamp_entry != null and _lamp_entry.node != null and is_instance_valid(_lamp_entry.node):
@@ -419,6 +434,16 @@ func _apply_active_view() -> void:
 		return
 	var t: ItemType = _types[entry.id]
 	# Lampile nu intra in _slots — sunt in _lamp_entry separat. Aici doar unelte.
+	if entry.node != null and _tool_socket != null:
+		if entry.node.has_method("set_equipped"):
+			entry.node.set_equipped(true)
+		if entry.node.get_parent() != _tool_socket:
+			if entry.node.get_parent() != null:
+				entry.node.reparent(_tool_socket, false)
+			else:
+				_tool_socket.add_child(entry.node)
+		entry.node.visible = true
+		return
 	if t.size != Vector3.ZERO and _tool_socket != null:
 		_spawned_placeholder = ToolVisualsLib.build_for_item_id(entry.id, true)
 		if _spawned_placeholder == null:
@@ -477,6 +502,16 @@ func _ask_drop_transform(player: Node, scaled: bool) -> Transform3D:
 	return Transform3D.IDENTITY
 
 func _spawn_world_pickup(entry: SlotEntry, world: Node, xform: Transform3D) -> void:
+	if entry.node != null and is_instance_valid(entry.node):
+		if entry.node.get_parent() != null:
+			entry.node.reparent(world, false)
+		else:
+			world.add_child(entry.node)
+		entry.node.global_transform = xform
+		entry.node.visible = true
+		if entry.node.has_method("set_equipped"):
+			entry.node.call("set_equipped", false)
+		return
 	var override_scene: PackedScene = _DROP_SCENE_OVERRIDES.get(entry.id, null)
 	if override_scene != null:
 		var override_node := override_scene.instantiate()

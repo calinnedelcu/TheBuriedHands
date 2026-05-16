@@ -6,6 +6,7 @@ signal mercury_poured()
 @export var prompt_pour: String = "Toarnă mercurul (ține E)"
 @export var prompt_no_vase: String = "Ai nevoie de o vază cu mercur"
 @export var prompt_empty_vase: String = "Vaza e goală"
+@export var prompt_already_active: String = "Mecanismul este deja activat"
 @export var flow_group: String = "mercury_flow"
 @export var pour_stream: AudioStream
 
@@ -14,6 +15,7 @@ signal mercury_poured()
 
 var _pour_progress: float = 0.0
 var _hold_timeout: float = 0.0
+var _activated: bool = false
 
 func _ready() -> void:
 	_interactable.hold_action = true
@@ -31,6 +33,12 @@ func _process(delta: float) -> void:
 		_pour_progress = 0.0
 
 func _on_held(_by: Node, dt: float) -> void:
+	if _activated:
+		_pour_progress = 0.0
+		if _audio.playing:
+			_audio.stop()
+		return
+
 	_hold_timeout = 0.2
 	var vase := _get_held_vase()
 	if vase == null or not vase.is_filled:
@@ -43,9 +51,7 @@ func _on_held(_by: Node, dt: float) -> void:
 		_audio.stop()
 		_hold_timeout = 0.0
 		vase.empty()
-		var player: Node3D = get_tree().get_first_node_in_group("player")
-		var drop_pos: Vector3 = player.global_position + Vector3(0.6, 0.0, 0.0) if player != null else global_position
-		vase.drop_at(drop_pos)
+		_activated = true
 		mercury_poured.emit()
 		_trigger_flow()
 
@@ -59,6 +65,10 @@ func _trigger_flow() -> void:
 func _refresh_prompt() -> void:
 	if not is_inside_tree():
 		return
+	if _activated:
+		_interactable.prompt_text = prompt_already_active
+		return
+
 	var vase := _get_held_vase()
 	if vase == null:
 		_interactable.prompt_text = prompt_no_vase

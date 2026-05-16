@@ -4,26 +4,46 @@
 [ext_resource type="PackedScene" uid="uid://u12868xfyvfa" path="res://scenes/items/MercuryFlowingPoint.glb" id="2_glb"]
 [ext_resource type="AudioStream" uid="uid://bbe8xkcwkiugj" path="res://audio/sfx/mercury/flow.mp3" id="3_flow"]
 
+[sub_resource type="StandardMaterial3D" id="Mat_mercury_flow_particle"]
+transparency = 1
+albedo_color = Color(0.62, 0.68, 0.72, 0.86)
+metallic = 0.85
+roughness = 0.18
+emission_enabled = true
+emission = Color(0.22, 0.38, 0.44, 1)
+emission_energy_multiplier = 0.15
+
+[sub_resource type="SphereMesh" id="Mesh_mercury_flow_particle"]
+material = SubResource("Mat_mercury_flow_particle")
+radius = 0.16
+height = 0.32
+radial_segments = 8
+rings = 4
+
 [node name="MercuryFlowingPoint" type="Node3D" unique_id=66882977]
 script = ExtResource("1_script")
 flow_stream = ExtResource("3_flow")
+flow_volume_db = -8.0
 
 [node name="Body" parent="." unique_id=233358328 instance=ExtResource("2_glb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.69577, -6.981813, -47.419537)
 
 [node name="Audio" type="AudioStreamPlayer3D" parent="." unique_id=1014340418]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7167356, -0.15691757, 0.113269806)
+volume_db = -8.0
 max_distance = 25.0
 
 [node name="FlowParticles" type="CPUParticles3D" parent="." unique_id=312847561]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6209505, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.25881904, -0.9659258, 0, 0.9659258, 0.25881904, -1.7167356, -0.15691757, 0.113269806)
 emitting = false
 amount = 80
 lifetime = 1.2
 preprocess = 0.5
-direction = Vector3(0, -1, 0)
-spread = 8.0
+direction = Vector3(0, 0, -1)
+spread = 5.0
 initial_velocity_min = 0.5
 initial_velocity_max = 1.8
-scale_amount_min = 0.04
-scale_amount_max = 0.08
+scale_amount_min = 0.18
+scale_amount_max = 0.34
 color = Color(0.72, 0.72, 0.8, 0.9)
+mesh = SubResource("Mesh_mercury_flow_particle")

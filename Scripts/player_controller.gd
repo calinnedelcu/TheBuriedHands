@@ -445,7 +445,22 @@ func _try_drop_active_item() -> bool:
 		return true
 	if inventory != null:
 		return false
+	if _try_drop_held_mercury_vase():
+		_emit_noise(noise_walk * 0.35)
+		play_feedback_sfx("drop")
+		return true
 	return _try_drop_held_lamp()
+
+func _try_drop_held_mercury_vase() -> bool:
+	if not is_inside_tree():
+		return false
+	var nodes: Array[Node] = get_tree().get_nodes_in_group("mercury_vase_held")
+	if nodes.is_empty():
+		return false
+	var vase: Node = nodes[0]
+	if vase == null or not vase.has_method("drop_by_player"):
+		return false
+	return bool(vase.call("drop_by_player", self))
 
 func _equip_lamp_direct(lamp_node: Node) -> void:
 	if lamp_socket == null or not (lamp_node is Node3D):
