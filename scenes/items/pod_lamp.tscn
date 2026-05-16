@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bbts6fsafxe4v"]
+
+[ext_resource type="Script" uid="uid://bwm5baqfkjugw" path="res://Scripts/lamp.gd" id="1_lamp"]
+[ext_resource type="PackedScene" uid="uid://cl03m0mgc0ups" path="res://scenes/items/3podLamp.glb" id="2_body_glb"]
+[ext_resource type="ArrayMesh" uid="uid://cgp5qimptvr4n" path="res://scenes/items/flame_teardrop.obj" id="3_flame_mesh"]
+[ext_resource type="Shader" uid="uid://c4v5lu1flwuv5" path="res://scenes/items/oil_flame.gdshader" id="4_flame_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flame"]
+render_priority = 0
+shader = ExtResource("4_flame_shader")
+shader_parameter/outer_color = Color(1, 0.28, 0.045, 0.72)
+shader_parameter/core_color = Color(1, 0.82, 0.28, 0.92)
+shader_parameter/tip_color = Color(1, 0.54, 0.08, 0.52)
+shader_parameter/emission_strength = 3.4
+shader_parameter/alpha_scale = 0.78
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProc_smoke"]
+direction = Vector3(0, 1, 0)
+spread = 18.0
+initial_velocity_min = 0.025
+initial_velocity_max = 0.075
+angular_velocity_min = -18.0
+angular_velocity_max = 18.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = 0.004
+linear_accel_max = 0.012
+scale_min = 0.55
+scale_max = 1.15
+
+[sub_resource type="StandardMaterial3D" id="Mat_smoke"]
+render_priority = 10
+transparency = 1
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0.28, 0.23, 0.18, 0.22)
+disable_receive_shadows = true
+billboard_mode = 1
+billboard_keep_scale = true
+
+[sub_resource type="QuadMesh" id="Mesh_smoke"]
+material = SubResource("Mat_smoke")
+size = Vector2(0.035, 0.035)
+
+[node name="PodLamp" type="Node3D" unique_id=1139961124]
+script = ExtResource("1_lamp")
+
+[node name="Body" parent="." unique_id=1411574960 instance=ExtResource("2_body_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.7432575, 0.30891657, -38.72486)
+
+[node name="FlameSocket" type="Node3D" parent="." unique_id=1508995217]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="Light" type="OmniLight3D" parent="FlameSocket" unique_id=1768323149]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.49110007, 0)
+light_color = Color(1, 0.62, 0.28, 1)
+light_energy = 5.0
+light_volumetric_fog_energy = 2.2
+omni_range = 20.0
+omni_attenuation = 1.6
+
+[node name="Flame" type="MeshInstance3D" parent="FlameSocket" unique_id=1160761871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.54110014, 0)
+material_override = SubResource("ShaderMaterial_flame")
+mesh = ExtResource("3_flame_mesh")
+
+[node name="Smoke" type="GPUParticles3D" parent="FlameSocket" unique_id=2067499007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5911001, 0)
+amount = 9
+lifetime = 1.6
+preprocess = 0.45
+randomness = 0.72
+visibility_aabb = AABB(-0.08, -0.05, -0.08, 0.16, 0.28, 0.16)
+process_material = SubResource("ParticleProc_smoke")
+draw_pass_1 = SubResource("Mesh_smoke")

@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://dic83bqtgje6w"]
+
+[ext_resource type="Script" uid="uid://bp5ua5gbbio8s" path="res://Scripts/interactable.gd" id="1_interact"]
+[ext_resource type="Script" uid="uid://xfksu3448vdq" path="res://Scripts/ladder.gd" id="2_ladder"]
+[ext_resource type="PackedScene" uid="uid://c22fk0j2unuow" path="res://scenes/items/Ladder.glb" id="3_ladder_glb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interact"]
+size = Vector3(0.9, 4.7901735, 0.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(1.2, 0.15, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_entry"]
+size = Vector3(2.5, 2, 2.5)
+
+[node name="Ladder" type="Node3D" unique_id=1165428040]
+script = ExtResource("2_ladder")
+
+[node name="Body" parent="." unique_id=233569978 instance=ExtResource("3_ladder_glb")]
+transform = Transform3D(-4.3629857e-08, -2.6685165e-09, 1, -0.06104854, 0.9981348, 0, -0.9981348, -0.06104854, -4.371139e-08, 9.022, 6.8, 23.28)
+
+[node name="TopExit" type="Marker3D" parent="." unique_id=962137141]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6, 0.6)
+
+[node name="BottomExit" type="Marker3D" parent="." unique_id=714131890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+
+[node name="InteractBody" type="StaticBody3D" parent="." unique_id=149267318]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.15)
+collision_mask = 0
+
+[node name="InteractShape" type="CollisionShape3D" parent="InteractBody" unique_id=539296167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2950866, 0)
+shape = SubResource("BoxShape3D_interact")
+
+[node name="Interactable" type="Node" parent="InteractBody" unique_id=1492671147]
+script = ExtResource("1_interact")
+prompt_text = "Urcă pe scară"
+
+[node name="LadderFloor" type="StaticBody3D" parent="." unique_id=610354308]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+collision_mask = 0
+
+[node name="FloorShape" type="CollisionShape3D" parent="LadderFloor" unique_id=1508589013]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="EntryArea" type="Area3D" parent="." unique_id=891234567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6, 0.3)
+collision_layer = 0
+
+[node name="EntryShape" type="CollisionShape3D" parent="EntryArea" unique_id=234567891]
+shape = SubResource("BoxShape3D_entry")
