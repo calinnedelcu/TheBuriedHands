@@ -41,7 +41,7 @@ signal extinguished()
 @export var flicker_range: float = 0.32
 @export var flicker_speed: float = 6.0
 @export var flicker_position_amount: float = 0.012
-@export var disable_oil_drain: bool = false
+@export var disable_oil_drain: bool = true
 @export var start_lit: bool = true
 ## false = lampa apare in lume ca pickup (collider activ, pot apasa F).
 ## true = lampa apare deja in mana (default, pentru lampa din LampSocket).
