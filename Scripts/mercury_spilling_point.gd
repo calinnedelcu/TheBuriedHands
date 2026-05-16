@@ -37,8 +37,8 @@ func _on_held(_by: Node, dt: float) -> void:
 		_pour_progress = 0.0
 		_audio.stop()
 		vase.empty()
-		var player := get_tree().get_first_node_in_group("player")
-		var drop_pos := player.global_position + Vector3(0.6, 0.0, 0.0) if player else global_position
+		var player: Node3D = get_tree().get_first_node_in_group("player")
+		var drop_pos: Vector3 = player.global_position + Vector3(0.6, 0.0, 0.0) if player != null else global_position
 		vase.drop_at(drop_pos)
 		mercury_poured.emit()
 		_trigger_flow()
