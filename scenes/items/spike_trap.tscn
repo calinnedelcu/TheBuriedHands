@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://blbuquvd1y156"]
+
+[ext_resource type="Script" uid="uid://7nh4ei2umafo" path="res://Scripts/spike_trap.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bmnmsa5tv3qat" path="res://scenes/items/Spikes.glb" id="2_spikes_glb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(3, 0.1, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_damage"]
+size = Vector3(2.8, 1.2, 1.8)
+
+[node name="SpikeTrap" type="Node3D" unique_id=1028522589]
+script = ExtResource("1_script")
+
+[node name="SpikesMesh" parent="." unique_id=1974351076 instance=ExtResource("2_spikes_glb")]
+transform = Transform3D(1.44, 0, 0, 0, 1.44, 0, 0, 0, 1.44, -28.283667, 9.42776, -32.86793)
+
+[node name="SpikeFloor" type="StaticBody3D" parent="." unique_id=519786829]
+collision_mask = 0
+
+[node name="FloorCollision" type="CollisionShape3D" parent="SpikeFloor" unique_id=63973649]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="DamageArea" type="Area3D" parent="." unique_id=866573593]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+collision_layer = 0
+
+[node name="DamageShape" type="CollisionShape3D" parent="DamageArea" unique_id=736661384]
+transform = Transform3D(1.3662038, 0, 0, 0, 1, 0, 0, 0, 1.3248249, 0, 0, 0)
+shape = SubResource("BoxShape3D_damage")
