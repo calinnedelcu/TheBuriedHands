@@ -13,7 +13,7 @@ signal mercury_poured()
 @onready var _audio: AudioStreamPlayer3D = $Audio
 
 var _pour_progress: float = 0.0
-var _held_this_frame: bool = false
+var _hold_timeout: float = 0.0
 
 func _ready() -> void:
 	_interactable.hold_action = true
@@ -22,16 +22,16 @@ func _ready() -> void:
 	if pour_stream != null:
 		_audio.stream = pour_stream
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_refresh_prompt()
-	if not _held_this_frame:
+	_hold_timeout = maxf(0.0, _hold_timeout - delta)
+	if _hold_timeout <= 0.0:
 		if _audio.playing:
 			_audio.stop()
 		_pour_progress = 0.0
-	_held_this_frame = false
 
 func _on_held(_by: Node, dt: float) -> void:
-	_held_this_frame = true
+	_hold_timeout = 0.2
 	var vase := _get_held_vase()
 	if vase == null or not vase.is_filled:
 		return
@@ -41,6 +41,7 @@ func _on_held(_by: Node, dt: float) -> void:
 	if _pour_progress >= pour_duration:
 		_pour_progress = 0.0
 		_audio.stop()
+		_hold_timeout = 0.0
 		vase.empty()
 		var player: Node3D = get_tree().get_first_node_in_group("player")
 		var drop_pos: Vector3 = player.global_position + Vector3(0.6, 0.0, 0.0) if player != null else global_position
