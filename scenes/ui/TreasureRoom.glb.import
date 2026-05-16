@@ -3,18 +3,19 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bc61qijll37rr"
-path="res://.godot/imported/MapWithoutTreasure.glb-b25a2d703fd38b35808aa47eb468d330.scn"
+uid="uid://ci01lokrnlbd4"
+path="res://.godot/imported/TreasureRoom.glb-cc2d06772696a75011a07dd9b5098868.scn"
 
 [deps]
 
-source_file="res://scenes/items/MapWithoutTreasure.glb"
-dest_files=["res://.godot/imported/MapWithoutTreasure.glb-b25a2d703fd38b35808aa47eb468d330.scn"]
+source_file="res://scenes/ui/TreasureRoom.glb"
+dest_files=["res://.godot/imported/TreasureRoom.glb-cc2d06772696a75011a07dd9b5098868.scn"]
 
 [params]
 
 nodes/root_type=""
 nodes/root_name=""
+nodes/root_script=null
 nodes/apply_root_scale=true
 nodes/root_scale=1.0
 nodes/import_as_skeleton_bones=false
@@ -32,7 +33,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path="res://Scripts/import_add_trimesh_collision.gd"
+import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

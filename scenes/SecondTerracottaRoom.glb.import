@@ -3,18 +3,19 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bc61qijll37rr"
-path="res://.godot/imported/MapWithoutTreasure.glb-b25a2d703fd38b35808aa47eb468d330.scn"
+uid="uid://cemtqqbngfjmq"
+path="res://.godot/imported/SecondTerracottaRoom.glb-d0724d940418ec0d9065dc20caccf1e8.scn"
 
 [deps]
 
-source_file="res://scenes/items/MapWithoutTreasure.glb"
-dest_files=["res://.godot/imported/MapWithoutTreasure.glb-b25a2d703fd38b35808aa47eb468d330.scn"]
+source_file="res://scenes/SecondTerracottaRoom.glb"
+dest_files=["res://.godot/imported/SecondTerracottaRoom.glb-d0724d940418ec0d9065dc20caccf1e8.scn"]
 
 [params]
 
 nodes/root_type=""
 nodes/root_name=""
+nodes/root_script=null
 nodes/apply_root_scale=true
 nodes/root_scale=1.0
 nodes/import_as_skeleton_bones=false
