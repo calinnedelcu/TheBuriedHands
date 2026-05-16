@@ -74,6 +74,7 @@ const _ITEM_ICON_TEXTURES: Dictionary = {
 	"wax_tablet": preload("res://scenes/ui/Slots/Icons/icon_wax_tablet.png"),
 	"clay_bowl": preload("res://scenes/ui/Slots/Icons/icon_clay_bowl.png"),
 	"clay_slip": preload("res://scenes/ui/Slots/Icons/icon_clay_slip.png"),
+	"mercury_vase": preload("res://scenes/ui/Slots/Icons/icon_clay_bowl.png"),
 	"lamp": preload("res://scenes/ui/Slots/Icons/icon_lamp.png"),
 	"rope": preload("res://scenes/ui/Slots/Icons/icon_rope.png"),
 	"wet_cloth": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),

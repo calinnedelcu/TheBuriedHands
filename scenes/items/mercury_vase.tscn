@@ -11,7 +11,7 @@ size = Vector3(0.3, 0.4, 0.3)
 script = ExtResource("1_script")
 
 [node name="Body" parent="." unique_id=1217091191 instance=ExtResource("3_glb")]
-transform = Transform3D(0.805, 0, 0, 0, 0.805, 0, 0, 0, 0.805, 7.1044683, -0.6833166, -2.6137042)
+transform = Transform3D(0.805, 0, 0, 0, 0.805, 0, 0, 0, 0.805, 7.152364, 0.08276194, -2.631718)
 
 [node name="PickupBody" type="StaticBody3D" parent="." unique_id=95616612]
 transform = Transform3D(2.8901625, 0, 0, 0, 1, 0, 0, 0, 2.336192, 0, 0, 0)
