@@ -16,7 +16,14 @@ shape = SubResource("Shape_placed_bowl")
 [node name="ClayBowlModel" parent="." instance=ExtResource("2_claybowl")]
 transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 0, 0)
 
-[node name="Interactable" type="Node" parent="."]
+[node name="PickupInteractable" type="Node" parent="."]
+script = ExtResource("1_quest_step")
+prompt_text = "Ia bolul cu barbotină"
+is_pickup = true
+free_parent_on_interact = true
+inventory_add_id = "clay_bowl"
+
+[node name="SlipInteractable" type="Node" parent="."]
 script = ExtResource("1_quest_step")
 prompt_text = "Ia o porție de barbotină"
 disable_after_interact = false

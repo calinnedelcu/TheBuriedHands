@@ -1,4 +1,4 @@
-extends CharacterBody3D
+﻿extends CharacterBody3D
 
 const _FALLBACK_CLICK_SFX = preload("res://audio/sfx/menu_click.wav")
 const _FALLBACK_ACTION_SFX = preload("res://audio/sfx/menu_play_start.wav")
@@ -61,6 +61,13 @@ signal stance_changed(stance: String)
 @export_group("Safety")
 ## Sub aceasta inaltime, player-ul e teleportat inapoi la spawn (in caz de cadere intr-un void).
 @export var fall_kill_y: float = -30.0
+## Dupa cinematic, paznicii ignora player-ul cateva secunde ca sa nu declanseze
+## fail/pause exact in frame-ul in care controlul revine la jucator.
+@export var post_cinematic_guard_grace_seconds: float = 3.0
+## Shortcut-ul de debug sare peste flow-ul normal si poate lasa player-ul in fata unor gardieni
+## care n-ar trebui sa conteze in testul cinematic. Tinem fail-ul dezarmat mai
+## mult, altfel SceneTree.paused ingheata luminile/animațiile imediat dupa dialog.
+@export var debug_skip_guard_grace_seconds: float = 8.0
 
 @export_group("Ladder")
 @export var ladder_climb_speed: float = 3.0
@@ -159,6 +166,12 @@ var _lamp_toggle_sfx_player: AudioStreamPlayer
 var _lamp_select_sfx_player: AudioStreamPlayer
 var _refill_sfx_player: AudioStreamPlayer
 var _refill_sfx_cooldown: float = 0.0
+var _cinematic_active: bool = false
+var _cinematic_tween: Tween = null
+var _cinematic_orig_fov: float = 0.0
+var _cinematic_locked: bool = false
+var _cinematic_run_id: int = 0
+var _guard_detection_suppressed_until_ms: int = 0
 
 var _climbing_ladder: Node = null
 var _climb_yaw_center: float = 0.0
@@ -197,9 +210,18 @@ func _setup_input_actions() -> void:
 		"slot_4": [KEY_4],
 		"throw": [KEY_G],
 	}
+	var strict_key_actions := {
+		"interact": KEY_E,
+		"pickup": KEY_F,
+	}
 	for action_name in actions:
 		if not InputMap.has_action(action_name):
 			InputMap.add_action(action_name)
+		if strict_key_actions.has(action_name):
+			var expected_keycode: int = int(strict_key_actions[action_name])
+			for ev in InputMap.action_get_events(action_name):
+				if ev is InputEventKey and (ev as InputEventKey).keycode != expected_keycode:
+					InputMap.action_erase_event(action_name, ev)
 		for keycode in actions[action_name]:
 			var key_event := InputEventKey.new()
 			key_event.keycode = keycode
@@ -266,6 +288,17 @@ func current_head_bob_multiplier() -> float:
 	return _debug_head_bob_multiplier
 
 func _unhandled_input(event: InputEvent) -> void:
+	# DEBUG: Ctrl+Shift+G sare direct la momentul "continue_modeling" (cand se declanseaza
+	# conversatia gardienilor) ca sa nu mai joci tot intro-ul + lampa + lutul la
+	# fiecare iteratie de testing. Nu folosim F9: Godot editor il foloseste
+	# pentru Suspend/Resume Embedded Project si ingheata tot SceneTree-ul.
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_G and event.ctrl_pressed and event.shift_pressed:
+		_debug_skip_to_guard_dialogue()
+		return
+	# Cinematic-ul de focus pe NPC blocheaza orice input. Mouse motion-ul ar
+	# lupta cu pan-ul, iar interact/jump intrate accidental ar rupe imersiunea.
+	if _cinematic_active:
+		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if _climbing_ladder != null:
 			# Pe scara: pitch liber, yaw limitat la ±ladder_yaw_limit_deg fata de directia de urcare
@@ -350,15 +383,9 @@ func _try_throw_ceramic() -> void:
 	_emit_noise(noise_walk * 0.4)
 
 func get_fallback_interaction_prompt() -> String:
-	if inventory != null and inventory.has_method("current_item_id") and inventory.current_item_id() != "":
-		var item_name: String = inventory.current_name() if inventory.has_method("current_name") else ""
-		return "Pune jos %s" % item_name if item_name != "" else "Pune jos"
-	if inventory != null and inventory.has_method("active_lamp") and inventory.call("active_lamp") != null:
-		return "Pune jos lampa"
-	if inventory != null:
-		return ""
-	if _has_held_lamp():
-		return "Pune jos lampa"
+	# Promptul "[X] Pune jos" a fost dezactivat in mod intentionat — apare prea
+	# des si distrage. Drop-ul ramane disponibil pe tasta X, iar daca cerem
+	# vreodata un tutorial dedicat de drop il vom afisa printr-un sistem separat.
 	return ""
 
 ## Called by lamp.gd when the player interacts with a lamp lying in the world.
@@ -523,6 +550,211 @@ func _process_climbing(delta: float) -> void:
 		return
 
 	velocity = Vector3.ZERO
+func is_cinematic_active() -> bool:
+	return _cinematic_active
+
+func is_guard_detection_suppressed() -> bool:
+	return _cinematic_active or Time.get_ticks_msec() < _guard_detection_suppressed_until_ms
+
+func suppress_guard_detection(seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	var until_ms := Time.get_ticks_msec() + int(seconds * 1000.0)
+	_guard_detection_suppressed_until_ms = maxi(_guard_detection_suppressed_until_ms, until_ms)
+
+## DEBUG: forteaza obiectivul 'continue_modeling' (declanseaza GuardConversation).
+## Apelul real se face deferred ca sa nu ruleze coroutine-urile + tween-urile in
+## mijlocul unui _unhandled_input — Godot poate intra in stari neasteptate daca
+## un signal emis sincron deschide coroutine care creeaza tween-uri ce-l
+## referenteaza inapoi pe player.
+func _debug_skip_to_guard_dialogue() -> void:
+	call_deferred("_debug_skip_to_guard_dialogue_impl")
+
+func _debug_skip_to_guard_dialogue_impl() -> void:
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	suppress_guard_detection(debug_skip_guard_grace_seconds)
+	var events := get_node_or_null("/root/GameEvents")
+	if events != null and events.has_method("notify_intro_finished"):
+		events.call("notify_intro_finished")
+	# Daca un cinematic ruleaza inca, il intrerupem curat ca sa nu ramana
+	# input-ul blocat dupa skip.
+	if _cinematic_active:
+		_kill_cinematic_tween()
+		_cinematic_run_id += 1
+		_cinematic_locked = false
+		_cinematic_active = false
+		if camera != null and _cinematic_orig_fov > 0.0:
+			camera.fov = _cinematic_orig_fov
+	var objectives := get_node_or_null("/root/Objectives")
+	if objectives != null and objectives.has_method("set_objective"):
+		objectives.call("set_objective", "continue_modeling", "Continuă modelarea picioarelor soldatului.")
+	print("[DEBUG Ctrl+Shift+G] forced objective → continue_modeling")
+
+## Pan scurt al camerei catre `world_pos`, urmat de o pauza (`hold_time`) cu
+## camera tinuta pe tinta. Camera face si zoom-in (FOV-ul scade catre `zoom_fov`)
+## in timpul pan-ului, sta zoomata pe hold, apoi revine la FOV-ul initial in
+## `return_duration`. In tot acest interval mouse-ul si miscarea sunt blocate.
+## Daca jucatorul deja se uita catre tinta, cinematic-ul e sarit.
+func play_cinematic_focus(world_pos: Vector3, pan_duration: float = 0.7, hold_time: float = 0.7, zoom_fov: float = 42.0, return_duration: float = 0.55) -> void:
+	if _cinematic_active or camera == null or camera_pivot == null:
+		return
+	var head_pos: Vector3 = camera.global_position
+	var to_target: Vector3 = world_pos - head_pos
+	if to_target.length_squared() < 0.04:
+		return
+	var current_forward: Vector3 = -camera.global_transform.basis.z
+	if current_forward.dot(to_target.normalized()) > 0.88:
+		return
+	var flat: Vector3 = Vector3(to_target.x, 0.0, to_target.z)
+	var horizontal_dist: float = flat.length()
+	# rotation.y == 0 inseamna ca jucatorul se uita spre -Z. Yaw-ul tinta:
+	var target_yaw: float = atan2(-flat.x, -flat.z) if horizontal_dist > 0.0001 else rotation.y
+	var target_pitch: float = atan2(to_target.y, horizontal_dist) if horizontal_dist > 0.0001 else 0.0
+	target_pitch = clampf(target_pitch, tilt_lower_limit, tilt_upper_limit)
+	var current_yaw: float = rotation.y
+	var yaw_delta: float = wrapf(target_yaw - current_yaw, -PI, PI)
+	var final_yaw: float = current_yaw + yaw_delta
+	var orig_fov: float = camera.fov
+	var clamped_zoom: float = clampf(zoom_fov, 10.0, orig_fov)
+	_cinematic_active = true
+	_cinematic_locked = false
+	_cinematic_orig_fov = orig_fov
+	suppress_guard_detection(pan_duration + hold_time + return_duration + post_cinematic_guard_grace_seconds)
+	_cinematic_run_id += 1
+	var run_id := _cinematic_run_id
+	_kill_cinematic_tween()
+	_run_cinematic_focus(run_id, current_yaw, final_yaw, camera_pivot.rotation.x, target_pitch, orig_fov, clamped_zoom, pan_duration, hold_time, return_duration)
+
+## Varianta de cinematic cu HOLD indefinit: pan + zoom-in catre tinta, apoi camera
+## ramane locked pana la `end_cinematic_lock()`. Folosit pentru dialoguri unde
+## durata e variabila (de ex. conversatia gardienilor). Input-ul ramane blocat
+## pe toata durata, inclusiv pe zoom-out-ul de la final.
+func start_cinematic_lock(world_pos: Vector3, zoom_fov: float = 42.0, pan_duration: float = 0.85) -> void:
+	print("[player] start_cinematic_lock called (active=%s, locked=%s)" % [_cinematic_active, _cinematic_locked])
+	if _cinematic_active or camera == null or camera_pivot == null:
+		print("[player] start_cinematic_lock EARLY RETURN (cinematic_active=%s)" % _cinematic_active)
+		return
+	var head_pos: Vector3 = camera.global_position
+	var to_target: Vector3 = world_pos - head_pos
+	if to_target.length_squared() < 0.04:
+		return
+	var flat: Vector3 = Vector3(to_target.x, 0.0, to_target.z)
+	var horizontal_dist: float = flat.length()
+	var target_yaw: float = atan2(-flat.x, -flat.z) if horizontal_dist > 0.0001 else rotation.y
+	var target_pitch: float = atan2(to_target.y, horizontal_dist) if horizontal_dist > 0.0001 else 0.0
+	target_pitch = clampf(target_pitch, tilt_lower_limit, tilt_upper_limit)
+	var current_yaw: float = rotation.y
+	var yaw_delta: float = wrapf(target_yaw - current_yaw, -PI, PI)
+	var final_yaw: float = current_yaw + yaw_delta
+	_cinematic_orig_fov = camera.fov
+	var clamped_zoom: float = clampf(zoom_fov, 10.0, _cinematic_orig_fov)
+	_cinematic_active = true
+	_cinematic_locked = true
+	suppress_guard_detection(pan_duration + post_cinematic_guard_grace_seconds)
+	_cinematic_run_id += 1
+	var run_id := _cinematic_run_id
+	_kill_cinematic_tween()
+	# Manual interpolation via process_frame (tween-urile pe player/camera in
+	# context nested coroutine+deferred nu se aplica vizual — workaround Godot 4.6).
+	_run_cinematic_pan(run_id, current_yaw, final_yaw, camera_pivot.rotation.x, target_pitch, _cinematic_orig_fov, clamped_zoom, pan_duration, true)
+	print("[player] cinematic_lock pan started (yaw %.2f→%.2f, fov %.1f→%.1f, dur=%.2f)" % [current_yaw, final_yaw, _cinematic_orig_fov, clamped_zoom, pan_duration])
+
+func _run_cinematic_focus(run_id: int, yaw_start: float, yaw_end: float, pitch_start: float, pitch_end: float, fov_start: float, fov_zoom: float, pan_duration: float, hold_time: float, return_duration: float) -> void:
+	await _run_cinematic_pan(run_id, yaw_start, yaw_end, pitch_start, pitch_end, fov_start, fov_zoom, pan_duration, false)
+	if not _cinematic_run_valid(run_id):
+		return
+	await _wait_cinematic_seconds(run_id, hold_time)
+	if not _cinematic_run_valid(run_id):
+		return
+	await _run_cinematic_zoom_out(run_id, fov_zoom, fov_start, return_duration)
+
+func _run_cinematic_pan(run_id: int, yaw_start: float, yaw_end: float, pitch_start: float, pitch_end: float, fov_start: float, fov_end: float, duration: float, require_lock: bool) -> void:
+	if duration <= 0.0:
+		rotation.y = yaw_end
+		if camera_pivot != null:
+			camera_pivot.rotation.x = pitch_end
+		if camera != null:
+			camera.fov = fov_end
+		return
+	var t0 := Time.get_ticks_msec()
+	var dur_ms := duration * 1000.0
+	while true:
+		await get_tree().process_frame
+		if not _cinematic_run_valid(run_id) or (require_lock and not _cinematic_locked):
+			# Cineva a anulat lock-ul intre timp; iesim curat.
+			return
+		var elapsed := float(Time.get_ticks_msec() - t0)
+		var t := clampf(elapsed / dur_ms, 0.0, 1.0)
+		var s := t * t * (3.0 - 2.0 * t)
+		rotation.y = lerpf(yaw_start, yaw_end, s)
+		if camera_pivot != null:
+			camera_pivot.rotation.x = lerpf(pitch_start, pitch_end, s)
+		if camera != null:
+			camera.fov = lerpf(fov_start, fov_end, s)
+		if t >= 1.0:
+			return
+
+func _wait_cinematic_seconds(run_id: int, seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	var t0 := Time.get_ticks_msec()
+	var dur_ms := seconds * 1000.0
+	while Time.get_ticks_msec() - t0 < dur_ms:
+		await get_tree().process_frame
+		if not _cinematic_run_valid(run_id):
+			return
+
+func _cinematic_run_valid(run_id: int) -> bool:
+	return run_id == _cinematic_run_id and _cinematic_active
+
+func end_cinematic_lock(return_duration: float = 0.55) -> void:
+	print("[player] end_cinematic_lock called (active=%s, locked=%s)" % [_cinematic_active, _cinematic_locked])
+	if not _cinematic_locked:
+		print("[player] end_cinematic_lock: not locked, returning")
+		return
+	_cinematic_locked = false
+	if camera == null:
+		_cinematic_active = false
+		return
+	_kill_cinematic_tween()
+	_run_cinematic_zoom_out(_cinematic_run_id, camera.fov, _cinematic_orig_fov, return_duration)
+
+func _run_cinematic_zoom_out(run_id: int, fov_start: float, fov_end: float, duration: float) -> void:
+	if duration <= 0.0 or camera == null:
+		if camera != null:
+			camera.fov = fov_end
+		if run_id == _cinematic_run_id:
+			suppress_guard_detection(post_cinematic_guard_grace_seconds)
+			_cinematic_active = false
+			_cinematic_locked = false
+		print("[player] cinematic ENDED (zero-duration)")
+		return
+	var t0 := Time.get_ticks_msec()
+	var dur_ms := duration * 1000.0
+	while true:
+		await get_tree().process_frame
+		if run_id != _cinematic_run_id:
+			return
+		if camera == null:
+			break
+		var elapsed := float(Time.get_ticks_msec() - t0)
+		var t := clampf(elapsed / dur_ms, 0.0, 1.0)
+		var s := t * t * (3.0 - 2.0 * t)
+		camera.fov = lerpf(fov_start, fov_end, s)
+		if t >= 1.0:
+			break
+	if run_id == _cinematic_run_id:
+		suppress_guard_detection(post_cinematic_guard_grace_seconds)
+		_cinematic_active = false
+		_cinematic_locked = false
+		print("[player] cinematic ENDED, input unlocked (tree.paused=%s, guard_grace=%.1fs)" % [str(get_tree().paused), post_cinematic_guard_grace_seconds])
+
+func _kill_cinematic_tween() -> void:
+	if _cinematic_tween != null and _cinematic_tween.is_running():
+		_cinematic_tween.kill()
+	_cinematic_tween = null
 
 func _physics_process(delta: float) -> void:
 	if global_position.y < fall_kill_y:
@@ -568,6 +800,8 @@ func _physics_process(delta: float) -> void:
 		_play_jump_sound()
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	if _cinematic_active:
+		input_dir = Vector2.ZERO
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	var target_speed := _current_speed()

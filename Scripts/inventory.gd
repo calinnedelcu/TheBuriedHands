@@ -267,13 +267,16 @@ func _cleanup_quest_carried(item_id: String) -> void:
 func _on_item_dropped(item_id: String) -> void:
 	if item_id != "clay_bowl":
 		return
+	# Advance objective FIRST. Daca tutorialul de lampa ruleaza dupa, va captura
+	# "take_clay_slip" ca saved_id si nu va mai trimite jucatorul inapoi sa
+	# repete drop_clay_bowl dupa refill.
 	var objectives := get_node_or_null("/root/Objectives")
-	if objectives == null or not objectives.has_method("current_id"):
-		return
-	if str(objectives.call("current_id")) != "drop_clay_bowl":
-		return
-	if objectives.has_method("set_objective"):
-		objectives.call("set_objective", "take_clay_slip", "Ia barbotina din bol.")
+	if objectives != null and objectives.has_method("current_id"):
+		if str(objectives.call("current_id")) == "drop_clay_bowl" and objectives.has_method("set_objective"):
+			objectives.call("set_objective", "take_clay_slip", "Ia barbotina din bol.")
+	var events := get_node_or_null("/root/GameEvents")
+	if events != null and events.has_method("request_lamp_tutorial"):
+		events.request_lamp_tutorial()
 
 ## Removes one unit from the active stackable slot (e.g. a thrown ceramic shard).
 func consume_current_stack() -> bool:

@@ -31,3 +31,5 @@ func _play_intro() -> void:
 		events.show_dialogue(str(line), dialogue_line_duration)
 		if dialogue_line_duration > 0.0:
 			await get_tree().create_timer(dialogue_line_duration).timeout
+	if events.has_method("notify_intro_finished"):
+		events.call("notify_intro_finished")

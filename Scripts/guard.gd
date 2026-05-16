@@ -155,6 +155,11 @@ func _face_toward_player() -> void:
 func _update_vision(delta: float) -> void:
 	if _player == null:
 		return
+	if _player_is_cinematic_locked():
+		_detect_timer = 0.0
+		if _state != State.PATROL:
+			_set_state(State.PATROL)
+		return
 	var origin: Vector3 = _vision_origin.global_position
 	var to_player := _player.global_position - origin
 	var distance := to_player.length()
@@ -195,6 +200,8 @@ func _update_vision(delta: float) -> void:
 func _on_noise(noise_pos: Vector3, loudness: float, source: Node) -> void:
 	if source == self:
 		return
+	if _player_is_cinematic_locked():
+		return
 	if _state == State.DETECT:
 		return
 	var distance := global_position.distance_to(noise_pos)
@@ -215,11 +222,23 @@ func _on_noise(noise_pos: Vector3, loudness: float, source: Node) -> void:
 func _trigger_detect() -> void:
 	if _state == State.DETECT:
 		return
+	if _player_is_cinematic_locked():
+		_detect_timer = 0.0
+		return
 	_set_state(State.DETECT)
 	if _alert_audio:
 		_alert_audio.play()
 	if has_node("/root/GameEvents"):
 		get_node("/root/GameEvents").fail("Ai fost descoperit.")
+
+func _player_is_cinematic_locked() -> bool:
+	if _player == null or not is_instance_valid(_player):
+		return false
+	if _player.has_method("is_guard_detection_suppressed") and bool(_player.call("is_guard_detection_suppressed")):
+		return true
+	if _player.has_method("is_cinematic_active") and bool(_player.call("is_cinematic_active")):
+		return true
+	return false
 
 func _set_state(s: int) -> void:
 	if _state == s:

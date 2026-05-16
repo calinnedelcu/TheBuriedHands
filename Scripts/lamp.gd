@@ -42,7 +42,7 @@ signal extinguished()
 @export var flicker_speed: float = 6.0
 @export var flicker_position_amount: float = 0.012
 @export var start_lit: bool = true
-## false = lampa apare in lume ca pickup (collider activ, pot apasa E).
+## false = lampa apare in lume ca pickup (collider activ, pot apasa F).
 ## true = lampa apare deja in mana (default, pentru lampa din LampSocket).
 @export var start_equipped: bool = true
 @export var pickup_prompt_text: String = "Ia lampa"
@@ -52,6 +52,17 @@ signal extinguished()
 @export var pickup_objective_after_id: String = ""
 @export_multiline var pickup_objective_after_text: String = ""
 @export_multiline var pickup_dialogue_text: String = ""
+
+@export_group("Pickup Focus Cinematic")
+@export var pickup_focus_enabled: bool = false
+@export var pickup_focus_target_path: NodePath = NodePath("")
+@export var pickup_focus_target_search_name: String = ""
+@export var pickup_focus_target_offset: Vector3 = Vector3(0.0, 1.0, 0.0)
+@export var pickup_focus_delay: float = 0.45
+@export var pickup_focus_pan_duration: float = 0.85
+@export var pickup_focus_hold_time: float = 1.2
+@export var pickup_focus_zoom_fov: float = 40.0
+@export var pickup_focus_zoom_return_duration: float = 0.6
 
 @export_group("Tutorial Sequences")
 ## Multi-line monologue played the first time THIS lamp is picked up.
@@ -66,6 +77,8 @@ signal extinguished()
 ## and restored at the end if it hasn't been overwritten by another system.
 @export var empty_tutorial_objective_id: String = "lamp_refill_hint"
 @export_multiline var empty_tutorial_objective_text: String = ""
+## Dialogue bubble shown once when the refill tutorial starts (before the objective hint).
+@export_multiline var empty_tutorial_dialogue: String = ""
 
 @onready var light: OmniLight3D = $FlameSocket/Light
 @onready var spot: SpotLight3D = _find_lamp_spot()
@@ -102,6 +115,10 @@ func _ready() -> void:
 	var objectives := get_node_or_null("/root/Objectives")
 	if objectives != null and objectives.has_signal("objective_changed"):
 		objectives.objective_changed.connect(_on_objective_changed)
+	var events := get_node_or_null("/root/GameEvents")
+	if events != null and events.has_signal("lamp_tutorial_requested"):
+		events.lamp_tutorial_requested.connect(_on_lamp_tutorial_requested)
+	add_to_group("lamp")
 	# Sane default. Lampa de start (din LampSocket) este equipped si inventarul
 	# preia ownership ulterior. Lampile din lume au start_equipped = false.
 	set_equipped(start_equipped)
@@ -189,7 +206,6 @@ func _process(delta: float) -> void:
 			_refresh()
 			extinguished.emit()
 			lit_changed.emit(false)
-			_play_empty_tutorial()
 			return
 		_apply_flicker()
 
@@ -232,7 +248,7 @@ func _on_pickup_interacted(by: Node) -> void:
 	if player_node != null and player_node.has_method("equip_lamp"):
 		_has_been_collected = true
 		player_node.equip_lamp(self)
-		_advance_pickup_objective()
+		_advance_pickup_objective(player_node)
 
 func _on_objective_changed(_id: String, _text: String) -> void:
 	_refresh_pickup_availability()
@@ -257,7 +273,7 @@ func _pickup_allowed_by_objective() -> bool:
 		return false
 	return str(objectives.call("current_id")) == pickup_required_objective_id
 
-func _advance_pickup_objective() -> void:
+func _advance_pickup_objective(player_node: Node) -> void:
 	var objectives := get_node_or_null("/root/Objectives")
 	if objectives == null:
 		return
@@ -270,7 +286,39 @@ func _advance_pickup_objective() -> void:
 			events.show_dialogue(pickup_dialogue_text, 4.0)
 	if pickup_objective_after_text != "" and objectives.has_method("set_objective"):
 		objectives.set_objective(pickup_objective_after_id, pickup_objective_after_text)
+	if pickup_focus_enabled:
+		_trigger_pickup_focus_cinematic(player_node)
 	_play_pickup_tutorial()
+
+func _trigger_pickup_focus_cinematic(player_node: Node) -> void:
+	if player_node == null or not player_node.has_method("play_cinematic_focus"):
+		return
+	var target_node := _resolve_pickup_focus_target()
+	if target_node == null:
+		return
+	var target_pos := target_node.global_position + pickup_focus_target_offset
+	if pickup_focus_delay > 0.0:
+		await get_tree().create_timer(pickup_focus_delay).timeout
+	if not is_instance_valid(player_node):
+		return
+	player_node.call(
+		"play_cinematic_focus",
+		target_pos,
+		pickup_focus_pan_duration,
+		pickup_focus_hold_time,
+		pickup_focus_zoom_fov,
+		pickup_focus_zoom_return_duration
+	)
+
+func _resolve_pickup_focus_target() -> Node3D:
+	var target: Node = null
+	if not pickup_focus_target_path.is_empty():
+		target = get_node_or_null(pickup_focus_target_path)
+	if target == null and pickup_focus_target_search_name != "":
+		var scene_root := get_tree().current_scene if is_inside_tree() else null
+		if scene_root != null:
+			target = scene_root.find_child(pickup_focus_target_search_name, true, false)
+	return target as Node3D
 
 func _play_pickup_tutorial() -> void:
 	if _pickup_tutorial_played or pickup_tutorial_lines.is_empty():
@@ -278,9 +326,16 @@ func _play_pickup_tutorial() -> void:
 	_pickup_tutorial_played = true
 	_play_tutorial_sequence(pickup_tutorial_lines, pickup_dialogue_text != "")
 
-func _play_empty_tutorial() -> void:
-	if empty_tutorial_lines.is_empty():
+func _on_lamp_tutorial_requested() -> void:
+	var events := get_node_or_null("/root/GameEvents")
+	if events != null and "lamp_empty_tutorial_played" in events and bool(events.get("lamp_empty_tutorial_played")):
 		return
+	_play_empty_tutorial()
+
+func _play_lamp_tutorial() -> void:
+	_play_empty_tutorial()
+
+func _play_empty_tutorial() -> void:
 	var events := get_node_or_null("/root/GameEvents")
 	if events == null:
 		return
@@ -288,6 +343,8 @@ func _play_empty_tutorial() -> void:
 		return
 	if "lamp_empty_tutorial_played" in events:
 		events.set("lamp_empty_tutorial_played", true)
+	if empty_tutorial_dialogue != "" and events.has_method("show_dialogue"):
+		events.show_dialogue(empty_tutorial_dialogue, 5.0)
 	var objectives := get_node_or_null("/root/Objectives")
 	var saved_id: String = ""
 	var saved_text: String = ""
@@ -298,11 +355,17 @@ func _play_empty_tutorial() -> void:
 			saved_text = str(objectives.call("current_text"))
 		if objectives.has_method("set_objective"):
 			objectives.call("set_objective", empty_tutorial_objective_id, empty_tutorial_objective_text)
-	await _play_tutorial_sequence(empty_tutorial_lines, false)
-	# Restore the prior objective only if no quest progression overwrote ours.
-	if objectives != null and empty_tutorial_objective_text != "" and objectives.has_method("current_id"):
-		if str(objectives.call("current_id")) == empty_tutorial_objective_id and objectives.has_method("set_objective"):
-			objectives.call("set_objective", saved_id, saved_text)
+	if not empty_tutorial_lines.is_empty():
+		await _play_tutorial_sequence(empty_tutorial_lines, false)
+	if objectives == null or empty_tutorial_objective_text == "" or not objectives.has_method("current_id"):
+		return
+	var refill_threshold: float = oil_max * 0.5
+	while oil_level < refill_threshold:
+		if str(objectives.call("current_id")) != empty_tutorial_objective_id:
+			return
+		await oil_changed
+	if str(objectives.call("current_id")) == empty_tutorial_objective_id and objectives.has_method("set_objective"):
+		objectives.call("set_objective", saved_id, saved_text)
 
 func _play_tutorial_sequence(lines: PackedStringArray, skip_first_delay: bool) -> void:
 	var events := get_node_or_null("/root/GameEvents")
@@ -310,9 +373,23 @@ func _play_tutorial_sequence(lines: PackedStringArray, skip_first_delay: bool) -
 		return
 	if skip_first_delay:
 		await get_tree().create_timer(4.0).timeout
+	# Wait for any unrelated dialogue (guards, NPCs, dropped-bowl prompts) to
+	# clear so the tutorial doesn't talk over them.
+	await _await_dialogue_clear(events)
 	for line in lines:
 		events.show_dialogue(str(line), tutorial_line_duration)
 		await get_tree().create_timer(tutorial_line_duration).timeout
+
+func _await_dialogue_clear(events: Node) -> void:
+	if events == null or not events.has_method("is_dialogue_active"):
+		return
+	while bool(events.call("is_dialogue_active")):
+		await get_tree().create_timer(0.3).timeout
+	# Grace window so we don't slip in between two consecutive lines from a
+	# sequence (e.g. guard reveal). If another line landed meanwhile, wait again.
+	await get_tree().create_timer(0.5).timeout
+	if bool(events.call("is_dialogue_active")):
+		await _await_dialogue_clear(events)
 
 func _resolve_player(by: Node) -> Node:
 	var n: Node = by

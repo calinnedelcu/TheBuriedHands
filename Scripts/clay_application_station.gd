@@ -101,7 +101,7 @@ func _player_has_chisel(by: Node) -> bool:
 		return false
 	return bool(inv.call("has_item", "chisel"))
 
-func _do_chisel_tap(by: Node) -> void:
+func _do_chisel_tap(_by: Node) -> void:
 	_cycle += 1
 	_stage = 0
 	hold_action = true

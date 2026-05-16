@@ -1,6 +1,83 @@
 # Current Project State
 
-Ultima inventariere: 2026-05-15.
+Ultima inventariere: 2026-05-16.
+
+## Checkpoint polish HUD + cinematic NPC (2026-05-16)
+
+Sesiune de polish atmosferic + UX. Tot ce mai jos e validat in joc.
+
+### 1. Animatii obiectiv mai dramatice
+- `Scripts/hud_pov.gd::_animate_objective_in/_replace/_out` rescrise. Cardul vine acum cu slide + scale (TRANS_BACK overshoot), flash cald care se topeste in alb, apoi reveal text decalat ~0.3s.
+- La replace, vechiul obiectiv e confirmat vizibil (flash + scale + slide stanga + label fade), pauza 0.45s, **abia apoi** schimba textul. Jucatorul vede CLAR cand obiectivul s-a schimbat (inainte era ~0.37s total, acum ~1.85s).
+- La complete (out), puls cald scurt inainte de fade.
+- Hidden offset crescut la `(110, -24)` pentru intrare mai vizibila din coltul dreapta-sus.
+
+### 2. Font in tema pentru obiective si dialog
+- `_OBJ_FONT_NAMES` (static var, NU const — vezi feedback) — cascada serif: Trajan Pro -> Trajan -> Cinzel -> IM FELL English -> Cormorant Garamond -> Cardo -> Cambria -> Constantia -> Palatino Linotype -> Book Antiqua -> Garamond -> Georgia -> serif. `SystemFont` ia primul instalat pe Windows (de obicei Cambria/Constantia/Palatino).
+- Text obiectiv: sepia inchis `Color(0.11, 0.06, 0.025, 0.97)` cu outline cald `Color(0.92, 0.78, 0.5, 0.35)`, size 2 — arata ca o inscriptie pe pergament.
+
+### 3. Caseta de dialog redesignata (`_build_dialogue_panel`)
+- Inlocuit `Label` cu `RichTextLabel` + `bbcode_enabled=true` + `fit_content=true`.
+- Style sepia-pergament: bg `(0.05, 0.032, 0.018, 0.88)`, border aur cald 2px, corner radius 6, padding intern 28x20, **drop shadow** offset (0,4) size 10.
+- 3 variante SystemFont (normal/bold/italic), aceeasi cascada serif.
+- `_format_dialogue_text(text)` — detecteaza prefix "Speaker:" si formateaza ca **`[color=#e8b86a][b]Ucenic:[/b][/color]  [i]restul replicii[/i]`**. Fara prefix sau prefix > 26 caractere → tot text italic.
+- Animatii:
+  - `_animate_dialogue_show`: slide-up 28px + fade 0.32s + scale 0.96→1 cu TRANS_BACK 0.45s
+  - `_animate_dialogue_text_swap`: puls scale 1.03→1 cu typewriter restart
+  - `_animate_dialogue_hide`: fade 0.3s + slide-down 0.35s
+  - `_start_dialogue_reveal`: typewriter via `visible_ratio` 0→1 la ~42 char/s, clamped 0.5–2.6s
+- `_DLG_BASE_OFFSET_TOP/BOTTOM`, `_DLG_HIDDEN_SHIFT`, `_DLG_SPEAKER_COLOR` constante pentru tuning rapid.
+
+### 4. Sistem cinematic focus pe NPC
+- `Scripts/player_controller.gd::play_cinematic_focus(world_pos, pan_duration=0.7, hold_time=0.7, zoom_fov=42.0, return_duration=0.55)`:
+  - Calculeaza yaw (atan2 pe XZ) + pitch (atan2 pe Y/orizontal), clampat la `tilt_lower/upper_limit`.
+  - Yaw delta cu `wrapf(target - current, -PI, PI)` → shortest path.
+  - Skip automat daca `dot(forward, to_target) > 0.88` (deja se uita acolo).
+  - Tween secvential explicit: faza 1 paralel (yaw + pitch + fov-in) `TRANS_CUBIC EASE_IN_OUT`, faza 2 interval (hold), faza 3 fov-out `TRANS_SINE EASE_IN_OUT`, faza 4 callback `_cinematic_active = false`.
+  - **IMPORTANT pattern**: NU folosi `set_parallel(true)` + `chain()` o data, pentru ca `chain()` e one-shot in Godot 4 si tweenele de dupa revin la paralel = callback-ul se trigger-uieste prea devreme. Foloseste mod default sequential + `.parallel()` per tween din pasul curent.
+- Input gating in `_unhandled_input` (early return daca `_cinematic_active`) + zero pe `input_dir` in `_physics_process`. Mouse + miscare + jump/interact/etc. blocate **pana la finalul fazei 4** (zoom-out complet).
+- `Scripts/npc_dialogue_interactable.gd::_trigger_focus_cinematic()` — exporturi `focus_player_on_objective`, `focus_target_path` (default = parent global_position), `focus_target_offset`, `focus_delay`, `focus_pan_duration`, `focus_hold_time`, `focus_zoom_fov`, `focus_zoom_return_duration`. Apelat din `_apply_initial_objective` cand obiectivul e setat (gate prin `wait_for_intro`).
+- Activat pe nodul `ApprenticeInteractBody/Dialogue` cu valori: `focus_target_offset=(0,1,0)`, `focus_delay=0.6`, `focus_pan_duration=0.85`, `focus_hold_time=1.5`, `focus_zoom_fov=40`, `focus_zoom_return_duration=0.6`. Total cinematic ~3.55s input blocat.
+
+### 5. Foc pentru cuptoare (`scenes/items/furnace_fire.tscn`)
+- Scena reutilizabila drag-and-drop. Refoloseste `oil_flame.gdshader` + `flame_teardrop.obj` (deja in proiect).
+- Structura: `Light` (OmniLight3D warm) + `FlameCore` + `FlameCrossA/B` (rotite 60°/120° pe Y pentru volum) + `FlameSide1/2` (la ±0.55m offset orizontal) + `FlameInnerGlow` + `Embers` (GPUParticles3D 36 scantei) + `Smoke` (32 puff-uri) + `CrackleSFX` (AudioStreamPlayer3D).
+- `Scripts/furnace_fire.gd` — flicker per instanta cu `FastNoiseLite` (seed random), exporturi pentru `flicker_speed/range`, `flame_jitter`, `base_energy/range`, `light_color`, `sound_enabled/volume_db/bus/pitch_random`. Pitch random per instanta + offset random in loop → cuptoarele alaturate nu suna sincronizat.
+- Audio: `audio/sfx/fire_crackle.mp3` (dragon-studio-fire-sounds-356121.mp3, copiat din Downloads). `.import` cu `loop=true`. `unit_size=10`, `max_distance=25`, `volume_db=6` pe AudioStreamPlayer3D ca sa se auda decent prin atenuarea 3D.
+- Defaults vizuale calibrate dupa screenshot user: portocaliu cald (NU galben), volum mare (3 flame-uri centrale + 2 laterale), fum moderat. Ajusteaza per instanta cu `scale` pe nodul radacina daca cuptorul e mai mare/mic.
+
+### 6. Obiectiv refill lampa: ramane pana la 50%
+- `Scripts/lamp.gd::_play_empty_tutorial` — dupa monologul de empty, **NU mai restaureaza imediat obiectivul vechi**. Asteapta `oil_changed` in loop pana `oil_level >= oil_max * 0.5`. Daca alt sistem setezeaza alt obiectiv intre timp, da return (quest progression are prioritate).
+- Textul din `tomb_layout.tscn` (4 lampi de workshop) actualizat: *"Reumple lampa la o sconcă de pe perete (ține apăsat E). Trebuie să umpli măcar până la jumătate."* — explicit ca jucatorul sa stie pragul.
+
+### 7. Obiectiv apprentice — gate pe intro finished
+- `Scripts/game_events.gd` — semnal nou `intro_finished`, flag `intro_done`, helper `notify_intro_finished()` (idempotent).
+- `Scripts/scene_intro_dialogue.gd` cheama `events.notify_intro_finished()` dupa ultima replica.
+- `Scripts/npc_dialogue_interactable.gd` — export nou `wait_for_intro: bool`. Daca true, `_ready` face `await events.intro_finished` inainte de `_apply_initial_objective`. Activat pe ucenic in scena.
+
+### 8. Plasa de siguranta pentru dialogue_lines (BUG RECURENT — vezi feedback)
+- `Scripts/npc_dialogue_interactable.gd` — trei nivele fallback in `_effective_lines()`:
+  1. `dialogue_lines` (export, din .tscn)
+  2. `fallback_dialogue_lines` (export, backup din .tscn)
+  3. `_get_baked_lines(key)` — **replici hardcodate in cod** sub `match` pe `baked_dialogue_key` sau `initial_objective_id`. **Imun la save-uri Godot/agenti care curata .tscn**.
+- Adaugat case-ul `"talk_to_apprentice"` cu cele 4 replici. Extinde cu alte case-uri pentru NPC noi.
+- `_ready` face `push_warning` daca toate 3 sursele sunt goale — debugging mai rapid data viitoare.
+
+### 9. Bugfixe colaterale
+- `Scripts/clay_application_station.gd::_do_chisel_tap` — parametru `by` → `_by` (era nefolosit).
+- `Scripts/hud_pov.gd:195-196` — `count_label.grow_horizontal/vertical = 0` → `Control.GROW_DIRECTION_BEGIN` (Godot 4.6 mai strict cu int→enum).
+- `scenes/tomb_layout.tscn::ApprenticeInteractBody` — scale non-uniform `(1.30, 2.08, 1.20)` baked in capsula (`radius 0.45→0.56`, `height 1.6→3.33`), transform setat la scale uniform `(1,1,1)`. Jolt nu mai da warning.
+
+### De facut imediat (urmatorul prompt)
+- (optional) **Sunet pentru obiectiv** — user a cerut explicit FARA sunet, doar font + animatie. Daca se razgandeste, exista pattern-ul `_make_objective_chime()` (procedural PCM16 din `furnace_fire.gd` ca referinta).
+- (optional) **Cinematic focus pe alti NPC** — paznici, mester etc. Doar bifezi `focus_player_on_objective=true` + setezi `focus_target_offset`.
+
+### De urmarit dupa playtest
+- Daca cinematic-ul pe ucenic se simte prea lung sau abrupt → ajusteaza `focus_pan_duration` (curent 0.85) si `focus_hold_time` (curent 1.5) in inspector pe nodul Dialogue.
+- Daca zoom-ul (FOV 40°) e prea agresiv → urci la 50–55°.
+- Furnace fire poate fi prea zgomotos cu mai multe cuptoare aproape → scade `volume_db` per instanta sau bus dedicat.
+
+---
 
 ## Checkpoint atelier si narațiune (2026-05-15 seara)
 

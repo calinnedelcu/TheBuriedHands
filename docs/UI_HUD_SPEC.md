@@ -121,7 +121,7 @@ Iconografie:
 
 Instanțe necesare:
 
-- E - Ia lampa
+- F - Ia lampa
 - E - Deschide
 - E - Împinge
 - E - Dezactivează capcana
@@ -210,4 +210,3 @@ Iconițe necesare:
 - pânză umedă;
 - sigiliu Qin;
 - tăbliță cu dovada.
-

@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://cs18cnwrdhvr6" path="res://scenes/ui/Slots/slot_left_hand.png" id="11_left_hand_slot"]
 [ext_resource type="Texture2D" uid="uid://bny7vxsik52fw" path="res://scenes/ui/Slots/Icons/icon_lamp.png" id="12_icon_lamp"]
 [ext_resource type="Texture2D" uid="uid://bpikmcmpsbelu" path="res://scenes/ui/Objectives/card_obiective.png" id="13_obj_card"]
+[ext_resource type="Texture2D" uid="uid://cmuceog3rt21n" path="res://scenes/ui/Vitalitate/vitality_hud.png" id="14_vitality"]
+[ext_resource type="Texture2D" uid="uid://tumwx0gvn5e4" path="res://scenes/ui/Mercur/frames/vapor_0.png" id="15_vapor_frame_preview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_dot"]
 bg_color = Color(1, 0.85, 0.65, 0.7)
@@ -41,6 +43,14 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="AtlasTexture" id="Atlas_vitality_hud"]
+atlas = ExtResource("14_vitality")
+region = Rect2(20, 143, 545, 102)
+
+[sub_resource type="AtlasTexture" id="Atlas_vapor_frame_preview"]
+atlas = ExtResource("15_vapor_frame_preview")
+region = Rect2(17, 260, 1081, 202)
 
 [node name="HUDPov" type="CanvasLayer" unique_id=205194570]
 script = ExtResource("1_hud")
@@ -458,12 +468,12 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -374.59995
-offset_top = 10.0
-offset_right = 75.20004
-offset_bottom = 183.0
+offset_left = -459.38086
+offset_top = 5.0
+offset_right = 93.17157
+offset_bottom = 218.0
 grow_horizontal = 0
-pivot_offset = Vector2(260, 100)
+pivot_offset = Vector2(310, 119)
 mouse_filter = 2
 texture = ExtResource("13_obj_card")
 expand_mode = 1
@@ -472,14 +482,14 @@ stretch_mode = 5
 [node name="ObjectiveLabel" type="Label" parent="Anchor/TopRight/ObjectiveCard" unique_id=1962451910]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.049000002
-anchor_top = 0.124000005
-anchor_right = 0.76400006
-anchor_bottom = 0.582
-offset_left = 6.5597763
-offset_top = 7.5479984
-offset_right = -8.047241
-offset_bottom = -6.6860046
+anchor_left = 0.064
+anchor_top = 0.16800001
+anchor_right = 0.74700004
+anchor_bottom = 0.546
+offset_left = -0.05404663
+offset_top = 0.00799942
+offset_right = 0.10183716
+offset_bottom = 0.026000977
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.09, 0.05, 0.02, 0.95)
@@ -488,3 +498,23 @@ theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="Vitality" type="TextureRect" parent="." unique_id=49885634]
+offset_left = 24.0
+offset_top = 9.0
+offset_right = 351.0
+offset_bottom = 70.0
+mouse_filter = 2
+texture = SubResource("Atlas_vitality_hud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VaporFrame" type="TextureRect" parent="." unique_id=2001672101]
+offset_left = 23.0
+offset_top = 78.0
+offset_right = 350.96307
+offset_bottom = 139.0
+mouse_filter = 2
+texture = SubResource("Atlas_vapor_frame_preview")
+expand_mode = 1
+stretch_mode = 5
