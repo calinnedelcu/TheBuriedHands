@@ -1,24 +1,24 @@
 extends Node3D
 
 @export var player_path: NodePath
-@export var sway_amount: float = 0.012
-@export var sway_smoothing: float = 8.0
-@export var movement_sway_amount: float = 0.004
-@export var bob_amount: float = 0.008
+@export var sway_amount: float = 0.005
+@export var sway_smoothing: float = 10.0
+@export var movement_sway_amount: float = 0.002
+@export var bob_amount: float = 0.004
 @export var bob_speed: float = 8.0
-@export var breath_amount: float = 0.0035
+@export var breath_amount: float = 0.002
 @export var breath_speed: float = 1.6
 @export var crouch_offset: Vector3 = Vector3(0, -0.04, 0.02)
 @export var crawl_offset: Vector3 = Vector3(0, -0.11, 0.08)
-@export var land_kick: float = 0.05
+@export var land_kick: float = 0.025
 @export_group("Stance Feel")
-@export var sprint_sway_multiplier: float = 1.65
-@export var sprint_bob_multiplier: float = 1.35
+@export var sprint_sway_multiplier: float = 1.3
+@export var sprint_bob_multiplier: float = 1.15
 @export var crouch_sway_multiplier: float = 0.58
 @export var crouch_bob_multiplier: float = 0.45
 @export var crawl_sway_multiplier: float = 0.42
 @export var crawl_bob_multiplier: float = 0.28
-@export var airborne_sway_multiplier: float = 1.3
+@export var airborne_sway_multiplier: float = 1.1
 
 @onready var _player: CharacterBody3D = get_node_or_null(player_path) if not player_path.is_empty() else _find_player()
 

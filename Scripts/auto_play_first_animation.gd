@@ -14,7 +14,10 @@ func _ready() -> void:
 		return
 
 	var selected_animation := animation_name
-	if selected_animation == &"" or not animation_player.has_animation(selected_animation):
+	if selected_animation != &"" and not animation_player.has_animation(selected_animation):
+		push_warning("[%s] animation '%s' NOT FOUND. Available: %s" % [name, String(selected_animation), animations])
+		selected_animation = &""
+	if selected_animation == &"":
 		selected_animation = animations[0]
 
 	var animation := animation_player.get_animation(selected_animation)

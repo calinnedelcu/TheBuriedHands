@@ -1,35 +1,87 @@
-[gd_scene format=3 uid="uid://cxhym1xktsuto"]
+[gd_scene format=3 uid="uid://bnunw4tjpxm7c"]
 
-[ext_resource type="Script" path="res://Scripts/pause_menu.gd" id="1_pause"]
+[ext_resource type="Script" uid="uid://bovchba6yelxn" path="res://Scripts/pause_menu.gd" id="1_pause"]
+[ext_resource type="Texture2D" uid="uid://b1pu4gs0y3hr1" path="res://scenes/ui/meniu-ingame.png" id="2_pause_art"]
+[ext_resource type="Texture2D" uid="uid://c8leomwdtgc03" path="res://scenes/ui/meniu-tbh.png" id="3_settings_art"]
+[ext_resource type="Texture2D" uid="uid://bavnoo8eaofxv" path="res://scenes/ui/slider_grabber_bronze.svg" id="4_slider_grabber"]
+[ext_resource type="Texture2D" uid="uid://ce18d6nvodrno" path="res://scenes/ui/slider_grabber_bronze_hover.svg" id="5_slider_grabber_hover"]
+[ext_resource type="Texture2D" uid="uid://dyy7evb7wev5f" path="res://scenes/ui/slider_grabber_bronze_disabled.svg" id="6_slider_grabber_disabled"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.06, 0.05, 0.04, 0.92)
+[sub_resource type="StyleBoxFlat" id="StyleBox_click_normal"]
+bg_color = Color(0.88, 0.58, 0.18, 0.22)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.55, 0.4, 0.22, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.6)
-shadow_size = 14
+border_color = Color(1, 0.75, 0.35, 0.65)
 
-[node name="PauseMenu" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_click_pressed"]
+bg_color = Color(0.75, 0.36, 0.12, 0.42)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.62, 0.28, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_click_hover"]
+bg_color = Color(0.95, 0.68, 0.22, 0.34)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.86, 0.48, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_track"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.19, 0.12, 0.055, 0.62)
+border_width_top = 1
+border_width_bottom = 1
+border_color = Color(0.48, 0.34, 0.17, 0.78)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_fill"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.62, 0.4, 0.18, 0.82)
+border_width_top = 1
+border_width_bottom = 1
+border_color = Color(0.92, 0.68, 0.33, 0.82)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_fill_hover"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.78, 0.5, 0.22, 0.94)
+border_width_top = 1
+border_width_bottom = 1
+border_color = Color(1, 0.78, 0.42, 0.95)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[node name="PauseMenu" type="CanvasLayer" unique_id=1111624037]
 layer = 50
 script = ExtResource("1_pause")
+pause_texture = ExtResource("2_pause_art")
+settings_texture = ExtResource("3_settings_art")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=818654028]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="Dimmer" type="ColorRect" parent="Root"]
+[node name="Dimmer" type="ColorRect" parent="Root" unique_id=1368102907]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,46 +89,241 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.55)
+color = Color(0, 0, 0, 0.68)
 
-[node name="Panel" type="PanelContainer" parent="Root"]
+[node name="PauseArt" type="TextureRect" parent="Root" unique_id=1732383459]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -140.0
-offset_right = 180.0
-offset_bottom = 140.0
+offset_left = -252.0
+offset_top = -315.0
+offset_right = 252.0
+offset_bottom = 315.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBox_panel")
+mouse_filter = 2
+texture = ExtResource("2_pause_art")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 14
+[node name="ContinueButton" type="Button" parent="Root/PauseArt" unique_id=386270843]
+layout_mode = 0
+offset_left = 143.0
+offset_top = 225.0
+offset_right = 363.0
+offset_bottom = 275.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
+theme_override_styles/normal = SubResource("StyleBox_click_normal")
+theme_override_styles/pressed = SubResource("StyleBox_click_pressed")
+theme_override_styles/hover = SubResource("StyleBox_click_hover")
+theme_override_styles/disabled = SubResource("StyleBox_click_normal")
+theme_override_styles/focus = SubResource("StyleBox_click_hover")
+flat = true
 
-[node name="Title" type="Label" parent="Root/Panel/VBox"]
-layout_mode = 2
-text = "PAUZĂ"
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 0.88, 0.65, 1)
-theme_override_font_sizes/font_size = 28
+[node name="MainMenuButton" type="Button" parent="Root/PauseArt" unique_id=1918992242]
+layout_mode = 0
+offset_left = 143.0
+offset_top = 305.0
+offset_right = 362.0
+offset_bottom = 356.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
+theme_override_styles/normal = SubResource("StyleBox_click_normal")
+theme_override_styles/pressed = SubResource("StyleBox_click_pressed")
+theme_override_styles/hover = SubResource("StyleBox_click_hover")
+theme_override_styles/disabled = SubResource("StyleBox_click_normal")
+theme_override_styles/focus = SubResource("StyleBox_click_hover")
+flat = true
 
-[node name="ResumeButton" type="Button" parent="Root/Panel/VBox"]
-layout_mode = 2
-text = "Reia jocul"
+[node name="SettingsButton" type="Button" parent="Root/PauseArt" unique_id=1923048149]
+layout_mode = 0
+offset_left = 143.0
+offset_top = 389.0
+offset_right = 361.0
+offset_bottom = 434.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
+theme_override_styles/normal = SubResource("StyleBox_click_normal")
+theme_override_styles/pressed = SubResource("StyleBox_click_pressed")
+theme_override_styles/hover = SubResource("StyleBox_click_hover")
+theme_override_styles/disabled = SubResource("StyleBox_click_normal")
+theme_override_styles/focus = SubResource("StyleBox_click_hover")
+flat = true
 
-[node name="RestartButton" type="Button" parent="Root/Panel/VBox"]
-layout_mode = 2
-text = "Reia de la început"
+[node name="QuitButton" type="Button" parent="Root/PauseArt" unique_id=1039998856]
+layout_mode = 0
+offset_left = 143.0
+offset_top = 471.0
+offset_right = 361.0
+offset_bottom = 516.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
+theme_override_styles/normal = SubResource("StyleBox_click_normal")
+theme_override_styles/pressed = SubResource("StyleBox_click_pressed")
+theme_override_styles/hover = SubResource("StyleBox_click_hover")
+theme_override_styles/disabled = SubResource("StyleBox_click_normal")
+theme_override_styles/focus = SubResource("StyleBox_click_hover")
+flat = true
 
-[node name="MenuButton" type="Button" parent="Root/Panel/VBox"]
-layout_mode = 2
-text = "Meniu principal"
+[node name="SettingsArt" type="TextureRect" parent="Root" unique_id=310433415]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -257.0
+offset_top = -315.0
+offset_right = 257.0
+offset_bottom = 315.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_settings_art")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="QuitButton" type="Button" parent="Root/Panel/VBox"]
-layout_mode = 2
-text = "Ieșire"
+[node name="SensitivityXSlider" type="HSlider" parent="Root/SettingsArt" unique_id=727458197]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 123.0
+offset_right = 368.0
+offset_bottom = 135.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 0.27
+
+[node name="SensitivityYSlider" type="HSlider" parent="Root/SettingsArt" unique_id=145590880]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 140.0
+offset_right = 368.0
+offset_bottom = 152.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 0.27
+
+[node name="ZoomSensitivitySlider" type="HSlider" parent="Root/SettingsArt" unique_id=598854142]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 157.0
+offset_right = 368.0
+offset_bottom = 169.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 0.42
+
+[node name="MasterVolumeSlider" type="HSlider" parent="Root/SettingsArt" unique_id=195506099]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 196.0
+offset_right = 368.0
+offset_bottom = 212.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 1.0
+
+[node name="MusicVolumeSlider" type="HSlider" parent="Root/SettingsArt" unique_id=1941907152]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 211.0
+offset_right = 368.0
+offset_bottom = 227.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 1.0
+
+[node name="EffectsVolumeSlider" type="HSlider" parent="Root/SettingsArt" unique_id=423610486]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 226.0
+offset_right = 368.0
+offset_bottom = 242.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 1.0
+
+[node name="DialogueVolumeSlider" type="HSlider" parent="Root/SettingsArt" unique_id=479954285]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 178.0
+offset_top = 241.0
+offset_right = 368.0
+offset_bottom = 257.0
+mouse_default_cursor_shape = 2
+theme_override_icons/grabber = ExtResource("4_slider_grabber")
+theme_override_icons/grabber_highlight = ExtResource("5_slider_grabber_hover")
+theme_override_icons/grabber_disabled = ExtResource("6_slider_grabber_disabled")
+theme_override_styles/slider = SubResource("StyleBox_slider_track")
+theme_override_styles/grabber_area = SubResource("StyleBox_slider_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_hover")
+step = 0.01
+value = 1.0
+
+[node name="SettingsCloseButton" type="Button" parent="Root/SettingsArt" unique_id=2010456789]
+layout_mode = 0
+offset_left = 178.0
+offset_top = 275.0
+offset_right = 368.0
+offset_bottom = 307.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+text = "Înapoi"
+theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
+theme_override_styles/normal = SubResource("StyleBox_click_normal")
+theme_override_styles/pressed = SubResource("StyleBox_click_pressed")
+theme_override_styles/hover = SubResource("StyleBox_click_hover")
+theme_override_styles/disabled = SubResource("StyleBox_click_normal")
+theme_override_styles/focus = SubResource("StyleBox_click_hover")
+flat = true

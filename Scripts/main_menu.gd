@@ -4,6 +4,7 @@ const GAME_SCENE := "res://scenes/tomb_layout.tscn"
 const MUSIC_TARGET_VOLUME_DB := -16.0
 const MUSIC_FADE_SECONDS := 3.0
 const PLAY_START_DELAY_SECONDS := 0.42
+const SETTINGS_FILE := "user://settings.cfg"
 
 @onready var music: AudioStreamPlayer = $Music
 @onready var click_sound: AudioStreamPlayer = $ClickSound
@@ -20,6 +21,7 @@ var _is_starting_game := false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	_apply_saved_audio_settings()
 	_start_music()
 
 	_button_glows = {
@@ -64,6 +66,24 @@ func _start_music() -> void:
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(music, "volume_db", MUSIC_TARGET_VOLUME_DB, MUSIC_FADE_SECONDS)
+
+func _apply_saved_audio_settings() -> void:
+	var config := ConfigFile.new()
+	if config.load(SETTINGS_FILE) != OK:
+		return
+	_set_bus_linear_volume(&"Master", float(config.get_value("settings", "master_volume", 1.0)))
+	_set_bus_linear_volume(&"Music", float(config.get_value("settings", "music_volume", 1.0)))
+	var effects_volume := float(config.get_value("settings", "effects_volume", 1.0))
+	_set_bus_linear_volume(&"SFX", effects_volume)
+	_set_bus_linear_volume(&"Tomb", effects_volume)
+	_set_bus_linear_volume(&"Dialogue", float(config.get_value("settings", "dialogue_volume", 1.0)))
+
+func _set_bus_linear_volume(bus_name: StringName, linear_value: float) -> void:
+	var index := AudioServer.get_bus_index(bus_name)
+	if index < 0:
+		return
+	var clamped := clampf(linear_value, 0.0, 1.0)
+	AudioServer.set_bus_volume_db(index, -80.0 if clamped <= 0.001 else linear_to_db(clamped))
 
 func _sync_glow(btn: Button, glow: Panel) -> void:
 	# Match the glow to the button's actual rect, ignoring its own anchors.

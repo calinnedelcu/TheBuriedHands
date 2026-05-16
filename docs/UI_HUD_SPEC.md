@@ -130,20 +130,45 @@ Instanțe necesare:
 
 ## Pause menu
 
-Opțiuni:
+Scenă:
 
-- Resume
-- Restart Checkpoint
-- Options
-- Main Menu
-- Quit
+- `res://scenes/ui/pause_menu.tscn`
+
+Structură curentă:
+
+- `PauseArt` — meniul de pauză in-game, deschis cu Escape/F6, bazat pe `meniu-ingame.png`.
+- `SettingsArt` — ecranul de setări deschis din `Setări`, bazat pe `meniu-tbh.png`.
+
+Opțiuni `PauseArt`:
+
+- Continuă
+- Meniu principal
+- Setări
+- Ieșire
+
+Setări `SettingsArt`:
+
+- Sensitivity X
+- Sensitivity Y
+- Zoom Sensitivity
+- Master Volume
+- Music Volume
+- Effects Volume
+- Dialogue Volume
 
 Stil:
 
 - pergament vertical;
 - margini bronz;
-- agățat cu sfoară;
-- simplu.
+- text românesc lizibil;
+- slidere subțiri crem/bronz, fără UI modern alb;
+- hover/click cald, la fel ca meniul principal.
+
+Notă implementare:
+
+- Butoanele și sliderele se poziționează manual în editor. Scriptul păstrează offseturile puse pe noduri.
+- `PauseArt` poate ocupa mai puțin din ecran; `SettingsArt` poate ocupa aproape tot verticalul (`settings_height_ratio = 0.95`).
+- `BackButton` nu este obligatoriu. Flow-ul curent folosește `Continuă`, Escape/F6 și butoanele existente.
 
 ## Main menu
 

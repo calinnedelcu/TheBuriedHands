@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://c5guardprot00"]
 
 [ext_resource type="Script" path="res://Scripts/guard.gd" id="1_guard"]
-[ext_resource type="PackedScene" uid="uid://brd4w4eu5kj5m" path="res://TripoModels/guard1-idle.glb" id="2_guard_model"]
+[ext_resource type="PackedScene" path="res://TripoModels/samurai.glb" id="2_guard_model"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 height = 1.8

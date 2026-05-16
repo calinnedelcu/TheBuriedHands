@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://ixx1w7jihlti"]
+
+[ext_resource type="Script" uid="uid://xhqtq54apk1j" path="res://Scripts/mercury_vase.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bp5ua5gbbio8s" path="res://Scripts/interactable.gd" id="2_interact"]
+[ext_resource type="PackedScene" uid="uid://dr4rjknbnmg0u" path="res://scenes/items/MercuryVase.glb" id="3_glb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pickup"]
+size = Vector3(0.3, 0.4, 0.3)
+
+[node name="MercuryVase" type="Node3D" unique_id=1273175159]
+script = ExtResource("1_script")
+
+[node name="Body" parent="." unique_id=1217091191 instance=ExtResource("3_glb")]
+transform = Transform3D(0.805, 0, 0, 0, 0.805, 0, 0, 0, 0.805, 7.1044683, -0.6833166, -2.6137042)
+
+[node name="PickupBody" type="StaticBody3D" parent="." unique_id=95616612]
+transform = Transform3D(2.8901625, 0, 0, 0, 1, 0, 0, 0, 2.336192, 0, 0, 0)
+collision_mask = 0
+
+[node name="PickupCollider" type="CollisionShape3D" parent="PickupBody" unique_id=1570513246]
+shape = SubResource("BoxShape3D_pickup")
+
+[node name="Interactable" type="Node" parent="PickupBody" unique_id=1818734692]
+script = ExtResource("2_interact")
+prompt_text = "Ia vaza de mercur"
+is_pickup = true

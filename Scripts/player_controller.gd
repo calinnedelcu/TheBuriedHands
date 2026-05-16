@@ -33,6 +33,9 @@ signal stance_changed(stance: String)
 
 @export_group("Look Settings")
 @export var mouse_sensitivity: float = 0.002
+@export var mouse_sensitivity_x: float = 0.002
+@export var mouse_sensitivity_y: float = 0.002
+@export_range(0.1, 2.0, 0.01) var zoom_mouse_sensitivity_multiplier: float = 0.75
 @export var tilt_lower_limit: float = deg_to_rad(-90.0)
 @export var tilt_upper_limit: float = deg_to_rad(90.0)
 
@@ -79,7 +82,13 @@ signal stance_changed(stance: String)
 @export var lamp_drop_probe_up: float = 1.1
 @export var lamp_drop_probe_down: float = 2.4
 @export var lamp_drop_surface_offset: float = 0.08
-@export var lamp_drop_scale: float = 4.0
+@export var lamp_drop_scale: float = 2.4
+
+@export_group("Ladder")
+@export var ladder_climb_speed: float = 3.0
+@export var ladder_snap_speed: float = 14.0
+@export var ladder_yaw_limit_deg: float = 65.0
+@export var ladder_mount_duration: float = 0.8
 
 @export_group("Movement Audio")
 @export var movement_audio_enabled: bool = true
@@ -163,9 +172,22 @@ var _refill_sfx_cooldown: float = 0.0
 var _cinematic_active: bool = false
 var _cinematic_tween: Tween = null
 var _cinematic_orig_fov: float = 0.0
+var _default_camera_fov: float = 75.0
 var _cinematic_locked: bool = false
 var _cinematic_run_id: int = 0
 var _guard_detection_suppressed_until_ms: int = 0
+
+var _climbing_ladder: Node = null
+var _climb_yaw_center: float = 0.0
+var _nearby_ladder: Node = null
+var _is_mounting: bool = false
+var _mount_t: float = 0.0
+var _mount_ladder: Node = null
+var _mount_start_pos: Vector3 = Vector3.ZERO
+var _mount_start_yaw: float = 0.0
+var _mount_start_cam_x: float = 0.0
+var _mount_target_pos: Vector3 = Vector3.ZERO
+var _mount_target_yaw: float = 0.0
 
 func _setup_input_actions() -> void:
 	var actions := {
@@ -223,6 +245,8 @@ func _ready() -> void:
 	if camera_pivot != null:
 		camera_pivot.position.y = stand_camera_y
 		_initial_camera_local_position.y = 0.0
+	if camera != null:
+		_default_camera_fov = camera.fov
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_setup_input_actions()
 	if collider != null and collider.shape is CapsuleShape3D:
@@ -268,6 +292,23 @@ func current_deceleration_multiplier() -> float:
 func current_head_bob_multiplier() -> float:
 	return _debug_head_bob_multiplier
 
+func set_look_settings(sensitivity_x: float, sensitivity_y: float, zoom_multiplier: float) -> void:
+	mouse_sensitivity_x = maxf(sensitivity_x, 0.00001)
+	mouse_sensitivity_y = maxf(sensitivity_y, 0.00001)
+	zoom_mouse_sensitivity_multiplier = clampf(zoom_multiplier, 0.1, 2.0)
+	mouse_sensitivity = (mouse_sensitivity_x + mouse_sensitivity_y) * 0.5
+
+func _look_sensitivity_x() -> float:
+	return mouse_sensitivity_x * _zoom_look_multiplier()
+
+func _look_sensitivity_y() -> float:
+	return mouse_sensitivity_y * _zoom_look_multiplier()
+
+func _zoom_look_multiplier() -> float:
+	if camera != null and camera.fov < _default_camera_fov - 0.5:
+		return zoom_mouse_sensitivity_multiplier
+	return 1.0
+
 func _unhandled_input(event: InputEvent) -> void:
 	# DEBUG: Ctrl+Shift+G sare direct la momentul "continue_modeling" (cand se declanseaza
 	# conversatia gardienilor) ca sa nu mai joci tot intro-ul + lampa + lutul la
@@ -286,9 +327,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _cinematic_active:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
-		camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, tilt_lower_limit, tilt_upper_limit)
+		if _climbing_ladder != null:
+			# Pe scara: pitch liber, yaw limitat la ±ladder_yaw_limit_deg fata de directia de urcare.
+			camera_pivot.rotate_x(-event.relative.y * _look_sensitivity_y())
+			camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, tilt_lower_limit, tilt_upper_limit)
+			var yaw_delta: float = -event.relative.x * _look_sensitivity_x()
+			var limit: float = deg_to_rad(ladder_yaw_limit_deg)
+			rotation.y += yaw_delta
+			var offset: float = angle_difference(_climb_yaw_center, rotation.y)
+			rotation.y = _climb_yaw_center + clamp(offset, -limit, limit)
+		else:
+			rotate_y(-event.relative.x * _look_sensitivity_x())
+			camera_pivot.rotate_x(-event.relative.y * _look_sensitivity_y())
+			camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, tilt_lower_limit, tilt_upper_limit)
 
 	if event.is_action_pressed("jump"):
 		jump_buffer_timer = jump_buffer_duration
@@ -300,8 +351,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_crawl(not _is_crawling)
 
 	if event.is_action_pressed("interact"):
-		if interaction != null and interaction.has_method("try_interact"):
-			interaction.try_interact()
+		if _climbing_ladder == null:
+			if _nearby_ladder != null and not _is_mounting and is_on_floor():
+				_start_mount(_nearby_ladder)
+			elif interaction != null and interaction.has_method("try_interact"):
+				interaction.try_interact()
 
 	if event.is_action_pressed("pickup"):
 		if interaction != null and interaction.has_method("try_pickup"):
@@ -451,6 +505,78 @@ func get_drop_transform(scaled: bool) -> Transform3D:
 	var scale_factor: float = lamp_drop_scale if scaled else 1.0
 	var yaw_basis := Basis(Vector3.UP, rotation.y).scaled(Vector3.ONE * scale_factor)
 	return Transform3D(yaw_basis, drop_position)
+
+func enter_ladder(ladder: Node, _snap_yaw: bool = false) -> void:
+	_climbing_ladder = ladder
+	_climb_yaw_center = rotation.y
+	velocity = Vector3.ZERO
+	_is_sprinting = false
+	jump_buffer_timer = 0.0
+	coyote_timer = 0.0
+
+func exit_ladder() -> void:
+	if _climbing_ladder != null and _climbing_ladder.has_method("notify_climber_exited"):
+		_climbing_ladder.notify_climber_exited()
+	_climbing_ladder = null
+	velocity = Vector3.ZERO
+
+func is_climbing() -> bool:
+	return _climbing_ladder != null
+
+func set_nearby_ladder(ladder: Node) -> void:
+	_nearby_ladder = ladder
+
+func _start_mount(ladder: Node) -> void:
+	_is_mounting = true
+	_mount_t = 0.0
+	_mount_ladder = ladder
+	_mount_start_pos = global_position
+	_mount_start_cam_x = camera_pivot.rotation.x
+	var entry: Marker3D = ladder.get_top_exit()
+	_mount_target_pos = entry.global_position + Vector3.DOWN * 0.5
+	# Snap yaw immediately so the mount animation has no rotation arc.
+	var to_ladder: Vector3 = (ladder as Node3D).global_position - global_position
+	to_ladder.y = 0.0
+	if to_ladder.length_squared() > 0.001:
+		rotation.y = atan2(to_ladder.x, -to_ladder.z)
+	_mount_start_yaw = rotation.y
+	_mount_target_yaw = rotation.y
+	velocity = Vector3.ZERO
+
+func _process_mount(delta: float) -> void:
+	_mount_t = minf(_mount_t + delta / ladder_mount_duration, 1.0)
+	var t: float = _mount_t * _mount_t * (3.0 - 2.0 * _mount_t)
+	global_position = _mount_start_pos.lerp(_mount_target_pos, t)
+	rotation.y = lerp_angle(_mount_start_yaw, _mount_target_yaw, t)
+	camera_pivot.rotation.x = lerp(_mount_start_cam_x, 0.0, t)
+	if _mount_t >= 1.0:
+		_is_mounting = false
+		enter_ladder(_mount_ladder, false)
+		_mount_ladder = null
+
+func _process_climbing(delta: float) -> void:
+	var ladder: Node = _climbing_ladder
+	if ladder == null:
+		return
+
+	var climb_input := Input.get_axis("move_backward", "move_forward")
+	global_position.y += climb_input * ladder_climb_speed * delta
+
+	var top_exit: Marker3D = ladder.get_top_exit()
+	var bottom_exit: Marker3D = ladder.get_bottom_exit()
+
+	if global_position.y >= top_exit.global_position.y:
+		global_position.y = top_exit.global_position.y
+		exit_ladder()
+		velocity = Vector3.UP * jump_velocity * 1.4
+		return
+
+	if global_position.y <= bottom_exit.global_position.y:
+		global_position.y = bottom_exit.global_position.y
+		exit_ladder()
+		return
+
+	velocity = Vector3.ZERO
 
 func is_cinematic_active() -> bool:
 	return _cinematic_active
@@ -662,6 +788,15 @@ func _physics_process(delta: float) -> void:
 	if global_position.y < fall_kill_y:
 		_respawn()
 		return
+
+	if _climbing_ladder != null:
+		_process_climbing(delta)
+		return
+
+	if _is_mounting:
+		_process_mount(delta)
+		return
+
 	var was_on_floor := is_on_floor()
 	_refill_sfx_cooldown = maxf(0.0, _refill_sfx_cooldown - delta)
 	is_jump_held = Input.is_action_pressed("jump")
@@ -840,6 +975,7 @@ func _make_feedback_player(player_name: String, stream: AudioStream, fallback: A
 	player.name = player_name
 	player.stream = stream if stream != null else fallback
 	player.volume_db = volume_db
+	player.bus = &"SFX"
 	add_child(player)
 	return player
 
@@ -870,18 +1006,21 @@ func _setup_movement_audio() -> void:
 	_footstep_player.name = "FootstepAudio"
 	_footstep_player.volume_db = footstep_volume_db
 	_footstep_player.stream = _footstep_stream
+	_footstep_player.bus = &"Tomb"
 	add_child(_footstep_player)
 
 	_jump_player = AudioStreamPlayer.new()
 	_jump_player.name = "JumpAudio"
 	_jump_player.volume_db = jump_volume_db
 	_jump_player.stream = _jump_stream
+	_jump_player.bus = &"Tomb"
 	add_child(_jump_player)
 
 	_land_player = AudioStreamPlayer.new()
 	_land_player.name = "LandAudio"
 	_land_player.volume_db = land_volume_db
 	_land_player.stream = _land_stream
+	_land_player.bus = &"Tomb"
 	add_child(_land_player)
 
 func _play_footstep_sound() -> void:

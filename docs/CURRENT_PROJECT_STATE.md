@@ -1,6 +1,262 @@
 # Current Project State
 
-Ultima inventariere: 2026-05-16.
+Ultima inventariere: 2026-05-17.
+
+## Checkpoint meniu in-game + setări funcționale + asseturi importate (2026-05-17)
+
+Sesiune UI + import asseturi. Meniul care apare în joc la Escape/F6 a fost separat clar de meniul principal și de ecranul de setări.
+
+### 1. Pause menu / in-game menu
+- `scenes/ui/pause_menu.tscn` folosește acum două imagini separate:
+  - `PauseArt` = meniul mic de pauză, cu `meniu-ingame.png`;
+  - `SettingsArt` = meniul mare de setări, cu `meniu-tbh.png`.
+- `PauseArt` conține butoanele: `ContinueButton`, `MainMenuButton`, `SettingsButton`, `QuitButton`.
+- `SettingsArt` conține sliderele. Este ascuns în editor by default; pentru poziționare manuală, activează ochiul la `SettingsArt`, mută sliderele acolo, apoi îl poți ascunde la loc.
+- Scriptul respectă pozițiile puse manual în editor. Nu mai realiniază automat butoanele sau sliderele.
+- `BackButton` a fost scos intenționat. Scriptul tolerează lipsa lui; revenirea/închiderea se face prin `Continuă`, Escape/F6 sau prin flow-ul de pause.
+- `settings_height_ratio = 0.95` face ca meniul de setări să ocupe aproape tot ecranul pe verticală, separat de scara meniului de pauză.
+
+### 2. Hover/click polish
+- `Scripts/pause_menu.gd` are efect de hover/click în stilul meniului principal: glow cald, mică animație de apăsare și sunet de click.
+- Zonele de click pot fi ascunse cu `show_click_zones = false`, dar hover-ul rămâne funcțional.
+- Click sound-ul merge pe bus-ul `SFX`.
+
+### 3. Slidere funcționale pentru setări
+- Sliderele active din `SettingsArt`:
+  - `SensitivityXSlider`
+  - `SensitivityYSlider`
+  - `ZoomSensitivitySlider`
+  - `MasterVolumeSlider`
+  - `MusicVolumeSlider`
+  - `EffectsVolumeSlider`
+  - `DialogueVolumeSlider`
+- Valorile sunt normalizate 0..1 și se salvează în `user://settings.cfg`.
+- Sensitivity X/Y și Zoom Sensitivity se aplică live pe player prin `set_look_settings(...)`.
+- Audio sliders aplică live pe bus-urile `Master`, `Music`, `SFX`, `Tomb`, `Dialogue`.
+- Sliderele au stil subțire în temă: track crem/bronz + grabber SVG bronz, fără cerc alb default.
+
+### 4. Player look + audio routing
+- `Scripts/player_controller.gd` are exporturi noi pentru `mouse_sensitivity_x`, `mouse_sensitivity_y`, `zoom_mouse_sensitivity_multiplier`.
+- Mouse look folosește sensibilități separate pe X/Y, iar zoom-ul are multiplicator separat.
+- Feedback-ul de pickup/drop/lamp select merge pe bus-ul `SFX`.
+- Footstep/jump/land merg pe bus-ul `Tomb`.
+- `Scripts/main_menu.gd` citește `user://settings.cfg` la pornire și aplică setările audio salvate.
+
+### 5. Audio bus layout
+- `audio/default_bus_layout.tres` include acum bus-uri dedicate:
+  - `Music`
+  - `SFX`
+  - `Dialogue`
+  - `Tomb` păstrat pentru spațialitate/reverb de mormânt.
+- `scenes/main_menu.tscn` routează muzica pe `Music`, iar click/play-start pe `SFX`.
+
+### 6. Asseturi importate
+- Importate în `TripoModels/`:
+  - `Testamente.glb` + `.import`
+  - `TreasureRoomUpdated.glb` + `.import`
+- Sunt doar importate în proiect; încă nu sunt plasate în nivel.
+
+### 7. Validare
+- `res://scenes/ui/pause_menu.tscn` se deschide în Godot 4.6.2 headless după modificările la slider style și structura `PauseArt` / `SettingsArt`.
+- `main_menu.tscn` și `tomb_layout.tscn` au fost validate anterior după integrarea setărilor audio/sensitivity.
+
+### 8. Ce urmează imediat
+- Poziționare fină manuală pentru slidere sub `SettingsArt`.
+- Test fullscreen pentru pause menu + settings menu, pe rezoluții diferite.
+- Decizie dacă e nevoie de un buton dedicat de închidere pentru setări sau rămâne flow-ul actual cu Escape/F6/Continuă.
+- Plasare în nivel pentru `TreasureRoomUpdated.glb` și/sau `Testamente.glb`, dacă sunt parte din ruta următoare.
+- Continuare priorități gameplay: Crossbow Corridor, vapori mercur cu damage, ObjectiveTriggers și gardieni live.
+
+---
+
+## Checkpoint integrare branch Vlad + swap samurai + polish guard conversation (2026-05-16, seara)
+
+Sesiune lungă: import selectiv din `bosregefixes-scripts` (Vlad + Claude Sonnet 4.6), înlocuire model gardian, animații per-instanță și polish complet pentru cinematicul de conversație al gardienilor.
+
+### 1. Import selectiv din `bosregefixes-scripts` (additive only, fără overwrite)
+
+Branchul `bosregefixes-scripts` are 21 commits în plus față de `baza` (autor Vlad). Am importat **doar fișierele noi**, lăsând intacte fișierele existente (`player_controller.gd`, `lamp.gd`, `oil_lamp.tscn`, `import_add_trimesh_collision.gd`, `TripoModels/TerracottaRoom.glb.import`).
+
+**Scripturi noi (14 fișiere)** în `Scripts/`:
+- `ladder.gd` — logică scară cu `EntryArea` + `TopExit`/`BottomExit` markers
+- `mercury_vase.gd`, `mercury_extracting_point.gd`, `mercury_spilling_point.gd`, `mercury_flowing_point.gd` — sistem complet mercur portabil (pickup F → fill hold E → carry → pour hold E → triggers flow particles + audio)
+- `spike_trap.gd` — capcană țepi cu instant-kill velocity + continuous damage
+- `trap_tile.gd` — placă de presiune care se rupe (crack → break → settle audio sequence)
+
+**Scene noi (8 .tscn)** în `scenes/items/`:
+- `ladder.tscn`, `mercury_vase.tscn`, `mercury_extracting_point.tscn`, `mercury_spilling_point.tscn`, `mercury_flowing_point.tscn`, `spike_trap.tscn`, `trap_tile.tscn`
+
+**Asseturi**: 7 GLB-uri (Ladder, MercuryVase, MercuryExtractingPoint, MercurySpillingPoint, MercuryFlowingPoint, Spikes, TrapTile) + 5 audio MP3 (mercury fill/flow + trap crack/break/settle) + `scenes/sigiliu.png`.
+
+**SKIP intenționat**: `bowls_lamp.tscn` + `pod_lamp.tscn` (referă GLB-uri care nu există local: `3bowlslamp.glb`, `3podLamp.glb`) și 8 `.import` din `scenes/*.glb.import` (FirstTerracottaRoom, SecondTerracottaRoom etc. — depend de trimesh script + GLB-uri absent local).
+
+### 2. Integrare manuală sistem Ladder în `player_controller.gd`
+
+După import, scripturile ladder/mercury au check defensiv (`has_method`), deci nu crash-uiesc dar nu activează ladder. Am făcut **4 edituri chirurgicale** în `Scripts/player_controller.gd` (+117 / -5):
+- Export group `Ladder`: `ladder_climb_speed`, `ladder_snap_speed`, `ladder_yaw_limit_deg`, `ladder_mount_duration`
+- 11 state variables: `_climbing_ladder`, `_nearby_ladder`, `_is_mounting`, `_mount_t`, `_mount_ladder`, `_mount_start_pos/yaw/cam_x`, `_mount_target_pos/yaw`, `_climb_yaw_center`
+- Mouse motion branch: pe scară, yaw clamped la ±`ladder_yaw_limit_deg` față de `_climb_yaw_center`, pitch rămâne liber
+- Interact: `E` declanșează `_start_mount` dacă există `_nearby_ladder` și `is_on_floor()`; altfel cade pe `try_interact` normal
+- 7 funcții noi: `enter_ladder`, `exit_ladder`, `is_climbing`, `set_nearby_ladder`, `_start_mount`, `_process_mount`, `_process_climbing`
+- Early-return în `_physics_process` pentru climbing/mounting (înainte de logica de movement normală)
+
+Top exit dă propulsie `jump_velocity * 1.4` să clear-uiască edge-ul. Mount-ul snap-ează yaw-ul imediat (fără arc de rotație vizibil) + interpolează poziție + camera pitch pe `ladder_mount_duration` (0.8s default) cu smoothstep.
+
+### 3. Înlocuire model gardian: `guard1-idle.glb` → `samurai.glb`
+
+Copiat `C:\Users\Calin\Downloads\samurai.glb` (3.8 MB) → `TripoModels/samurai.glb`. Modificate **3 ext_resource path**:
+- `scenes/entities/guard.tscn` (Model node — afectează GuardLive2 cu AI)
+- `scenes/tomb_layout.tscn` ExtResource `4_2bvp5` (afectează cele 7 TerracottaGuard statici)
+- `scenes/tomb_layout.tscn` ExtResource `2_f8c7l` (afectează nodul `samurai_armor_3d_model` din root, era FBX)
+
+Toate transformurile păstrate (scale 3.25× pe TerracottaGuards, rotații originale). `guard1-idle.glb` rămâne în repo pentru rollback rapid.
+
+**`samurai.glb` are 8 animații Blender NLA-style**. Numele raw din GLB JSON conțin puncte (`NlaTrack.001_Armature`), dar **Godot le redenumește la import înlocuind `.` cu `_`** (vezi `[[godot-glb-anim-name-renaming]]` în memorie). Numele reale runtime:
+
+| Label user | Godot name | Pose |
+|---|---|---|
+| 001 | `NlaTrack_001_Armature` | stă pe fund |
+| 001_001 | `NlaTrack_001_Armature_001` | mâini cruciș |
+| 002 | `NlaTrack_002_Armature` | explică / gesticulează |
+| 002_001 | `NlaTrack_002_Armature_001` | merge țanțoș (proud walk) |
+| 003 | `NlaTrack_003_Armature` | uitându-se în părți |
+| 004 | `NlaTrack_004_Armature` | idle |
+| (default) | `NlaTrack_Armature` | frustrat (REJECTAT pe gardieni) |
+| (default)_001 | `NlaTrack_Armature_001` | merge nervos |
+
+### 4. Distribuție animații per-instanță
+
+`auto_play_first_animation.gd` are deja `animation_name` export. Setat în `tomb_layout.tscn` cu `animation_name = &"<nume cu underscore>"`:
+
+| Instanță | Animație |
+|---|---|
+| TerracottaGuard01 | `NlaTrack_001_Armature_001` (mâini cruciș) |
+| TerracottaGuard02 | `NlaTrack_003_Armature` (uitându-se) |
+| TerracottaGuard03 | `NlaTrack_004_Armature` (idle) |
+| TerracottaGuard04 | `NlaTrack_002_Armature` (explică) — conversation guard A |
+| TerracottaGuard05 | `NlaTrack_001_Armature` (stă pe fund) — singura pose seated păstrată |
+| TerracottaGuard06 | `NlaTrack_003_Armature` (uitându-se) |
+| TerracottaGuard07 | `NlaTrack_001_Armature_001` (mâini cruciș) — conversation guard B; inițial setat frustrat, REJECTAT de user |
+| samurai_armor_3d_model | `NlaTrack_001_Armature_001` (mâini cruciș) — root node |
+
+Adăugat și diagnostic în `auto_play_first_animation.gd`: `push_warning` cu lista animațiilor disponibile când numele cerut nu se găsește (debug rapid pentru viitoare modele Tripo/Blender). Memoria `feedback_no_frustrated_on_guards` reține regula că niciodată nu se mai pune `NlaTrack_Armature` pe gardian.
+
+### 5. Walk/idle dinamic pe `guard.gd` (AI patrul GuardLive2)
+
+`Scripts/guard.gd` extins cu (+31 linii):
+- Export group `Animations`: `walk_animation: StringName`, `idle_animation: StringName`, `animation_walk_threshold: float = 0.15`
+- `@onready var _animation_player := _find_animation_player(self)` — căutare recursivă
+- `_update_animation(horizontal_speed)` apelat în `_physics_process` înainte de `move_and_slide()` — comută între walk/idle când viteza orizontală depășește threshold
+- `_current_animation: StringName` cache ca să nu re-play-uiască același anim în fiecare frame
+
+GuardLive2 în tomb_layout.tscn:
+- `walk_animation = &"NlaTrack_002_Armature_001"` (țanțoș)
+- `idle_animation = &"NlaTrack_004_Armature"`
+
+### 6. Polish complet `guard_conversation_sequence.gd` (cinematic gardieni + ordin sigilare)
+
+Sesiunea cea mai detaliată — rescris complet cinematicul de conversație ca să arate natural:
+
+**Animații pe toate fazele cinematicului** (5 exporturi noi în grup `Animations`):
+- `approach_walk_anim = "NlaTrack_002_Armature_001"` — ambii merg în timp ce se apropie de midpoint (înainte stăteau înghețați)
+- `guard_a_dialogue_anim = "NlaTrack_002_Armature"` (explică) — Guard A gesticulează în timpul dialogului
+- `guard_b_dialogue_anim = "NlaTrack_001_Armature_001"` (mâini cruciș) — Guard B ascultă
+- `exit_walk_anim = "NlaTrack_002_Armature_001"` — pe drumul de ieșire
+- `exit_idle_anim = "NlaTrack_004_Armature"` — la ultimul waypoint
+
+Helper `_play_anim(player, name)` + `_play_anim_blended(player, name, blend)` cu cross-fade Godot 4 (`AnimationPlayer.play(name, custom_blend)`). Toate animațiile primesc `loop_mode = Animation.LOOP_LINEAR`.
+
+**Înlocuit `anim.stop()` cu `_play_anim(approach_walk_anim)`** — comentariul vechi explica că oprirea era workaround pentru tween_property + AnimationPlayer crash, dar scriptul folosește deja manual lerp (`_move_one_manual` cu `process_frame`), deci poate lăsa anim să ruleze.
+
+**Skip choreography + face yaw offset** (samurai are forward axis diferit de guard1-idle):
+- `skip_choreography: bool = false` — dacă true, gardienii stau la pozițiile lor de editor (fără approach + face)
+- `face_yaw_offset_deg: float` — compensare pentru orientarea modelului. Pentru samurai cu baked rotation actuală: `90.0` (setat în tomb_layout.tscn pe GuardGateConversation)
+- `_shortest_yaw_to` adaugă `deg_to_rad(face_yaw_offset_deg)` la `desired`
+
+**Camera focus + exit walk decuplate** (cerere user):
+- `release_focus_on_non_guard_lines: bool = true`
+- `guard_line_prefix: String = "Gardianul"`
+- În bucla de replici: la **prima linie care NU începe cu `guard_line_prefix`** → `_start_exit_walk` se lansează în fundal, dar camera **rămâne locked** până la finalul tuturor replicilor (inclusiv monolog meșteșugar)
+- Comportament: gardienii pleacă din cadru în timp ce jucătorul aude ultimele 2 replici `Meșteșugar:`, fără pop-out de cinematic
+
+**Exit walk smooth** (anti-„brusc"):
+- `exit_speed_mps: 1.7 → 6.5` (alergare)
+- `exit_b_lag: 0.9 → 0.35`
+- `exit_rotation_time_max: 0.45 → 0.18` (snappy între waypoints)
+- `pre_exit_delay: 1.1s` — pauză înainte de start (picioarele deja fac walk-cycle, dar nu se mișcă)
+- `exit_anim_blend: 0.7s` — cross-fade lung din pose dialog → walk
+- `exit_first_rotation_time: 1.4s` — prima rotație lentă (din face-to-face spre WP_01)
+- `exit_first_move_ease_seconds: 1.2s` — accelerație smoothstep de la 0 la viteza nominală pe prima porțiune
+
+Total tranziție smooth: ~3.7s înainte ca gardienii să fie la viteza maximă. După WP_01, snappy între waypoints.
+
+**Funcție nouă `_move_one_manual_eased(node, target, duration, ease_seconds)`** — integrează curba viteză sub smoothstep, calculează distanță parcursă cumulativ, folosește pentru primul move dintre WP-uri.
+
+### 7. Replici extinse: mențiune arbalete + trape secrete
+
+`_get_baked_lines("guards_gate_seal")` extins de la 8 la 10 replici. Adăugat schimb după G1 „Și dacă vreunul încearcă să iasă?":
+- **G2 NOU**: „Am armat tot ce avem pe calea principală — arbaletele din coridoare, trapele secrete dintre săli. Se declanșează la cea mai mică greutate."
+- **G1 NOU**: „Și dacă, totuși, vreunul le evită?"
+- G2 (original): „Avem ordin clar: oricine se apropie de poarta principală trebuie doborât."
+
+Acum jucătorul are motivație narativă explicită să caute rută alternativă (prin Liang).
+
+### Memorii noi salvate
+
+- `feedback_godot_glb_anim_names.md` — Godot înlocuiește `.` cu `_` în nume de animații GLB la import
+- `feedback_no_frustrated_on_guards.md` — niciodată anim frustrat pe gardieni
+- `reference_samurai_animations.md` — tabel complet labels user → nume Godot + maparea curentă pe instanțe + PowerShell one-liner pentru extras nume raw din GLB JSON
+
+### De făcut imediat (urmează după acest checkpoint)
+
+- **Viewmodel sway tuning** — lampa + bolul de barbotină „fug" prea mult din mâini când player-ul se uită stânga-dreapta. Cerut de user dar abandonat când a apărut alt task. `Scripts/viewmodel_sway.gd` — reduce `sway_amount` (curent 0.012), `bob_amount` (0.008), `movement_sway_amount` (0.004) și/sau ajustează `crouch_offset`/`crawl_offset` ca să țină items mai aproape de corp
+- (opțional) **Animation speed_scale proporțional cu viteza guard-ului** — la `exit_speed_mps = 6.5` walk-cycle-ul samurai-ului pare „alunecat". Adaugă în `_walk_along` ceva ca `anim_player.speed_scale = exit_speed_mps / 2.5` (presupune walk-anim natural la ~2.5 m/s)
+- (opțional) **Root motion lock** pe walk anim — dacă `NlaTrack_002_Armature_001` are translation tracks pe Hips/Root, vor exista artefacte vizuale subtile la `_move_one_manual`. Pattern: `cycle_animations_preview.gd::_lock_root_y()` strip-uiește translate tracks
+
+### De urmărit la următorul playtest
+
+- Confirmă că schimbul nou guard despre arbalete + trape sună natural (timing 5.4s per linie x 10 linii = 54 sec total dialog, plus pauza animație + camera lock + monolog)
+- Verifică că la `face_yaw_offset_deg = 90.0`, gardienii ajung exact față-în-față după rotație (alt offset poate fi necesar dacă scena lor inițială are alte yaw-uri)
+- Verifică exit-walk smooth în context — dacă tot pare brusc, mai urcă `pre_exit_delay` și `exit_first_rotation_time` din inspector
+
+---
+
+## Checkpoint Dialog Liang + skip dialogue + mecanism tunel (2026-05-16)
+
+Sesiune de implementare NPC Liang + quality-of-life skip dialog + mecanisme breakable.
+
+### 1. Dialogue skip (tasta J)
+- `Scripts/game_events.gd` — signal `dialogue_skip_requested` + `request_dialogue_skip()`, `is_dialogue_skip_pending()`, `consume_dialogue_skip()`
+- `Scripts/player_controller.gd` — acțiunea `skip_dialogue` pe KEY_J, tratată înainte de `_cinematic_active` ca să meargă și în cinematic-uri
+- `Scripts/hud_pov.gd` — la skip: typewriter instant + panou ascuns în 0.2s; hint `[J] skip` în panoul de dialog
+- Toate scripturile de dialog (`guard_conversation_sequence.gd`, `scene_intro_dialogue.gd`, `dialogue_sequence_interactable.gd`) folosesc `_dialogue_wait()` skippable în loc de `create_timer`
+
+### 2. Monolog după obiectivul "find_liang"
+- `guard_conversation_sequence.gd` — după `_finish()`, după `monologue_delay` (5s default), afișează monologul interior: "Meșteșugar: Trebuie să ajung în camera administrativă. Era undeva pe stânga din tunelul principal. Să am grijă să nu mă vadă gardienii."
+- Exporturi noi: `monologue_delay`, `monologue_text` (cu fallback hardcodat)
+
+### 3. Model Liang (monk.glb)
+- Importat `TripoModels/monk.glb` (1587 KB, 1 animație full-body cu 3 faze: sitting/thinking/surprised/frustrated)
+- Poziționat în scenă la `(38.22, 0.19, -34.20)`
+- Script custom `Scripts/liang.gd` — expose `play_sitting()`, `play_surprised()`, `play_frustrated()`, auto-play sitting la ready, lock_root_y
+- Nod `LiangInteractBody` (StaticBody3D) cu CapsuleShape3D (radius 0.5, height 2.6)
+- Nod `Dialogue` cu `npc_dialogue_interactable.gd`, baked key `"talk_to_liang"` (23 replici din NARRATIVE_AND_DIALOGUE.md)
+
+### 4. Animații per-replică
+- `npc_dialogue_interactable.gd` — export nou `per_line_animations: Array[StringName]` pentru animații specifice per linie
+- Liang: prima replică = `NlaTrack.002_Armature` (surprised), restul = `NlaTrack.001_Armature` (sitting), linia 16 = `NlaTrack_Armature` (frustrated)
+
+### 5. Alte adăugiri
+- `mester-mestesugar-real3` adăugat în scenă cu animația `NlaTrack_001_Armature`
+- `BreakableInteractable` pe `MapWithoutTreasure/TunnelEntrance2` (necesită wedge+hammer)
+- Obiectivul după Liang: `"cross_crossbow_corridor"` — "Urmează tunelul de serviciu. Treci de coridorul cu arbalete și ajunge la Sala Mercurului."
+
+### 6. Ce urmează
+- Plasare mecanisme breakable la celelalte TunnelEntrance-uri (1, 3, etc.)
+- Implementare gameplay Crossbow Corridor
+- Objective triggers la praguri între camere
+
+---
 
 ## Checkpoint polish HUD + cinematic NPC (2026-05-16)
 
@@ -152,6 +408,7 @@ De retinut pentru urmatorul pas:
 │   ├── auto_play_first_animation.gd
 │   ├── lamp.gd
 │   ├── guard.gd
+│   ├── liang.gd
 │   ├── cycle_animations_preview.gd
 │   ├── add_lamp_lights.gd
 │   ├── static_lamp_flicker.gd          # flicker generic per Light3D
@@ -159,6 +416,7 @@ De retinut pentru urmatorul pas:
 │   ├── inventory.gd
 │   ├── interactable.gd
 │   ├── interaction.gd
+│   ├── hud_pov.gd
 │   ├── hud_debug.gd
 │   ├── pickup_item.gd
 │   ├── game_events.gd
@@ -166,16 +424,25 @@ De retinut pentru urmatorul pas:
 │   ├── noise_bus.gd
 │   ├── objective_trigger.gd
 │   ├── tool_required_interactable.gd
+│   ├── breakable_interactable.gd
 │   ├── viewmodel_sway.gd
 │   ├── crossbow_trap.gd
 │   ├── bolt.gd
 │   ├── fail_screen.gd
-│   └── pause_menu.gd
+│   ├── pause_menu.gd
+│   ├── guard_conversation_sequence.gd
+│   ├── scene_intro_dialogue.gd
+│   ├── dialogue_sequence_interactable.gd
+│   ├── npc_dialogue_interactable.gd
+│   ├── quest_step_interactable.gd
+│   └── clay_application_station.gd
 ├── TripoModels/
 │   ├── guard1-idle.glb
 │   ├── statue1-idle.glb
 │   ├── ucenic.glb
 │   ├── mester-mestesugar-real.glb
+│   ├── mester-mestesugar-real3.glb
+│   ├── monk.glb
 │   ├── in-hand-lamp.glb
 │   ├── samurai_armor_3d_model/
 │   └── imported FBX/texture folders
@@ -400,6 +667,8 @@ Lămpile-rezervor de pe pereții `TerracottaRoom2` (~21 instanțe) sunt auto-cre
 |----------|-------|----------|----------|---------|
 | Ucenic | `ucenic.glb` | NlaTrack_003_Armature | -0.15 | oprită |
 | Meșter | `mester-mestesugar-real.glb` | NlaTrack_004_Armature | -0.23 | oprită |
+| Meșter 2 | `mester-mestesugar-real3` | NlaTrack_001_Armature | — | oprită |
+| Liang | `monk.glb` | NlaTrack.001_Armature (sitting) | — | oprită (lock_root_y) |
 
 ## De reținut
 
@@ -415,18 +684,22 @@ Lămpile-rezervor de pe pereții `TerracottaRoom2` (~21 instanțe) sunt auto-cre
 ## Ce urmează
 
 ### Imediat (UI/gameplay)
-- **Frame mare „mâna dreaptă"** pe HUD (analog OilPhial-ului stânga) — dezign descris în `IMAGE_PROMPTS.md`, asset încă neegnerat
+- **Poziționare manuală finală pentru settings sliders** în `scenes/ui/pause_menu.tscn`: activează `SettingsArt`, mută nodurile `*Slider`, apoi ascunde `SettingsArt` dacă vrei să lucrezi din nou pe `PauseArt`.
+- **Playtest fullscreen pentru pause/settings menu**: pause menu rămâne mai mic, settings menu folosește `settings_height_ratio = 0.95`.
+- (opțional) **Buton dedicat de închidere pentru SettingsArt** dacă Escape/F6 + Continuă nu sunt suficiente în playtest.
+- **Frame mare „mâna dreaptă"** pe HUD (analog OilPhial-ului stânga) — design descris în `IMAGE_PROMPTS.md`, asset încă negenerat
 - **Tuning movement/lamp feel** cu overlay-ul F3: ajustează multiplicatorii de consum ulei, sway, bob și viteze până când stealth-ul se simte tensionat dar corect.
 - (opțional) **Refill rezervor de la player** — momentan transfer e doar rezervor → lampă, nu invers
 - (opțional) **Tuning prag low-oil** pentru lampa portabilă și lămpile-rezervor după test în joc
 
 ### Niveluri și entități
-- Model nou pentru gardieni cu animație de mers
-- Audio 3D pentru gardieni: pași spațiali
-- Bus/reverb de mormânt pentru SFX
-- Seturi dedicate de pași pentru clay/stone/wood/wet_stone
-- Plasează gardieni și capcane în camerele corespunzătoare
+- Plasează `TreasureRoomUpdated.glb` și/sau `Testamente.glb` dacă trebuie să intre în ruta următoare; momentan sunt doar importate în `TripoModels/`.
+- Plasează `BreakableInteractable` la celelalte TunnelEntrance-uri (1, 3, etc.)
+- Implementare gameplay Crossbow Corridor (plăci de presiune, trigger bolt, dezactivare cu daltă, blocare cu pană)
 - `ObjectiveTrigger` la pragul fiecărei camere
+- Plasare gardieni live + waypoints în coridoarele cheie; modelul samurai are deja walk/idle usable.
+- Audio 3D pentru gardieni: pași spațiali pe bus-ul potrivit (`Tomb`/`SFX`)
+- Seturi dedicate de pași pentru clay/stone/wood/wet_stone
 
 ### Asseturi de generat (vezi `docs/IMAGE_PROMPTS.md`)
 - Frame mare „mâna dreaptă" (oglindă OilPhial)

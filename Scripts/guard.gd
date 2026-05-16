@@ -19,12 +19,18 @@ enum State { PATROL, SUSPICIOUS, ALERT, DETECT }
 @export var step_distance: float = 1.4
 @export var player_group: String = "player"
 
+@export_group("Animations")
+@export var walk_animation: StringName = &""
+@export var idle_animation: StringName = &""
+@export var animation_walk_threshold: float = 0.15
+
 @onready var _vision_origin: Node3D = (get_node_or_null("VisionOrigin") as Node3D) if has_node("VisionOrigin") else self
 @onready var _footstep_audio: AudioStreamPlayer3D = get_node_or_null("FootstepAudio")
 @onready var _alert_audio: AudioStreamPlayer3D = get_node_or_null("AlertAudio")
 @warning_ignore("unused_private_class_variable")
 @onready var _ambient_audio: AudioStreamPlayer3D = get_node_or_null("AmbientAudio")
 @onready var _vision_indicator: MeshInstance3D = get_node_or_null("VisionOrigin/VisionIndicator")
+@onready var _animation_player: AnimationPlayer = _find_animation_player(self)
 
 var _waypoints: Array[Node3D] = []
 var _waypoint_index: int = 0
@@ -35,6 +41,7 @@ var _last_known_position: Vector3
 var _player: Node3D = null
 var _detect_timer: float = 0.0
 var _distance_since_step: float = 0.0
+var _current_animation: StringName = &""
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
@@ -97,6 +104,7 @@ func _physics_process(delta: float) -> void:
 			if has_node("/root/NoiseBus"):
 				get_node("/root/NoiseBus").emit_noise(global_position, 0.4, self)
 
+	_update_animation(horizontal)
 	move_and_slide()
 
 func _tick_patrol(delta: float) -> void:
@@ -262,3 +270,26 @@ func _update_vision_indicator() -> void:
 			color = Color(1.0, 0.15, 0.1, 0.55)
 	if mat is StandardMaterial3D:
 		(mat as StandardMaterial3D).albedo_color = color
+
+func _update_animation(horizontal_speed: float) -> void:
+	if _animation_player == null:
+		return
+	var target: StringName = walk_animation if horizontal_speed > animation_walk_threshold else idle_animation
+	if target == &"" or _current_animation == target:
+		return
+	if not _animation_player.has_animation(target):
+		return
+	var anim := _animation_player.get_animation(target)
+	if anim != null:
+		anim.loop_mode = Animation.LOOP_LINEAR
+	_animation_player.play(target)
+	_current_animation = target
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var found := _find_animation_player(child)
+		if found != null:
+			return found
+	return null
