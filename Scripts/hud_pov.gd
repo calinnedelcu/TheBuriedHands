@@ -105,6 +105,7 @@ var _debug_overlay_timer: float = 0.0
 var _left_hand_selected: bool = false
 var _dialogue_panel: PanelContainer = null
 var _dialogue_label: RichTextLabel = null
+var _dialogue_skip_hint: Label = null
 var _dialogue_hide_timer: float = 0.0
 var _dialogue_tween: Tween = null
 var _dialogue_reveal_tween: Tween = null
@@ -189,6 +190,8 @@ func _ready() -> void:
 		var events := get_node("/root/GameEvents")
 		if events.has_signal("dialogue_changed"):
 			events.dialogue_changed.connect(_on_dialogue_changed)
+		if events.has_signal("dialogue_skip_requested"):
+			events.dialogue_skip_requested.connect(_on_dialogue_skip_requested)
 
 	if not interaction_path.is_empty():
 		var inter := get_node_or_null(interaction_path)
@@ -504,6 +507,21 @@ func _build_dialogue_panel() -> void:
 	_dialogue_label.add_theme_font_override("bold_italics_font", bold_font)
 	_dialogue_panel.add_child(_dialogue_label)
 
+	_dialogue_skip_hint = Label.new()
+	_dialogue_skip_hint.name = "SkipHint"
+	_dialogue_skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dialogue_skip_hint.text = "[J] skip"
+	_dialogue_skip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_dialogue_skip_hint.add_theme_color_override("font_color", Color(0.74, 0.62, 0.42, 0.7))
+	_dialogue_skip_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	_dialogue_skip_hint.add_theme_constant_override("outline_size", 3)
+	_dialogue_skip_hint.add_theme_font_size_override("font_size", 12)
+	var skip_font := SystemFont.new()
+	skip_font.font_names = _OBJ_FONT_NAMES
+	skip_font.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	_dialogue_skip_hint.add_theme_font_override("font", skip_font)
+	_dialogue_panel.add_child(_dialogue_skip_hint)
+
 func _update_dialogue_timer(delta: float) -> void:
 	if _dialogue_hide_timer <= 0.0:
 		return
@@ -755,6 +773,13 @@ func _on_dialogue_changed(text: String, duration: float) -> void:
 		_animate_dialogue_show()
 	else:
 		_animate_dialogue_text_swap()
+
+func _on_dialogue_skip_requested() -> void:
+	if _dialogue_label == null:
+		return
+	_dialogue_label.visible_ratio = 1.0
+	_dialogue_reveal_active = false
+	_dialogue_hide_timer = minf(_dialogue_hide_timer, 0.2)
 
 func _format_dialogue_text(text: String) -> String:
 	# "Speaker: corp" → speaker bold/aurit + corp italic. Pentru linii fara

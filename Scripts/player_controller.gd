@@ -189,6 +189,7 @@ func _setup_input_actions() -> void:
 		"slot_3": [KEY_3],
 		"slot_4": [KEY_4],
 		"throw": [KEY_G],
+		"skip_dialogue": [KEY_J],
 	}
 	var strict_key_actions := {
 		"interact": KEY_E,
@@ -275,8 +276,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_G and event.ctrl_pressed and event.shift_pressed:
 		_debug_skip_to_guard_dialogue()
 		return
-	# Cinematic-ul de focus pe NPC blocheaza orice input. Mouse motion-ul ar
-	# lupta cu pan-ul, iar interact/jump intrate accidental ar rupe imersiunea.
+	# Skip-ul de dialog merge si in timpul cinematic-urilor.
+	if event.is_action_pressed("skip_dialogue"):
+		var events_node := get_node_or_null("/root/GameEvents")
+		if events_node != null and events_node.has_method("request_dialogue_skip"):
+			events_node.request_dialogue_skip()
+		return
+	# Cinematic-ul de focus pe NPC blocheaza orice alt input.
 	if _cinematic_active:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:

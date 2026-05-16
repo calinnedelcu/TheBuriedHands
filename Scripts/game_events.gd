@@ -3,6 +3,7 @@ extends Node
 signal player_failed(reason: String)
 signal player_succeeded(ending_id: String)
 signal dialogue_changed(text: String, duration: float)
+signal dialogue_skip_requested
 signal intro_finished
 signal lamp_tutorial_requested
 
@@ -39,12 +40,41 @@ func show_dialogue(text: String, duration: float = 5.5) -> void:
 		_dialogue_active_until_ms = Time.get_ticks_msec() + int(duration * 1000.0)
 	dialogue_changed.emit(text, duration)
 
+## Setat de request_dialogue_skip() si consumat de coroutine-urile care
+## asteapta durata unei replici. Cand e true, dialogul curent e sarit.
+var _dialogue_skip_flag: bool = false
+
 func clear_dialogue() -> void:
 	_dialogue_active_until_ms = 0
+	dialogue_skip_flag_reset()
 	dialogue_changed.emit("", 0.0)
 
 func is_dialogue_active() -> bool:
 	return Time.get_ticks_msec() < _dialogue_active_until_ms
+
+## Jucatorul apasa J pentru a sari peste replica curenta.
+## HUD-ul primeste signalul si accelereaza typewriter-ul + ascunde panoul
+## mai repede. Coroutine-urile care asteapta pot apela consume_dialogue_skip()
+## ca sa termine bucla de asteptare imediat.
+func request_dialogue_skip() -> void:
+	if not is_dialogue_active():
+		return
+	_dialogue_skip_flag = true
+	dialogue_skip_requested.emit()
+
+## Citeste flag-ul si il reseteaza. Folosit de coroutine-uri pentru a detecta
+## skip-ul si a iesi anticipat din bucla de asteptare a replicii.
+func is_dialogue_skip_pending() -> bool:
+	return _dialogue_skip_flag
+
+func consume_dialogue_skip() -> bool:
+	if _dialogue_skip_flag:
+		dialogue_skip_flag_reset()
+		return true
+	return false
+
+func dialogue_skip_flag_reset() -> void:
+	_dialogue_skip_flag = false
 
 func request_lamp_tutorial() -> void:
 	var player := get_tree().get_first_node_in_group("player")

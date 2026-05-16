@@ -43,6 +43,12 @@ extends Node
 @export var exit_b_lag: float = 0.9
 @export var exit_rotation_time_max: float = 0.45
 
+@export_group("Monologue After Objective")
+## Dupa ce obiectivul `objective_after_id` e setat, dupa acest delay (secunde)
+## protagonistul rosteste un monolog interior care ghideaza jucatorul.
+@export var monologue_delay: float = 5.0
+@export_multiline var monologue_text: String = ""
+
 var _playing: bool = false
 var _consumed: bool = false
 
@@ -156,7 +162,7 @@ func _run_sequence() -> void:
 			print("[GuardConversation] line %d/%d: %s" % [i+1, lines.size(), line.substr(0, 50)])
 			events.call("show_dialogue", line, dialogue_line_duration)
 			if dialogue_line_duration > 0.0:
-				await _wait_seconds(dialogue_line_duration)
+				await _dialogue_wait(dialogue_line_duration)
 			if dialogue_inter_pause > 0.0:
 				await _wait_seconds(dialogue_inter_pause)
 		print("[GuardConversation] all lines done")
@@ -174,6 +180,18 @@ func _run_sequence() -> void:
 	_start_exit_walk(guard_a, guard_b)
 
 	_finish()
+
+	if monologue_text != "" and monologue_delay > 0.0:
+		await _dialogue_wait(monologue_delay)
+		var events_mono := get_node_or_null("/root/GameEvents")
+		if events_mono != null and events_mono.has_method("show_dialogue"):
+			events_mono.call("show_dialogue", monologue_text, dialogue_line_duration)
+	elif monologue_delay > 0.0:
+		# Fallback hardcodat daca monologue_text e gol in .tscn
+		await _dialogue_wait(monologue_delay)
+		var events_mono := get_node_or_null("/root/GameEvents")
+		if events_mono != null and events_mono.has_method("show_dialogue"):
+			events_mono.call("show_dialogue", "Meșteșugar: Trebuie să ajung în camera administrativă. Era undeva pe stânga din tunelul principal. Să am grijă să nu mă vadă gardienii.", dialogue_line_duration)
 
 func _start_exit_walk(guard_a: Node3D, guard_b: Node3D) -> void:
 	if exit_path.is_empty():
@@ -325,6 +343,21 @@ func _wait_seconds(seconds: float) -> void:
 	var t0 := Time.get_ticks_msec()
 	var dur_ms := seconds * 1000.0
 	while Time.get_ticks_msec() - t0 < dur_ms:
+		await get_tree().process_frame
+
+## Versiune skippable a lui _wait_seconds. Cand jucatorul apasa J, iese
+## anticipat din asteptare (replica curenta e sarita).
+func _dialogue_wait(seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	var t0 := Time.get_ticks_msec()
+	var dur_ms := seconds * 1000.0
+	while Time.get_ticks_msec() - t0 < dur_ms:
+		var events_node := get_node_or_null("/root/GameEvents")
+		if events_node != null and events_node.has_method("is_dialogue_skip_pending") and events_node.call("is_dialogue_skip_pending"):
+			if events_node.has_method("consume_dialogue_skip"):
+				events_node.call("consume_dialogue_skip")
+			return
 		await get_tree().process_frame
 
 func _find_animation_player(node: Node) -> AnimationPlayer:

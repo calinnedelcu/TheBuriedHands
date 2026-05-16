@@ -60,6 +60,11 @@ extends Interactable
 @export var dialogue_idle_animation: StringName = &""
 @export var finished_animation: StringName = &""
 @export_range(0.1, 3.0, 0.05) var first_interaction_animation_speed: float = 1.0
+## Array paralel cu dialogue_lines: pentru fiecare index se poate seta o
+## animație care suprascrie dialogue_idle_animation. Sirul gol = folosește
+## dialogue_idle_animation. Dacă array-ul e mai scurt decât replicile,
+## replicile fără corespondent rămân pe dialogue_idle_animation.
+@export var per_line_animations: Array[StringName] = []
 @export_range(0.0, 1.0, 0.05) var animation_blend: float = 0.15
 @export var face_player_during_dialogue: bool = false
 @export_range(-180.0, 180.0, 1.0) var face_player_yaw_offset_degrees: float = 0.0
@@ -201,13 +206,23 @@ func _play_first_animation_then_dialogue(by: Node) -> void:
 	_advance_dialogue(by)
 
 func _ensure_dialogue_idle_animation() -> void:
-	if dialogue_idle_animation == &"":
+	var anim_name: StringName = _get_line_animation_override(_line_index)
+	if anim_name == &"":
+		anim_name = dialogue_idle_animation
+	if anim_name == &"":
 		return
 	var animation_player := _get_npc_animation_player()
-	var resolved_animation := _resolve_animation_name(animation_player, dialogue_idle_animation)
+	var resolved_animation := _resolve_animation_name(animation_player, anim_name)
 	if resolved_animation != &"" and animation_player.current_animation == resolved_animation:
 		return
-	_play_npc_animation(dialogue_idle_animation, true, false, 1.0)
+	_play_npc_animation(anim_name, true, false, 1.0)
+
+func _get_line_animation_override(line_index: int) -> StringName:
+	if line_index >= 0 and line_index < per_line_animations.size():
+		var ov := per_line_animations[line_index]
+		if ov != &"":
+			return ov
+	return &""
 
 func _return_to_finished_animation_after_dialogue() -> void:
 	if finished_animation == &"":
@@ -390,6 +405,32 @@ func _get_baked_lines(key: String) -> PackedStringArray:
 				"Meșteșugar: După un asemenea mormânt, nimeni nu mai pleacă neschimbat.",
 				"Ucenic: Mai avem nevoie de barbotină pentru picioarele soldatului. O aduceți din magazie?",
 				"Meșteșugar: Va trebui să iau bolul cu barbotina din camera din celălalt capăt.",
+			])
+		"talk_to_liang":
+			return PackedStringArray([
+				"Liang: Tu?! Ești nebun? Cum ai trecut de gardieni?",
+				"Meșteșugar: M-am strecurat pe la administrație. Nu sunt atât de atenți.",
+				"Liang: Dar nu înțeleg... De ce ai venit aici? Nu lasă pe nimeni să intre sau să iasă din atelier.",
+				"Meșteșugar: Liang, ascultă-mă. Nu pot să rămân aici să aștept să se termine aerul. Trebuie să ies. Acum.",
+				"Liang: Să ieși...? Pe unde? Tot ce am construit în ultimii zece ani a fost gândit ca nimeni, niciodată, să nu poată să intre după moartea Împăratului.",
+				"Meșteșugar: Dar tu ai desenat jumătate din pasajele ascunse. Știi unde sunt punctele slabe.",
+				"Liang: Am lucrat la pasaje, da... dar m-au pus să lucrez pe bucăți. O secțiune aici, una dincolo. Ne-au orbit cu detalii ca să nu vedem întregul.",
+				"Meșteșugar: Nu mă minți. Spune-mi tot ce știi. Trebuie să fie o cale de scăpare undeva prin tunelurile astea.",
+				"Liang: Majoritatea sunt capcane moarte. Dacă pui piciorul greșit, te transformi în perniță de ace. Iar restul duc în locuri unde moartea e și mai lentă.",
+				"Liang: Există un drum prin tunelurile de serviciu din spate. Te scoate aproape de tezaur, dar trece pe lângă Camera cu Mercur.",
+				"Meșteșugar: Mercur...? Râurile acelea ca de argint despre care mi-ai mai vorbit?",
+				"Liang: Aerul de acolo e greu, metalic. Treci repede. Vaporii de mercur sunt toxici; dacă zăbovești, nu mai ieși viu.",
+				"Meșteșugar: Există altă cale? Un drum secret? Orice altceva?",
+				"Liang: Mai mult de atât nu știu.",
+				"Meșteșugar: Atunci vino cu mine. Dacă știi drumul, avem o șansă să vedem lumina din nou.",
+				"Liang: Nu pot, prietene. Spatele mi-e frânt și genunchii nu mă mai țin să mă târăsc prin găurile acelea. Doar te-aș încetini.",
+				"Meșteșugar: Liang...",
+				"Liang: Dar tu trebuie să scapi. Există o cameră pe care arhitecții au conceput-o împotriva hoților. E un mecanism vechi, ascuns lângă încăperea unde se păstrează tezaurul.",
+				"Liang: E o contragreutate. Ca s-o declanșezi pe dinăuntru, ai nevoie de ceva greu, dar nici eu nu știu exact ce.",
+				"Meșteșugar: Ceva greu, zici?",
+				"Liang: Când ajungi la Camera cu Mercur, acoperă-ți nasul și gura cu o cârpă umedă. Nu trage aer adânc în piept.",
+				"Liang: Acum du-te. Ridică piatra aceea mare din camera de lângă. Te va duce unde ai nevoie.",
+				"Meșteșugar: Mulțumesc, Liang...",
 			])
 		_:
 			return PackedStringArray()

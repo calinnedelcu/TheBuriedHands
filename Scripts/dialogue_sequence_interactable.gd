@@ -41,9 +41,22 @@ func _play_sequence() -> void:
 		for line in dialogue_lines:
 			events.show_dialogue(str(line), dialogue_line_duration)
 			if dialogue_line_duration > 0.0:
-				await get_tree().create_timer(dialogue_line_duration).timeout
+				await _dialogue_wait(dialogue_line_duration)
 	_apply_objective_after_sequence()
 	_playing = false
+
+func _dialogue_wait(seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	var t0 := Time.get_ticks_msec()
+	var dur_ms := seconds * 1000.0
+	while Time.get_ticks_msec() - t0 < dur_ms:
+		var events_node := get_node_or_null("/root/GameEvents")
+		if events_node != null and events_node.has_method("is_dialogue_skip_pending") and events_node.call("is_dialogue_skip_pending"):
+			if events_node.has_method("consume_dialogue_skip"):
+				events_node.call("consume_dialogue_skip")
+			return
+		await get_tree().process_frame
 
 func _apply_objective_after_sequence() -> void:
 	var objectives := get_node_or_null("/root/Objectives")
