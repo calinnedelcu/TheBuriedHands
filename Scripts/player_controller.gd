@@ -541,7 +541,7 @@ func _process_climbing(delta: float) -> void:
 	if global_position.y >= top_exit.global_position.y:
 		global_position.y = top_exit.global_position.y
 		exit_ladder()
-		velocity = Vector3.UP * jump_velocity
+		velocity = Vector3.UP * jump_velocity * 2.2
 		return
 
 	if global_position.y <= bottom_exit.global_position.y:
