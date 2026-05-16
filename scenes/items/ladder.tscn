@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://c22fk0j2unuow" path="res://scenes/items/Ladder.glb" id="3_ladder_glb"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interact"]
-size = Vector3(0.9, 4.7901735, 0.25)
+size = Vector3(0.9, 4.223334, 0.25)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(1.2, 0.15, 0.6)
@@ -17,7 +17,7 @@ size = Vector3(2.5, 2, 2.5)
 script = ExtResource("2_ladder")
 
 [node name="Body" parent="." unique_id=233569978 instance=ExtResource("3_ladder_glb")]
-transform = Transform3D(-4.3629857e-08, -2.6685165e-09, 1, -0.06104854, 0.9981348, 0, -0.9981348, -0.06104854, -4.371139e-08, 9.022, 6.8, 23.28)
+transform = Transform3D(-4.3629854e-08, -2.6685163e-09, 1, -0.061048537, 0.99813473, 0, -0.99813473, -0.061048537, -4.371139e-08, 9.001277, 6.258119, 23.111)
 
 [node name="TopExit" type="Marker3D" parent="." unique_id=962137141]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6, 0.6)
@@ -30,7 +30,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.15)
 collision_mask = 0
 
 [node name="InteractShape" type="CollisionShape3D" parent="InteractBody" unique_id=539296167]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2950866, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0116668, 0)
 shape = SubResource("BoxShape3D_interact")
 
 [node name="Interactable" type="Node" parent="InteractBody" unique_id=1492671147]
@@ -49,4 +49,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6, 0.3)
 collision_layer = 0
 
 [node name="EntryShape" type="CollisionShape3D" parent="EntryArea" unique_id=234567891]
+transform = Transform3D(0.42358184, 0, 0, 0, 0.25696015, 0, 0, 0, 1, 0, -0.5924611, 0)
 shape = SubResource("BoxShape3D_entry")
