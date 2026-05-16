@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dcqq0a4avlqxd"]
+[gd_scene format=3 uid="uid://c4yrdkfgi01bb"]
 
-[ext_resource type="Script" uid="uid://5v1wrtygsc7" path="res://Scripts/trap_tile.gd" id="1_script"]
+[ext_resource type="Script" path="res://Scripts/trap_tile.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://d0a67us07nbh5" path="res://scenes/items/TrapTile.glb" id="2_glb"]
 [ext_resource type="AudioStream" uid="uid://c87vm4tw565eu" path="res://audio/sfx/trap/spinopel-ceramic-tile-411505.mp3" id="3_crack"]
 [ext_resource type="AudioStream" uid="uid://bp1ly6qaom8kt" path="res://audio/sfx/trap/spinopel-break-the-ceramic-tiles-411504.mp3" id="4_break"]
@@ -45,7 +45,7 @@ settle_stream = ExtResource("5_settle")
 shape = SubResource("BoxShape3D_tile")
 
 [node name="TileMesh" parent="." unique_id=83840282 instance=ExtResource("2_glb")]
-transform = Transform3D(0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0)
+transform = Transform3D(0.84569025, 0, 0, 0, 0.84569025, 0, 0, 0, 0.84569025, -20.595, 0, -19.365)
 
 [node name="SealDecal" type="Decal" parent="." unique_id=1046959799]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
