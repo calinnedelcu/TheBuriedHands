@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dq7x3balanta1"]
+
+[ext_resource type="Script" path="res://Scripts/balanta.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/Balanta.glb" id="2_glb"]
+
+[node name="Balanta" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Body" parent="." instance=ExtResource("2_glb")]
