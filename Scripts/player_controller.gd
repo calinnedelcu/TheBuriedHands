@@ -1,4 +1,4 @@
-ï»¿extends CharacterBody3D
+extends CharacterBody3D
 
 const _FALLBACK_CLICK_SFX = preload("res://audio/sfx/menu_click.wav")
 const _FALLBACK_ACTION_SFX = preload("res://audio/sfx/menu_play_start.wav")
@@ -66,7 +66,7 @@ signal stance_changed(stance: String)
 @export var post_cinematic_guard_grace_seconds: float = 3.0
 ## Shortcut-ul de debug sare peste flow-ul normal si poate lasa player-ul in fata unor gardieni
 ## care n-ar trebui sa conteze in testul cinematic. Tinem fail-ul dezarmat mai
-## mult, altfel SceneTree.paused ingheata luminile/animaÈ›iile imediat dupa dialog.
+## mult, altfel SceneTree.paused ingheata luminile/anima?iile imediat dupa dialog.
 @export var debug_skip_guard_grace_seconds: float = 8.0
 
 @export_group("Ladder")
@@ -144,7 +144,7 @@ var _is_crouching: bool = false
 var _is_crawling: bool = false
 var _is_sprinting: bool = false
 var _distance_since_step: float = 0.0
-var _current_stance: String = "ÃŽn picioare"
+var _current_stance: String = "În picioare"
 var _camera_land_offset: float = 0.0
 var _debug_accel_multiplier: float = 1.0
 var _debug_decel_multiplier: float = 1.0
@@ -301,7 +301,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if _climbing_ladder != null:
-			# Pe scara: pitch liber, yaw limitat la Â±ladder_yaw_limit_deg fata de directia de urcare
+			# Pe scara: pitch liber, yaw limitat la ±ladder_yaw_limit_deg fata de directia de urcare
 			camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
 			camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, tilt_lower_limit, tilt_upper_limit)
 			var yaw_delta: float = -event.relative.x * mouse_sensitivity
@@ -325,7 +325,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("interact"):
 		if _climbing_ladder == null:
-			if _nearby_ladder != null and not _is_mounting:
+			if _nearby_ladder != null and not _is_mounting and is_on_floor():
 				_start_mount(_nearby_ladder)
 			elif interaction != null and interaction.has_method("try_interact"):
 				interaction.try_interact()
@@ -383,7 +383,7 @@ func _try_throw_ceramic() -> void:
 	_emit_noise(noise_walk * 0.4)
 
 func get_fallback_interaction_prompt() -> String:
-	# Promptul "[X] Pune jos" a fost dezactivat in mod intentionat â€” apare prea
+	# Promptul "[X] Pune jos" a fost dezactivat in mod intentionat — apare prea
 	# des si distrage. Drop-ul ramane disponibil pe tasta X, iar daca cerem
 	# vreodata un tutorial dedicat de drop il vom afisa printr-un sistem separat.
 	return ""
@@ -396,7 +396,7 @@ func equip_lamp(lamp_node: Node) -> void:
 		_equip_lamp_direct(lamp_node)
 		return
 	if inventory.add_item("lamp", lamp_node) < 0:
-		return  # inventory full â€” the lamp stays in the world
+		return  # inventory full — the lamp stays in the world
 	_emit_noise(noise_walk * 0.25)
 	play_feedback_sfx("pickup")
 
@@ -541,7 +541,7 @@ func _process_climbing(delta: float) -> void:
 	if global_position.y >= top_exit.global_position.y:
 		global_position.y = top_exit.global_position.y
 		exit_ladder()
-		velocity = Vector3.UP * 2.5
+		velocity = Vector3.UP * jump_velocity
 		return
 
 	if global_position.y <= bottom_exit.global_position.y:
@@ -564,7 +564,7 @@ func suppress_guard_detection(seconds: float) -> void:
 
 ## DEBUG: forteaza obiectivul 'continue_modeling' (declanseaza GuardConversation).
 ## Apelul real se face deferred ca sa nu ruleze coroutine-urile + tween-urile in
-## mijlocul unui _unhandled_input â€” Godot poate intra in stari neasteptate daca
+## mijlocul unui _unhandled_input — Godot poate intra in stari neasteptate daca
 ## un signal emis sincron deschide coroutine care creeaza tween-uri ce-l
 ## referenteaza inapoi pe player.
 func _debug_skip_to_guard_dialogue() -> void:
@@ -589,8 +589,8 @@ func _debug_skip_to_guard_dialogue_impl() -> void:
 			camera.fov = _cinematic_orig_fov
 	var objectives := get_node_or_null("/root/Objectives")
 	if objectives != null and objectives.has_method("set_objective"):
-		objectives.call("set_objective", "continue_modeling", "ContinuÄƒ modelarea picioarelor soldatului.")
-	print("[DEBUG Ctrl+Shift+G] forced objective â†’ continue_modeling")
+		objectives.call("set_objective", "continue_modeling", "Continua modelarea picioarelor soldatului.")
+	print("[DEBUG Ctrl+Shift+G] forced objective ? continue_modeling")
 
 ## Pan scurt al camerei catre `world_pos`, urmat de o pauza (`hold_time`) cu
 ## camera tinuta pe tinta. Camera face si zoom-in (FOV-ul scade catre `zoom_fov`)
@@ -657,9 +657,9 @@ func start_cinematic_lock(world_pos: Vector3, zoom_fov: float = 42.0, pan_durati
 	var run_id := _cinematic_run_id
 	_kill_cinematic_tween()
 	# Manual interpolation via process_frame (tween-urile pe player/camera in
-	# context nested coroutine+deferred nu se aplica vizual â€” workaround Godot 4.6).
+	# context nested coroutine+deferred nu se aplica vizual — workaround Godot 4.6).
 	_run_cinematic_pan(run_id, current_yaw, final_yaw, camera_pivot.rotation.x, target_pitch, _cinematic_orig_fov, clamped_zoom, pan_duration, true)
-	print("[player] cinematic_lock pan started (yaw %.2fâ†’%.2f, fov %.1fâ†’%.1f, dur=%.2f)" % [current_yaw, final_yaw, _cinematic_orig_fov, clamped_zoom, pan_duration])
+	print("[player] cinematic_lock pan started (yaw %.2f?%.2f, fov %.1f?%.1f, dur=%.2f)" % [current_yaw, final_yaw, _cinematic_orig_fov, clamped_zoom, pan_duration])
 
 func _run_cinematic_focus(run_id: int, yaw_start: float, yaw_end: float, pitch_start: float, pitch_end: float, fov_start: float, fov_zoom: float, pan_duration: float, hold_time: float, return_duration: float) -> void:
 	await _run_cinematic_pan(run_id, yaw_start, yaw_end, pitch_start, pitch_end, fov_start, fov_zoom, pan_duration, false)
@@ -1137,7 +1137,7 @@ func _update_stance_label() -> void:
 			_current_stance = "Taras"
 			stance_changed.emit(_current_stance)
 		return
-	var s: String = "Ghemuit" if _is_crouching else ("AleargÄƒ" if _is_sprinting else "ÃŽn picioare")
+	var s: String = "Ghemuit" if _is_crouching else ("Alearga" if _is_sprinting else "În picioare")
 	if s != _current_stance:
 		_current_stance = s
 		stance_changed.emit(s)
@@ -1164,4 +1164,4 @@ func _target_capsule_radius() -> float:
 func _respawn() -> void:
 	velocity = Vector3.ZERO
 	global_transform = _spawn_transform
-	print("[player] fell below y=%.1f â€” teleported to spawn" % fall_kill_y)
+	print("[player] fell below y=%.1f — teleported to spawn" % fall_kill_y)
