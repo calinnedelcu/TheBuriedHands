@@ -15,13 +15,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.69577, -6.981813, -47.419
 max_distance = 25.0
 
 [node name="FlowParticles" type="CPUParticles3D" parent="." unique_id=312847561]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6209505, 0, 0)
 emitting = false
 amount = 80
 lifetime = 1.2
 preprocess = 0.5
 direction = Vector3(0, -1, 0)
 spread = 8.0
-gravity = Vector3(0, -9.8, 0)
 initial_velocity_min = 0.5
 initial_velocity_max = 1.8
 scale_amount_min = 0.04

@@ -1,31 +1,32 @@
-[gd_scene format=3 uid="uid://mercury_extract_scene"]
+[gd_scene format=3 uid="uid://b0npwle75dxgq"]
 
-[ext_resource type="Script" path="res://Scripts/mercury_extracting_point.gd" id="1_script"]
-[ext_resource type="Script" path="res://Scripts/interactable.gd" id="2_interact"]
-[ext_resource type="PackedScene" path="res://scenes/items/MercuryExtractingPoint.glb" id="3_glb"]
-[ext_resource type="AudioStream" path="res://audio/sfx/mercury/fill.mp3" id="4_fill"]
+[ext_resource type="Script" uid="uid://18hmq3kacp1n" path="res://Scripts/mercury_extracting_point.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bp5ua5gbbio8s" path="res://Scripts/interactable.gd" id="2_interact"]
+[ext_resource type="PackedScene" uid="uid://b0jrj3aita6f7" path="res://scenes/items/MercuryExtractingPoint.glb" id="3_glb"]
+[ext_resource type="AudioStream" uid="uid://kgyy8wr58x3w" path="res://audio/sfx/mercury/fill.mp3" id="4_fill"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interact"]
 size = Vector3(1.5, 1.5, 1.5)
 
-[node name="MercuryExtractingPoint" type="Node3D"]
+[node name="MercuryExtractingPoint" type="Node3D" unique_id=153230969]
 script = ExtResource("1_script")
 fill_stream = ExtResource("4_fill")
 
-[node name="Body" parent="." instance=ExtResource("3_glb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="Body" parent="." unique_id=243643156 instance=ExtResource("3_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5162296, 0, -45.001892)
 
-[node name="InteractBody" type="StaticBody3D" parent="."]
+[node name="InteractBody" type="StaticBody3D" parent="." unique_id=109962467]
+transform = Transform3D(3.6731157, 0, 0, 0, 1, 0, 0, 0, 1.6611397, 0, 0.6839528, 0)
 collision_mask = 0
 
-[node name="InteractShape" type="CollisionShape3D" parent="InteractBody"]
+[node name="InteractShape" type="CollisionShape3D" parent="InteractBody" unique_id=591745350]
 shape = SubResource("BoxShape3D_interact")
 
-[node name="Interactable" type="Node" parent="InteractBody"]
+[node name="Interactable" type="Node" parent="InteractBody" unique_id=616590229]
 script = ExtResource("2_interact")
 prompt_text = "Ai nevoie de o vaza"
 hold_action = true
 
-[node name="Audio" type="AudioStreamPlayer3D" parent="."]
+[node name="Audio" type="AudioStreamPlayer3D" parent="." unique_id=230119239]
 unit_size = 6.0
 max_distance = 15.0
