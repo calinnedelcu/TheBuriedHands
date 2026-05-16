@@ -43,6 +43,7 @@ size = Vector2(0.035, 0.035)
 
 [node name="BowlsLamp" type="Node3D" unique_id=818484566]
 script = ExtResource("1_lamp")
+disable_oil_drain = true
 
 [node name="Body" parent="." unique_id=282394458 instance=ExtResource("2_body_glb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.926094, -8.178223, -34.429108)

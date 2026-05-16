@@ -47,6 +47,7 @@ size = Vector3(0.62, 0.26, 0.46)
 
 [node name="OilLamp" type="Node3D" unique_id=1443442757]
 script = ExtResource("1_lamp")
+disable_oil_drain = true
 
 [node name="Body" parent="." unique_id=1860220164 instance=ExtResource("2_in_hand_lamp")]
 transform = Transform3D(0.24, 0, 0, 0, 0.24, 0, 0, 0, 0.24, 0, -0.04, 0)

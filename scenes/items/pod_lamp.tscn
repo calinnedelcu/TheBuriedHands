@@ -43,6 +43,7 @@ size = Vector2(0.035, 0.035)
 
 [node name="PodLamp" type="Node3D" unique_id=1139961124]
 script = ExtResource("1_lamp")
+disable_oil_drain = true
 
 [node name="Body" parent="." unique_id=1411574960 instance=ExtResource("2_body_glb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.7432575, 0.30891657, -38.72486)
