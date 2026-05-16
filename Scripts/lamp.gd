@@ -41,6 +41,7 @@ signal extinguished()
 @export var flicker_range: float = 0.32
 @export var flicker_speed: float = 6.0
 @export var flicker_position_amount: float = 0.012
+@export var disable_oil_drain: bool = false
 @export var start_lit: bool = true
 ## false = lampa apare in lume ca pickup (collider activ, pot apasa F).
 ## true = lampa apare deja in mana (default, pentru lampa din LampSocket).
@@ -193,7 +194,7 @@ func _process(delta: float) -> void:
 	_time += delta
 	_raise_blend = lerp(_raise_blend, 1.0 if is_raised else 0.0, clamp(delta * 8.0, 0.0, 1.0))
 	_selected_blend = lerp(_selected_blend, 1.0 if is_selected else 0.0, clamp(delta * 8.0, 0.0, 1.0))
-	if is_lit:
+	if is_lit and not disable_oil_drain:
 		var equipped_mult: float = 1.0 if equipped else dropped_drain_multiplier
 		var movement_mult: float = 1.0
 		if equipped:
