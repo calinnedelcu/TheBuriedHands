@@ -1,6 +1,9 @@
 extends Node3D
 
-@export var animation_name: String = "Animation"
+## Când play_all_animations = true (default), TOATE animațiile din GLB rulează simultan.
+## Setează play_all_animations = false și animation_name = "Balanta" dacă vrei o singură anim.
+@export var play_all_animations: bool = true
+@export var animation_name: String = "Balanta"
 @export var blend_time: float = 0.08
 @export var playback_duration: float = 8.0
 @export var mechanism_stream: AudioStream
@@ -12,6 +15,8 @@ extends Node3D
 @export var rebuild_complex_collision_after_animation: bool = true
 @export_flags_3d_physics var collision_layer: int = 1
 @export_flags_3d_physics var collision_mask: int = 1
+
+const _MERGED_ANIM_NAME := &"__all_merged__"
 
 var _anim: AnimationPlayer = null
 var _audio: AudioStreamPlayer3D = null
@@ -57,13 +62,78 @@ func stop_flow() -> void:
 	elif disable_complex_collision_while_animating:
 		_set_complex_collision_enabled(true)
 
+# ── Rezolvare animație ─────────────────────────────────────────────────────────
+
 func _resolve_animation_name() -> StringName:
+	if play_all_animations:
+		return _get_or_build_merged()
+	# Fallback: o singură animație specificată
 	if _anim.has_animation(animation_name):
 		return StringName(animation_name)
 	var anims: PackedStringArray = _anim.get_animation_list()
 	if anims.is_empty():
 		return &""
 	return StringName(anims[0])
+
+## Merge toate animațiile din player într-una singură și o returnează.
+## Dacă a fost deja creată, o returnează direct (cache).
+func _get_or_build_merged() -> StringName:
+	if _anim.has_animation(_MERGED_ANIM_NAME):
+		return _MERGED_ANIM_NAME
+
+	var merged := Animation.new()
+	merged.length = 0.0
+
+	for src_name: StringName in _anim.get_animation_list():
+		# Sari peste animații helper Godot
+		if src_name == &"RESET" or src_name == _MERGED_ANIM_NAME:
+			continue
+		var src: Animation = _anim.get_animation(src_name)
+		if src == null:
+			continue
+
+		# Extinde durata merged
+		if src.length > merged.length:
+			merged.length = src.length
+
+		# Copiaza fiecare track
+		for t: int in range(src.get_track_count()):
+			var tpath: NodePath = src.track_get_path(t)
+			var ttype: Animation.TrackType = src.track_get_type(t)
+
+			var dst_idx: int = merged.find_track(tpath, ttype)
+			if dst_idx == -1:
+				dst_idx = merged.add_track(ttype)
+				merged.track_set_path(dst_idx, tpath)
+				merged.track_set_interpolation_type(dst_idx, src.track_get_interpolation_type(t))
+				merged.track_set_interpolation_loop_wrap(dst_idx, src.track_get_interpolation_loop_wrap(t))
+
+			# Inserează keyframe-urile (skip dacă există exact același timp)
+			for k: int in range(src.track_get_key_count(t)):
+				var t_time: float = src.track_get_key_time(t, k)
+				var existing: int = merged.track_find_key(dst_idx, t_time, Animation.FIND_MODE_EXACT)
+				if existing != -1:
+					continue
+				var value: Variant = src.track_get_key_value(t, k)
+				var transition: float = src.track_get_key_transition(t, k)
+				merged.track_insert_key(dst_idx, t_time, value, transition)
+
+	if merged.length <= 0.0:
+		# Nu am găsit nimic valid, fall back la prima animatie
+		var anims: PackedStringArray = _anim.get_animation_list()
+		return StringName(anims[0]) if not anims.is_empty() else &""
+
+	# Adaugă merged în library
+	var lib: AnimationLibrary = _anim.get_animation_library(&"")
+	if lib != null:
+		lib.add_animation(_MERGED_ANIM_NAME, merged)
+	else:
+		# Nu există library default - creăm unul
+		var new_lib := AnimationLibrary.new()
+		new_lib.add_animation(_MERGED_ANIM_NAME, merged)
+		_anim.add_animation_library(&"", new_lib)
+
+	return _MERGED_ANIM_NAME
 
 func _playback_speed_for(anim_name: StringName) -> float:
 	if playback_duration <= 0.0:
@@ -83,6 +153,8 @@ func _on_animation_finished(_anim_name: StringName) -> void:
 	elif disable_complex_collision_while_animating:
 		_set_complex_collision_enabled(true)
 
+# ── Audio ──────────────────────────────────────────────────────────────────────
+
 func _get_or_create_audio() -> AudioStreamPlayer3D:
 	var existing: Node = get_node_or_null("MechanismAudio")
 	if existing is AudioStreamPlayer3D:
@@ -91,6 +163,8 @@ func _get_or_create_audio() -> AudioStreamPlayer3D:
 	player.name = "MechanismAudio"
 	add_child(player)
 	return player
+
+# ── Coliziune complexă ─────────────────────────────────────────────────────────
 
 func _create_complex_collision() -> void:
 	if has_node("ComplexCollision"):

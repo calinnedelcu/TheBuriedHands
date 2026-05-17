@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dq7x3balanta1"]
 
 [ext_resource type="Script" uid="uid://cv2iq3bjds1qt" path="res://Scripts/balanta.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://dokin57o5qmi0" path="res://scenes/items/BalantaMonoAnimation.glb" id="2_glb"]
+[ext_resource type="PackedScene" uid="uid://cfuko6sw8jq2g" path="res://scenes/items/balanta2.glb" id="2_glb"]
 [ext_resource type="AudioStream" uid="uid://cnf84pa5v8eo4" path="res://audio/sfx/mechanisms/ancient_mechanical_gears.mp3" id="3_gears"]
 
 [node name="Balanta" type="Node3D" unique_id=910842277]
