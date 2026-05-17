@@ -100,6 +100,7 @@ func _register_types() -> void:
 	_add_type(ItemType.new("lamp", "Lampă cu ulei", Color(0, 0, 0, 0), Vector3.ZERO, Vector3.ZERO, false, true))
 
 	_add_type(ItemType.new("mercury_vase", "Vaza cu mercur", Color(0.42, 0.45, 0.48), Vector3.ZERO, Vector3.ZERO))
+	_add_type(ItemType.new("vapor_mask", "Masca de panza", Color(0.56, 0.48, 0.36), Vector3(0.12, 0.035, 0.09), Vector3(0.0, 0.0, -0.04)))
 
 func _add_type(t: ItemType) -> void:
 	_types[t.id] = t

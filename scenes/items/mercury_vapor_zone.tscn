@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://bamucwghmiypt"]
+
+[ext_resource type="Script" uid="uid://bifbetg7igoco" path="res://Scripts/mercury_vapor_zone.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vapor_area"]
+size = Vector3(10, 4, 10)
+
+[sub_resource type="StandardMaterial3D" id="Mat_mercury_vapor_particle"]
+transparency = 1
+albedo_color = Color(0.58, 0.66, 0.68, 0.42)
+roughness = 0.22
+emission_enabled = true
+emission = Color(0.18, 0.34, 0.36, 1)
+emission_energy_multiplier = 0.08
+
+[sub_resource type="SphereMesh" id="Mesh_mercury_vapor_particle"]
+material = SubResource("Mat_mercury_vapor_particle")
+radius = 0.18
+height = 0.36
+radial_segments = 8
+rings = 4
+
+[node name="MercuryVaporZone" type="Node3D" unique_id=1978328135]
+script = ExtResource("1_script")
+ambient_intensity_in_area = 0.5
+protected_ambient_intensity_in_area = 0.375
+
+[node name="Area" type="Area3D" parent="." unique_id=1249381445]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area" unique_id=646161501]
+shape = SubResource("BoxShape3D_vapor_area")
+
+[node name="Source" type="Marker3D" parent="." unique_id=2043530365]
+
+[node name="Sources" type="Node3D" parent="." unique_id=2108492238]
+
+[node name="SourceA" type="Marker3D" parent="Sources" unique_id=245209517]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
+
+[node name="SourceB" type="Marker3D" parent="Sources" unique_id=872522569]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+
+[node name="VaporParticles" type="CPUParticles3D" parent="." unique_id=1839909894]
+amount = 140
+lifetime = 2.4
+preprocess = 2.4
+mesh = SubResource("Mesh_mercury_vapor_particle")
+emission_shape = 1
+emission_sphere_radius = 3.0
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, 0.05, 0)
+initial_velocity_min = 0.05
+initial_velocity_max = 0.28
+angular_velocity_min = -25.0
+angular_velocity_max = 25.0
+scale_amount_min = 0.22
+scale_amount_max = 0.65
+color = Color(0.62, 0.72, 0.74, 0.45)

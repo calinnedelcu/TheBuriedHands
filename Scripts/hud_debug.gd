@@ -26,6 +26,7 @@ const VITALITY_REGIONS: Array[Rect2] = [
 
 @export var vitality_path: NodePath = NodePath("")
 @export var vitality_search_name: String = "Vitality"
+@export var hide_when_modern_hud_exists: bool = true
 
 var vitality_step := 0
 var vitality_textures: Array[AtlasTexture] = []
@@ -35,6 +36,9 @@ var damage_tween: Tween
 
 
 func _ready() -> void:
+	if hide_when_modern_hud_exists and _modern_damage_hud_exists():
+		visible = false
+		return
 	add_to_group("hud_damage")
 	for i in VITALITY_SOURCES.size():
 		var atlas_texture := AtlasTexture.new()
@@ -104,3 +108,12 @@ func _resolve_vitality_node() -> TextureRect:
 	if scene_root == null or vitality_search_name == "":
 		return null
 	return scene_root.find_child(vitality_search_name, true, false) as TextureRect
+
+
+func _modern_damage_hud_exists() -> bool:
+	if not is_inside_tree():
+		return false
+	for node in get_tree().get_nodes_in_group("hud_damage"):
+		if node != self and node.has_method("set_vapor_fraction") and node.has_method("apply_damage"):
+			return true
+	return false

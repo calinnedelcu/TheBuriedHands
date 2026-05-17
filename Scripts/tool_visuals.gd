@@ -7,6 +7,7 @@ const SLOT_WEDGE := 2
 const SLOT_CERAMIC := 3
 const SLOT_HAMMER := 4
 const SLOT_WAX_TABLET := 5
+const SLOT_VAPOR_MASK := 6
 
 const SLOT_NAMES := {
 	SLOT_CHISEL: "Daltă",
@@ -14,6 +15,7 @@ const SLOT_NAMES := {
 	SLOT_CERAMIC: "Cioburi de ceramică",
 	SLOT_HAMMER: "Ciocan de lemn",
 	SLOT_WAX_TABLET: "Tăbliță de ceară",
+	SLOT_VAPOR_MASK: "Masca de panza",
 }
 
 const SLOT_BY_ITEM_ID := {
@@ -22,6 +24,7 @@ const SLOT_BY_ITEM_ID := {
 	"ceramic": SLOT_CERAMIC,
 	"hammer": SLOT_HAMMER,
 	"wax_tablet": SLOT_WAX_TABLET,
+	"vapor_mask": SLOT_VAPOR_MASK,
 }
 
 static func slot_name(slot: int) -> String:
@@ -34,6 +37,12 @@ static func item_display_name(item_id: String) -> String:
 	return slot_name(slot_for_item_id(item_id))
 
 static func build_for_item_id(item_id: String, in_hand: bool) -> Node3D:
+	if item_id == "vapor_mask":
+		var root := Node3D.new()
+		root.name = "VaporMaskVisual"
+		_build_vapor_mask(root, 1.0 if in_hand else 1.55, in_hand)
+		_apply_pose(root, SLOT_VAPOR_MASK, in_hand)
+		return root
 	return build_for_slot(slot_for_item_id(item_id), in_hand)
 
 static func pickup_prompt(slot: int) -> String:
@@ -51,6 +60,8 @@ static func pickup_prompt(slot: int) -> String:
 	return "Ridică unealta"
 
 static func pickup_prompt_for_item_id(item_id: String) -> String:
+	if item_id == "vapor_mask":
+		return "Ridica masca de panza"
 	return pickup_prompt(slot_for_item_id(item_id))
 
 static func glow_color_for_slot(slot: int) -> Color:
@@ -68,6 +79,8 @@ static func glow_color_for_slot(slot: int) -> Color:
 	return Color(1.0, 0.88, 0.55, 1.0)
 
 static func glow_color_for_item_id(item_id: String) -> Color:
+	if item_id == "vapor_mask":
+		return Color(0.72, 0.86, 0.78, 1.0)
 	return glow_color_for_slot(slot_for_item_id(item_id))
 
 static func build_for_slot(slot: int, in_hand: bool) -> Node3D:
@@ -136,6 +149,17 @@ static func _build_wax_tablet(root: Node3D, s: float, in_hand: bool) -> void:
 	_box(root, "IncisedLineA", Vector3(0.09, 0.004, 0.004) * s, Vector3(0.0, 0.017 * s, -0.016 * s), Vector3.ZERO, wood)
 	_box(root, "IncisedLineB", Vector3(0.07, 0.004, 0.004) * s, Vector3(0.0, 0.017 * s, 0.011 * s), Vector3.ZERO, wood)
 
+static func _build_vapor_mask(root: Node3D, s: float, in_hand: bool) -> void:
+	var cloth := _mat(Color(0.55, 0.48, 0.36, 1.0), 0.0, 0.92, in_hand)
+	var dark_cloth := _mat(Color(0.32, 0.27, 0.2, 1.0), 0.0, 0.95, in_hand)
+	var cord := _mat(Color(0.2, 0.15, 0.1, 1.0), 0.0, 0.9, in_hand)
+	_box(root, "FoldedCloth", Vector3(0.13, 0.028, 0.085) * s, Vector3.ZERO, Vector3.ZERO, cloth)
+	_box(root, "FilterPad", Vector3(0.075, 0.034, 0.048) * s, Vector3(0.0, 0.004 * s, -0.006 * s), Vector3.ZERO, dark_cloth)
+	_box(root, "FoldA", Vector3(0.118, 0.006, 0.006) * s, Vector3(0.0, 0.022 * s, -0.026 * s), Vector3.ZERO, dark_cloth)
+	_box(root, "FoldB", Vector3(0.118, 0.006, 0.006) * s, Vector3(0.0, 0.022 * s, 0.024 * s), Vector3.ZERO, dark_cloth)
+	_cylinder(root, "CordLeft", 0.004 * s, 0.11 * s, Vector3(-0.072, 0.0, 0.0) * s, Vector3(0, 0, 90), cord, 6)
+	_cylinder(root, "CordRight", 0.004 * s, 0.11 * s, Vector3(0.072, 0.0, 0.0) * s, Vector3(0, 0, 90), cord, 6)
+
 static func _apply_pose(root: Node3D, slot: int, in_hand: bool) -> void:
 	if in_hand:
 		root.position = Vector3(0.0, 0.0, -0.025)
@@ -152,6 +176,9 @@ static func _apply_pose(root: Node3D, slot: int, in_hand: bool) -> void:
 			SLOT_WAX_TABLET:
 				root.position = Vector3(0.0, 0.0, -0.04)
 				root.rotation_degrees = Vector3(-18, 18, 0)
+			SLOT_VAPOR_MASK:
+				root.position = Vector3(0.0, -0.004, -0.035)
+				root.rotation_degrees = Vector3(-14, 16, -4)
 	else:
 		root.position = Vector3(0.0, 0.075, 0.0)
 		root.rotation_degrees = Vector3(0, 22, -6)

@@ -5,7 +5,7 @@ extends CanvasLayer
 @export var interaction_path: NodePath
 @export var inventory_path: NodePath
 @export var debug_overlay_update_interval: float = 0.15
-@export var vapor_preview_cycle_enabled: bool = true
+@export var vapor_preview_cycle_enabled: bool = false
 @export var vapor_preview_cycle_interval: float = 1.0
 
 @onready var _oil_phial: Control = $Anchor/Bottom/OilPhial
@@ -21,6 +21,7 @@ extends CanvasLayer
 @onready var _dot: Panel = $Anchor/Center/CrosshairDot
 @onready var _objective_card: TextureRect = $Anchor/TopRight/ObjectiveCard
 @onready var _objective_label: Label = $Anchor/TopRight/ObjectiveCard/ObjectiveLabel
+@onready var _vitality_frame: TextureRect = $Vitality
 var _objective_visible_pos: Vector2 = Vector2.ZERO
 var _objective_tween: Tween = null
 const _OBJ_HIDDEN_OFFSET := Vector2(110.0, -24.0)
@@ -79,6 +80,7 @@ const _ITEM_ICON_TEXTURES: Dictionary = {
 	"rope": preload("res://scenes/ui/Slots/Icons/icon_rope.png"),
 	"wet_cloth": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
 	"qin_seal": preload("res://scenes/ui/Slots/Icons/icon_qin_seal.png"),
+	"vapor_mask": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
 }
 const _VAPOR_FRAME_REGION: Rect2 = Rect2(17, 260, 1081, 202)
 const _VAPOR_FRAME_SOURCES: Array[Texture2D] = [
@@ -92,7 +94,30 @@ const _VAPOR_FRAME_SOURCES: Array[Texture2D] = [
 	preload("res://scenes/ui/Mercur/frames/vapor_7.png"),
 	preload("res://scenes/ui/Mercur/frames/vapor_8.png"),
 ]
+const _VITALITY_FRAME_SOURCES: Array[Texture2D] = [
+	preload("res://scenes/ui/Vitalitate/vitality_0_full.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_1.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_2.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_3.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_4.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_5.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_6.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_7.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_8_empty.png"),
+]
+const _VITALITY_FRAME_REGIONS: Array[Rect2] = [
+	Rect2(20, 143, 545, 102),
+	Rect2(20, 143, 545, 102),
+	Rect2(20, 143, 545, 102),
+	Rect2(20, 142, 545, 102),
+	Rect2(20, 157, 545, 101),
+	Rect2(20, 144, 545, 102),
+	Rect2(20, 144, 545, 101),
+	Rect2(20, 142, 545, 103),
+	Rect2(20, 142, 545, 102),
+]
 var _vapor_frame_textures: Array[AtlasTexture] = []
+var _vitality_frame_textures: Array[AtlasTexture] = []
 var _slot_count_labels: Array[Label] = []
 var _inventory: Node = null
 var _active_lamp_node: Node = null
@@ -151,10 +176,15 @@ var _oil_bob_time: float = 0.0
 var _oil_pct: float = 1.0
 var _vapor_step: int = 0
 var _vapor_preview_timer: float = 0.0
+var _vitality_step: int = 0
+var _vitality_base_position: Vector2 = Vector2.ZERO
+var _vitality_damage_tween: Tween = null
 
 func _ready() -> void:
 	add_to_group("hud_vapors")
+	add_to_group("hud_damage")
 	_build_vapor_frame_textures()
+	_build_vitality_frame_textures()
 	_setup_debug_overlay_input()
 	_build_debug_overlay()
 	_build_dialogue_panel()
@@ -177,6 +207,8 @@ func _ready() -> void:
 	_apply_objective_font()
 	_prepare_slot_count_labels()
 	_set_vapor_step(0)
+	_set_vitality_step(0)
+	_vitality_base_position = _vitality_frame.position
 
 	if has_node("/root/Objectives"):
 		var obj := get_node("/root/Objectives")
@@ -235,6 +267,14 @@ func apply_vapor(steps: int = 1) -> void:
 func reset_vapors() -> void:
 	_set_vapor_step(0)
 
+func apply_damage(steps: int = 1) -> void:
+	if _vitality_frame == null or _vitality_frame_textures.is_empty():
+		return
+	var next_step: int = mini(_vitality_step + steps, _vitality_frame_textures.size() - 1)
+	if next_step == _vitality_step:
+		return
+	_play_vitality_damage_feedback(next_step)
+
 func _set_vapor_step(step: int) -> void:
 	if _vapor_frame == null or _vapor_frame_textures.is_empty():
 		return
@@ -248,6 +288,37 @@ func _build_vapor_frame_textures() -> void:
 		atlas_texture.atlas = source
 		atlas_texture.region = _VAPOR_FRAME_REGION
 		_vapor_frame_textures.append(atlas_texture)
+
+func _build_vitality_frame_textures() -> void:
+	_vitality_frame_textures.clear()
+	for i in _VITALITY_FRAME_SOURCES.size():
+		var atlas_texture := AtlasTexture.new()
+		atlas_texture.atlas = _VITALITY_FRAME_SOURCES[i]
+		atlas_texture.region = _VITALITY_FRAME_REGIONS[i]
+		_vitality_frame_textures.append(atlas_texture)
+
+func _set_vitality_step(step: int) -> void:
+	if _vitality_frame == null or _vitality_frame_textures.is_empty():
+		return
+	_vitality_step = clampi(step, 0, _vitality_frame_textures.size() - 1)
+	_vitality_frame.texture = _vitality_frame_textures[_vitality_step]
+
+func _play_vitality_damage_feedback(next_step: int) -> void:
+	if _vitality_frame == null:
+		return
+	if _vitality_damage_tween != null and _vitality_damage_tween.is_running():
+		_vitality_damage_tween.kill()
+
+	_vitality_frame.position = _vitality_base_position
+	_vitality_frame.modulate = Color.WHITE
+
+	_vitality_damage_tween = create_tween()
+	_vitality_damage_tween.tween_property(_vitality_frame, "modulate", Color(0.78, 0.38, 0.28, 1.0), 0.05)
+	_vitality_damage_tween.parallel().tween_property(_vitality_frame, "position", _vitality_base_position + Vector2(-3.0, 1.0), 0.05)
+	_vitality_damage_tween.tween_property(_vitality_frame, "position", _vitality_base_position + Vector2(3.0, -1.0), 0.04)
+	_vitality_damage_tween.tween_callback(_set_vitality_step.bind(next_step))
+	_vitality_damage_tween.tween_property(_vitality_frame, "position", _vitality_base_position, 0.05)
+	_vitality_damage_tween.parallel().tween_property(_vitality_frame, "modulate", Color.WHITE, 0.14)
 
 func _prepare_slot_count_labels() -> void:
 	_slot_count_labels.clear()

@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://c7nrdkg0wgask"]
+
+[ext_resource type="Script" path="res://Scripts/pickup_item.gd" id="1_pickup"]
+[ext_resource type="Script" path="res://Scripts/interactable.gd" id="2_interact"]
+
+[sub_resource type="BoxShape3D" id="Shape_mask"]
+size = Vector3(0.46, 0.26, 0.36)
+
+[node name="VaporMask" type="Node3D"]
+script = ExtResource("1_pickup")
+item_id = "vapor_mask"
+custom_prompt = "Ridica masca de panza"
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="BodyCollider" type="CollisionShape3D" parent="Body"]
+shape = SubResource("Shape_mask")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+visible = false
+
+[node name="Glow" type="OmniLight3D" parent="."]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+light_color = Color(0.72, 0.86, 0.78, 1)
+light_energy = 0.0
+omni_range = 1.2
+omni_attenuation = 1.9
+
+[node name="Interactable" type="Node" parent="."]
+script = ExtResource("2_interact")
+prompt_text = "Ridica masca de panza"
+is_pickup = true
