@@ -1,0 +1,162 @@
+[gd_scene load_steps=25 format=3]
+
+[ext_resource type="Script" path="res://Scripts/squeeze_tunnel_collapse.gd" id="1_mechanism"]
+[ext_resource type="Script" path="res://Scripts/squeeze_tunnel_interactable.gd" id="2_interact"]
+[ext_resource type="AudioStream" path="res://audio/sfx/tunnel/squeeze_effort.mp3" id="3_squeeze"]
+[ext_resource type="AudioStream" path="res://audio/sfx/tunnel/gravel_slide.mp3" id="4_gravel"]
+[ext_resource type="AudioStream" path="res://audio/sfx/tunnel/stones_falling.mp3" id="5_stones"]
+[ext_resource type="AudioStream" path="res://audio/sfx/tunnel/rock_cinematic.mp3" id="6_cine"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/large_rock_centered.tscn" id="7_large_a"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/large_rock_2_centered.tscn" id="8_large_b"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/medium_rock_1_centered.tscn" id="9_medium_a"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/medium_rock_2_centered.tscn" id="10_medium_b"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/medium_rock_3_centered.tscn" id="11_medium_c"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/small_rock_1_centered.tscn" id="12_small_a"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/small_rock_2_centered.tscn" id="13_small_b"]
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/small_rock_3_centered.tscn" id="14_small_c"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_entry"]
+size = Vector3(1.5, 0.8, 0.28)
+
+[sub_resource type="BoxShape3D" id="BoxShape_gate"]
+size = Vector3(1.25, 0.62, 0.22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gate"]
+size = Vector3(1.25, 0.62, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="Material_dark_stone"]
+albedo_color = Color(0.24, 0.2, 0.17, 1)
+roughness = 0.92
+
+[sub_resource type="BoxShape3D" id="BoxShape_exit"]
+size = Vector3(2.0, 1.0, 0.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape_collapse"]
+size = Vector3(2.1, 1.25, 0.85)
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock_large"]
+radius = 0.38
+height = 0.72
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock_medium"]
+radius = 0.27
+height = 0.48
+radial_segments = 7
+rings = 3
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock_small"]
+radius = 0.18
+height = 0.32
+radial_segments = 6
+rings = 3
+
+[node name="SqueezeTunnelCollapse" type="Node3D"]
+script = ExtResource("1_mechanism")
+
+[node name="SqueezeFocus" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1.15)
+
+[node name="CollapseFocus" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.8)
+
+[node name="EntryBody" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EntryBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.4)
+shape = SubResource("BoxShape_entry")
+
+[node name="Interactable" type="Node" parent="EntryBody"]
+script = ExtResource("2_interact")
+prompt_text = "Împinge-te prin pasaj"
+mechanism_path = NodePath("../..")
+
+[node name="PassageGate" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PassageGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, -0.15)
+shape = SubResource("BoxShape_gate")
+
+[node name="GateVisual" type="MeshInstance3D" parent="PassageGate"]
+transform = Transform3D(1, 0, 0, 0, 0.84, 0, 0, 0, 1, 0, 0.32, -0.15)
+visible = false
+mesh = SubResource("BoxMesh_gate")
+surface_material_override/0 = SubResource("Material_dark_stone")
+
+[node name="ExitTrigger" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExitTrigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.2)
+shape = SubResource("BoxShape_exit")
+
+[node name="CollapseBlocker" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CollapseBlocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0.45)
+shape = SubResource("BoxShape_collapse")
+disabled = true
+
+[node name="RockReentryCollider" type="CollisionShape3D" parent="CollapseBlocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0.45)
+shape = SubResource("BoxShape_collapse")
+disabled = true
+
+[node name="Rocks" type="Node3D" parent="CollapseBlocker"]
+visible = false
+
+[node name="RockLargeA" parent="CollapseBlocker/Rocks" instance=ExtResource("7_large_a")]
+transform = Transform3D(1.12, 0.16, -0.08, -0.12, 0.74, 0.06, 0.12, -0.04, 0.92, -0.54, 0.92, 0.16)
+
+[node name="RockLargeB" parent="CollapseBlocker/Rocks" instance=ExtResource("8_large_b")]
+transform = Transform3D(0.86, -0.08, 0.14, 0.1, 0.7, 0.08, -0.1, -0.08, 1.08, 0.36, 0.86, 0.5)
+
+[node name="RockMediumA" parent="CollapseBlocker/Rocks" instance=ExtResource("9_medium_a")]
+transform = Transform3D(1.1, 0.1, 0, -0.08, 0.78, 0.04, 0.02, -0.04, 0.95, 0.02, 1.08, -0.05)
+
+[node name="RockMediumB" parent="CollapseBlocker/Rocks" instance=ExtResource("10_medium_b")]
+transform = Transform3D(0.86, 0.06, -0.08, -0.04, 0.74, 0.12, 0.1, -0.08, 0.98, 0.72, 0.62, 0.18)
+
+[node name="RockMediumC" parent="CollapseBlocker/Rocks" instance=ExtResource("11_medium_c")]
+transform = Transform3D(0.74, -0.04, 0.08, 0.06, 0.66, -0.06, -0.08, 0.08, 0.86, -0.2, 0.52, 0.72)
+
+[node name="RockSmallA" parent="CollapseBlocker/Rocks" instance=ExtResource("12_small_a")]
+transform = Transform3D(1.1, 0, 0, 0, 0.75, 0, 0, 0, 0.92, -0.92, 0.55, 0.46)
+
+[node name="RockSmallB" parent="CollapseBlocker/Rocks" instance=ExtResource("13_small_b")]
+transform = Transform3D(0.9, 0, 0, 0, 0.66, 0, 0, 0, 1.08, 0.95, 0.47, 0.52)
+
+[node name="RockSmallC" parent="CollapseBlocker/Rocks" instance=ExtResource("14_small_c")]
+transform = Transform3D(0.54, 0.04, -0.06, -0.03, 0.5, 0.02, 0.05, -0.02, 0.6, 0.18, 0.34, -0.18)
+
+[node name="SqueezeAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_squeeze")
+volume_db = -2.0
+unit_size = 8.0
+max_distance = 24.0
+
+[node name="GravelAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_gravel")
+volume_db = -4.0
+unit_size = 10.0
+max_distance = 32.0
+
+[node name="StonesAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("5_stones")
+volume_db = 1.0
+unit_size = 12.0
+max_distance = 40.0
+
+[node name="CinematicAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("6_cine")
+volume_db = -7.0
+unit_size = 14.0
+max_distance = 46.0

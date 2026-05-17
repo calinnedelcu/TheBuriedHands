@@ -19,6 +19,7 @@
 [ext_resource type="PackedScene" uid="uid://7vo71wtxrab5" path="res://scenes/items/pickup_item.tscn" id="Scene_pickup"]
 [ext_resource type="PackedScene" uid="uid://bc61qijll37rr" path="res://scenes/items/MapWithoutTreasure.glb" id="Scene_terracotta_room_2"]
 [ext_resource type="PackedScene" uid="uid://damcndlfm8jo4" path="res://scenes/items/tunele.glb" id="Scene_tunele"]
+[ext_resource type="PackedScene" path="res://scenes/items/squeeze_tunnel_collapse.tscn" id="42_5sbsc"]
 [ext_resource type="Script" uid="uid://cdxvffxevudq6" path="res://Scripts/add_lamp_lights.gd" id="Script_add_lamp_lights"]
 [ext_resource type="Script" uid="uid://cwfuqcryr2xt4" path="res://Scripts/breakable_interactable.gd" id="Script_breakable"]
 [ext_resource type="Script" uid="uid://x5cvcurbcwp2" path="res://Scripts/clay_application_station.gd" id="Script_clay_app_station"]
@@ -1646,4 +1647,34 @@ mesh = SubResource("ArrayMesh_bws2g")
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
 script = ExtResource("Script_runtime_col")
 
+[node name="SqueezeTunnelCollapse2" parent="." unique_id=287285825 instance=ExtResource("42_5sbsc")]
+transform = Transform3D(-0.041649017, 0, -0.9991323, 0, 1, 0, 0.9991323, 0, -0.041649017, -4.44003, 8.556511, 141.78773)
+
+[node name="SqueezeFocus" parent="SqueezeTunnelCollapse2" index="0"]
+transform = Transform3D(1.0000006, 0, -3.7252903e-09, 0, 1, 0, 3.7252903e-09, 0, 1.0000006, 0.74282837, -0.42410088, -2.243423)
+
+[node name="CollapseFocus" parent="SqueezeTunnelCollapse2" index="1"]
+transform = Transform3D(1.0000007, 0, -7.450581e-09, 0, 1, 0, 7.450581e-09, 0, 1.0000007, 0.82232666, -0.715745, -0.4726808)
+
+[node name="CollisionShape3D" parent="SqueezeTunnelCollapse2/EntryBody" index="0"]
+transform = Transform3D(1.000001, 0, -7.450581e-09, 0, 1, 0, 7.450581e-09, 0, 1.000001, 1.0541992, -0.7278652, -0.6093757)
+
+[node name="CollisionShape3D" parent="SqueezeTunnelCollapse2/PassageGate" index="0"]
+transform = Transform3D(1.000001, 0, -7.450581e-09, 0, 1, 0, 7.450581e-09, 0, 1.000001, 1.0541992, -0.85786533, -1.1593792)
+
+[node name="GateVisual" parent="SqueezeTunnelCollapse2/PassageGate" index="1"]
+transform = Transform3D(1, 0, 0, 0, 0.84, 0, 0, 0, 1, 0, 0.32, -1.1869907)
+
+[node name="CollisionShape3D" parent="SqueezeTunnelCollapse2/ExitTrigger" index="0"]
+transform = Transform3D(1.0000011, 0, -1.1175871e-08, 0, 1, 0, 1.1175871e-08, 0, 1.0000011, 1.0763702, -0.677865, -2.482128)
+
+[node name="CollisionShape3D" parent="SqueezeTunnelCollapse2/CollapseBlocker" index="0"]
+transform = Transform3D(0.4077256, 0, -0.91310567, 0, 1, 0, 0.91310567, 0, 0.4077256, 0.6639252, -0.63980436, 0.966125)
+
+[node name="RockReentryCollider" parent="SqueezeTunnelCollapse2/CollapseBlocker" index="1"]
+transform = Transform3D(0.9940424, 0, -0.10900568, 0, 1, 0, 0.10900568, 0, 0.9940424, 0.75914, -0.45835876, -0.8857317)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=157324655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.954873, 8.383691, 142.39056)
 [editable path="MapWithoutTreasure"]
+[editable path="SqueezeTunnelCollapse2"]
