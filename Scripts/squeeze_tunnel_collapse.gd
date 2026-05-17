@@ -15,6 +15,8 @@ extends Node3D
 @export var focus_pan_duration: float = 0.45
 @export var focus_hold_time: float = 0.5
 @export var focus_return_duration: float = 0.4
+@export var collapse_camera_shake_intensity: float = 0.09
+@export var collapse_camera_shake_duration: float = 0.85
 @export_node_path("Marker3D") var squeeze_focus_path: NodePath = NodePath("SqueezeFocus")
 @export_node_path("Marker3D") var collapse_focus_path: NodePath = NodePath("CollapseFocus")
 
@@ -98,6 +100,7 @@ func _collapse_after_exit(player: Node) -> void:
 	if stones_delay > 0.0:
 		await get_tree().create_timer(stones_delay).timeout
 	_play_audio(_stones_audio)
+	_shake_player_camera(player)
 	_animate_rocks()
 	if collision_enable_delay > 0.0:
 		await get_tree().create_timer(collision_enable_delay).timeout
@@ -150,6 +153,10 @@ func _focus_player(player: Node, marker_path: NodePath, zoom_fov: float, hold_ti
 	if marker == null:
 		return
 	player.call("play_cinematic_focus", marker.global_position, focus_pan_duration, hold_time, zoom_fov, focus_return_duration)
+
+func _shake_player_camera(player: Node) -> void:
+	if player != null and player.has_method("play_camera_shake"):
+		player.call("play_camera_shake", collapse_camera_shake_intensity, collapse_camera_shake_duration)
 
 func _is_player_crawling(player: Node) -> bool:
 	if player != null and player.has_method("is_crawling"):

@@ -41,6 +41,9 @@ signal stance_changed(stance: String)
 @export var bob_frequency: float = 10.0
 @export var bob_speed_multiplier: float = 1.0
 
+@export_group("Camera Shake")
+@export var camera_shake_recover_speed: float = 22.0
+
 @export_group("Stance")
 @export var stand_height: float = 1.8
 @export var crouch_height: float = 1.0
@@ -146,6 +149,9 @@ var _is_sprinting: bool = false
 var _distance_since_step: float = 0.0
 var _current_stance: String = "În picioare"
 var _camera_land_offset: float = 0.0
+var _camera_shake_remaining: float = 0.0
+var _camera_shake_duration: float = 0.0
+var _camera_shake_intensity: float = 0.0
 var _debug_accel_multiplier: float = 1.0
 var _debug_decel_multiplier: float = 1.0
 var _debug_head_bob_multiplier: float = 1.0
@@ -568,6 +574,11 @@ func _process_climbing(delta: float) -> void:
 func is_cinematic_active() -> bool:
 	return _cinematic_active
 
+func play_camera_shake(intensity: float = 0.08, duration: float = 0.55) -> void:
+	_camera_shake_intensity = maxf(_camera_shake_intensity, maxf(0.0, intensity))
+	_camera_shake_duration = maxf(0.01, duration)
+	_camera_shake_remaining = maxf(_camera_shake_remaining, _camera_shake_duration)
+
 func is_guard_detection_suppressed() -> bool:
 	return _cinematic_active or Time.get_ticks_msec() < _guard_detection_suppressed_until_ms
 
@@ -862,6 +873,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_bob_time = 0.0
 		camera.position.y = lerp(camera.position.y, _initial_camera_local_position.y - _camera_land_offset, delta * 10.0)
+	_update_camera_shake(delta)
 
 	# Footstep noise
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length() > 0.2:
@@ -920,6 +932,22 @@ func _head_bob_multiplier() -> float:
 	if _is_sprinting:
 		return sprint_bob_multiplier
 	return 1.0
+
+func _update_camera_shake(delta: float) -> void:
+	if camera == null:
+		return
+	if _camera_shake_remaining > 0.0:
+		_camera_shake_remaining = maxf(0.0, _camera_shake_remaining - delta)
+		var t: float = _camera_shake_remaining / maxf(0.01, _camera_shake_duration)
+		var amplitude: float = _camera_shake_intensity * t * t
+		camera.position.x = _initial_camera_local_position.x + randf_range(-amplitude, amplitude)
+		camera.position.z = _initial_camera_local_position.z + randf_range(-amplitude, amplitude)
+		if _camera_shake_remaining <= 0.0:
+			_camera_shake_intensity = 0.0
+		return
+	var recover_t: float = clampf(delta * camera_shake_recover_speed, 0.0, 1.0)
+	camera.position.x = lerpf(camera.position.x, _initial_camera_local_position.x, recover_t)
+	camera.position.z = lerpf(camera.position.z, _initial_camera_local_position.z, recover_t)
 
 func _step_noise() -> float:
 	if _is_crawling:

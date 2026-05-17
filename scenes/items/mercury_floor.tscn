@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://bay0kqoh0m4rh"]
+
+[ext_resource type="Script" path="res://Scripts/mercury_floor.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_kill_area"]
+size = Vector3(4, 1, 4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_mercury_floor"]
+albedo_color = Color(0.47, 0.51, 0.54, 0.92)
+metallic = 0.95
+roughness = 0.08
+emission_enabled = true
+emission = Color(0.12, 0.18, 0.2, 1)
+emission_energy_multiplier = 0.18
+
+[sub_resource type="BoxMesh" id="BoxMesh_mercury_surface"]
+material = SubResource("Mat_mercury_floor")
+size = Vector3(4, 0.08, 4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_mercury_warning"]
+transparency = 1
+albedo_color = Color(0.64, 0.72, 0.74, 0.22)
+emission_enabled = true
+emission = Color(0.22, 0.34, 0.36, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="BoxMesh" id="BoxMesh_mercury_warning"]
+material = SubResource("Mat_mercury_warning")
+size = Vector3(4, 0.04, 4)
+
+[node name="MercuryFloor" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Surface" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+mesh = SubResource("BoxMesh_mercury_surface")
+
+[node name="WarningGlow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.04, 0, 0, 0, 1, 0, 0, 0, 1.04, 0, 0.11, 0)
+mesh = SubResource("BoxMesh_mercury_warning")
+
+[node name="KillArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="KillArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape_kill_area")
