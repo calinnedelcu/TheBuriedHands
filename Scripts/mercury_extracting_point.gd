@@ -17,6 +17,7 @@ func _ready() -> void:
 	_interactable.held.connect(_on_held)
 	if fill_stream != null:
 		_audio.stream = fill_stream
+	_audio.bus = &"Tomb"
 
 func _process(_delta: float) -> void:
 	_refresh_prompt()

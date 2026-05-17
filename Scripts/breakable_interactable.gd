@@ -12,6 +12,9 @@ signal broken(blocker: Node)
 
 @export var required_items: PackedStringArray = PackedStringArray(["wedge", "hammer"])
 @export var break_time: float = 3.0
+## Obiectiv setat dupa spargere.
+@export var objective_after_id: String = ""
+@export var objective_after_text: String = ""
 ## Daca true, ascunde nodul-parinte si dezactiveaza toate coliziile din el.
 @export var hide_blocker_on_break: bool = true
 ## Daca true, free-uieste tot subarborele parintelui dupa break (1s delay).
@@ -84,6 +87,11 @@ func _break_now() -> void:
 	enabled = false
 	var blocker := get_parent()
 	broken.emit(blocker)
+	# Set next objective if configured.
+	if objective_after_id != "":
+		var objectives := get_node_or_null("/root/Objectives")
+		if objectives and objectives.has_method("set_objective"):
+			objectives.set_objective(objective_after_id, objective_after_text)
 	if not hide_blocker_on_break:
 		return
 	if blocker is Node3D:

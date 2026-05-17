@@ -58,5 +58,6 @@ material_override = SubResource("Mat_door")
 
 [node name="GateAudio" type="AudioStreamPlayer3D" parent="."]
 volume_db = -4.0
+bus = &"Tomb"
 unit_size = 12.0
 max_distance = 30.0

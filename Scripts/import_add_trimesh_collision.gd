@@ -15,7 +15,7 @@ func _add_collision_recursive(node: Node, owner_root: Node) -> void:
 		body.owner = owner_root
 
 		var shape := CollisionShape3D.new()
-		var tri := node.mesh.create_trimesh_shape()
+		var tri: Shape3D = node.mesh.create_trimesh_shape()
 		if tri is ConcavePolygonShape3D:
 			(tri as ConcavePolygonShape3D).backface_collision = true
 		shape.shape = tri

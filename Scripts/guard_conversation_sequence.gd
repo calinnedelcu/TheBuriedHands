@@ -268,6 +268,25 @@ func _start_exit_walk(guard_a: Node3D, guard_b: Node3D) -> void:
 	print("[GuardConversation] starting exit walk with %d waypoints" % waypoints.size())
 	_walk_along(guard_a, waypoints, 0.0)
 	_walk_along(guard_b, waypoints, exit_b_lag)
+	_wait_exit_walk_then_arm_guards(guard_a, guard_b, waypoints)
+
+func _wait_exit_walk_then_arm_guards(guard_a: Node3D, guard_b: Node3D, waypoints: Array[Vector3]) -> void:
+	# Asteapta ca ambii sa ajunga aproape de ultimul waypoint, apoi armeaza gardienii.
+	# Nu putem `await` direct pe _walk_along (e fire-and-forget); polling pe pozitie.
+	if waypoints.is_empty():
+		return
+	var final_wp: Vector3 = waypoints[waypoints.size() - 1]
+	while true:
+		await get_tree().create_timer(0.25).timeout
+		var a_done := guard_a == null or not is_instance_valid(guard_a) or guard_a.global_position.distance_to(final_wp) < 0.8
+		var b_done := guard_b == null or not is_instance_valid(guard_b) or guard_b.global_position.distance_to(final_wp) < 0.8
+		if a_done and b_done:
+			break
+	if has_node("/root/GameEvents"):
+		var events := get_node("/root/GameEvents")
+		if events.has_method("mark_guards_alerted"):
+			events.call("mark_guards_alerted")
+			print("[GuardConversation] exit walk complete → guards_alerted=true")
 
 func _exit_waypoints() -> Array[Vector3]:
 	var waypoints: Array[Vector3] = []

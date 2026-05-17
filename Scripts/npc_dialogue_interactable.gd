@@ -417,7 +417,7 @@ func _get_baked_lines(key: String) -> PackedStringArray:
 				"Liang: Am lucrat la pasaje, da... dar m-au pus să lucrez pe bucăți. O secțiune aici, una dincolo. Ne-au orbit cu detalii ca să nu vedem întregul.",
 				"Meșteșugar: Nu mă minți. Spune-mi tot ce știi. Trebuie să fie o cale de scăpare undeva prin tunelurile astea.",
 				"Liang: Majoritatea sunt capcane moarte. Dacă pui piciorul greșit, te transformi în perniță de ace. Iar restul duc în locuri unde moartea e și mai lentă.",
-				"Liang: Există un drum prin tunelurile de serviciu din spate. Te scoate aproape de tezaur, dar trece pe lângă Camera cu Mercur.",
+				"Liang: Există un drum prin tunelul secret din spate. Te scoate aproape de tezaur, dar trece pe lângă Camera cu Mercur.",
 				"Meșteșugar: Mercur...? Râurile acelea ca de argint despre care mi-ai mai vorbit?",
 				"Liang: Aerul de acolo e greu, metalic. Treci repede. Vaporii de mercur sunt toxici; dacă zăbovești, nu mai ieși viu.",
 				"Meșteșugar: Există altă cale? Un drum secret? Orice altceva?",
@@ -429,7 +429,9 @@ func _get_baked_lines(key: String) -> PackedStringArray:
 				"Liang: E o contragreutate. Ca s-o declanșezi pe dinăuntru, ai nevoie de ceva greu, dar nici eu nu știu exact ce.",
 				"Meșteșugar: Ceva greu, zici?",
 				"Liang: Când ajungi la Camera cu Mercur, acoperă-ți nasul și gura cu o cârpă umedă. Nu trage aer adânc în piept.",
-				"Liang: Acum du-te. Ridică piatra aceea mare din camera de lângă. Te va duce unde ai nevoie.",
+				"Liang: Acum du-te. În camera alăturată e o piatră mare care blochează drumul. Sparge-o cu ciocanul și pana de lemn.",
+				"Meșteșugar: Am uneltele. Mă descurc.",
+				"Liang: Bine. După ce spargi piatra, drumul te va duce unde ai nevoie.",
 				"Meșteșugar: Mulțumesc, Liang...",
 			])
 		_:

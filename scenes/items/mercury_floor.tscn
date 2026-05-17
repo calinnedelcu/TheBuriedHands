@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://cy3kh7b1lv3xk"]
+
+[ext_resource type="Script" uid="uid://bw7xk2h40qrny" path="res://Scripts/mercury_floor.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mercury"]
+size = Vector3(6, 0.3, 6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_mercury_surface"]
+albedo_color = Color(0.25, 0.28, 0.3, 0.85)
+roughness = 0.08
+emission_enabled = true
+emission = Color(0.12, 0.28, 0.32, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_mercury"]
+size = Vector2(6, 6)
+
+[node name="MercuryFloor" type="Node3D" unique_id=56117162]
+script = ExtResource("1_script")
+
+[node name="Area" type="Area3D" parent="." unique_id=805472127]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area" unique_id=1714440640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+shape = SubResource("BoxShape3D_mercury")
+
+[node name="SurfaceVisual" type="MeshInstance3D" parent="." unique_id=1939459374]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+visible = false
+material_override = SubResource("Mat_mercury_surface")
+mesh = SubResource("PlaneMesh_mercury")
+
+[node name="VaporParticles" type="CPUParticles3D" parent="." unique_id=1677204175]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+amount = 40
+lifetime = 1.8
+preprocess = 1.8
+emission_shape = 2
+emission_sphere_radius = 1.0
+direction = Vector3(0, 1, 0)
+spread = 30.0
+gravity = Vector3(0, -0.15, 0)
+initial_velocity_min = 0.02
+initial_velocity_max = 0.18
+scale_amount_min = 0.1
+scale_amount_max = 0.4
+color = Color(0.5, 0.65, 0.7, 0.32)

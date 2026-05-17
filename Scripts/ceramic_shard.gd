@@ -9,6 +9,7 @@ var _t_total: float = 0.0
 var _t_post: float = 0.0
 
 func _ready() -> void:
+	add_to_group("trap_trigger")
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)

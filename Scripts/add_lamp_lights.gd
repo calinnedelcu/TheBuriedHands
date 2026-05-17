@@ -2,6 +2,8 @@ extends Node3D
 
 const OilReservoirScript = preload("res://Scripts/oil_reservoir.gd")
 const InteractableScript = preload("res://Scripts/interactable.gd")
+const StaticLampLoopAudioScript = preload("res://Scripts/static_lamp_loop_audio.gd")
+const DefaultWallLampFireStream = preload("res://audio/sfx/lamp/wall_lamp_fire.mp3")
 
 @export var light_energy: float = 4.5:
 	set(v):
@@ -23,7 +25,7 @@ const InteractableScript = preload("res://Scripts/interactable.gd")
 @export_group("Oil Reservoir")
 ## Daca true, ataseaza un OilReservoir + Interactable la fiecare lampa.
 @export var add_oil_reservoir: bool = true
-@export var reservoir_oil_amount: float = 200.0
+@export var reservoir_oil_amount: float = 400.0
 ## Procent minim/maxim din `reservoir_oil_amount` cu care fiecare lampa porneste.
 ## 1.0 = 100%. Diferenta dintre min si max → variatie aleatoare per instanta.
 @export_range(0.0, 1.0, 0.05) var reservoir_initial_oil_min_pct: float = 0.5
@@ -31,6 +33,14 @@ const InteractableScript = preload("res://Scripts/interactable.gd")
 @export var reservoir_idle_drain: float = 0.2
 @export var reservoir_refill_per_second: float = 8.0
 @export var reservoir_collider_extents: Vector3 = Vector3(0.35, 0.35, 0.35)
+@export_group("Loop Audio")
+@export var add_fire_loop_audio: bool = true
+@export var fire_loop_stream: AudioStream = DefaultWallLampFireStream
+@export var fire_loop_volume_db: float = -12.0
+@export var fire_loop_unit_size: float = 6.0
+@export var fire_loop_max_distance: float = 18.0
+@export var fire_loop_max_db: float = -4.0
+@export_range(0.0, 1.0, 0.05) var fire_loop_panning_strength: float = 0.65
 
 var _scanned := false
 
@@ -73,8 +83,31 @@ func _add_light_to(target: Node3D) -> void:
 		target.add_child(light)
 		if Engine.is_editor_hint():
 			light.owner = target.owner
+	if add_fire_loop_audio:
+		_add_fire_loop_audio_to(target)
 	if add_oil_reservoir:
 		_add_reservoir_to(target)
+
+func _add_fire_loop_audio_to(target: Node3D) -> void:
+	if fire_loop_stream == null or target.get_node_or_null("LampFireSFX") != null:
+		return
+	var audio := AudioStreamPlayer3D.new()
+	audio.name = "LampFireSFX"
+	audio.set_script(StaticLampLoopAudioScript)
+	audio.set("light_path", NodePath("../AddedLight"))
+	audio.set("active_volume_db", fire_loop_volume_db)
+	audio.stream = fire_loop_stream
+	audio.volume_db = fire_loop_volume_db
+	audio.unit_size = fire_loop_unit_size
+	audio.max_db = fire_loop_max_db
+	audio.max_distance = fire_loop_max_distance
+	audio.panning_strength = fire_loop_panning_strength
+	audio.bus = &"SFX"
+	audio.autoplay = true
+	audio.position = Vector3(0, 0.4, 0)
+	target.add_child(audio)
+	if Engine.is_editor_hint():
+		audio.owner = target.owner
 
 func _add_reservoir_to(target: Node3D) -> void:
 	if target.get_node_or_null("OilReservoir") != null:

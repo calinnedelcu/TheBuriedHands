@@ -60,8 +60,8 @@ func _apply_visual_changes(by: Node) -> void:
 	var player_node := _resolve_player(by)
 	if player_node != null:
 		_clear_carried(player_node, clear_carried_node_name)
-		_spawn_carried(player_node)
 		_apply_inventory_changes(player_node)
+		_spawn_carried(player_node)
 
 func _apply_inventory_changes(player_node: Node) -> void:
 	if inventory_add_id == "" and inventory_remove_id == "":
@@ -86,6 +86,8 @@ func _set_node_visible(path: NodePath, is_visible: bool) -> void:
 func _spawn_carried(player_node: Node) -> void:
 	if carried_scene == null or carried_node_name == "":
 		return
+	if not _should_show_carried(player_node):
+		return
 	var socket := _find_tool_socket(player_node)
 	if socket == null:
 		return
@@ -97,6 +99,16 @@ func _spawn_carried(player_node: Node) -> void:
 	socket.add_child(visual)
 	if visual is Node3D:
 		(visual as Node3D).transform = carried_transform
+
+func _should_show_carried(player_node: Node) -> bool:
+	if inventory_add_id == "":
+		return true
+	var inv := player_node.get_node_or_null("Inventory")
+	if inv == null or not inv.has_method("current_item_id"):
+		return true
+	if inv.has_method("has_hand_scene_override") and bool(inv.call("has_hand_scene_override", inventory_add_id)):
+		return false
+	return str(inv.call("current_item_id")) == inventory_add_id
 
 func _clear_carried(player_node: Node, node_name: String) -> void:
 	if node_name == "":

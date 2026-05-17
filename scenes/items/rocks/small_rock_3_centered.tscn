@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/items/rocks/SmallRock3.glb" id="1_rock"]
+
+[node name="SmallRock3Centered" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_rock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.41921, -4.653877, -102.346985)

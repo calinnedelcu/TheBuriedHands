@@ -7,6 +7,15 @@ signal dialogue_skip_requested
 signal intro_finished
 signal lamp_tutorial_requested
 
+## Cat timp ramane false, toti gardienii ignora player-ul (nu vad, nu aud).
+## Devine true cand cei doi gardieni din conversatie au terminat exit walk-ul.
+var guards_alerted: bool = false
+
+func mark_guards_alerted() -> void:
+	if guards_alerted:
+		return
+	guards_alerted = true
+
 ## One-shot tutorial guards. Set true when the corresponding sequence has been
 ## played so it cannot replay across multiple lamp instances or playthroughs.
 var lamp_empty_tutorial_played: bool = false

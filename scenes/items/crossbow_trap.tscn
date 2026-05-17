@@ -1,28 +1,34 @@
-[gd_scene format=3 uid="uid://c6xbowtrap001"]
+[gd_scene format=3 uid="uid://bl7377bb58jxn"]
 
-[ext_resource type="Script" path="res://Scripts/crossbow_trap.gd" id="1_trap"]
-[ext_resource type="Script" path="res://Scripts/tool_required_interactable.gd" id="2_tool_int"]
+[ext_resource type="Script" uid="uid://l78ng5n0yhka" path="res://Scripts/crossbow_trap.gd" id="1_trap"]
+[ext_resource type="Script" uid="uid://ch2ouixuwdtyd" path="res://Scripts/tool_required_interactable.gd" id="2_tool_int"]
+[ext_resource type="AudioStream" uid="uid://cf5hqs42gpcd4" path="res://audio/sfx/trap/crossbow_shot.mp3" id="3_fire_sfx"]
 
 [sub_resource type="BoxShape3D" id="Shape_plate"]
-size = Vector3(0.9, 0.04, 0.9)
-
-[sub_resource type="BoxMesh" id="Mesh_plate"]
-size = Vector3(0.9, 0.04, 0.9)
+size = Vector3(0.9, 0.12, 0.9)
 
 [sub_resource type="StandardMaterial3D" id="Mat_plate"]
 albedo_color = Color(0.35, 0.27, 0.18, 1)
 roughness = 0.95
 
-[sub_resource type="BoxMesh" id="Mesh_housing"]
-size = Vector3(0.4, 0.3, 0.55)
+[sub_resource type="BoxMesh" id="Mesh_plate"]
+size = Vector3(0.9, 0.12, 0.9)
 
 [sub_resource type="BoxShape3D" id="Shape_housing"]
 size = Vector3(0.4, 0.3, 0.55)
 
 [sub_resource type="StandardMaterial3D" id="Mat_housing"]
 albedo_color = Color(0.22, 0.16, 0.1, 1)
-roughness = 0.85
 metallic = 0.2
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="Mesh_housing"]
+size = Vector3(0.4, 0.3, 0.55)
+
+[sub_resource type="StandardMaterial3D" id="Mat_muzzle"]
+albedo_color = Color(0.14, 0.1, 0.07, 1)
+metallic = 0.45
+roughness = 0.7
 
 [sub_resource type="CylinderMesh" id="Mesh_muzzle"]
 top_radius = 0.04
@@ -30,63 +36,119 @@ bottom_radius = 0.05
 height = 0.18
 radial_segments = 8
 
-[sub_resource type="StandardMaterial3D" id="Mat_muzzle"]
-albedo_color = Color(0.14, 0.1, 0.07, 1)
-roughness = 0.7
-metallic = 0.45
+[sub_resource type="StandardMaterial3D" id="Mat_shaft"]
+albedo_color = Color(0.55, 0.4, 0.25, 1)
+roughness = 0.85
 
-[node name="CrossbowTrap" type="Node3D"]
+[sub_resource type="StandardMaterial3D" id="Mat_head"]
+albedo_color = Color(0.3, 0.3, 0.32, 1)
+metallic = 0.7
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_fletching"]
+albedo_color = Color(0.45, 0.18, 0.14, 1)
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="Mesh_shaft"]
+top_radius = 0.012
+bottom_radius = 0.012
+height = 0.55
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="Mesh_head"]
+top_radius = 0.0
+bottom_radius = 0.028
+height = 0.10
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="Mesh_fletching"]
+size = Vector3(0.003, 0.05, 0.08)
+
+[node name="CrossbowTrap" type="Node3D" unique_id=661321473]
 script = ExtResource("1_trap")
+bolt_damage_steps = 1
+max_distance = 18.0
+one_shot = false
 pressure_plate_path = NodePath("PressurePlate")
 muzzle_path = NodePath("Housing/Muzzle")
 
-[node name="PressurePlate" type="Area3D" parent="."]
+[node name="PressurePlate" type="Area3D" parent="." unique_id=631691171]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
 collision_layer = 0
-collision_mask = 1
+collision_mask = 5
 
-[node name="PlateShape" type="CollisionShape3D" parent="PressurePlate"]
+[node name="PlateShape" type="CollisionShape3D" parent="PressurePlate" unique_id=1271984811]
 shape = SubResource("Shape_plate")
 
-[node name="PlateMesh" type="MeshInstance3D" parent="PressurePlate"]
-mesh = SubResource("Mesh_plate")
+[node name="PlateMesh" type="MeshInstance3D" parent="PressurePlate" unique_id=243775472]
 material_override = SubResource("Mat_plate")
+mesh = SubResource("Mesh_plate")
 
-[node name="Housing" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0.8, 0)
-collision_layer = 1
+[node name="Housing" type="StaticBody3D" parent="." unique_id=1314624295]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 1.4, 0)
 collision_mask = 0
 
-[node name="HousingCollider" type="CollisionShape3D" parent="Housing"]
+[node name="HousingCollider" type="CollisionShape3D" parent="Housing" unique_id=106020894]
 shape = SubResource("Shape_housing")
 
-[node name="HousingMesh" type="MeshInstance3D" parent="Housing"]
-mesh = SubResource("Mesh_housing")
+[node name="HousingMesh" type="MeshInstance3D" parent="Housing" unique_id=766192169]
+visible = false
 material_override = SubResource("Mat_housing")
+mesh = SubResource("Mesh_housing")
 
-[node name="Muzzle" type="Node3D" parent="Housing"]
+[node name="Muzzle" type="Node3D" parent="Housing" unique_id=96009271]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.25, 0, 0)
 
-[node name="MuzzleMesh" type="MeshInstance3D" parent="Housing/Muzzle"]
+[node name="MuzzleMesh" type="MeshInstance3D" parent="Housing/Muzzle" unique_id=970989214]
+visible = false
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -0.1)
-mesh = SubResource("Mesh_muzzle")
 material_override = SubResource("Mat_muzzle")
+mesh = SubResource("Mesh_muzzle")
 
-[node name="FireAudio" type="AudioStreamPlayer3D" parent="Housing"]
+[node name="LoadedBolt" type="Node3D" parent="Housing/Muzzle" unique_id=2006084443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.3)
+
+[node name="Shaft" type="MeshInstance3D" parent="Housing/Muzzle/LoadedBolt" unique_id=2006084444]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+material_override = SubResource("Mat_shaft")
+mesh = SubResource("Mesh_shaft")
+
+[node name="Head" type="MeshInstance3D" parent="Housing/Muzzle/LoadedBolt" unique_id=2006084445]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -0.325)
+material_override = SubResource("Mat_head")
+mesh = SubResource("Mesh_head")
+
+[node name="Fletching1" type="MeshInstance3D" parent="Housing/Muzzle/LoadedBolt" unique_id=2006084446]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.22)
+material_override = SubResource("Mat_fletching")
+mesh = SubResource("Mesh_fletching")
+
+[node name="Fletching2" type="MeshInstance3D" parent="Housing/Muzzle/LoadedBolt" unique_id=2006084447]
+transform = Transform3D(-0.5, 0.8660254, 0, -0.8660254, -0.5, 0, 0, 0, 1, 0, 0, 0.22)
+material_override = SubResource("Mat_fletching")
+mesh = SubResource("Mesh_fletching")
+
+[node name="Fletching3" type="MeshInstance3D" parent="Housing/Muzzle/LoadedBolt" unique_id=2006084448]
+transform = Transform3D(-0.5, -0.8660254, 0, 0.8660254, -0.5, 0, 0, 0, 1, 0, 0, 0.22)
+material_override = SubResource("Mat_fletching")
+mesh = SubResource("Mesh_fletching")
+
+[node name="FireAudio" type="AudioStreamPlayer3D" parent="Housing" unique_id=508035457]
+stream = ExtResource("3_fire_sfx")
 volume_db = -4.0
-unit_size = 10.0
 max_distance = 24.0
+bus = &"Tomb"
 
-[node name="DisableWithChisel" type="Node" parent="."]
+[node name="DisableWithChisel" type="Node" parent="." unique_id=902125793]
 script = ExtResource("2_tool_int")
-prompt_text = "Dezactivează capcana"
 required_item_id = "chisel"
 success_prompt = "Dezactivează capcana cu dalta"
 failure_prompt = "Nevoie de daltă"
+prompt_text = "Dezactivează capcana"
 
-[node name="BlockWithWedge" type="Node" parent="."]
+[node name="BlockWithWedge" type="Node" parent="." unique_id=2142907405]
 script = ExtResource("2_tool_int")
-prompt_text = "Blochează mecanismul"
 required_item_id = "wedge"
 success_prompt = "Blochează mecanismul cu pana"
 failure_prompt = "Nevoie de pană de lemn"
+prompt_text = "Blochează mecanismul"

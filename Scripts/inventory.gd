@@ -49,6 +49,12 @@ class SlotEntry:
 const _DROP_SCENE_OVERRIDES: Dictionary = {
 	"clay_bowl": preload("res://scenes/items/placed_clay_bowl.tscn"),
 }
+const _HAND_SCENE_OVERRIDES: Dictionary = {
+	"clay_bowl": preload("res://scenes/items/claybowl.glb"),
+}
+const _HAND_NODE_NAMES: Dictionary = {
+	"clay_bowl": "HeldClayBowl",
+}
 
 var _types: Dictionary = {}
 var _slots: Array = []
@@ -99,6 +105,7 @@ func _register_types() -> void:
 	_add_type(ItemType.new("clay_slip", "Barbotină", Color(0.62, 0.5, 0.36), Vector3.ZERO, Vector3.ZERO))
 	_add_type(ItemType.new("lamp", "Lampă cu ulei", Color(0, 0, 0, 0), Vector3.ZERO, Vector3.ZERO, false, true))
 	_add_type(ItemType.new("mercury_vase", "Vază cu mercur", Color(0.42, 0.45, 0.48), Vector3.ZERO, Vector3.ZERO))
+	_add_type(ItemType.new("vapor_mask", "Masca de panza", Color(0.56, 0.48, 0.36), Vector3(0.12, 0.035, 0.09), Vector3(0.0, 0.0, -0.04)))
 
 func _add_type(t: ItemType) -> void:
 	_types[t.id] = t
@@ -274,7 +281,7 @@ func _on_item_dropped(item_id: String) -> void:
 	var objectives := get_node_or_null("/root/Objectives")
 	if objectives != null and objectives.has_method("current_id"):
 		if str(objectives.call("current_id")) == "drop_clay_bowl" and objectives.has_method("set_objective"):
-			objectives.call("set_objective", "take_clay_slip", "Ia barbotina din bol.")
+			objectives.call("set_objective", "take_clay_slip", "Ia barbotina din bol cu tasta E.")
 	var events := get_node_or_null("/root/GameEvents")
 	if events != null and events.has_method("request_lamp_tutorial"):
 		events.request_lamp_tutorial()
@@ -341,6 +348,9 @@ func has_item(id: String) -> bool:
 			return true
 	return false
 
+func has_hand_scene_override(id: String) -> bool:
+	return _HAND_SCENE_OVERRIDES.has(id)
+
 ## Removes the first slot holding `id` (no world drop). Used by quest steps that
 ## consume the item silently (e.g. applying barbotină onto the soldier).
 func remove_item(id: String) -> bool:
@@ -372,6 +382,7 @@ func release_node_item(node: Node3D) -> bool:
 		_slots[i] = null
 		slots_changed.emit()
 		return true
+	return false
 
 ## Returns the lamp instance from the offhand slot, else null.
 func find_lamp() -> Node:
@@ -444,6 +455,10 @@ func _apply_active_view() -> void:
 				_tool_socket.add_child(entry.node)
 		entry.node.visible = true
 		return
+	if _tool_socket != null:
+		_spawned_placeholder = _equip_scene_override(entry.id)
+		if _spawned_placeholder != null:
+			return
 	if t.size != Vector3.ZERO and _tool_socket != null:
 		_spawned_placeholder = ToolVisualsLib.build_for_item_id(entry.id, true)
 		if _spawned_placeholder == null:
@@ -458,8 +473,38 @@ func _store_node(node: Node3D) -> void:
 		node.reparent(_storage, false)
 	else:
 		_storage.add_child(node)
+	node.visible = false
 	if node.has_method("set_stored"):
 		node.set_stored()
+
+func _equip_scene_override(item_id: String) -> Node3D:
+	var scene: PackedScene = _HAND_SCENE_OVERRIDES.get(item_id, null)
+	if scene == null or _tool_socket == null:
+		return null
+	var node_name: String = _HAND_NODE_NAMES.get(item_id, "HeldItem")
+	var visual := _tool_socket.get_node_or_null(node_name) as Node3D
+	if visual == null:
+		visual = scene.instantiate() as Node3D
+		if visual == null:
+			return null
+		visual.name = node_name
+	if visual.get_parent() != _tool_socket:
+		if visual.get_parent() != null:
+			visual.reparent(_tool_socket, false)
+		else:
+			_tool_socket.add_child(visual)
+	visual.transform = _hand_transform_for_item_id(item_id)
+	visual.visible = true
+	return visual
+
+func _hand_transform_for_item_id(item_id: String) -> Transform3D:
+	match item_id:
+		"clay_bowl":
+			return Transform3D(
+				Basis(Vector3(0.22, 0.0, 0.0), Vector3(0.0, 0.22, 0.0), Vector3(0.0, 0.0, 0.22)),
+				Vector3(0.02, -0.025, -0.09)
+			)
+	return Transform3D.IDENTITY
 
 func _equip_lamp_node(lamp: Node3D) -> void:
 	if _lamp_socket == null:

@@ -314,12 +314,11 @@ value = 1.0
 [node name="SettingsCloseButton" type="Button" parent="Root/SettingsArt" unique_id=2010456789]
 layout_mode = 0
 offset_left = 178.0
-offset_top = 275.0
+offset_top = 550.0
 offset_right = 368.0
-offset_bottom = 307.0
+offset_bottom = 582.0
 focus_mode = 0
 mouse_default_cursor_shape = 2
-text = "Înapoi"
 theme_override_colors/font_color = Color(1, 0.9, 0.62, 0.95)
 theme_override_styles/normal = SubResource("StyleBox_click_normal")
 theme_override_styles/pressed = SubResource("StyleBox_click_pressed")

@@ -24,6 +24,7 @@ buses/default_bus_layout="res://audio/default_bus_layout.tres"
 NoiseBus="*res://Scripts/noise_bus.gd"
 Objectives="*res://Scripts/objectives.gd"
 GameEvents="*res://Scripts/game_events.gd"
+SettingsManager="*res://Scripts/settings_manager.gd"
 
 [editor_plugins]
 

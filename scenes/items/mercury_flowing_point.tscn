@@ -23,7 +23,6 @@ rings = 4
 [node name="MercuryFlowingPoint" type="Node3D" unique_id=66882977]
 script = ExtResource("1_script")
 flow_stream = ExtResource("3_flow")
-flow_volume_db = -8.0
 
 [node name="Body" parent="." unique_id=233358328 instance=ExtResource("2_glb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.69577, -6.981813, -47.419537)
@@ -32,18 +31,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.69577, -6.981813, -47.419
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7167356, -0.15691757, 0.113269806)
 volume_db = -8.0
 max_distance = 25.0
+bus = &"Tomb"
 
 [node name="FlowParticles" type="CPUParticles3D" parent="." unique_id=312847561]
-transform = Transform3D(1, 0, 0, 0, 0.25881904, -0.9659258, 0, 0.9659258, 0.25881904, -1.7167356, -0.15691757, 0.113269806)
+transform = Transform3D(0.5277566, -0.8493957, -2.910383e-11, -0.8493926, -0.5277547, 0.0026877772, -0.0022829862, -0.0014184917, -0.99999636, -1.7167356, -0.15691757, 0.113269806)
 emitting = false
-amount = 80
-lifetime = 1.2
+amount = 110
+lifetime = 1.6
 preprocess = 0.5
-direction = Vector3(0, 0, -1)
-spread = 5.0
-initial_velocity_min = 0.5
-initial_velocity_max = 1.8
-scale_amount_min = 0.18
-scale_amount_max = 0.34
-color = Color(0.72, 0.72, 0.8, 0.9)
 mesh = SubResource("Mesh_mercury_flow_particle")
+direction = Vector3(0, 1, -0.35)
+spread = 12.0
+gravity = Vector3(0, -5.5, 0)
+initial_velocity_min = 2.2
+initial_velocity_max = 3.4
+scale_amount_min = 0.14
+scale_amount_max = 0.3
+color = Color(0.72, 0.72, 0.8, 0.9)

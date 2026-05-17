@@ -5,7 +5,7 @@ extends CanvasLayer
 @export var interaction_path: NodePath
 @export var inventory_path: NodePath
 @export var debug_overlay_update_interval: float = 0.15
-@export var vapor_preview_cycle_enabled: bool = true
+@export var vapor_preview_cycle_enabled: bool = false
 @export var vapor_preview_cycle_interval: float = 1.0
 
 @onready var _oil_phial: Control = $Anchor/Bottom/OilPhial
@@ -60,6 +60,46 @@ static var _OBJ_FONT_NAMES: PackedStringArray = PackedStringArray([
 	$Anchor/Bottom/OilPhial/DustLayer/Dust4,
 ]
 @onready var _vapor_frame: TextureRect = $VaporFrame
+@onready var _vitality: TextureRect = get_node_or_null("Vitality")
+
+const _VITALITY_SOURCES: Array[Texture2D] = [
+	preload("res://scenes/ui/Vitalitate/vitality_0_full.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_1.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_2.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_3.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_4.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_5.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_6.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_7.png"),
+	preload("res://scenes/ui/Vitalitate/vitality_8_empty.png"),
+]
+# Regiunea de decupare din PNG-ul HUD (acelasi crop ca atlas_vitality_hud din .tscn).
+const _VITALITY_REGION: Rect2 = Rect2(20, 143, 545, 102)
+# Asset-ul vitality_4.png a fost desenat cu bara mai sus decat restul cadrelor.
+# Editeaza valorile din Inspector pe HUDPov ca sa aliniezi fiecare cadru (pozitive = jos).
+@export var vitality_y_offsets: Array[float] = [0.0, 0.0, 0.0, 0.0, 13.0, 0.0, 0.0, 0.0, 0.0]
+@export var vitality_x_offsets: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+var _vitality_frames: Array[AtlasTexture] = []
+var _vitality_last_idx: int = -1
+var _vitality_hurt_tween: Tween = null
+var _vitality_base_scale: Vector2 = Vector2.ONE
+var _vitality_base_pivot_set: bool = false
+var _damage_vignette: ColorRect = null
+var _damage_vignette_mat: ShaderMaterial = null
+var _damage_vignette_tween: Tween = null
+var _vitality_debug_idx: int = -1
+var _vitality_debug_label: Label = null
+
+const _DAMAGE_VIGNETTE_SHADER: String = """shader_type canvas_item;
+uniform float intensity : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 hurt_color : source_color = vec3(0.7, 0.08, 0.08);
+void fragment() {
+	vec2 uv = UV - 0.5;
+	float d = length(uv) * 1.55;
+	float v = smoothstep(0.58, 1.05, d);
+	COLOR = vec4(hurt_color, v * intensity);
+}
+"""
 
 ## Modulate state pentru sloturile noi cu textura proprie:
 ## empty = dim, owned = neutral, active = warm bright
@@ -79,6 +119,7 @@ const _ITEM_ICON_TEXTURES: Dictionary = {
 	"rope": preload("res://scenes/ui/Slots/Icons/icon_rope.png"),
 	"wet_cloth": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
 	"qin_seal": preload("res://scenes/ui/Slots/Icons/icon_qin_seal.png"),
+	"vapor_mask": preload("res://scenes/ui/Slots/Icons/icon_wet_cloth.png"),
 }
 const _VAPOR_FRAME_REGION: Rect2 = Rect2(17, 260, 1081, 202)
 const _VAPOR_FRAME_SOURCES: Array[Texture2D] = [
@@ -155,6 +196,7 @@ var _vapor_preview_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group("hud_vapors")
+	add_to_group("hud_damage")
 	_build_vapor_frame_textures()
 	_setup_debug_overlay_input()
 	_build_debug_overlay()
@@ -193,6 +235,16 @@ func _ready() -> void:
 			events.dialogue_changed.connect(_on_dialogue_changed)
 		if events.has_signal("dialogue_skip_requested"):
 			events.dialogue_skip_requested.connect(_on_dialogue_skip_requested)
+
+	_build_damage_vignette()
+	_build_vitality_debug_label()
+	set_process_unhandled_input(true)
+	if not player_path.is_empty():
+		var player_node := get_node_or_null(player_path)
+		if player_node != null and player_node.has_signal("health_changed"):
+			player_node.health_changed.connect(_on_player_health_changed)
+			if player_node.has_method("current_health") and player_node.has_method("max_health_value"):
+				_on_player_health_changed(int(player_node.call("current_health")), int(player_node.call("max_health_value")))
 
 	if not interaction_path.is_empty():
 		var inter := get_node_or_null(interaction_path)
@@ -237,6 +289,30 @@ func apply_vapor(steps: int = 1) -> void:
 
 func reset_vapors() -> void:
 	_set_vapor_step(0)
+
+func apply_damage(steps: int = 1, source: Node = null) -> void:
+	if steps <= 0:
+		return
+	var player_node := _resolve_damage_player()
+	if player_node != null and player_node.has_method("apply_damage"):
+		player_node.call("apply_damage", steps, source if source != null else self)
+		return
+	if _vitality == null:
+		return
+	if _vitality_frames.is_empty():
+		_rebuild_vitality_frames()
+	var next_idx: int = clampi(maxi(_vitality_last_idx, 0) + steps, 0, _vitality_frames.size() - 1)
+	_vitality.texture = _vitality_frames[next_idx]
+	_vitality_last_idx = next_idx
+	_play_vitality_hurt_anim()
+	_play_damage_vignette()
+
+func _resolve_damage_player() -> Node:
+	if not player_path.is_empty():
+		var explicit_player := get_node_or_null(player_path)
+		if explicit_player != null:
+			return explicit_player
+	return get_tree().get_first_node_in_group("player") if is_inside_tree() else null
 
 func _set_vapor_step(step: int) -> void:
 	if _vapor_frame == null or _vapor_frame_textures.is_empty():
@@ -384,6 +460,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_debug_overlay_timer = 0.0
 		_update_debug_overlay(debug_overlay_update_interval)
 		get_viewport().set_input_as_handled()
+		return
+	_handle_vitality_debug_input(event)
 
 func _setup_debug_overlay_input() -> void:
 	if not InputMap.has_action("debug_overlay"):
@@ -887,3 +965,170 @@ func _update_dialogue_reveal(delta: float) -> void:
 	_dialogue_label.visible_ratio = t
 	if t >= 1.0:
 		_dialogue_reveal_active = false
+
+func _on_player_health_changed(current: int, maximum: int) -> void:
+	if _vitality == null:
+		return
+	if _vitality_frames.is_empty():
+		for i in _VITALITY_SOURCES.size():
+			var atlas := AtlasTexture.new()
+			atlas.atlas = _VITALITY_SOURCES[i]
+			var region: Rect2 = _VITALITY_REGION
+			if i < vitality_y_offsets.size():
+				region.position.y += vitality_y_offsets[i]
+			if i < vitality_x_offsets.size():
+				region.position.x += vitality_x_offsets[i]
+			atlas.region = region
+			_vitality_frames.append(atlas)
+	if not _vitality_base_pivot_set:
+		_vitality_base_scale = _vitality.scale
+		_vitality.pivot_offset = _vitality.size * 0.5
+		_vitality_base_pivot_set = true
+	# 0_full = HP plin, 8_empty = mort. Mapam proportional intre cele 9 cadre.
+	var frame_count := _vitality_frames.size()
+	var lost := maxi(0, maximum - current)
+	var idx: int = 0
+	if maximum > 0:
+		idx = int(round(float(lost) * float(frame_count - 1) / float(maximum)))
+	idx = clampi(idx, 0, frame_count - 1)
+	var took_hit: bool = _vitality_last_idx >= 0 and idx > _vitality_last_idx
+	_vitality.texture = _vitality_frames[idx]
+	_vitality_last_idx = idx
+	if took_hit:
+		_play_vitality_hurt_anim()
+		_play_damage_vignette()
+
+func _play_vitality_hurt_anim() -> void:
+	if _vitality == null:
+		return
+	if _vitality_hurt_tween != null and _vitality_hurt_tween.is_running():
+		_vitality_hurt_tween.kill()
+	# Re-captureaza pivotul de fiecare data (size poate fi 0 la prima rulare).
+	if _vitality.size.length() > 0.0:
+		_vitality.pivot_offset = _vitality.size * 0.5
+	_vitality.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_vitality.scale = _vitality_base_scale
+	var punch_scale := _vitality_base_scale * 1.12
+	var hurt_color := Color(1.45, 0.9, 0.85, 1.0)
+	_vitality_hurt_tween = create_tween()
+	# Faza 1: flash rosu + zoom in, in paralel
+	_vitality_hurt_tween.tween_property(_vitality, "modulate", hurt_color, 0.10)
+	_vitality_hurt_tween.parallel().tween_property(_vitality, "scale", punch_scale, 0.10)
+	# Faza 2: revenire, in paralel (dupa faza 1)
+	_vitality_hurt_tween.tween_property(_vitality, "modulate", Color(1, 1, 1, 1), 0.40).set_trans(Tween.TRANS_QUAD)
+	_vitality_hurt_tween.parallel().tween_property(_vitality, "scale", _vitality_base_scale, 0.40).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _build_damage_vignette() -> void:
+	if _damage_vignette != null:
+		return
+	_damage_vignette = ColorRect.new()
+	_damage_vignette.name = "DamageVignette"
+	_damage_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_damage_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_damage_vignette.color = Color(1, 1, 1, 1)
+	var shader := Shader.new()
+	shader.code = _DAMAGE_VIGNETTE_SHADER
+	_damage_vignette_mat = ShaderMaterial.new()
+	_damage_vignette_mat.shader = shader
+	_damage_vignette_mat.set_shader_parameter("intensity", 0.0)
+	_damage_vignette.material = _damage_vignette_mat
+	# Adaugam direct sub CanvasLayer-ul HUDPov, peste tot restul HUD-ului.
+	add_child(_damage_vignette)
+	move_child(_damage_vignette, -1)
+
+func _play_damage_vignette() -> void:
+	if _damage_vignette_mat == null:
+		return
+	if _damage_vignette_tween != null and _damage_vignette_tween.is_running():
+		_damage_vignette_tween.kill()
+	_damage_vignette_mat.set_shader_parameter("intensity", 0.0)
+	_damage_vignette_tween = create_tween()
+	_damage_vignette_tween.tween_method(_set_vignette_intensity, 0.0, 0.32, 0.10)
+	_damage_vignette_tween.tween_method(_set_vignette_intensity, 0.32, 0.0, 0.45).set_trans(Tween.TRANS_QUAD)
+
+func _set_vignette_intensity(v: float) -> void:
+	if _damage_vignette_mat != null:
+		_damage_vignette_mat.set_shader_parameter("intensity", v)
+
+# --- Vitality debug mode ----------------------------------------------------
+# F4 = cicleaza prin cele 9 cadre (afiseaza fiecare pe HUD live).
+# Sageti = ajusteaza X/Y offset al cadrului curent. Shift = pas de 5px.
+# F5 (in debug mode) = printeaza array-ul curent in consola sa-l copiezi.
+
+func _build_vitality_debug_label() -> void:
+	if _vitality_debug_label != null:
+		return
+	_vitality_debug_label = Label.new()
+	_vitality_debug_label.name = "VitalityDebugLabel"
+	_vitality_debug_label.position = Vector2(20, 80)
+	_vitality_debug_label.add_theme_color_override("font_color", Color(1, 1, 0.4))
+	_vitality_debug_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	_vitality_debug_label.add_theme_constant_override("outline_size", 3)
+	_vitality_debug_label.add_theme_font_size_override("font_size", 14)
+	_vitality_debug_label.text = ""
+	add_child(_vitality_debug_label)
+
+func _handle_vitality_debug_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	var key_event := event as InputEventKey
+	if key_event.keycode == KEY_F4:
+		_vitality_debug_idx = (_vitality_debug_idx + 1) % _VITALITY_SOURCES.size()
+		_apply_vitality_debug_preview()
+		return
+	if _vitality_debug_idx < 0:
+		return
+	var step: float = 5.0 if key_event.shift_pressed else 1.0
+	var changed := false
+	match key_event.keycode:
+		KEY_LEFT:
+			vitality_x_offsets[_vitality_debug_idx] -= step
+			changed = true
+		KEY_RIGHT:
+			vitality_x_offsets[_vitality_debug_idx] += step
+			changed = true
+		KEY_UP:
+			vitality_y_offsets[_vitality_debug_idx] -= step
+			changed = true
+		KEY_DOWN:
+			vitality_y_offsets[_vitality_debug_idx] += step
+			changed = true
+		KEY_F5:
+			print("[hud] vitality_y_offsets = %s" % str(vitality_y_offsets))
+			print("[hud] vitality_x_offsets = %s" % str(vitality_x_offsets))
+		KEY_ESCAPE:
+			_vitality_debug_idx = -1
+			if _vitality_debug_label != null:
+				_vitality_debug_label.text = ""
+			# Restaureaza cadrul real corespunzator HP-ului curent.
+			if _vitality_last_idx >= 0 and _vitality_last_idx < _vitality_frames.size():
+				_rebuild_vitality_frames()
+				_vitality.texture = _vitality_frames[_vitality_last_idx]
+			return
+	if changed:
+		_rebuild_vitality_frames()
+		_apply_vitality_debug_preview()
+
+func _rebuild_vitality_frames() -> void:
+	_vitality_frames.clear()
+	for i in _VITALITY_SOURCES.size():
+		var atlas := AtlasTexture.new()
+		atlas.atlas = _VITALITY_SOURCES[i]
+		var region: Rect2 = _VITALITY_REGION
+		if i < vitality_y_offsets.size():
+			region.position.y += vitality_y_offsets[i]
+		if i < vitality_x_offsets.size():
+			region.position.x += vitality_x_offsets[i]
+		atlas.region = region
+		_vitality_frames.append(atlas)
+
+func _apply_vitality_debug_preview() -> void:
+	if _vitality == null or _vitality_debug_idx < 0:
+		return
+	if _vitality_frames.is_empty():
+		_rebuild_vitality_frames()
+	_vitality.texture = _vitality_frames[_vitality_debug_idx]
+	if _vitality_debug_label != null:
+		var x_off: float = vitality_x_offsets[_vitality_debug_idx] if _vitality_debug_idx < vitality_x_offsets.size() else 0.0
+		var y_off: float = vitality_y_offsets[_vitality_debug_idx] if _vitality_debug_idx < vitality_y_offsets.size() else 0.0
+		_vitality_debug_label.text = "DEBUG frame %d | x=%+.0f y=%+.0f | F4=next ←→↑↓=nudge SHIFT=x5 F5=print ESC=exit" % [_vitality_debug_idx, x_off, y_off]

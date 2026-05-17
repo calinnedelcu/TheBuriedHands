@@ -1,0 +1,111 @@
+[gd_scene load_steps=10 format=3 uid="uid://dg8jh62qpmtxp"]
+
+[ext_resource type="Script" path="res://Scripts/exit_light_gate.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://buoe6cfxurm65" path="res://audio/music/exit_ambient_woods.mp3" id="2_ambient"]
+[ext_resource type="Texture2D" path="res://assets/ui/ending_card.png" id="3_bg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+size = Vector3(4.0, 4.0, 2.0)
+
+[sub_resource type="StandardMaterial3D" id="Material_lightwall"]
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 1)
+emission_enabled = true
+emission = Color(1, 0.98, 0.92, 1)
+emission_energy_multiplier = 60.0
+disable_receive_shadows = true
+disable_ambient_light = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_lightwall"]
+size = Vector2(10, 8)
+
+[sub_resource type="StandardMaterial3D" id="Material_haze"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.96, 0.85, 0.55)
+emission_enabled = true
+emission = Color(1, 0.94, 0.78, 1)
+emission_energy_multiplier = 20.0
+disable_receive_shadows = true
+disable_ambient_light = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_haze"]
+size = Vector2(14, 12)
+
+[sub_resource type="Environment" id="Environment_bloom"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(1, 0.95, 0.85, 1)
+ambient_light_sky_contribution = 0.0
+ambient_light_energy = 1.2
+tonemap_mode = 3
+tonemap_exposure = 1.4
+tonemap_white = 2.0
+glow_enabled = true
+glow_levels/1 = 1.0
+glow_levels/2 = 1.0
+glow_levels/3 = 1.0
+glow_levels/4 = 1.0
+glow_levels/5 = 1.0
+glow_levels/6 = 1.0
+glow_levels/7 = 1.0
+glow_intensity = 2.4
+glow_strength = 1.6
+glow_bloom = 0.9
+glow_blend_mode = 1
+glow_hdr_threshold = 0.5
+glow_hdr_scale = 5.0
+
+[node name="ExitLightGate" type="Node3D"]
+script = ExtResource("1_script")
+ambient_stream = ExtResource("2_ambient")
+ending_background = ExtResource("3_bg")
+bloom_environment = SubResource("Environment_bloom")
+
+[node name="Trigger" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Trigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("BoxShape3D_trigger")
+
+[node name="LightMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -6.0)
+
+[node name="HazeWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -5.0)
+mesh = SubResource("QuadMesh_haze")
+material_override = SubResource("Material_haze")
+extra_cull_margin = 16384.0
+cast_shadow = 0
+
+[node name="LightWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -6.0)
+mesh = SubResource("QuadMesh_lightwall")
+material_override = SubResource("Material_lightwall")
+extra_cull_margin = 16384.0
+cast_shadow = 0
+
+[node name="ExitLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -5.5)
+light_color = Color(1, 0.97, 0.88, 1)
+light_energy = 9.0
+light_volumetric_fog_energy = 6.0
+omni_range = 16.0
+omni_attenuation = 0.4
+shadow_enabled = false
+
+[node name="ExitLight2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -3.0)
+light_color = Color(1, 0.96, 0.85, 1)
+light_energy = 5.0
+light_volumetric_fog_energy = 4.0
+omni_range = 10.0
+omni_attenuation = 0.6
+shadow_enabled = false
+
+[node name="AmbientAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_ambient")
+volume_db = -80.0
+bus = &"Music"

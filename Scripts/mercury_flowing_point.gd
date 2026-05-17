@@ -4,6 +4,16 @@ extends Node3D
 @export var auto_stop_after: float = 8.0
 @export var flow_volume_db: float = -8.0
 
+@export_group("Jet Arc")
+@export var jet_gravity: float = -5.5
+@export var jet_initial_velocity_min: float = 2.2
+@export var jet_initial_velocity_max: float = 3.4
+## Unghi de lansare fata de orizontala (90 = drept in sus, 60-75 = fantana clasica).
+@export var jet_angle_deg: float = 68.0
+@export var jet_spread: float = 12.0
+@export var jet_scale_min: float = 0.14
+@export var jet_scale_max: float = 0.3
+
 @onready var _audio: AudioStreamPlayer3D = $Audio
 @onready var _particles: CPUParticles3D = $FlowParticles
 
@@ -16,7 +26,9 @@ func _ready() -> void:
 	if flow_stream != null:
 		_audio.stream = flow_stream
 	_audio.volume_db = flow_volume_db
+	_audio.bus = &"Tomb"
 	_anim = _find_anim_player()
+	_configure_jet_arc()
 
 func _process(delta: float) -> void:
 	if not _flowing:
@@ -52,3 +64,15 @@ func _find_anim_player() -> AnimationPlayer:
 		if ap is AnimationPlayer:
 			return ap as AnimationPlayer
 	return get_node_or_null("AnimationPlayer")
+
+func _configure_jet_arc() -> void:
+	if _particles == null:
+		return
+	var angle_rad := deg_to_rad(jet_angle_deg)
+	_particles.direction = Vector3(0.0, sin(angle_rad), -cos(angle_rad))
+	_particles.gravity = Vector3(0.0, jet_gravity, 0.0)
+	_particles.initial_velocity_min = jet_initial_velocity_min
+	_particles.initial_velocity_max = jet_initial_velocity_max
+	_particles.spread = jet_spread
+	_particles.scale_amount_min = jet_scale_min
+	_particles.scale_amount_max = jet_scale_max

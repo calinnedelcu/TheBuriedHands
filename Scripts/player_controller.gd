@@ -2,8 +2,24 @@ extends CharacterBody3D
 
 const _FALLBACK_CLICK_SFX = preload("res://audio/sfx/menu_click.wav")
 const _FALLBACK_ACTION_SFX = preload("res://audio/sfx/menu_play_start.wav")
+const _HURT_GRUNT_STREAM = preload("res://audio/sfx/player/hurt/grunt.mp3")
+const _LAMP_LIGHT_MATCH_STREAM = preload("res://audio/sfx/lamp/lamp_light_match.mp3")
+# Trei variatii de pitch pentru gruntul de damage ca sa nu sune identic la hituri repetate.
+const _HURT_PITCH_VARIATIONS: Array[float] = [0.88, 1.0, 1.13]
+const _ToolVisualsLib = preload("res://Scripts/tool_visuals.gd")
+const _ThrownToolScript = preload("res://Scripts/thrown_tool.gd")
+# Uneltele care pot fi aruncate ca distragere pentru gardieni.
+const _THROWABLE_ITEM_IDS: Array[String] = ["ceramic", "chisel", "wedge", "hammer", "wax_tablet"]
+# Dimensiuni rough pentru hitbox-ul fiecarei unelte aruncate (m).
+const _THROWN_TOOL_SIZES: Dictionary = {
+	"chisel": Vector3(0.05, 0.05, 0.32),
+	"wedge": Vector3(0.13, 0.07, 0.25),
+	"hammer": Vector3(0.30, 0.12, 0.30),
+	"wax_tablet": Vector3(0.25, 0.03, 0.16),
+}
 
 signal stance_changed(stance: String)
+signal health_changed(current: int, maximum: int)
 
 @export_group("Movement")
 @export var sneak_speed: float = 1.6
@@ -72,6 +88,14 @@ signal stance_changed(stance: String)
 ## mult, altfel SceneTree.paused ingheata luminile/animațiile imediat dupa dialog.
 @export var debug_skip_guard_grace_seconds: float = 8.0
 
+@export_group("Health")
+@export var max_health: int = 8
+@export var damage_invuln_seconds: float = 0.6
+@export var hurt_camera_kick: float = 0.18
+@export var hurt_sfx_volume_db: float = -4.0
+## Sarim peste tacerea din inceputul mp3-ului ca gruntul sa porneasca instant cand iei damage.
+@export var hurt_sfx_start_offset_seconds: float = 0.08
+
 @export_group("Throw")
 @export var throw_speed: float = 11.0
 @export var throw_arc_up: float = 1.5
@@ -122,7 +146,7 @@ signal stance_changed(stance: String)
 @export var refill_sfx_stream: AudioStream
 @export var pickup_sfx_volume_db: float = -18.0
 @export var drop_sfx_volume_db: float = -15.0
-@export var lamp_toggle_sfx_volume_db: float = -19.0
+@export var lamp_toggle_sfx_volume_db: float = -8.0
 @export var lamp_select_sfx_volume_db: float = -21.0
 @export var refill_sfx_volume_db: float = -24.0
 @export var refill_sfx_interval: float = 0.32
@@ -170,13 +194,21 @@ var _lamp_select_sfx_player: AudioStreamPlayer
 var _refill_sfx_player: AudioStreamPlayer
 var _refill_sfx_cooldown: float = 0.0
 var _cinematic_active: bool = false
+var _auto_walk_forward: bool = false
 var _cinematic_tween: Tween = null
 var _cinematic_orig_fov: float = 0.0
 var _default_camera_fov: float = 75.0
 var _cinematic_locked: bool = false
 var _cinematic_run_id: int = 0
 var _guard_detection_suppressed_until_ms: int = 0
+var _current_health: int = 8
+var _invuln_until_ms: int = 0
+var _is_dead: bool = false
+var _hurt_sfx_player: AudioStreamPlayer = null
+var _hurt_pitch_last: int = -1
 
+var _camera_shake_remaining: float = 0.0
+var _camera_shake_intensity: float = 0.0
 var _climbing_ladder: Node = null
 var _climb_yaw_center: float = 0.0
 var _nearby_ladder: Node = null
@@ -257,6 +289,9 @@ func _ready() -> void:
 	if lamp is Node3D:
 		_lamp_held_transform = (lamp as Node3D).transform
 	_setup_interaction_audio()
+	_setup_hurt_audio()
+	_current_health = max_health
+	health_changed.emit(_current_health, max_health)
 	stance_changed.emit(_current_stance)
 
 func is_crouching() -> bool:
@@ -372,8 +407,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_lamp"):
 		var l := _active_lamp()
 		if l != null and l.has_method("toggle"):
+			var was_lit := bool(l.get("is_lit"))
 			l.toggle()
-			play_feedback_sfx("lamp_toggle")
+			if not was_lit and bool(l.get("is_lit")):
+				play_feedback_sfx("lamp_toggle")
 
 	if event.is_action_pressed("raise_lamp"):
 		var l := _active_lamp()
@@ -391,23 +428,81 @@ func _unhandled_input(event: InputEvent) -> void:
 				inventory.set_slot(i - 1)
 
 	if event.is_action_pressed("throw"):
-		_try_throw_ceramic()
+		_try_throw_current_item()
 
-func _try_throw_ceramic() -> void:
-	if inventory == null or ceramic_shard_scene == null:
+func _try_throw_current_item() -> void:
+	if inventory == null or not inventory.has_method("current_item_id"):
 		return
-	if not inventory.has_method("current_item_id") or inventory.current_item_id() != "ceramic":
+	var item_id: String = inventory.current_item_id()
+	if not (item_id in _THROWABLE_ITEM_IDS):
+		return
+	if item_id == "ceramic":
+		_throw_ceramic_shard()
+	else:
+		_throw_tool(item_id)
+
+func _throw_ceramic_shard() -> void:
+	if ceramic_shard_scene == null:
 		return
 	if not inventory.has_method("consume_current_stack") or not inventory.consume_current_stack():
 		return
 	var shard: RigidBody3D = ceramic_shard_scene.instantiate()
 	get_tree().current_scene.add_child(shard)
-	var spawn_origin: Vector3 = camera.global_position - camera.global_transform.basis.z * 0.3
-	shard.global_position = spawn_origin
-	var forward: Vector3 = -camera.global_transform.basis.z
-	shard.linear_velocity = forward * throw_speed + Vector3.UP * throw_arc_up
-	shard.angular_velocity = Vector3(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
+	_launch_thrown_body(shard)
 	_emit_noise(noise_walk * 0.4)
+
+func _throw_tool(item_id: String) -> void:
+	# Uneltele non-stackable: scoatem slotul intreg din inventar.
+	if not inventory.has_method("remove_item") or not bool(inventory.call("remove_item", item_id)):
+		return
+	var body := _build_thrown_tool_body(item_id)
+	if body == null:
+		return
+	get_tree().current_scene.add_child(body)
+	_launch_thrown_body(body)
+	_emit_noise(noise_walk * 0.4)
+
+func _build_thrown_tool_body(item_id: String) -> RigidBody3D:
+	var body := RigidBody3D.new()
+	body.name = "Thrown_%s" % item_id
+	body.set_script(_ThrownToolScript)
+	body.set("item_id", item_id)
+	# Layer 4 este folosit de placile capcanelor ca sa simta obiectele aruncate.
+	# Mask=1 ramane pentru coliziune cu podeaua/peretii.
+	body.collision_layer = 4
+	body.collision_mask = 1
+	body.continuous_cd = true
+	var phys := PhysicsMaterial.new()
+	phys.friction = 0.55
+	phys.bounce = 0.2
+	body.physics_material_override = phys
+	# Mass-uri usor diferite ca ciocanu sa cada mai greu decat dalta.
+	match item_id:
+		"hammer":
+			body.mass = 1.6
+		"wedge":
+			body.mass = 0.8
+		"wax_tablet":
+			body.mass = 0.6
+		_:
+			body.mass = 0.4
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var size: Vector3 = _THROWN_TOOL_SIZES.get(item_id, Vector3(0.15, 0.08, 0.2))
+	box.size = size
+	shape.shape = box
+	body.add_child(shape)
+	var visual: Node3D = _ToolVisualsLib.build_for_item_id(item_id, false)
+	if visual != null:
+		body.add_child(visual)
+	return body
+
+func _launch_thrown_body(body: RigidBody3D) -> void:
+	var spawn_origin: Vector3 = camera.global_position - camera.global_transform.basis.z * 0.3
+	body.global_position = spawn_origin
+	var forward: Vector3 = -camera.global_transform.basis.z
+	body.linear_velocity = forward * throw_speed + Vector3.UP * throw_arc_up
+	body.angular_velocity = Vector3(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
 
 func get_fallback_interaction_prompt() -> String:
 	# Promptul "[X] Pune jos" a fost dezactivat in mod intentionat — apare prea
@@ -593,6 +688,47 @@ func _process_climbing(delta: float) -> void:
 
 	velocity = Vector3.ZERO
 
+func current_health() -> int:
+	return _current_health
+
+func max_health_value() -> int:
+	return max_health
+
+func is_dead() -> bool:
+	return _is_dead
+
+func apply_damage(amount: int, source: Node = null) -> void:
+	if _is_dead or amount <= 0:
+		return
+	if Time.get_ticks_msec() < _invuln_until_ms:
+		return
+	_invuln_until_ms = Time.get_ticks_msec() + int(damage_invuln_seconds * 1000.0)
+	_current_health = maxi(0, _current_health - amount)
+	health_changed.emit(_current_health, max_health)
+	_camera_land_offset = maxf(_camera_land_offset, hurt_camera_kick)
+	_play_hurt_grunt()
+	if _current_health <= 0:
+		_is_dead = true
+		var events := get_node_or_null("/root/GameEvents")
+		if events != null and events.has_method("fail"):
+			events.call("fail", _damage_fail_message(source))
+
+func _damage_fail_message(source: Node) -> String:
+	if source == null:
+		return "Ai fost doborât."
+	var source_name := String(source.name)
+	if source.is_in_group("crossbow_trap") or source_name.contains("Crossbow"):
+		return "Te-a doborât o arbaletă."
+	if source.is_in_group("guard") or source_name.contains("Guard"):
+		return "Te-a prins gardianul."
+	if source.is_in_group("mercury_floor") or source_name.contains("Mercury"):
+		return "Mercurul te-a ucis."
+	return "Ai fost doborât."
+
+func play_camera_shake(duration: float = 0.6, intensity: float = 0.12) -> void:
+	_camera_shake_remaining = maxf(_camera_shake_remaining, duration)
+	_camera_shake_intensity = maxf(_camera_shake_intensity, intensity)
+
 func is_cinematic_active() -> bool:
 	return _cinematic_active
 
@@ -752,6 +888,21 @@ func _wait_cinematic_seconds(run_id: int, seconds: float) -> void:
 func _cinematic_run_valid(run_id: int) -> bool:
 	return run_id == _cinematic_run_id and _cinematic_active
 
+## Force player out of crawl/crouch into standing (daca nu e blocat deasupra).
+func force_stand_up() -> void:
+	if _is_crawling:
+		_is_crawling = false
+	if _is_crouching:
+		_is_crouching = false
+
+## Activeaza/dezactiveaza mers automat inainte (override input_dir).
+## Foloseste pentru cutscene epilog dupa collapse etc.
+func set_auto_walk_forward(active: bool) -> void:
+	_auto_walk_forward = active
+	if not active:
+		velocity.x = 0
+		velocity.z = 0
+
 func end_cinematic_lock(return_duration: float = 0.55) -> void:
 	print("[player] end_cinematic_lock called (active=%s, locked=%s)" % [_cinematic_active, _cinematic_locked])
 	if not _cinematic_locked:
@@ -845,6 +996,8 @@ func _physics_process(delta: float) -> void:
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	if _cinematic_active:
 		input_dir = Vector2.ZERO
+	if _auto_walk_forward:
+		input_dir = Vector2(0, -1)
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	var target_speed := _current_speed()
@@ -880,16 +1033,30 @@ func _physics_process(delta: float) -> void:
 
 	_camera_land_offset = lerp(_camera_land_offset, 0.0, clamp(delta * land_camera_recover_speed, 0.0, 1.0))
 
+	# Camera shake
+	var shake_x := 0.0
+	var shake_y := 0.0
+	if _camera_shake_remaining > 0.0:
+		_camera_shake_remaining -= delta
+		var shake_decay: float = clampf(_camera_shake_remaining / 0.6, 0.0, 1.0)
+		var intensity: float = _camera_shake_intensity * shake_decay
+		shake_x = randf_range(-intensity, intensity)
+		shake_y = randf_range(-intensity * 0.7, intensity * 0.7)
+		if _camera_shake_remaining <= 0.0:
+			_camera_shake_intensity = 0.0
+
 	# Head bob (Y), applied on top of stance height
 	var bob_offset_y := 0.0
 	_debug_head_bob_multiplier = _head_bob_multiplier()
 	if is_on_floor() and input_dir.length() > 0:
 		_bob_time += delta * target_speed * bob_speed_multiplier * _debug_head_bob_multiplier
 		bob_offset_y = sin(_bob_time * bob_frequency) * bob_amplitude * _debug_head_bob_multiplier
-		camera.position.y = _initial_camera_local_position.y + bob_offset_y - _camera_land_offset
+		camera.position.y = _initial_camera_local_position.y + bob_offset_y - _camera_land_offset + shake_y
+		camera.position.x = _initial_camera_local_position.x + shake_x
 	else:
 		_bob_time = 0.0
-		camera.position.y = lerp(camera.position.y, _initial_camera_local_position.y - _camera_land_offset, delta * 10.0)
+		camera.position.y = lerp(camera.position.y, _initial_camera_local_position.y - _camera_land_offset + shake_y, delta * 10.0)
+		camera.position.x = lerp(camera.position.x, _initial_camera_local_position.x + shake_x, delta * 10.0)
 
 	# Footstep noise
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length() > 0.2:
@@ -981,9 +1148,29 @@ func _setup_interaction_audio() -> void:
 		return
 	_pickup_sfx_player = _make_feedback_player("PickupSFX", pickup_sfx_stream, _FALLBACK_CLICK_SFX, pickup_sfx_volume_db)
 	_drop_sfx_player = _make_feedback_player("DropSFX", drop_sfx_stream, _FALLBACK_ACTION_SFX, drop_sfx_volume_db)
-	_lamp_toggle_sfx_player = _make_feedback_player("LampToggleSFX", lamp_toggle_sfx_stream, _FALLBACK_CLICK_SFX, lamp_toggle_sfx_volume_db)
+	_lamp_toggle_sfx_player = _make_feedback_player("LampToggleSFX", lamp_toggle_sfx_stream, _LAMP_LIGHT_MATCH_STREAM, lamp_toggle_sfx_volume_db)
 	_lamp_select_sfx_player = _make_feedback_player("LampSelectSFX", lamp_select_sfx_stream, _FALLBACK_CLICK_SFX, lamp_select_sfx_volume_db)
 	_refill_sfx_player = _make_feedback_player("RefillSFX", refill_sfx_stream, _FALLBACK_CLICK_SFX, refill_sfx_volume_db)
+
+func _setup_hurt_audio() -> void:
+	_hurt_sfx_player = AudioStreamPlayer.new()
+	_hurt_sfx_player.name = "HurtSFX"
+	_hurt_sfx_player.stream = _HURT_GRUNT_STREAM
+	_hurt_sfx_player.volume_db = hurt_sfx_volume_db
+	_hurt_sfx_player.bus = &"SFX"
+	add_child(_hurt_sfx_player)
+
+func _play_hurt_grunt() -> void:
+	if _hurt_sfx_player == null:
+		return
+	# Alege un index diferit fata de ultimul ca sa nu sune la fel.
+	var idx := randi() % _HURT_PITCH_VARIATIONS.size()
+	if idx == _hurt_pitch_last and _HURT_PITCH_VARIATIONS.size() > 1:
+		idx = (idx + 1) % _HURT_PITCH_VARIATIONS.size()
+	_hurt_pitch_last = idx
+	# Mic jitter aditional pentru variatie suplimentara.
+	_hurt_sfx_player.pitch_scale = _HURT_PITCH_VARIATIONS[idx] * randf_range(0.97, 1.03)
+	_hurt_sfx_player.play(maxf(0.0, hurt_sfx_start_offset_seconds))
 
 func _make_feedback_player(player_name: String, stream: AudioStream, fallback: AudioStream, volume_db: float) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()

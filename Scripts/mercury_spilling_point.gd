@@ -40,7 +40,7 @@ func _on_held(_by: Node, dt: float) -> void:
 		return
 
 	_hold_timeout = 0.2
-	var vase := _get_held_vase()
+	var vase: MercuryVase = _get_held_vase()
 	if vase == null or not vase.is_filled:
 		return
 	if not _audio.playing:
@@ -58,7 +58,7 @@ func _on_held(_by: Node, dt: float) -> void:
 func _trigger_flow() -> void:
 	if not is_inside_tree():
 		return
-	for node in get_tree().get_nodes_in_group(flow_group):
+	for node: Node in get_tree().get_nodes_in_group(flow_group):
 		if node.has_method("start_flow"):
 			node.start_flow()
 
@@ -69,7 +69,7 @@ func _refresh_prompt() -> void:
 		_interactable.prompt_text = prompt_already_active
 		return
 
-	var vase := _get_held_vase()
+	var vase: MercuryVase = _get_held_vase()
 	if vase == null:
 		_interactable.prompt_text = prompt_no_vase
 	elif not vase.is_filled:
@@ -80,5 +80,5 @@ func _refresh_prompt() -> void:
 func _get_held_vase() -> MercuryVase:
 	if not is_inside_tree():
 		return null
-	var nodes := get_tree().get_nodes_in_group("mercury_vase_held")
+	var nodes: Array[Node] = get_tree().get_nodes_in_group("mercury_vase_held")
 	return nodes[0] as MercuryVase if not nodes.is_empty() else null

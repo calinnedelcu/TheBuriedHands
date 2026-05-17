@@ -3,9 +3,9 @@ extends CanvasLayer
 @export var main_menu_scene: String = "res://scenes/main_menu.tscn"
 
 @onready var _root: Control = $Root
-@onready var _reason: Label = $Root/Panel/VBox/ReasonLabel
-@onready var _retry: Button = $Root/Panel/VBox/RetryButton
-@onready var _menu: Button = $Root/Panel/VBox/MenuButton
+@onready var _reason: Label = $Root/Panel/ReasonLabel
+@onready var _retry: Button = $Root/Panel/RetryButton
+@onready var _menu: Button = $Root/Panel/MenuButton
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

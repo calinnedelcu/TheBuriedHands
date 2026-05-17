@@ -7,4 +7,8 @@
 # Optional generated Android export folder
 /android/
 
+# Build artifacts (too large, generated; never commit)
+build/
+export_presets.cfg
+
 # MapWithoutTreasure.glb (~257 MB) is now tracked via Git LFS (see .gitattributes).

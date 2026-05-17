@@ -4,8 +4,8 @@ signal oil_changed(level: float, max_level: float)
 signal lit_changed(is_lit: bool)
 signal extinguished()
 
-@export var oil_max: float = 100.0
-@export var oil_level: float = 100.0
+@export var oil_max: float = 200.0
+@export var oil_level: float = 200.0
 @export var oil_drain_rate: float = 0.6
 ## Multiplicator pentru rata de consum cand lampa e pe jos (not equipped).
 ## 0.25 = tine de 4 ori mai mult pe jos decat in mana.

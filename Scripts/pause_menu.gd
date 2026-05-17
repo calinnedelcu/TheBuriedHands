@@ -12,6 +12,13 @@ const _LOOK_SENSITIVITY_MIN := 0.0005
 const _LOOK_SENSITIVITY_MAX := 0.006
 const _ZOOM_SENSITIVITY_MIN := 0.2
 const _ZOOM_SENSITIVITY_MAX := 1.5
+const _BUS_BASE_VOLUME_DB := {
+	&"Master": 0.0,
+	&"Music": -16.0,
+	&"SFX": 0.0,
+	&"Tomb": -2.0,
+	&"Dialogue": 0.0,
+}
 
 @onready var _root: Control = $Root
 @onready var _pause_art: TextureRect = $Root/PauseArt
@@ -37,10 +44,24 @@ var _is_paused: bool = false
 var _was_mouse_captured: bool = true
 var _showing_settings: bool = false
 var _loading_settings: bool = false
+var _blur_rect: ColorRect = null
+var _blur_tween: Tween = null
+
+const _BLUR_SHADER: String = """shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform float blur_lod : hint_range(0.0, 6.0) = 2.5;
+uniform float darken : hint_range(0.0, 1.0) = 0.25;
+void fragment() {
+	vec3 col = textureLod(screen_tex, SCREEN_UV, blur_lod).rgb;
+	col *= (1.0 - darken);
+	COLOR = vec4(col, 1.0);
+}
+"""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_root.visible = false
+	_build_blur_layer()
 	_pause_art.pivot_offset = _pause_art.size * 0.5
 	_settings_art.pivot_offset = _settings_art.size * 0.5
 	_setup_settings_sliders()
@@ -79,6 +100,7 @@ func _set_paused(p: bool) -> void:
 	_is_paused = p
 	get_tree().paused = p
 	_root.visible = p
+	_animate_blur(p)
 	if p:
 		_was_mouse_captured = Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -170,12 +192,16 @@ func _default_settings() -> Dictionary:
 	}
 
 func _load_settings() -> void:
-	_settings_values = _default_settings()
-	var config := ConfigFile.new()
-	if config.load(_SETTINGS_FILE) == OK:
-		for key: String in _settings_values.keys():
-			if config.has_section_key("settings", key):
-				_settings_values[key] = clampf(float(config.get_value("settings", key)), 0.0, 1.0)
+	var settings_manager := _settings_manager()
+	if settings_manager != null and settings_manager.has_method("get_all_settings"):
+		_settings_values = settings_manager.call("get_all_settings")
+	else:
+		_settings_values = _default_settings()
+		var config := ConfigFile.new()
+		if config.load(_SETTINGS_FILE) == OK:
+			for key: String in _settings_values.keys():
+				if config.has_section_key("settings", key):
+					_settings_values[key] = clampf(float(config.get_value("settings", key)), 0.0, 1.0)
 	_loading_settings = true
 	for key: String in _settings_sliders.keys():
 		var slider := _settings_sliders[key] as HSlider
@@ -184,6 +210,10 @@ func _load_settings() -> void:
 	_loading_settings = false
 
 func _save_settings() -> void:
+	var settings_manager := _settings_manager()
+	if settings_manager != null and settings_manager.has_method("set_settings"):
+		settings_manager.call("set_settings", _settings_values, true)
+		return
 	var config := ConfigFile.new()
 	for key: String in _settings_values.keys():
 		config.set_value("settings", key, float(_settings_values[key]))
@@ -213,6 +243,10 @@ func _apply_look_settings() -> void:
 		player.set("mouse_sensitivity", (sensitivity_x + sensitivity_y) * 0.5)
 
 func _apply_audio_settings() -> void:
+	var settings_manager := _settings_manager()
+	if settings_manager != null and settings_manager.has_method("set_settings"):
+		settings_manager.call("set_settings", _settings_values, false)
+		return
 	_ensure_audio_bus(&"Music")
 	_ensure_audio_bus(&"SFX")
 	_ensure_audio_bus(&"Dialogue")
@@ -236,7 +270,11 @@ func _set_bus_linear_volume(bus_name: StringName, linear_value: float) -> void:
 	if index < 0:
 		return
 	var clamped := clampf(linear_value, 0.0, 1.0)
-	AudioServer.set_bus_volume_db(index, -80.0 if clamped <= 0.001 else linear_to_db(clamped))
+	var base_volume_db := float(_BUS_BASE_VOLUME_DB.get(bus_name, 0.0))
+	AudioServer.set_bus_volume_db(index, -80.0 if clamped <= 0.001 else base_volume_db + linear_to_db(clamped))
+
+func _settings_manager() -> Node:
+	return get_node_or_null("/root/SettingsManager")
 
 func _apply_click_zone_visibility() -> void:
 	var alpha := 1.0 if show_click_zones else 0.0
@@ -344,3 +382,54 @@ func _on_main_menu() -> void:
 
 func _on_quit() -> void:
 	get_tree().quit()
+
+func _build_blur_layer() -> void:
+	_blur_rect = ColorRect.new()
+	_blur_rect.name = "BlurOverlay"
+	_blur_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_blur_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_blur_rect.color = Color(1, 1, 1, 1)
+	var shader := Shader.new()
+	shader.code = _BLUR_SHADER
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("blur_lod", 0.0)
+	mat.set_shader_parameter("darken", 0.0)
+	_blur_rect.material = mat
+	_blur_rect.visible = false
+	add_child(_blur_rect)
+	# Plasam blur-ul SUB Root (panoul de pauza), nu peste el.
+	move_child(_blur_rect, _root.get_index())
+
+func _animate_blur(active: bool) -> void:
+	if _blur_rect == null:
+		return
+	if _blur_tween != null and _blur_tween.is_running():
+		_blur_tween.kill()
+	var mat: ShaderMaterial = _blur_rect.material as ShaderMaterial
+	if mat == null:
+		return
+	if active:
+		_blur_rect.visible = true
+		mat.set_shader_parameter("blur_lod", 0.0)
+		mat.set_shader_parameter("darken", 0.0)
+		_blur_tween = create_tween()
+		_blur_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		_blur_tween.set_parallel(true)
+		_blur_tween.tween_method(_set_blur_lod, 0.0, 2.6, 0.25).set_trans(Tween.TRANS_QUAD)
+		_blur_tween.tween_method(_set_blur_darken, 0.0, 0.28, 0.25).set_trans(Tween.TRANS_QUAD)
+	else:
+		_blur_tween = create_tween()
+		_blur_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		_blur_tween.set_parallel(true)
+		_blur_tween.tween_method(_set_blur_lod, mat.get_shader_parameter("blur_lod") as float, 0.0, 0.18).set_trans(Tween.TRANS_QUAD)
+		_blur_tween.tween_method(_set_blur_darken, mat.get_shader_parameter("darken") as float, 0.0, 0.18).set_trans(Tween.TRANS_QUAD)
+		_blur_tween.chain().tween_callback(func(): _blur_rect.visible = false)
+
+func _set_blur_lod(v: float) -> void:
+	if _blur_rect != null and _blur_rect.material is ShaderMaterial:
+		(_blur_rect.material as ShaderMaterial).set_shader_parameter("blur_lod", v)
+
+func _set_blur_darken(v: float) -> void:
+	if _blur_rect != null and _blur_rect.material is ShaderMaterial:
+		(_blur_rect.material as ShaderMaterial).set_shader_parameter("darken", v)

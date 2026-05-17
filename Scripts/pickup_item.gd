@@ -33,6 +33,7 @@ const ITEM_LABELS := {
 	"hammer": "Ridică ciocanul",
 	"wax_tablet": "Ridică tăblița de ceară",
 	"lamp": "Ridică lampa",
+	"vapor_mask": "Ridica masca de panza",
 }
 
 func _ready() -> void:

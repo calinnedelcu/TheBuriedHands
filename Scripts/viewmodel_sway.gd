@@ -1,9 +1,9 @@
 extends Node3D
 
 @export var player_path: NodePath
-@export var sway_amount: float = 0.005
-@export var sway_smoothing: float = 10.0
-@export var movement_sway_amount: float = 0.002
+@export var sway_amount: float = 0.0005
+@export var sway_smoothing: float = 18.0
+@export var movement_sway_amount: float = 0.0004
 @export var bob_amount: float = 0.004
 @export var bob_speed: float = 8.0
 @export var breath_amount: float = 0.002

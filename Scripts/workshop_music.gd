@@ -4,6 +4,7 @@ extends AudioStreamPlayer3D
 @export var occluded_volume_db: float = -40.0
 @export var fade_duration: float = 5.0
 @export var occlusion_smoothing: float = 3.0
+@export var use_occlusion: bool = true
 
 var _player: Node3D = null
 var _occlusion_factor: float = 0.0
@@ -12,6 +13,7 @@ var _fade_done: bool = false
 func _ready() -> void:
 	if stream == null:
 		return
+	bus = &"Music"
 	if stream is AudioStreamMP3:
 		(stream as AudioStreamMP3).loop = true
 	volume_db = -48.0
@@ -24,6 +26,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if not _fade_done:
+		return
+	if not use_occlusion:
+		volume_db = target_volume_db
 		return
 	if _player == null:
 		_player = get_tree().get_first_node_in_group("player") as Node3D
