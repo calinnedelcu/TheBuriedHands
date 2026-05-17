@@ -128,6 +128,23 @@ signal health_changed(current: int, maximum: int)
 @export var footstep_streams: Array[AudioStream] = []
 @export var jump_streams: Array[AudioStream] = []
 @export var land_streams: Array[AudioStream] = []
+## Preload-uri explicite ca .ogg-urile sa fie packed in export (DirAccess in
+## .pck nu vede fisiere care nu sunt referite undeva la compile time).
+const _BUNDLED_FOOTSTEPS: Array[AudioStream] = [
+	preload("res://audio/sfx/player/footsteps/01-footstep_0.ogg"),
+	preload("res://audio/sfx/player/footsteps/02-footstep.ogg"),
+	preload("res://audio/sfx/player/footsteps/03-footstep.ogg"),
+	preload("res://audio/sfx/player/footsteps/04-footstep.ogg"),
+	preload("res://audio/sfx/player/footsteps/05-footstep.ogg"),
+	preload("res://audio/sfx/player/footsteps/06-footstep.ogg"),
+]
+const _BUNDLED_JUMPS: Array[AudioStream] = [
+	preload("res://audio/sfx/player/jump/jump_takeoff_01.ogg"),
+	preload("res://audio/sfx/player/jump/jump_takeoff_02.ogg"),
+]
+const _BUNDLED_LANDS: Array[AudioStream] = [
+	preload("res://audio/sfx/player/land/jumpland.wav"),
+]
 @export var footstep_volume_db: float = -13.0
 @export var jump_volume_db: float = -15.0
 @export var land_volume_db: float = -11.0
@@ -776,16 +793,17 @@ func _debug_skip_to_guard_dialogue_impl() -> void:
 ## in timpul pan-ului, sta zoomata pe hold, apoi revine la FOV-ul initial in
 ## `return_duration`. In tot acest interval mouse-ul si miscarea sunt blocate.
 ## Daca jucatorul deja se uita catre tinta, cinematic-ul e sarit.
-func play_cinematic_focus(world_pos: Vector3, pan_duration: float = 0.7, hold_time: float = 0.7, zoom_fov: float = 42.0, return_duration: float = 0.55) -> void:
+func play_cinematic_focus(world_pos: Vector3, pan_duration: float = 0.7, hold_time: float = 0.7, zoom_fov: float = 42.0, return_duration: float = 0.55, force: bool = false) -> void:
 	if _cinematic_active or camera == null or camera_pivot == null:
 		return
 	var head_pos: Vector3 = camera.global_position
 	var to_target: Vector3 = world_pos - head_pos
 	if to_target.length_squared() < 0.04:
 		return
-	var current_forward: Vector3 = -camera.global_transform.basis.z
-	if current_forward.dot(to_target.normalized()) > 0.88:
-		return
+	if not force:
+		var current_forward: Vector3 = -camera.global_transform.basis.z
+		if current_forward.dot(to_target.normalized()) > 0.88:
+			return
 	var flat: Vector3 = Vector3(to_target.x, 0.0, to_target.z)
 	var horizontal_dist: float = flat.length()
 	# rotation.y == 0 inseamna ca jucatorul se uita spre -Z. Yaw-ul tinta:
@@ -1196,9 +1214,15 @@ func _setup_movement_audio() -> void:
 	if not movement_audio_enabled:
 		return
 	_footstep_stream = _make_randomizer(footstep_streams, footstep_audio_dir, footstep_pitch_random, footstep_volume_random_db)
+	if _footstep_stream == null:
+		_footstep_stream = _make_randomizer(_BUNDLED_FOOTSTEPS, "", footstep_pitch_random, footstep_volume_random_db)
 	_footstep_streams_by_surface = _make_surface_randomizers()
 	_jump_stream = _make_randomizer(jump_streams, jump_audio_dir, jump_pitch_random, 1.0)
+	if _jump_stream == null:
+		_jump_stream = _make_randomizer(_BUNDLED_JUMPS, "", jump_pitch_random, 1.0)
 	_land_stream = _make_randomizer(land_streams, land_audio_dir, land_pitch_random, 1.4)
+	if _land_stream == null:
+		_land_stream = _make_randomizer(_BUNDLED_LANDS, "", land_pitch_random, 1.4)
 	if _jump_stream == null:
 		_jump_stream = _footstep_stream
 	if _land_stream == null:

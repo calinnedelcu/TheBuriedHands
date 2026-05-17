@@ -1,11 +1,24 @@
 class_name Liang
 extends Node3D
 
-@export var sitting_anim: StringName = &"NlaTrack.001_Armature"
-@export var surprised_anim: StringName = &"NlaTrack.002_Armature"
+@export var sitting_anim: StringName = &"NlaTrack_001_Armature"
+@export var surprised_anim: StringName = &"NlaTrack_002_Armature"
 @export var frustrated_anim: StringName = &"NlaTrack_Armature"
+## Offset default Y aplicat tuturor animatiilor.
 @export var y_offset: float = 0.0
+## Offset-uri specifice per animatie (suprascriu y_offset cand sunt setate).
+@export var sitting_y_offset: float = 0.0
+@export var surprised_y_offset: float = 0.0
+@export var frustrated_y_offset: float = 0.0
+## Offset extra per animatie pe X si Z (in spatiul scheletului).
+@export var sitting_xz_offset: Vector2 = Vector2.ZERO
+@export var surprised_xz_offset: Vector2 = Vector2.ZERO
+@export var frustrated_xz_offset: Vector2 = Vector2.ZERO
 @export var lock_vertical_motion: bool = true
+## Daca true: animatia e congelata la frame-ul `freeze_animation_time` dupa play.
+## Liang ramane in pose static (nu mai cicleaza prin keyframe-uri).
+@export var freeze_animations: bool = false
+@export var freeze_animation_time: float = 0.0
 
 var _animation_player: AnimationPlayer = null
 var _base_position_y: float = 0.0
@@ -29,6 +42,9 @@ func _ready() -> void:
 	_lock_root_y()
 	set_process(lock_vertical_motion)
 	set_physics_process(lock_vertical_motion)
+	# Asteapta un frame ca alti scripts (npc_dialogue etc.) sa termine init,
+	# apoi forteaza pornirea animatiei.
+	await get_tree().process_frame
 	play_sitting()
 
 func _process(_delta: float) -> void:
@@ -59,7 +75,12 @@ func _play_anim(name: StringName) -> void:
 	if anim != null:
 		anim.loop_mode = Animation.LOOP_LINEAR
 	_lock_root_y()
+	_animation_player.stop()
 	_animation_player.play(name)
+	_animation_player.speed_scale = 1.0
+	if freeze_animations:
+		_animation_player.seek(freeze_animation_time, true)
+		_animation_player.pause()
 	_restore_vertical_baseline()
 
 func _restore_vertical_baseline() -> void:
@@ -70,6 +91,15 @@ func _restore_vertical_baseline() -> void:
 		_armature_node.position.y = _base_armature_y
 	if _skeleton_node != null and is_instance_valid(_skeleton_node):
 		_skeleton_node.position.y = _base_skeleton_y
+
+func _get_offset_for_anim(anim_name: StringName) -> Vector3:
+	if anim_name == sitting_anim:
+		return Vector3(sitting_xz_offset.x, sitting_y_offset if sitting_y_offset != 0.0 else y_offset, sitting_xz_offset.y)
+	if anim_name == surprised_anim:
+		return Vector3(surprised_xz_offset.x, surprised_y_offset if surprised_y_offset != 0.0 else y_offset, surprised_xz_offset.y)
+	if anim_name == frustrated_anim:
+		return Vector3(frustrated_xz_offset.x, frustrated_y_offset if frustrated_y_offset != 0.0 else y_offset, frustrated_xz_offset.y)
+	return Vector3(0.0, y_offset, 0.0)
 
 func _lock_root_y() -> void:
 	var skel := _skeleton_node if _skeleton_node != null and is_instance_valid(_skeleton_node) else _find_skeleton()
@@ -82,16 +112,16 @@ func _lock_root_y() -> void:
 		var anim := _animation_player.get_animation(anim_name)
 		if anim == null:
 			continue
+		var offset: Vector3 = _get_offset_for_anim(anim_name)
 		for i in anim.get_track_count():
 			if anim.track_get_type(i) == Animation.TYPE_POSITION_3D:
 				var tp := str(anim.track_get_path(i))
 				for bone_name in root_bones:
 					if _track_targets_bone(tp, bone_name):
-						var rest_y := skel.get_bone_rest(skel.find_bone(bone_name)).origin.y + y_offset
+						var rest := skel.get_bone_rest(skel.find_bone(bone_name)).origin
+						var locked := Vector3(rest.x + offset.x, rest.y + offset.y, rest.z + offset.z)
 						for k in anim.track_get_key_count(i):
-							var val := anim.track_get_key_value(i, k) as Vector3
-							val.y = rest_y
-							anim.track_set_key_value(i, k, val)
+							anim.track_set_key_value(i, k, locked)
 						break
 
 func _find_root_bones(skel: Skeleton3D) -> Array[String]:

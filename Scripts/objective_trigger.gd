@@ -27,17 +27,21 @@ func _on_body_entered(body: Node3D) -> void:
 	if require_player_group != "" and not body.is_in_group(require_player_group):
 		return
 	_used = true
-	# Camera focus on target if configured.
-	if not focus_target_path.is_empty():
-		var focus_target := get_node_or_null(focus_target_path) as Node3D
-		if focus_target and body.has_method("play_cinematic_focus"):
-			body.call("play_cinematic_focus", focus_target.global_position, 0.7, focus_hold_time, focus_zoom_fov, 0.55)
-	# Dialogue
+	# Dialogue first
 	if intro_dialogue != "":
 		var events := get_node_or_null("/root/GameEvents")
 		if events and events.has_method("show_dialogue"):
 			events.show_dialogue(intro_dialogue, intro_dialogue_duration)
 			await get_tree().create_timer(0.6).timeout
+	# Camera focus on target — fire DURING/AFTER dialogue line so player can
+	# see the cinematic pan to the target even if facing it already.
+	if not focus_target_path.is_empty():
+		var focus_target := get_node_or_null(focus_target_path) as Node3D
+		if focus_target and body.has_method("play_cinematic_focus"):
+			# Mic delay sa nu se suprapuna cu inceputul dialogului.
+			await get_tree().create_timer(1.2).timeout
+			if is_instance_valid(body) and is_instance_valid(focus_target):
+				body.call("play_cinematic_focus", focus_target.global_position, 0.9, focus_hold_time, focus_zoom_fov, 0.6, true)
 	# Objective
 	var bus: Node = get_node_or_null("/root/Objectives")
 	if bus == null:

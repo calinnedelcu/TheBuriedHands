@@ -1208,6 +1208,9 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_2rfg8")
 
+[sub_resource type="BoxShape3D" id="Shape_tunnel_ceiling"]
+size = Vector3(8, 3, 8)
+
 [sub_resource type="CapsuleShape3D" id="Cap_liang_interaction"]
 height = 2.6
 
@@ -1409,7 +1412,15 @@ draw_pass_1 = SubResource("Quad_global_dust")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 0, -15)
 
 [node name="WorkshopMusic" type="AudioStreamPlayer3D" parent="Rooms/01_TerracottaWorkshop" unique_id=2098012345]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7695923, 4.398671, -4.45088)
+stream = ExtResource("Audio_workshop")
+unit_size = 300.0
+max_distance = 60.0
+bus = &"Music"
+script = ExtResource("Script_workshop_music")
+
+[node name="WorkshopMusic2" type="AudioStreamPlayer3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1902676353]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.75105, 4.398671, -4.5664005)
 stream = ExtResource("Audio_workshop")
 unit_size = 300.0
 max_distance = 60.0
@@ -1597,12 +1608,32 @@ pickup_objective_after_text = "Întoarce-te la statuetă și bate cu dalta."
 pickup_dialogue_text = "Meșteșugar: Acolo era. Cu dalta pot termina picioarele."
 
 [node name="Workbench_Hammer_W" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=366263078 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(0.86185586, -0.01482289, 0.50689346, 0.0676767, 0.99399334, -0.086003035, -0.5025739, 0.10843186, 0.85768205, 104.344406, 1.814182, -17.336767)
+item_id = "hammer"
+custom_prompt = "Ridică ciocanul"
+
+[node name="Workbench_Hammer_W3" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=1493619857 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(0.86185586, -0.01482289, 0.50689346, 0.0676767, 0.99399334, -0.086003035, -0.5025739, 0.10843186, 0.85768205, 88.57788, 1.7550485, -21.050562)
+item_id = "hammer"
+custom_prompt = "Ridică ciocanul"
+
+[node name="Workbench_Hammer_W2" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=583688768 instance=ExtResource("Scene_pickup")]
 transform = Transform3D(0.86185586, -0.01482289, 0.50689346, 0.0676767, 0.99399334, -0.086003035, -0.5025739, 0.10843186, 0.85768205, -13.130282, 1.7900379, 9.608077)
 item_id = "hammer"
 custom_prompt = "Ridică ciocanul"
 
 [node name="Workbench_Wedge_W" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=484446394 instance=ExtResource("Scene_pickup")]
 transform = Transform3D(0.819, 0, -0.574, 0, 1, 0, 0.574, 0, 0.819, -14.79, 1.7566072, 9.68)
+item_id = "wedge"
+custom_prompt = "Ridică pana de lemn"
+
+[node name="Workbench_Wedge_W2" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=614500170 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(0.819, 0, -0.574, 0, 1, 0, 0.574, 0, 0.819, 88.285645, 1.7566072, -20.365032)
+item_id = "wedge"
+custom_prompt = "Ridică pana de lemn"
+
+[node name="Workbench_Wedge_W3" parent="Rooms/01_TerracottaWorkshop/FunctionalToolPickups" unique_id=630030671 instance=ExtResource("Scene_pickup")]
+transform = Transform3D(0.819, 0, -0.574, 0, 1, 0, 0.574, 0, 0.819, 105.10925, 1.7566072, -17.876495)
 item_id = "wedge"
 custom_prompt = "Ridică pana de lemn"
 
@@ -2210,7 +2241,7 @@ walk_animation = &"NlaTrack_002_Armature_001"
 idle_animation = &"NlaTrack_004_Armature"
 
 [node name="player" type="CharacterBody3D" parent="." unique_id=945651234]
-transform = Transform3D(-0.010977926, 0, -0.99993974, 0, 1, 0, 0.99993974, 0, -0.010977926, -76.21097, 1.6494353, -26.0887)
+transform = Transform3D(-0.010977926, 0, -0.99993974, 0, 1, 0, 0.99993974, 0, -0.010977926, -75.74441, 2.6808877, -24.196987)
 safe_margin = 0.08
 script = ExtResource("Script_player")
 bob_amplitude = 0.04
@@ -2351,7 +2382,7 @@ animation_name = "NlaTrack_004_Armature"
 y_offset = -0.23
 
 [node name="mester-mestesugar-real3" parent="." unique_id=1954244699 instance=ExtResource("23_ih8h4")]
-transform = Transform3D(1.8894346, 0, -2.457649, 0, 3.1, 0, 2.457649, 0, 1.8894346, 51.767284, 0.19221447, -8.844203)
+transform = Transform3D(1.8894346, 0, -2.457649, 0, 3.1, 0, 2.457649, 0, 1.8894346, 51.767284, 0.8782268, -8.844203)
 script = ExtResource("Script_ucenic_animation_preview")
 seconds_per_animation = 2.5
 label_prefix = "Meșter"
@@ -2404,8 +2435,44 @@ bones/40/rotation = Quaternion(-0.13769557, -0.09843542, -0.05446087, 0.98406523
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
 script = ExtResource("Script_add_lamp_lights")
 
+[node name="FurnaceFire" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003" parent_id_path=PackedInt32Array(1259806216, 1588030001) index="1" unique_id=770026000 instance=ExtResource("10_8gn55")]
+transform = Transform3D(0.13664928, 0, 0.9906196, 0, 1, 0, -0.9906196, 0, 0.13664928, 0.13066284, -0.04240644, -0.0070381113)
+
+[node name="FlameSide1" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="4"]
+visible = false
+
+[node name="FlameSide2" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="5"]
+visible = false
+
+[node name="Cylinder_091" parent="MapWithoutTreasure" index="173" unique_id=1754978073]
+visible = false
+
+[node name="Cylinder_092" parent="MapWithoutTreasure" index="174" unique_id=1235768875]
+visible = false
+
+[node name="Cylinder_093" parent="MapWithoutTreasure" index="177" unique_id=1759129289]
+visible = false
+
+[node name="Cylinder_096" parent="MapWithoutTreasure" index="196" unique_id=857992933]
+visible = false
+
+[node name="Cylinder_097" parent="MapWithoutTreasure" index="197" unique_id=1231994489]
+visible = false
+
+[node name="Cylinder_098" parent="MapWithoutTreasure" index="198" unique_id=2097644525]
+visible = false
+
+[node name="Cylinder_101" parent="MapWithoutTreasure" index="203" unique_id=1045326817]
+visible = false
+
+[node name="Cylinder_102" parent="MapWithoutTreasure" index="204" unique_id=1600673471]
+visible = false
+
 [node name="Chair" parent="MapWithoutTreasure" index="286" unique_id=1424562466]
 transform = Transform3D(0.29624936, 0, 0.02054614, 0, 0.025, 0, -0.4273597, 0, 0.014242757, -8.614061, 0.30141315, 7.513135)
+
+[node name="Cylinder_003" parent="MapWithoutTreasure" index="299" unique_id=1272554267]
+transform = Transform3D(0.050252013, -0.06543793, -0.00031307974, 3.8151063e-10, -0.010849914, 0.051179543, -0.009835516, -0.33433807, -0.0015995975, -6.4689994, 1.0888913, 8.945617)
 
 [node name="Cube_082" parent="MapWithoutTreasure" index="306" unique_id=278325949]
 visible = false
@@ -2436,7 +2503,10 @@ breath_amount = 0.04
 breath_period = 7.8
 
 [node name="Chair_038" parent="MapWithoutTreasure" index="639" unique_id=725032907]
-transform = Transform3D(-0.21075921, 0, -0.043764193, 0, 0.04547353, 0, 0.9122101, 0, -0.010111384, 58.38581, -0.98648906, -9.166945)
+transform = Transform3D(-0.21075921, 0, -0.043764193, 0, 0.04547353, 0, 0.9122101, 0, -0.010111384, 58.38581, 0.30022788, -9.166945)
+
+[node name="Cube_230" parent="MapWithoutTreasure" index="661" unique_id=761225661]
+visible = false
 
 [node name="Cube_244" parent="MapWithoutTreasure" index="706" unique_id=1348836932]
 transform = Transform3D(-0.12522474, 0, -0.06093272, 0, 0.04309255, 0, 0.06093272, 0, -0.12522474, 58.632324, 0.062325835, -10.654744)
@@ -2448,6 +2518,7 @@ objective_after_id = "follow_tunnel_to_mercury"
 objective_after_text = "Urmează tunelul drept înainte până la Camera cu Mercur."
 
 [node name="BreakPromptRange" type="StaticBody3D" parent="MapWithoutTreasure/TunnelEntrance2" parent_id_path=PackedInt32Array(1259806216, 1019996704) index="2" unique_id=1266262433]
+transform = Transform3D(0.40119296, 0, 0, 0, 0.32647094, 0, 0, 0, 1, -0.07556891, -0.16414547, 0)
 collision_layer = 2
 collision_mask = 0
 
@@ -2758,10 +2829,10 @@ shape = SubResource("ConcavePolygonShape3D_5a5sy")
 metadata/generated_trimesh_collision = true
 
 [node name="AdministrativeSneakingMusic" type="AudioStreamPlayer3D" parent="MapWithoutTreasure" unique_id=24544621]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.35, -8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 4.88641, -8)
 stream = ExtResource("Audio_admin_sneak")
-unit_size = 42.0
-max_distance = 48.0
+unit_size = 300.0
+max_distance = 110.0
 bus = &"Music"
 script = ExtResource("Script_workshop_music")
 target_volume_db = -10.0
@@ -3361,7 +3432,7 @@ transform = Transform3D(-0.0020459944, 0.18268013, -0.616413, 1.4551915e-11, 1.0
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 37.983242, 8.326743, 42.808605)
 
 [node name="MercuryFlowingPoint" parent="MapWithoutTreasure" unique_id=66882977 instance=ExtResource("42_s7lgn")]
-transform = Transform3D(0.9435132, 0, 0, 0, 0.625, 0, 0, 0, 0.741451, 37.9998, 7.888669, 47.79104)
+transform = Transform3D(0.9435132, 0, 0, 0, 0.625, 0, 0, 0, 0.741451, 38.37576, 7.888669, 47.79104)
 
 [node name="Balanta" parent="MapWithoutTreasure" unique_id=1947383111 instance=ExtResource("43_alxqe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.30841, 0.32707912, 48.087727)
@@ -3383,10 +3454,6 @@ transform = Transform3D(9.602176, 0, 0, 0, 4.186791, 0, 0, 0, 11.620692, 0, -2.1
 
 [node name="MercuryVaporZone3" parent="MapWithoutTreasure" unique_id=191237547 instance=ExtResource("44_alxqe")]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 34.183002, -0.07739782, 79.54642)
-area_path = NodePath("../MercuryVaporZone/Area")
-source_path = NodePath("../MercuryVaporZone/Source")
-sources_parent_path = NodePath("../MercuryVaporZone/Sources")
-particles_path = NodePath("../MercuryVaporZone/VaporParticles")
 
 [node name="Area" parent="MapWithoutTreasure/MercuryVaporZone3" index="0" unique_id=1249381445]
 transform = Transform3D(5.3178015, 0, 0, 0, 10.138702, 0, 0, 0, 5.4285235, 0, 0, 0)
@@ -3419,10 +3486,47 @@ transform = Transform3D(2.8380418, 0, 0, 0, 1.3833146, 0, 0, 0, 2.9765406, -1.42
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
 script = ExtResource("Script_runtime_col")
 
+[node name="TunnelCeilingColliders" type="Node3D" parent="." unique_id=770028000]
+
+[node name="TunnelCeiling_01" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=770028001]
+transform = Transform3D(5.5738626, 0, 0, 0, 1, 0, 0, 0, 1, 6.8837185, -4.7448826, -34.23727)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=770028002]
+shape = SubResource("Shape_tunnel_ceiling")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=1736775771]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.786573, 0, -12.383465)
+shape = SubResource("Shape_tunnel_ceiling")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=6520850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3570502, 0, 63.47317)
+shape = SubResource("Shape_tunnel_ceiling")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=69080453]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0891216, 0, 69.64092)
+shape = SubResource("Shape_tunnel_ceiling")
+
+[node name="TunnelCeiling_05" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=770028009]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, -27.44034, -20)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_05" unique_id=770028010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 14.629896, 92.150116, 22.831528, -6.536539)
+shape = SubResource("Shape_tunnel_ceiling")
+
+[node name="TunnelCeiling_06" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=1012751566]
+transform = Transform3D(3.6137369, 0, 0, 0, 1, 0, 0, 0, 0.36970487, -363.524, -11.415, 61.897)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_06" unique_id=688890013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 14.629896, 92.150116, 22.831528, -6.536539)
+shape = SubResource("Shape_tunnel_ceiling")
+
 [node name="monk" parent="." unique_id=1932490062 instance=ExtResource("35_p7lf4")]
-transform = Transform3D(3.12983, 0, -0.5059808, 0, 2.9975622, 0, 0.55232346, 0, 2.8672218, 38.22118, -0.11924885, -34.19695)
+transform = Transform3D(-2.9444344, 0, 1.0959507, 0, 2.9975622, 0, -1.1963285, 0, -2.6973817, 37.79354, -1.0564466, -34.191)
 script = ExtResource("Script_liang")
-y_offset = -0.15
+y_offset = 0.3
 
 [node name="Skeleton3D" parent="monk/Armature" parent_id_path=PackedInt32Array(1932490062, 1154747792) index="0" unique_id=2045055836]
 bones/0/position = Vector3(-0.0041788244, 4.864545e-07, -0.0032934868)
@@ -3470,12 +3574,11 @@ objective_after_id = "break_stone_with_tools"
 objective_after_text = "Sparge piatra din camera alăturată cu ciocanul și pana de lemn."
 animated_npc_path = NodePath("../../monk")
 animated_npc_search_name = "monk"
-first_interaction_animation = &"NlaTrack.002_Armature"
-dialogue_idle_animation = &"NlaTrack.001_Armature"
-finished_animation = &"NlaTrack.001_Armature"
-per_line_animations = Array[StringName]([&"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"", &"NlaTrack_Armature", &"", &"", &"", &"", &"", &"", &""])
+first_interaction_animation = &"NlaTrack_001_Armature"
+dialogue_idle_animation = &"NlaTrack_001_Armature"
+finished_animation = &"NlaTrack_001_Armature"
 face_player_during_dialogue = true
-face_player_yaw_offset_degrees = 180.0
+face_player_yaw_offset_degrees = 90.0
 prompt_text = "Vorbește cu Liang"
 
 [node name="Testamente2" parent="." unique_id=222499981 instance=ExtResource("41_64qr2")]
@@ -4285,7 +4388,7 @@ transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -51.319466, 0.3613901, 
 transform = Transform3D(-1.5999998, 0, -0.0010054143, 0, 1.6, 0, 0.0010054143, 0, -1.5999998, -96.8163, 0.4329319, 60.703945)
 
 [node name="VaporMask" parent="." unique_id=1237766303 instance=ExtResource("53_07h2l")]
-transform = Transform3D(3.312302, 0, 0, 0, 3.0896938, 0, 0, 0, 3.5458372, -0.6391307, 7.4913635, 45.57486)
+transform = Transform3D(3.312302, 0, 0, 0, 3.0896938, 0, 0, 0, 3.5458372, -2.728448, 7.491364, 48.622326)
 
 [node name="SqueezeTunnelCollapse" parent="." unique_id=2089905172 instance=ExtResource("54_1i7dt")]
 transform = Transform3D(-0.0052883816, 0, -0.999986, 0, 1, 0, 0.999986, 0, -0.0052883816, -6.4056363, 7.948615, 142.97246)
@@ -4315,7 +4418,7 @@ objective_id = "go_to_mercury_room"
 objective_text = "Ia vaza cu mercur și masca de pe jos pentru a te proteja de vapori, apoi urmează tunelul din dreapta până la Sala Mercurului."
 intro_dialogue = "Meșteșugar: Trebuie să iau vaza cu mercur și masca de pe jos ca să mă protejez de vapori. Apoi o iau prin tunelul din dreapta."
 intro_dialogue_duration = 7.0
-focus_target_path = NodePath("VaporMask")
+focus_target_path = NodePath("../VaporMask")
 focus_hold_time = 3.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MechanismRoomEntranceTrigger" unique_id=1164021162]
@@ -4329,17 +4432,27 @@ objective_id = "fill_vase_with_mercury"
 objective_text = "Umple vaza cu mercur din țeavă și adu-o înapoi la mecanism."
 intro_dialogue = "Meșteșugar: Camera cu Mercur... Aerul e greu aici. Trebuie să umplu vaza cu mercur din țeava aia și să o aduc înapoi la mecanism."
 intro_dialogue_duration = 7.0
-focus_target_path = NodePath("MercuryExtractingPoint")
+focus_target_path = NodePath("../MercuryExtractingPoint2")
 focus_hold_time = 3.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MercuryRoomFillingTrigger" unique_id=1239136974]
 shape = SubResource("Shape_mercury_room_entrance")
 
 [node name="MercuryRoomMusic" type="AudioStreamPlayer3D" parent="." unique_id=770023001]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -71.23816, 4, 61.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -71.23816, 5.130524, 61.5)
 stream = ExtResource("AS_treasure_music")
 unit_size = 300.0
-max_distance = 45.0
+max_distance = 110.0
+bus = &"Music"
+script = ExtResource("Script_workshop_music")
+target_volume_db = -10.0
+occluded_volume_db = -50.0
+
+[node name="MercuryRoomMusic2" type="AudioStreamPlayer3D" parent="." unique_id=494662005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.357041, 16.87251, 53.93013)
+stream = ExtResource("AS_treasure_music")
+unit_size = 300.0
+max_distance = 110.0
 bus = &"Music"
 script = ExtResource("Script_workshop_music")
 target_volume_db = -10.0
@@ -4370,6 +4483,7 @@ player_group = ""
 [editable path="Rooms/01_TerracottaWorkshop/TerracottaGuard07"]
 [editable path="mester-mestesugar-real3"]
 [editable path="MapWithoutTreasure"]
+[editable path="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire"]
 [editable path="MapWithoutTreasure/CrossbowTrap_Admin_01"]
 [editable path="MapWithoutTreasure/CrossbowTrap_Admin_02"]
 [editable path="MapWithoutTreasure/CrossbowTrap_Admin_03"]

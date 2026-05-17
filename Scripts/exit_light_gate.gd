@@ -181,6 +181,14 @@ func _fade_white_in(overlay: CanvasLayer, duration: float) -> void:
 	tween.tween_property(color_rect, "modulate:a", 1.0, duration).set_trans(Tween.TRANS_SINE)
 
 func _show_ending_ui(white_overlay: CanvasLayer) -> void:
+	# Fundalul alb se transforma in maro-negru cald (in tonul ramei cardului)
+	# ca sa elimine gri-ul muddy si sa puna in evidenta cardul.
+	if white_overlay != null:
+		var bg_rect := white_overlay.get_child(0) as ColorRect
+		if bg_rect != null:
+			var bg_tween := create_tween()
+			bg_tween.tween_property(bg_rect, "color", Color(0.06, 0.04, 0.03, 1.0), ui_fade_in_duration * 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
 	var ui := CanvasLayer.new()
 	ui.name = "ExitEndingUI"
 	ui.layer = 129
@@ -192,13 +200,6 @@ func _show_ending_ui(white_overlay: CanvasLayer) -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	ui.add_child(root)
 
-	var dim := ColorRect.new()
-	dim.name = "Dim"
-	dim.color = Color(0, 0, 0, 0.55)
-	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(dim)
-
 	var centerer := CenterContainer.new()
 	centerer.name = "Centerer"
 	centerer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -206,8 +207,8 @@ func _show_ending_ui(white_overlay: CanvasLayer) -> void:
 	root.add_child(centerer)
 
 	var window_size: Vector2 = Vector2(get_window().size)
-	var scale_x: float = min(card_max_screen_width, window_size.x * 0.85) / card_native_size.x
-	var scale_y: float = (window_size.y * 0.85) / card_native_size.y
+	var scale_x: float = min(card_max_screen_width, window_size.x * 0.78) / card_native_size.x
+	var scale_y: float = (window_size.y * 0.82) / card_native_size.y
 	var card_scale: float = min(scale_x, scale_y)
 	var card_size: Vector2 = card_native_size * card_scale
 
@@ -215,6 +216,8 @@ func _show_ending_ui(white_overlay: CanvasLayer) -> void:
 	card.name = "Card"
 	card.custom_minimum_size = card_size
 	card.mouse_filter = Control.MOUSE_FILTER_PASS
+	card.pivot_offset = card_size * 0.5
+	card.scale = Vector2(0.94, 0.94)
 	centerer.add_child(card)
 
 	var bg := TextureRect.new()
@@ -239,8 +242,10 @@ func _show_ending_ui(white_overlay: CanvasLayer) -> void:
 	root.modulate.a = 0.0
 	get_tree().current_scene.add_child(ui)
 
-	var tween := create_tween()
-	tween.tween_property(root, "modulate:a", 1.0, ui_fade_in_duration).set_trans(Tween.TRANS_SINE)
+	# Fade-in elegant + scale subtila pentru intrarea cardului.
+	var ui_tween := create_tween().set_parallel(true)
+	ui_tween.tween_property(root, "modulate:a", 1.0, ui_fade_in_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	ui_tween.tween_property(card, "scale", Vector2.ONE, ui_fade_in_duration * 1.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

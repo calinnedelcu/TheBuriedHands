@@ -15,7 +15,7 @@ const SLOT_NAMES := {
 	SLOT_CERAMIC: "Cioburi de ceramică",
 	SLOT_HAMMER: "Ciocan de lemn",
 	SLOT_WAX_TABLET: "Tăbliță de ceară",
-	SLOT_VAPOR_MASK: "Masca de panza",
+	SLOT_VAPOR_MASK: "Cârpă de protecție",
 }
 
 const SLOT_BY_ITEM_ID := {
@@ -61,7 +61,7 @@ static func pickup_prompt(slot: int) -> String:
 
 static func pickup_prompt_for_item_id(item_id: String) -> String:
 	if item_id == "vapor_mask":
-		return "Ridica masca de panza"
+		return "Ridică cârpa de protecție"
 	return pickup_prompt(slot_for_item_id(item_id))
 
 static func glow_color_for_slot(slot: int) -> Color:
