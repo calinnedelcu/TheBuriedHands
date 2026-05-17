@@ -11,4 +11,9 @@
 build/
 export_presets.cfg
 
+# Local editor / tool settings
+.claude/
+.vscode/
+.idea/
+
 # MapWithoutTreasure.glb (~257 MB) is now tracked via Git LFS (see .gitattributes).
