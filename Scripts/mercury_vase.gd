@@ -5,6 +5,7 @@ extends Node3D
 @export var body_visual_offset: Vector3 = Vector3(7.152364, -0.499749, -2.631718)
 @export var equipped_transform: Transform3D = Transform3D(Basis(), Vector3(0.0, -0.02, -0.08))
 @export var hide_when_equipped: bool = true
+@export_flags_3d_physics var pickup_collision_layer: int = 2
 
 @onready var _body: Node3D = get_node_or_null("Body")
 @onready var _pickup_body: StaticBody3D = get_node_or_null("PickupBody")
@@ -23,6 +24,8 @@ func _ready() -> void:
 		_interactable.prompt_text = pickup_prompt
 		_interactable.is_pickup = true
 		_interactable.interacted.connect(_on_pickup)
+	if not is_held and not _stored:
+		_set_world_pickup_enabled(true)
 
 func _process(_delta: float) -> void:
 	pass
@@ -35,6 +38,7 @@ func _on_pickup(by: Node) -> void:
 	if inventory != null and inventory.has_method("add_item"):
 		var slot: int = inventory.call("add_item", "mercury_vase", self)
 		if slot < 0:
+			_set_world_pickup_enabled(true)
 			return
 	else:
 		set_equipped(true)
@@ -53,8 +57,7 @@ func drop_at(pos: Vector3) -> void:
 	remove_from_group("mercury_vase_held")
 	_reparent_to_world()
 	global_position = pos
-	visible = true
-	call_deferred("_set_collision", true)
+	call_deferred("_set_world_pickup_enabled", true)
 
 func drop_by_player(player: Node) -> bool:
 	if not is_held and not _stored:
@@ -66,8 +69,7 @@ func drop_by_player(player: Node) -> bool:
 		global_transform = player.get_drop_transform(false)
 	else:
 		global_position += Vector3(0.6, 0.0, 0.0)
-	visible = true
-	call_deferred("_set_collision", true)
+	call_deferred("_set_world_pickup_enabled", true)
 	return true
 
 func set_equipped(equipped: bool) -> void:
@@ -80,7 +82,7 @@ func set_equipped(equipped: bool) -> void:
 		visible = not hide_when_equipped
 	else:
 		remove_from_group("mercury_vase_held")
-		_set_collision(true)
+		_set_world_pickup_enabled(true)
 
 func set_stored() -> void:
 	_stored = true
@@ -91,13 +93,19 @@ func set_stored() -> void:
 
 func _set_collision(enabled: bool) -> void:
 	if _pickup_body != null:
-		_pickup_body.collision_layer = 1 if enabled else 0
+		_pickup_body.collision_layer = pickup_collision_layer if enabled else 0
 		_pickup_body.collision_mask = 0
 		_pickup_body.process_mode = Node.PROCESS_MODE_INHERIT if enabled else Node.PROCESS_MODE_DISABLED
 	if _pickup_collider != null:
 		_pickup_collider.disabled = not enabled
 	if _interactable != null:
 		_interactable.enabled = enabled
+
+func _set_world_pickup_enabled(enabled: bool) -> void:
+	visible = enabled
+	_set_collision(enabled)
+	if enabled and _interactable != null and _interactable.has_method("reset"):
+		_interactable.reset()
 
 func _reparent_to_world() -> void:
 	if not is_inside_tree():
