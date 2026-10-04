@@ -1933,7 +1933,7 @@ visible = false
 transform = Transform3D(1.4823543, 0, 0, 0, 2.1261914, 0, 0, 0, 1.4823543, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 0.93853974
+pitch_scale = 0.9502737
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="171" unique_id=2048551156]
@@ -5449,11 +5449,13 @@ route_path = NodePath("../../Routes/ArchiveDoor")
 transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -3.7108803, 0.24131827, 16.29159)
 velocity = Vector3(0, -0.78400004, 0)
 route_path = NodePath("../../Routes/CorridorWatch")
+carries_torch = true
 
 [node name="ArchiveGuard1" parent="Guards" unique_id=812367339 instance=ExtResource("78_4gtt1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8408203, 0.16043974, -16.51106)
 velocity = Vector3(0, -0.78400004, 0)
 route_path = NodePath("../../Routes/ArchiveSouth")
+carries_torch = true
 
 [node name="ArchiveGuard2" parent="Guards" unique_id=1180360167 instance=ExtResource("78_4gtt1")]
 transform = Transform3D(0.9985996, 0, 0.05290414, 0, 1, 0, -0.05290414, 0, 0.9985996, 17.24752, 0.005592834, -16.154305)
@@ -5464,6 +5466,7 @@ route_path = NodePath("../../Routes/ArchiveEast")
 transform = Transform3D(0.9924818, 0, -0.122392215, 0, 1, 0, 0.122392215, 0, 0.9924818, -2.2750015, 0.018485796, -35.62845)
 velocity = Vector3(0, -0.78400004, 0)
 route_path = NodePath("../../Routes/ArchiveNorthWest")
+carries_torch = true
 
 [node name="ArchiveGuard4" parent="Guards" unique_id=1101598378 instance=ExtResource("78_4gtt1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.473942, 0.17212917, -35.62845)

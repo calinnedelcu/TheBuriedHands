@@ -44,7 +44,14 @@ const ANIM := {
 @export var call_radius := 22.0
 
 @export_group("Look")
+## A burning torch in the right hand: it lights the guard's surroundings
+## (making the player visible there) and shows where the guard is.
 @export var carries_torch := false
+## Where the fist is, in the hand bone's space (metres); the torch keeps
+## itself upright.
+@export var torch_offset := Vector3(0.0, 0.07, 0.02)
+
+const TORCH := preload("res://scenes/ai/guard_torch.tscn")
 
 @onready var _agent: NavigationAgent3D = $Agent
 @onready var _model: Node3D = $Model
@@ -95,13 +102,25 @@ func _ready() -> void:
 	_agent.velocity_computed.connect(_on_velocity_computed)
 	_play(&"idle")
 	_icon.visible = false
-	if carries_torch and has_node("Torch"):
-		Stealth.register_light($Torch/Light)
+	if carries_torch:
+		_attach_torch()
 
 func _exit_tree() -> void:
 	Stealth.unregister_guard(self)
-	if has_node("Torch"):
-		Stealth.unregister_light($Torch/Light)
+
+func _attach_torch() -> void:
+	var skeleton := _model.find_children("*", "Skeleton3D", true, false)
+	if skeleton.is_empty():
+		return
+	var hand := BoneAttachment3D.new()
+	hand.name = "TorchHand"
+	hand.bone_name = "R_Hand"
+	(skeleton[0] as Node).add_child(hand)
+	var torch := TORCH.instantiate() as Node3D
+	hand.add_child(torch)
+	# The skeleton is scaled with the model; the offset is in real metres.
+	var s := 1.0 / maxf((skeleton[0] as Node3D).global_transform.basis.get_scale().x, 0.001)
+	torch.set(&"grip_offset", torch_offset * s)
 
 func awareness_level() -> float:
 	return clampf(awareness, 0.0, 1.0) if state != State.SCRIPTED else 0.0

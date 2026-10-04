@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/items/flame_teardrop.obj" id="1_flame"]
+[ext_resource type="Shader" path="res://scenes/items/oil_flame.gdshader" id="2_flame_shader"]
+[ext_resource type="Script" path="res://Scripts/world/flicker_light.gd" id="3_flicker"]
+[ext_resource type="AudioStream" path="res://audio/sfx/fire_crackle.mp3" id="4_crackle"]
+[ext_resource type="Script" path="res://Scripts/ai/held_torch.gd" id="5_held"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.22, 0.14, 0.08, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_char"]
+albedo_color = Color(0.09, 0.07, 0.06, 1)
+roughness = 1.0
+emission_enabled = true
+emission = Color(1, 0.35, 0.08, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="CylinderMesh" id="Mesh_shaft"]
+material = SubResource("Mat_wood")
+top_radius = 0.028
+bottom_radius = 0.022
+height = 0.75
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="Mesh_head"]
+material = SubResource("Mat_char")
+top_radius = 0.055
+bottom_radius = 0.042
+height = 0.16
+radial_segments = 10
+rings = 1
+
+[sub_resource type="ShaderMaterial" id="Mat_flame"]
+shader = ExtResource("2_flame_shader")
+shader_parameter/outer_color = Color(1, 0.3, 0.05, 0.85)
+shader_parameter/core_color = Color(1, 0.78, 0.3, 0.95)
+shader_parameter/tip_color = Color(1, 0.45, 0.08, 0.6)
+shader_parameter/emission_strength = 5.5
+shader_parameter/alpha_scale = 0.9
+shader_parameter/depth_squash = 0.0
+
+[sub_resource type="ParticleProcessMaterial" id="Proc_embers"]
+direction = Vector3(0, 1, 0)
+spread = 20.0
+initial_velocity_min = 0.6
+initial_velocity_max = 1.4
+gravity = Vector3(0, 0.4, 0)
+scale_min = 0.5
+scale_max = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ember"]
+shading_mode = 0
+albedo_color = Color(1, 0.6, 0.2, 1)
+billboard_mode = 1
+emission_enabled = true
+emission = Color(1, 0.55, 0.15, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="QuadMesh" id="Mesh_ember"]
+material = SubResource("Mat_ember")
+size = Vector2(0.015, 0.015)
+
+[node name="Torch" type="Node3D"]
+script = ExtResource("5_held")
+
+[node name="Shaft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+mesh = SubResource("Mesh_shaft")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Mesh_head")
+
+[node name="Flame" type="MeshInstance3D" parent="."]
+transform = Transform3D(2.4, 0, 0, 0, 2.6, 0, 0, 0, 2.4, 0, 0.62, 0)
+cast_shadow = 0
+material_override = SubResource("Mat_flame")
+mesh = ExtResource("1_flame")
+
+[node name="Embers" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+amount = 10
+lifetime = 1.2
+local_coords = false
+process_material = SubResource("Proc_embers")
+draw_pass_1 = SubResource("Mesh_ember")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+light_color = Color(1, 0.56, 0.24, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 1.4
+light_size = 0.1
+shadow_enabled = true
+shadow_bias = 0.08
+shadow_normal_bias = 1.5
+omni_range = 10.0
+omni_attenuation = 1.2
+distance_fade_enabled = true
+distance_fade_begin = 50.0
+distance_fade_shadow = 30.0
+distance_fade_length = 10.0
+script = ExtResource("3_flicker")
+flicker_amount = 0.22
+flicker_speed = 6.0
+
+[node name="Crackle" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+stream = ExtResource("4_crackle")
+volume_db = -14.0
+unit_size = 3.0
+max_distance = 16.0
+bus = &"Tomb"
+autoplay = true

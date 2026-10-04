@@ -17,6 +17,7 @@ func _run() -> void:
 	await get_tree().physics_frame
 	_localize_drain()
 	_zone_sound()
+	_guard_torches()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -86,3 +87,12 @@ func _zone_sound() -> void:
 	_zone("Archives", Vector3(16.0, 4.0, -30.0), Vector3(56.0, 14.0, 64.0)).music = &"archives"
 	_zone("Corridor", Vector3(-10.0, 3.0, 15.0), Vector3(84.0, 10.0, 22.0)).music = &"archives"
 	_log.append("zones: music and ambience set")
+
+## Some patrols carry torches: moving light that shows where they are and
+## lights up anyone near them.
+func _guard_torches() -> void:
+	for n in ["ArchiveGuard1", "ArchiveGuard3", "GuardEscort"]:
+		var g := root.get_node_or_null("Guards/" + n) as Guard
+		if g != null and not g.carries_torch:
+			g.carries_torch = true
+			_log.append("torch: " + n)

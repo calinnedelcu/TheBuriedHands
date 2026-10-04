@@ -8,6 +8,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			_out = arg.substr(6)
+	if _out != "":
+		DirAccess.make_dir_recursive_absolute(_out)
 	_run.call_deferred()
 
 func _run() -> void:
@@ -23,6 +25,12 @@ func _run() -> void:
 	_check("not hostile before the sealing: state=%s" % Guard.State.keys()[guard.state], guard.state == Guard.State.PATROL)
 
 	Game.set_flag(&"guards_hostile", true)
+	# Perception checks need a guard that stands still and faces one way.
+	guard._route = null
+	guard.velocity = Vector3.ZERO
+	guard._home = guard.global_position
+	guard._set_state(Guard.State.PATROL)
+	await _wait(0.5)
 	# Darkness, crouched, 9 m in front of the guard: should stay unseen.
 	player.inventory.take_lamp(80.0, false)
 	player._set_stance(Player.Stance.CROUCH, true)
