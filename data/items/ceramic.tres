@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_ceramic.png" id="1_d6xrx"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactGlass_light_000.ogg" id="2_xhcve"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactGlass_light_001.ogg" id="3_33xcp"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactGlass_light_002.ogg" id="4_34cw7"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="5_hj8nk"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/ceramic.tscn" id="6_as4dx"]
+
+[resource]
+script = ExtResource("5_hj8nk")
+id = &"ceramic"
+name_key = "ITEM_CERAMIC"
+description_key = "ITEM_DESC_CERAMIC"
+icon = ExtResource("1_d6xrx")
+world_scene = ExtResource("6_as4dx")
+max_stack = 6
+throwable = true
+throw_noise_radius = 20.0
+mass = 0.3
+impact_sounds = Array[AudioStream]([ExtResource("2_xhcve"), ExtResource("3_33xcp"), ExtResource("4_34cw7")])

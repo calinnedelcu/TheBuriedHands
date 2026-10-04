@@ -1,0 +1,131 @@
+[gd_scene format=3]
+
+[sub_resource type="Gradient" id="Gradient_5fonh"]
+colors = PackedColorArray(0.36, 0.22, 0.12, 1, 0.5, 0.33, 0.18, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_7ej71"]
+seed = 3
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7d6mc"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_7ej71")
+color_ramp = SubResource("Gradient_5fonh")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2jcax"]
+albedo_texture = SubResource("NoiseTexture2D_7d6mc")
+roughness = 0.82
+uv1_scale = Vector3(1, 6, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_fq13t"]
+top_radius = 0.028
+bottom_radius = 0.024
+height = 0.42
+radial_segments = 8
+rings = 1
+
+[sub_resource type="Gradient" id="Gradient_0ny4w"]
+colors = PackedColorArray(0.24, 0.14, 0.08, 1, 0.34, 0.21, 0.12, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_uhrr4"]
+seed = 7
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mebi2"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_uhrr4")
+color_ramp = SubResource("Gradient_0ny4w")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_25tgu"]
+albedo_texture = SubResource("NoiseTexture2D_mebi2")
+roughness = 0.82
+uv1_scale = Vector3(1, 6, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dcbev"]
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.22
+radial_segments = 12
+rings = 1
+
+[sub_resource type="Gradient" id="Gradient_1whsj"]
+colors = PackedColorArray(0.42, 0.33, 0.17, 1, 0.55, 0.45, 0.25, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_o7q5g"]
+seed = 11
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vwp2y"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_o7q5g")
+color_ramp = SubResource("Gradient_1whsj")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x4xp4"]
+albedo_texture = SubResource("NoiseTexture2D_vwp2y")
+metallic = 0.75
+roughness = 0.42
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_2hhcc"]
+top_radius = 0.078
+bottom_radius = 0.078
+height = 0.02
+radial_segments = 12
+rings = 1
+
+[sub_resource type="Gradient" id="Gradient_plp4u"]
+colors = PackedColorArray(0.42, 0.33, 0.17, 1, 0.55, 0.45, 0.25, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_48kq6"]
+seed = 11
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mcvpl"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_48kq6")
+color_ramp = SubResource("Gradient_plp4u")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x32ar"]
+albedo_texture = SubResource("NoiseTexture2D_mcvpl")
+metallic = 0.75
+roughness = 0.42
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ky1vr"]
+top_radius = 0.078
+bottom_radius = 0.078
+height = 0.02
+radial_segments = 12
+rings = 1
+
+[node name="Mallet" type="Node3D" unique_id=304735101]
+
+[node name="Handle" type="MeshInstance3D" parent="." unique_id=52112866]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_2jcax")
+mesh = SubResource("CylinderMesh_fq13t")
+
+[node name="Head" type="MeshInstance3D" parent="." unique_id=1570609389]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, -0.23)
+material_override = SubResource("StandardMaterial3D_25tgu")
+mesh = SubResource("CylinderMesh_dcbev")
+
+[node name="BandA" type="MeshInstance3D" parent="." unique_id=611234541]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.1, 0, -0.23)
+material_override = SubResource("StandardMaterial3D_x4xp4")
+mesh = SubResource("CylinderMesh_2hhcc")
+
+[node name="BandB" type="MeshInstance3D" parent="." unique_id=417588065]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.1, 0, -0.23)
+material_override = SubResource("StandardMaterial3D_x32ar")
+mesh = SubResource("CylinderMesh_ky1vr")

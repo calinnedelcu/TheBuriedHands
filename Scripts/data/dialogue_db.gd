@@ -1,0 +1,161 @@
+class_name DialogueDB
+extends RefCounted
+## Every scripted line in the game. Entries are [speaker_id, text_key] or
+## [speaker_id, text_key, extras]; the text itself lives in
+## localization/strings.csv. Extras are forwarded to listeners (e.g. an NPC
+## animation for that line: {"anim": &"..."}).
+
+const SPEAKERS := {
+	&"craftsman": "SPK_CRAFTSMAN",
+	&"apprentice": "SPK_APPRENTICE",
+	&"liang": "SPK_LIANG",
+	&"guard_a": "SPK_GUARD_CAPTAIN",
+	&"guard_b": "SPK_GUARD",
+	&"guard": "SPK_GUARD",
+}
+
+const SEQUENCES := {
+	# --- Act I: the workshop -------------------------------------------------
+	&"intro": [
+		[&"craftsman", "DLG_INTRO_1"],
+		[&"craftsman", "DLG_INTRO_2"],
+	],
+	&"apprentice_task": [
+		[&"apprentice", "DLG_APPR_1", {"anim": &"talk"}],
+		[&"craftsman", "DLG_APPR_2"],
+		[&"apprentice", "DLG_APPR_3", {"anim": &"point"}],
+	],
+	&"lamp_taken": [
+		[&"craftsman", "DLG_LAMP_TAKEN"],
+	],
+	&"bowl_taken": [
+		[&"craftsman", "DLG_BOWL_TAKEN"],
+	],
+	&"slip_applied": [
+		[&"craftsman", "DLG_SLIP_APPLIED_1"],
+		[&"craftsman", "DLG_SLIP_APPLIED_2"],
+	],
+	&"chisel_found": [
+		[&"craftsman", "DLG_CHISEL_FOUND"],
+	],
+	&"statue_done": [
+		[&"craftsman", "DLG_STATUE_DONE"],
+	],
+	&"sealing_first": [
+		[&"apprentice", "DLG_SEAL1_1"],
+		[&"craftsman", "DLG_SEAL1_2"],
+	],
+	&"guards_talk": [
+		[&"guard_a", "DLG_GUARDS_1"],
+		[&"guard_b", "DLG_GUARDS_2"],
+		[&"guard_a", "DLG_GUARDS_3"],
+		[&"guard_b", "DLG_GUARDS_4"],
+		[&"guard_a", "DLG_GUARDS_5"],
+		[&"guard_b", "DLG_GUARDS_6"],
+	],
+	&"guards_aftermath": [
+		[&"craftsman", "DLG_AFTER_1"],
+		[&"craftsman", "DLG_AFTER_2"],
+	],
+	&"apprentice_plea": [
+		[&"apprentice", "DLG_PLEA_1", {"anim": &"scared"}],
+	],
+	&"apprentice_gave_lamp": [
+		[&"apprentice", "DLG_GAVE_1", {"anim": &"scared"}],
+		[&"craftsman", "DLG_GAVE_2"],
+	],
+	&"apprentice_kept_lamp": [
+		[&"apprentice", "DLG_KEPT_1", {"anim": &"scared"}],
+	],
+	# --- Act II: the archives and Liang ---------------------------------------
+	&"archives_enter": [
+		[&"craftsman", "DLG_ARCHIVES_ENTER"],
+	],
+	&"evidence_found": [
+		[&"craftsman", "DLG_EVIDENCE_1"],
+		[&"craftsman", "DLG_EVIDENCE_2"],
+	],
+	&"liang_talk": [
+		[&"liang", "DLG_LIANG_1", {"anim": &"surprised"}],
+		[&"craftsman", "DLG_LIANG_2"],
+		[&"liang", "DLG_LIANG_3", {"anim": &"talk"}],
+		[&"craftsman", "DLG_LIANG_4"],
+		[&"liang", "DLG_LIANG_5", {"anim": &"talk"}],
+		[&"liang", "DLG_LIANG_6", {"anim": &"talk"}],
+		[&"liang", "DLG_LIANG_7", {"anim": &"talk"}],
+		[&"craftsman", "DLG_LIANG_8"],
+		[&"liang", "DLG_LIANG_9", {"anim": &"frustrated"}],
+		[&"liang", "DLG_LIANG_10", {"anim": &"talk"}],
+		[&"liang", "DLG_LIANG_11", {"anim": &"talk"}],
+		[&"craftsman", "DLG_LIANG_12"],
+		[&"liang", "DLG_LIANG_13", {"anim": &"sit"}],
+	],
+	# --- Act III: the two routes ----------------------------------------------
+	&"stone_broken": [
+		[&"craftsman", "DLG_STONE_BROKEN"],
+	],
+	&"tunnels_enter": [
+		[&"craftsman", "DLG_TUNNELS_ENTER"],
+	],
+	&"corridor_enter": [
+		[&"craftsman", "DLG_CORRIDOR_ENTER"],
+	],
+	# --- Act IV: mechanism chamber and the Mercury Hall -----------------------
+	&"mechanism_enter": [
+		[&"craftsman", "DLG_MECH_ENTER"],
+	],
+	&"balance_inspect": [
+		[&"craftsman", "DLG_BALANCE_1"],
+		[&"craftsman", "DLG_BALANCE_2"],
+	],
+	&"mercury_enter": [
+		[&"craftsman", "DLG_MERCURY_ENTER_1"],
+		[&"craftsman", "DLG_MERCURY_ENTER_2"],
+	],
+	&"vase_filled": [
+		[&"craftsman", "DLG_VASE_FILLED"],
+	],
+	&"poured": [
+		[&"craftsman", "DLG_POURED_1"],
+		[&"craftsman", "DLG_POURED_2"],
+	],
+	&"sealing_second": [
+		[&"craftsman", "DLG_SEAL2"],
+	],
+	# --- Act V: treasury and escape ------------------------------------------
+	&"treasury_enter": [
+		[&"craftsman", "DLG_TREASURY_1"],
+		[&"craftsman", "DLG_TREASURY_2"],
+	],
+	&"drain_found": [
+		[&"craftsman", "DLG_DRAIN_FOUND"],
+	],
+	&"collapse": [
+		[&"craftsman", "DLG_COLLAPSE_1"],
+		[&"craftsman", "DLG_COLLAPSE_2"],
+	],
+	&"light": [
+		[&"craftsman", "DLG_LIGHT"],
+	],
+}
+
+## Short reactive lines guards shout; one is picked at random per situation.
+const GUARD_BARKS := {
+	&"suspicious": ["BARK_SUSPICIOUS_1", "BARK_SUSPICIOUS_2", "BARK_SUSPICIOUS_3"],
+	&"investigate": ["BARK_INVESTIGATE_1", "BARK_INVESTIGATE_2"],
+	&"spotted": ["BARK_SPOTTED_1", "BARK_SPOTTED_2", "BARK_SPOTTED_3"],
+	&"lost": ["BARK_LOST_1", "BARK_LOST_2"],
+	&"calm": ["BARK_CALM_1", "BARK_CALM_2"],
+	&"noise": ["BARK_NOISE_1", "BARK_NOISE_2"],
+}
+
+static func sequence(id: StringName) -> Array:
+	return SEQUENCES.get(id, [])
+
+static func speaker_name(speaker_id: StringName) -> String:
+	var key: String = SPEAKERS.get(speaker_id, "")
+	return TranslationServer.translate(key) if key != "" else ""
+
+static func random_bark(kind: StringName) -> String:
+	var options: Array = GUARD_BARKS.get(kind, [])
+	return options.pick_random() if not options.is_empty() else ""

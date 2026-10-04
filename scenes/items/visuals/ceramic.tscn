@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[sub_resource type="Gradient" id="Gradient_6b3sc"]
+colors = PackedColorArray(0.55, 0.29, 0.17, 1, 0.6175, 0.3965, 0.2945, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_iga4v"]
+seed = 5
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_tk17q"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_iga4v")
+color_ramp = SubResource("Gradient_6b3sc")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8cfqr"]
+albedo_texture = SubResource("NoiseTexture2D_tk17q")
+roughness = 0.95
+
+[sub_resource type="PrismMesh" id="PrismMesh_6yc5i"]
+left_to_right = 0.2
+size = Vector3(0.11, 0.08, 0.016)
+
+[sub_resource type="Gradient" id="Gradient_fhvv0"]
+colors = PackedColorArray(0.68, 0.42, 0.26, 1, 0.728, 0.50699997, 0.371, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_pll4l"]
+seed = 5
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_d5vre"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_pll4l")
+color_ramp = SubResource("Gradient_fhvv0")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_psrrf"]
+albedo_texture = SubResource("NoiseTexture2D_d5vre")
+roughness = 0.95
+
+[sub_resource type="PrismMesh" id="PrismMesh_kmlsd"]
+left_to_right = 0.8
+size = Vector3(0.09, 0.1, 0.014)
+
+[sub_resource type="PrismMesh" id="PrismMesh_lxvkw"]
+left_to_right = 0.4
+size = Vector3(0.07, 0.06, 0.013)
+
+[node name="Shards" type="Node3D" unique_id=150965427]
+
+[node name="ShardA" type="MeshInstance3D" parent="." unique_id=1968895461]
+transform = Transform3D(0.9396926, -0.33682406, 0.059391186, 0, 0.17364822, 0.9848077, -0.34202012, -0.9254165, 0.16317596, -0.03, 0, 0)
+material_override = SubResource("StandardMaterial3D_8cfqr")
+mesh = SubResource("PrismMesh_6yc5i")
+
+[node name="ShardB" type="MeshInstance3D" parent="." unique_id=819462925]
+transform = Transform3D(0.90592873, 0.4204688, 0.049990494, -0.01513444, -0.08583167, 0.9961947, 0.42315957, -0.90323806, -0.071393825, 0.035, 0.008, -0.02)
+material_override = SubResource("StandardMaterial3D_psrrf")
+mesh = SubResource("PrismMesh_kmlsd")
+
+[node name="ShardC" type="MeshInstance3D" parent="." unique_id=1590080037]
+transform = Transform3D(0.6935892, -0.6566587, 0.29619816, -0.08852133, 0.3303661, 0.9396926, -0.71491116, -0.67798054, 0.17101006, 0, 0.016, -0.06)
+material_override = SubResource("StandardMaterial3D_8cfqr")
+mesh = SubResource("PrismMesh_lxvkw")

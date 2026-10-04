@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_wet_cloth.png" id="1_wm114"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="2_8rbtq"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/cloth.tscn" id="3_77mog"]
+
+[resource]
+script = ExtResource("2_8rbtq")
+id = &"cloth"
+name_key = "ITEM_CLOTH"
+description_key = "ITEM_DESC_CLOTH"
+icon = ExtResource("1_wm114")
+world_scene = ExtResource("3_77mog")
+key_item = true
+droppable = false
+throw_noise_radius = 0.0
+mass = 0.2

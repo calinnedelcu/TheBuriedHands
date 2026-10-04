@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/items/MercuryVase.glb" id="1_1l16i"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j56kw"]
+albedo_color = Color(0.78, 0.8, 0.84, 1)
+metallic = 1.0
+roughness = 0.08
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_kb6ey"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.01
+radial_segments = 18
+rings = 1
+
+[node name="JarFull" type="Node3D" unique_id=987171458]
+
+[node name="Model" type="Node3D" parent="." unique_id=1135754181 instance=ExtResource("1_1l16i")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.885, -0.01, -3.269)
+
+[node name="Mercury" type="MeshInstance3D" parent="." unique_id=1478705195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.13, 0)
+material_override = SubResource("StandardMaterial3D_j56kw")
+mesh = SubResource("CylinderMesh_kb6ey")

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_wedge.png" id="1_yrukd"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_000.ogg" id="2_votdq"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_001.ogg" id="3_jh7gc"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_002.ogg" id="4_x3t6x"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="5_gsejs"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/wedge.tscn" id="6_wf1tv"]
+
+[resource]
+script = ExtResource("5_gsejs")
+id = &"wedge"
+name_key = "ITEM_WEDGE"
+description_key = "ITEM_DESC_WEDGE"
+icon = ExtResource("1_yrukd")
+world_scene = ExtResource("6_wf1tv")
+throwable = true
+throw_noise_radius = 14.0
+impact_sounds = Array[AudioStream]([ExtResource("2_votdq"), ExtResource("3_jh7gc"), ExtResource("4_x3t6x")])

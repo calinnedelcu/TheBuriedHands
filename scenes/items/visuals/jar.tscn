@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/items/MercuryVase.glb" id="1_oj1mq"]
+
+[node name="Jar" type="Node3D" unique_id=1249079250]
+
+[node name="Model" type="Node3D" parent="." unique_id=1135754181 instance=ExtResource("1_oj1mq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.885, -0.01, -3.269)

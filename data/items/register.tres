@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_register.png" id="1_i6anl"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="2_d6ved"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/register.tscn" id="3_5fh5x"]
+
+[resource]
+script = ExtResource("2_d6ved")
+id = &"register"
+name_key = "ITEM_REGISTER"
+description_key = "ITEM_DESC_REGISTER"
+icon = ExtResource("1_i6anl")
+world_scene = ExtResource("3_5fh5x")
+key_item = true
+droppable = false
+throw_noise_radius = 0.0
+mass = 0.4

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_hammer.png" id="1_inamq"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_000.ogg" id="2_t0ju4"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_001.ogg" id="3_0wgfa"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactPlank_medium_002.ogg" id="4_65eep"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="5_igh8g"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/hammer.tscn" id="6_cod1n"]
+
+[resource]
+script = ExtResource("5_igh8g")
+id = &"hammer"
+name_key = "ITEM_HAMMER"
+description_key = "ITEM_DESC_HAMMER"
+icon = ExtResource("1_inamq")
+world_scene = ExtResource("6_cod1n")
+throwable = true
+throw_noise_radius = 18.0
+mass = 1.2
+impact_sounds = Array[AudioStream]([ExtResource("2_t0ju4"), ExtResource("3_0wgfa"), ExtResource("4_65eep")])

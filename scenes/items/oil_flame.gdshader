@@ -7,6 +7,14 @@ uniform vec4 core_color : source_color = vec4(1.0, 0.82, 0.28, 0.92);
 uniform vec4 tip_color : source_color = vec4(1.0, 0.54, 0.08, 0.52);
 uniform float emission_strength : hint_range(0.5, 8.0) = 3.4;
 uniform float alpha_scale : hint_range(0.1, 1.0) = 0.78;
+// > 0 for flames held in the first-person view (see viewmodel.gdshader).
+uniform float depth_squash : hint_range(0.0, 0.99) = 0.0;
+
+void vertex() {
+	// Writing POSITION anywhere means it is always used, so always set it.
+	POSITION = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	POSITION.z = mix(POSITION.z, POSITION.w, depth_squash);
+}
 
 void fragment() {
 	float y = clamp(UV.y, 0.0, 1.0);

@@ -1,0 +1,262 @@
+keys,en,ro
+SPK_CRAFTSMAN,The Craftsman,Meșteșugarul
+SPK_APPRENTICE,The Apprentice,Ucenicul
+SPK_LIANG,Liang,Liang
+SPK_GUARD_CAPTAIN,Guard Captain,Căpitanul gărzii
+SPK_GUARD,Guard,Gardianul
+GAME_TITLE,The Buried Hands,Mâinile Îngropate
+MENU_NEW_GAME,New Game,Joc nou
+MENU_CONTINUE,Continue,Continuă
+MENU_OPTIONS,Options,Opțiuni
+MENU_CREDITS,Credits,Credite
+MENU_QUIT,Quit,Ieșire
+MENU_RESUME,Resume,Reia
+MENU_MAIN_MENU,Main Menu,Meniu principal
+MENU_RETRY,Retry from checkpoint,Reîncearcă de la ultimul punct
+MENU_BACK,Back,Înapoi
+MENU_PAUSED,Paused,Pauză
+MENU_CONFIRM_NEW,Start a new game? Your saved progress will be lost.,Începi un joc nou? Progresul salvat se va pierde.
+MENU_YES,Yes,Da
+MENU_NO,No,Nu
+MENU_TAGLINE,"Lishan, 210 BC. The tomb is being sealed — with you inside.","Lishan, anul 210 î.Hr. Mormântul se sigilează — cu tine înăuntru."
+LOADING,Loading…,Se încarcă…
+CHECKPOINT_SAVED,Progress saved,Progres salvat
+OPT_TAB_GAME,Game,Joc
+OPT_TAB_CONTROLS,Controls,Control
+OPT_TAB_AUDIO,Audio,Sunet
+OPT_TAB_VIDEO,Video,Imagine
+OPT_LANGUAGE,Language,Limba
+OPT_LANG_AUTO,System,Sistem
+OPT_LANG_EN,English,English
+OPT_LANG_RO,Română,Română
+OPT_SUBTITLES,Subtitles,Subtitrări
+OPT_SUBTITLE_SIZE,Subtitle size,Mărime subtitrări
+OPT_HINTS,Control hints,Indicii de control
+OPT_SENSITIVITY,Mouse sensitivity,Sensibilitate mouse
+OPT_INVERT_Y,Invert vertical look,Inversează axa verticală
+OPT_CROUCH_TOGGLE,Crouch toggles,Ghemuire cu comutare
+OPT_FOV,Field of view,Câmp vizual
+OPT_HEAD_BOB,Head bob,Legănarea capului
+OPT_BINDINGS,Key bindings,Taste
+OPT_PRESS_KEY,Press a key… (Esc to cancel),Apasă o tastă… (Esc pentru anulare)
+OPT_RESET,Reset to defaults,Revino la valorile implicite
+OPT_VOL_MASTER,Master volume,Volum general
+OPT_VOL_MUSIC,Music,Muzică
+OPT_VOL_SFX,Effects,Efecte
+OPT_VOL_DIALOGUE,Dialogue,Dialog
+OPT_FULLSCREEN,Fullscreen,Ecran complet
+OPT_VSYNC,V-Sync,Sincronizare verticală
+OPT_RENDER_SCALE,Render scale,Rezoluție de randare
+OPT_QUALITY,Quality,Calitate
+OPT_QUALITY_0,Low,Scăzută
+OPT_QUALITY_1,Medium,Medie
+OPT_QUALITY_2,High,Ridicată
+OPT_QUALITY_3,Ultra,Ultra
+OPT_BRIGHTNESS,Brightness,Luminozitate
+OPT_ON,On,Pornit
+OPT_OFF,Off,Oprit
+ACTION_MOVE_FORWARD,Move forward,Înainte
+ACTION_MOVE_BACKWARD,Move backward,Înapoi
+ACTION_MOVE_LEFT,Move left,Stânga
+ACTION_MOVE_RIGHT,Move right,Dreapta
+ACTION_SPRINT,Run,Fugi
+ACTION_JUMP,Jump,Sari
+ACTION_CROUCH,Crouch,Ghemuiește-te
+ACTION_CRAWL,Crawl,Târăște-te
+ACTION_INTERACT,Use / pick up,Folosește / ia
+ACTION_TOGGLE_LAMP,Light / snuff lamp,Aprinde / stinge lampa
+ACTION_RAISE_LAMP,Raise lamp,Ridică lampa
+ACTION_HOLD_BREATH,Hold breath,Ține-ți respirația
+ACTION_THROW,Throw,Aruncă
+ACTION_DROP,Drop,Lasă jos
+ACTION_NEXT_ITEM,Next item,Obiectul următor
+ACTION_PREV_ITEM,Previous item,Obiectul anterior
+ACTION_JOURNAL,Journal,Jurnal
+ACTION_SKIP_LINE,Skip line,Sari replica
+KEY_MOUSE_LEFT,LMB,Click stânga
+KEY_MOUSE_RIGHT,RMB,Click dreapta
+KEY_MOUSE_MIDDLE,MMB,Click mijloc
+KEY_WHEEL_UP,Wheel up,Rotiță sus
+KEY_WHEEL_DOWN,Wheel down,Rotiță jos
+HUD_OBJECTIVE,Objective,Obiectiv
+HUD_NEW_OBJECTIVE,New objective,Obiectiv nou
+HUD_HANDS_FREE,Empty hands,Mâini libere
+HUD_JOURNAL_TITLE,Journal,Jurnal
+HUD_JOURNAL_CONTROLS,Controls,Comenzi
+HUD_JOURNAL_NOTES,Notes,Însemnări
+HUD_HOLD,Hold,Ține
+OBJ_TALK_APPRENTICE,Talk to your apprentice.,Vorbește cu ucenicul.
+OBJ_TAKE_LAMP,Take an oil lamp from the stand.,Ia o lampă cu ulei de pe suport.
+OBJ_FETCH_SLIP,Fetch the bowl of clay slip from the far end of the workshop.,Adu bolul cu barbotină din capătul atelierului.
+OBJ_PLACE_BOWL,Set the bowl on the workbench beside the statue.,Așază bolul pe masa de lucru de lângă statuie.
+OBJ_APPLY_SLIP,Bind the soldier's legs with slip.,Leagă picioarele soldatului cu barbotină.
+OBJ_FIND_CHISEL,Find the chisel that fell under the workbench.,Găsește dalta căzută sub masa de lucru.
+OBJ_FINISH_STATUE,Set the joint with the chisel.,Fixează îmbinarea cu dalta.
+OBJ_ANSWER_APPRENTICE,Speak to your apprentice.,Vorbește cu ucenicul.
+OBJ_FIND_LIANG,Slip through the archives to Liang's workshop.,Strecoară-te prin arhive până la atelierul lui Liang.
+OBJ_TALK_LIANG,Talk to Liang.,Vorbește cu Liang.
+OBJ_REACH_MECHANISM,"Reach the mechanism chamber — through the service tunnels, or the crossbow corridor.",Ajunge în camera mecanismelor — prin tunelurile de serviciu sau pe coridorul arbaletelor.
+OBJ_INSPECT_BALANCE,Examine the great counterweight.,Cercetează marea contragreutate.
+OBJ_GET_VASE,Take the clay jar and the cloth.,Ia ulciorul de lut și cârpa.
+OBJ_FILL_VASE,Fill the jar with mercury in the Mercury Hall.,Umple ulciorul cu mercur în Sala Mercurului.
+OBJ_POUR_MERCURY,Pour the mercury into the counterweight.,Toarnă mercurul în contragreutate.
+OBJ_FIND_DRAIN,Cross the treasury and find the drainage channel.,Traversează tezaurul și găsește canalul de drenaj.
+OBJ_CRAWL_OUT,Crawl through the drain.,Târăște-te prin canal.
+OBJ_EVIDENCE,Optional: the workers' register is somewhere in the archives.,Opțional: registrul lucrătorilor e undeva în arhive.
+HINT_MOVE,{move_forward}{move_left}{move_backward}{move_right} move  ·  {sprint} run  ·  {crouch} crouch,{move_forward}{move_left}{move_backward}{move_right} mers  ·  {sprint} fugă  ·  {crouch} ghemuit
+HINT_INTERACT,{interact} use / pick up,{interact} folosește / ia
+HINT_LAMP,{toggle_lamp} light / snuff the lamp  ·  hold {raise_lamp} to raise it,{toggle_lamp} aprinde / stinge lampa  ·  ține {raise_lamp} ca s-o ridici
+HINT_HOLD,Hold {interact},Ține apăsat {interact}
+HINT_CROUCH,{crouch} crouch  ·  {crawl} crawl,{crouch} ghemuit  ·  {crawl} târâș
+HINT_STEALTH,Light gives you away. Snuff your lamp with {toggle_lamp} and keep to the shadows.,Lumina te trădează. Stinge-ți lampa cu {toggle_lamp} și ține-te în umbră.
+HINT_THROW,{throw} throw the selected item to distract,{throw} aruncă obiectul selectat ca să distragi
+HINT_BREATH,Hold {hold_breath} to hold your breath in the fumes,Ține {hold_breath} ca să-ți ții respirația în vapori
+HINT_REFILL,Hold {interact} at a wall lamp to refill your oil,Ține {interact} la o lampă de perete ca să-ți reumpli uleiul
+HINT_CRAWL,{crawl} crawl  ·  {interact} push forward,{crawl} târâș  ·  {interact} împinge-te înainte
+HINT_JOURNAL,{journal} journal,{journal} jurnal
+HINT_SKIP,{skip_line} skip,{skip_line} sari
+PROMPT_TALK,Talk,Vorbește
+PROMPT_TAKE,Take,Ia
+PROMPT_TAKE_LAMP,Take the lamp,Ia lampa
+PROMPT_TAKE_BOWL,Take the bowl,Ia bolul
+PROMPT_PLACE_BOWL,Set down the bowl,Așază bolul
+PROMPT_APPLY_SLIP,Apply the slip,Aplică barbotina
+PROMPT_SET_JOINT,Strike the joint,Bate îmbinarea
+PROMPT_NEED_CHISEL,You need a chisel,Ai nevoie de o daltă
+PROMPT_REFILL,Refill the lamp,Reumple lampa
+PROMPT_LAMP_FULL,Your lamp is full,Lampa e plină
+PROMPT_NEED_LAMP,You need a lamp,Ai nevoie de o lampă
+PROMPT_RESERVOIR_EMPTY,Dry,Fără ulei
+PROMPT_SNUFF,Snuff the flame,Stinge flacăra
+PROMPT_LIGHT,Light the flame,Aprinde flacăra
+PROMPT_BREAK_STONE,Split the stone,Despică piatra
+PROMPT_NEED_WEDGE_HAMMER,You need a wedge and a hammer,Ai nevoie de o pană și un ciocan
+PROMPT_DISARM,Disarm the crossbow,Dezarmează arbaleta
+PROMPT_JAM_PLATE,Jam the plate with the wedge,Blochează placa cu pana
+PROMPT_NEED_CHISEL_DISARM,A chisel could disarm this,Cu o daltă ai putea dezarma asta
+PROMPT_CLIMB,Climb,Urcă
+PROMPT_EXAMINE,Examine,Cercetează
+PROMPT_FILL_VASE,Fill the jar,Umple ulciorul
+PROMPT_NEED_VASE,You need a jar,Ai nevoie de un ulcior
+PROMPT_VASE_FULL,The jar is full,Ulciorul e plin
+PROMPT_POUR,Pour the mercury,Toarnă mercurul
+PROMPT_NEED_FULL_VASE,You need a jar of mercury,Ai nevoie de un ulcior cu mercur
+PROMPT_PUSH,Push forward,Împinge-te înainte
+PROMPT_MUST_CRAWL,Too low — crawl,Prea jos — târăște-te
+PROMPT_OPEN,Open,Deschide
+PROMPT_READ,Read,Citește
+PROMPT_HIDE,Hide,Ascunde-te
+ITEM_LAMP,Oil lamp,Lampă cu ulei
+ITEM_CHISEL,Bronze chisel,Daltă de bronz
+ITEM_WEDGE,Wooden wedge,Pană de lemn
+ITEM_HAMMER,Wooden mallet,Ciocan de lemn
+ITEM_CERAMIC,Pottery shards,Cioburi de ceramică
+ITEM_CLAY_BOWL,Bowl of clay slip,Bol cu barbotină
+ITEM_VASE,Clay jar,Ulcior de lut
+ITEM_VASE_FULL,Jar of mercury,Ulcior cu mercur
+ITEM_CLOTH,Damp cloth,Cârpă umedă
+ITEM_REGISTER,Workers' register,Registrul lucrătorilor
+ITEM_DESC_LAMP,Clay lamp with a cotton wick. Spills oil if you run.,Lampă de lut cu fitil de bumbac. Varsă ulei dacă alergi.
+ITEM_DESC_CHISEL,Sharp enough to cut a crossbow's string.,Destul de ascuțită cât să taie coarda unei arbalete.
+ITEM_DESC_WEDGE,Jams plates and splits stone.,Blochează plăci și despică piatra.
+ITEM_DESC_HAMMER,Heavy and loud.,Greu și zgomotos.
+ITEM_DESC_CERAMIC,Throw them to make noise somewhere else.,Aruncă-le ca să faci zgomot în altă parte.
+ITEM_DESC_CLOTH,"Over mouth and nose, it slows the poison of the fumes.","Pusă peste gură și nas, încetinește otrava vaporilor."
+ITEM_DESC_REGISTER,Bamboo slips with the names of everyone sealed inside.,Fâșii de bambus cu numele tuturor celor închiși înăuntru.
+PICKUP_ITEM,Take: {item},Ia: {item}
+INVENTORY_FULL,Your hands are full,Ai mâinile pline
+DLG_INTRO_1,The First Emperor has been dead forty days. And still we knead his army out of clay.,Primul Împărat e mort de patruzeci de zile. Și noi încă îi frământăm armata din lut.
+DLG_INTRO_2,A few more statues. Then they'll let us go home.,Încă câteva statui. Apoi ne lasă să ne întoarcem acasă.
+DLG_APPR_1,"Master, the soldier's legs are cracking again. The clay dried too fast.","Maestre, picioarele soldatului crapă iar. Lutul s-a uscat prea repede."
+DLG_APPR_2,Then we bind them with slip. Where's the bowl?,Atunci le legăm cu barbotină. Unde e bolul?
+DLG_APPR_3,"At the far end, by the kilns. Take a lamp — it's pitch black back there.","În capătul celălalt, lângă cuptoare. Luați o lampă — acolo e beznă."
+DLG_LAMP_TAKEN,"Oil for a few hours. If I run, I'll spill it.","Ulei pentru câteva ore. Dacă alerg, îl vărs."
+DLG_BOWL_TAKEN,Still wet. Back to the statue.,Încă umedă. Înapoi la statuie.
+DLG_SLIP_APPLIED_1,It's taking. Now it needs the chisel...,Se prinde. Acum trebuie bătută cu dalta...
+DLG_SLIP_APPLIED_2,Where's my chisel? It must have rolled under the bench.,Unde-i dalta? Trebuie să se fi rostogolit sub masă.
+DLG_CHISEL_FOUND,There you are.,Aici erai.
+DLG_STATUE_DONE,Done. He'll stand for a thousand years.,Gata. O să stea în picioare o mie de ani.
+DLG_SEAL1_1,Master... what was that?,Maestre... ce-a fost asta?
+DLG_SEAL1_2,The bronze gate. But the work isn't finished...,Poarta de bronz. Dar lucrările nu s-au terminat...
+DLG_GUARDS_1,You heard it. The first gate is shut. The order came from the top.,Ai auzit. Prima poartă s-a închis. Ordinul a venit de sus.
+DLG_GUARDS_2,And the craftsmen? There are hundreds still in the workshops.,Și meșterii? Mai sunt sute în ateliere.
+DLG_GUARDS_3,Whoever has seen the tomb from within will never see the sun again. So the new emperor commands.,Cine a văzut mormântul pe dinăuntru nu mai vede soarele. Așa poruncește noul împărat.
+DLG_GUARDS_4,And us?,Și noi?
+DLG_GUARDS_5,We guard to the end. The crossbows in the corridor are armed. Anyone trying to leave is cut down.,Noi păzim până la capăt. Arbaletele de pe coridor sunt armate. Cine încearcă să iasă e doborât.
+DLG_GUARDS_6,Then let's round them up. Start with the archives.,Atunci să-i adunăm. Începem cu arhivele.
+DLG_AFTER_1,They're burying us alive. All of us.,Ne îngroapă de vii. Pe toți.
+DLG_AFTER_2,"Liang drew the service tunnels. If there's a way out, he knows it.","Liang a desenat tunelurile de serviciu. Dacă există o cale afară, el o știe."
+DLG_PLEA_1,"I don't want to die down here, master. I don't even have a lamp...","Nu vreau să mor aici, maestre. N-am nici măcar o lampă..."
+CHOICE_GIVE_LAMP,Take my lamp. Hide in the cold kiln and wait.,Ia lampa mea. Ascunde-te în cuptorul rece și așteaptă.
+CHOICE_KEEP_LAMP,Stay hidden in the dark. I'll come back for you.,Stai ascuns în întuneric. Mă întorc după tine.
+DLG_GAVE_1,But you... what will you see by?,Dar dumneavoastră... cu ce o să vedeți?
+DLG_GAVE_2,There are more lamps on the stand. Go. Now.,Mai sunt lămpi pe suport. Du-te. Acum.
+DLG_KEPT_1,"...I'll wait for you, master.","...Vă aștept, maestre."
+DLG_ARCHIVES_ENTER,"Guards. If they see my flame, it's over. The shadows are my friends now.","Gărzi. Dacă îmi văd flacăra, s-a terminat. Umbrele îmi sunt prietene acum."
+DLG_EVIDENCE_1,"The workers' register... thousands of names. All sealed in here, like me.","Registrul lucrătorilor... mii de nume. Toți închiși aici, ca mine."
+DLG_EVIDENCE_2,Someone has to know what happened to them.,Cineva trebuie să afle ce s-a întâmplat cu ei.
+DLG_LIANG_1,You? How did you get past the guards?,Tu? Cum ai trecut de gărzi?
+DLG_LIANG_2,Through the shadows. Liang — they're sealing the tomb with us inside.,Prin umbre. Liang — sigilează mormântul cu noi înăuntru.
+DLG_LIANG_3,I know. I built half of the locks myself.,Știu. Jumătate din încuietori le-am construit eu.
+DLG_LIANG_4,Then you know how they open.,Atunci știi și cum se deschid.
+DLG_LIANG_5,"Under my workshop there's a service shaft. The tunnel runs to the mechanism chamber, beneath the treasury.","Sub atelierul meu e un puț de serviciu. Tunelul duce la camera mecanismelor, sub tezaur."
+DLG_LIANG_6,A counterweight there lifts the treasury gate. It needs something heavy. Very heavy.,"Acolo, o contragreutate ridică poarta tezaurului. Îi trebuie ceva greu. Foarte greu."
+DLG_LIANG_7,South of the treasury runs a drainage channel. Narrow — but it comes out in the forest.,La sud de tezaur e un canal de drenaj. Îngust — dar iese în pădure.
+DLG_LIANG_8,Come with me.,Vino cu mine.
+DLG_LIANG_9,On these knees? I'd bury us both. A stone blocks the shaft — split it with a wedge and a mallet.,Cu genunchii ăștia? Ne-aș îngropa pe amândoi. O piatră blochează puțul — despic-o cu pana și ciocanul.
+DLG_LIANG_10,Or chance the great corridor. But I armed those crossbows myself. They don't forgive.,Sau încearcă marele coridor. Dar arbaletele alea le-am armat eu. Nu iartă.
+DLG_LIANG_11,And beware the Mercury Hall. The air there kills slowly.,Și ferește-te de Sala Mercurului. Aerul de acolo omoară încet.
+DLG_LIANG_12,"Thank you, old friend.","Mulțumesc, prietene."
+DLG_LIANG_13,Get out. And tell them who built this place.,Ieși de aici. Și spune-le cine a construit locul ăsta.
+DLG_STONE_BROKEN,The way is open.,Drumul e liber.
+DLG_TUNNELS_ENTER,The service tunnels. Guards never come down here... and neither does light.,Tunelurile de serviciu. Gărzile nu coboară niciodată aici... și nici lumina.
+DLG_CORRIDOR_ENTER,Pressure plates — I know this work. Spot them in time and I can step around them. Or jam them.,"Plăci de presiune — știu lucrătura asta. Dacă le văd la timp, le pot ocoli. Sau le pot bloca."
+DLG_MECH_ENTER,Liang's counterweight. A clay jar... and a cloth. For the air.,Contragreutatea lui Liang. Un ulcior de lut... și o cârpă. Pentru aer.
+DLG_BALANCE_1,Something heavy...,Ceva greu...
+DLG_BALANCE_2,Mercury. Nothing under heaven is heavier than mercury.,Mercur. Nimic de sub cer nu e mai greu decât mercurul.
+DLG_MERCURY_ENTER_1,"The rivers of the Empire, in living silver. Just as the Emperor wished.","Râurile Imperiului, din argint viu. Așa cum și-a dorit Împăratul."
+DLG_MERCURY_ENTER_2,Don't breathe deep.,Nu respira adânc.
+DLG_VASE_FILLED,"Enough. Back, before it sickens me.","Destul. Înapoi, până nu mă îmbolnăvesc."
+DLG_POURED_1,Come on... tip...,Haide... înclină-te...
+DLG_POURED_2,It's moving!,Se mișcă!
+DLG_SEAL2,The second gate. There's no way back now.,A doua poartă. Nu mai e cale înapoi.
+DLG_TREASURY_1,The First Emperor's treasury...,Tezaurul Primului Împărat...
+DLG_TREASURY_2,Gold is worth nothing down here. South — the drain.,Aurul nu valorează nimic aici jos. Spre sud — canalul.
+DLG_DRAIN_FOUND,So narrow... I'll have to crawl.,Atât de îngust... Trebuie să mă târăsc.
+DLG_COLLAPSE_1,No...!,Nu...!
+DLG_COLLAPSE_2,No way back. Only forward.,Nu mai e cale înapoi. Doar înainte.
+DLG_LIGHT,Light...,Lumină...
+BARK_SUSPICIOUS_1,Hm? Who's there?,Hm? Cine-i acolo?
+BARK_SUSPICIOUS_2,Did something move?,S-a mișcat ceva?
+BARK_SUSPICIOUS_3,Show yourself.,Arată-te.
+BARK_INVESTIGATE_1,I'm going to take a look.,Mă duc să văd.
+BARK_INVESTIGATE_2,Over there...,Acolo...
+BARK_SPOTTED_1,There! A runaway!,Acolo! Un fugar!
+BARK_SPOTTED_2,Stop where you are!,Stai pe loc!
+BARK_SPOTTED_3,Here! To me!,Aici! La mine!
+BARK_LOST_1,Where did he go?,Unde-a dispărut?
+BARK_LOST_2,He can't hide forever.,Nu se poate ascunde la nesfârșit.
+BARK_CALM_1,Just rats.,Doar șobolani.
+BARK_CALM_2,The dark plays tricks.,Întunericul îți joacă feste.
+BARK_NOISE_1,What was that?,Ce-a fost asta?
+BARK_NOISE_2,That came from over there.,A venit de acolo.
+DEATH_TITLE,You died,Ai murit
+DEATH_SUBTITLE,"Like thousands of other workers, you remained beneath Mount Li.","Ca mii de alți lucrători, ai rămas sub muntele Li."
+DEATH_GUARD,The guards caught you.,Gărzile te-au prins.
+DEATH_CROSSBOW,A crossbow bolt brought you down.,O săgeată de arbaletă te-a doborât.
+DEATH_SPIKES,You fell onto the spikes.,Ai căzut în țepi.
+DEATH_MERCURY,The mercury fumes poisoned you.,Vaporii de mercur te-au otrăvit.
+DEATH_FALL,You fell.,Ai căzut.
+DEATH_GENERIC,You were struck down.,Ai fost doborât.
+END_TITLE,You escaped,Ai scăpat
+END_BASE,The First Emperor's tomb was sealed with its builders inside. You are one of the few who saw the sky again.,Mormântul Primului Împărat a fost sigilat cu constructorii lui înăuntru. Tu ești unul dintre puținii care au mai văzut cerul.
+END_EVIDENCE,The register came out with you. Their names will not be forgotten.,Registrul a ieșit odată cu tine. Numele lor nu vor fi uitate.
+END_NO_EVIDENCE,No one will ever write of those left beneath the mountain.,"Despre cei rămași sub munte nu va scrie nimeni, niciodată."
+END_APPRENTICE,"The lamp you left your apprentice burned until dawn. Days later, a thin boy stumbled out of the forest at the foot of Mount Li.","Lampa lăsată ucenicului a ars până în zori. Câteva zile mai târziu, un băiat slăbit a ieșit din pădurea de la poalele muntelui Li."
+END_NO_APPRENTICE,You often thought of your apprentice. You never learned what became of him.,Te-ai gândit des la ucenic. N-ai aflat niciodată ce s-a ales de el.
+END_HISTORY,"""The artisans who had built the machinery and knew of the treasures were sealed inside; none came out."" — after Sima Qian, Records of the Grand Historian","„Meșteșugarii care făcuseră mecanismele și știau de comori au fost închiși înăuntru; niciunul n-a mai ieșit.” — după Sima Qian, Însemnările marelui istoric"
+END_THANKS,Thank you for playing.,Mulțumim că ai jucat.
+CREDITS_TEAM,A game by,Un joc de
+CREDITS_FONTS,Fonts,Fonturi
+CREDITS_AUDIO,Audio,Sunet
+CREDITS_ENGINE,Made with Godot Engine,Realizat cu Godot Engine

@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/world/lamp_stand.gd" id="1_stand"]
+[ext_resource type="Script" path="res://Scripts/interaction/delegate_usable.gd" id="2_usable"]
+[ext_resource type="PackedScene" path="res://TripoModels/in-hand-lamp.glb" id="3_model"]
+[ext_resource type="ArrayMesh" path="res://scenes/items/flame_teardrop.obj" id="4_flame"]
+[ext_resource type="Shader" path="res://scenes/items/oil_flame.gdshader" id="5_flame_shader"]
+
+[sub_resource type="ShaderMaterial" id="Mat_flame"]
+shader = ExtResource("5_flame_shader")
+shader_parameter/outer_color = Color(1, 0.3, 0.05, 0.75)
+shader_parameter/core_color = Color(1, 0.84, 0.32, 0.95)
+shader_parameter/tip_color = Color(1, 0.55, 0.1, 0.55)
+shader_parameter/emission_strength = 3.6
+shader_parameter/alpha_scale = 0.8
+shader_parameter/depth_squash = 0.0
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(0.42, 0.3, 0.42)
+
+[node name="LampStand" type="Node3D"]
+script = ExtResource("1_stand")
+
+[node name="Model" parent="." instance=ExtResource("3_model")]
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="Flame" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0.14, 0.09, 0)
+cast_shadow = 0
+material_override = SubResource("Mat_flame")
+mesh = ExtResource("4_flame")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 0.25, 0)
+light_color = Color(1, 0.62, 0.28, 1)
+light_energy = 1.8
+omni_range = 7.0
+omni_attenuation = 1.5
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("Shape_body")
+
+[node name="Usable" type="Node" parent="Body"]
+script = ExtResource("2_usable")
+prompt_key = "PROMPT_TAKE_LAMP"
+highlight_root_path = NodePath("../../Model")

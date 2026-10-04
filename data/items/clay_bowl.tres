@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_clay_bowl.png" id="1_1yrlr"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="2_jmf3l"]
+[ext_resource type="PackedScene" path="res://scenes/items/claybowl.glb" id="3_v7u84"]
+
+[resource]
+script = ExtResource("2_jmf3l")
+id = &"clay_bowl"
+name_key = "ITEM_CLAY_BOWL"
+icon = ExtResource("1_1yrlr")
+world_scene = ExtResource("3_v7u84")
+droppable = false
+throw_noise_radius = 0.0
+mass = 1.0

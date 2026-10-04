@@ -1,0 +1,74 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://Scripts/player/interactor.gd" id="2_interactor"]
+[ext_resource type="Script" path="res://Scripts/player/viewmodel.gd" id="3_viewmodel"]
+[ext_resource type="Script" path="res://Scripts/player/inventory.gd" id="4_inventory"]
+[ext_resource type="Script" path="res://Scripts/ui/hud.gd" id="5_hud"]
+[ext_resource type="ArrayMesh" path="res://assets/models/viewmodel/arm_left.res" id="6_arm_left"]
+[ext_resource type="ArrayMesh" path="res://assets/models/viewmodel/arm_right.res" id="7_arm_right"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.42
+height = 2.9
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 5
+floor_max_angle = 0.872665
+floor_snap_length = 0.35
+safe_margin = 0.04
+script = ExtResource("1_player")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+shape = SubResource("Shape_body")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.65, 0)
+
+[node name="Camera" type="Camera3D" parent="Head"]
+current = true
+fov = 75.0
+near = 0.04
+far = 400.0
+
+[node name="Interactor" type="RayCast3D" parent="Head/Camera"]
+target_position = Vector3(0, 0, -3.6)
+collision_mask = 21
+hit_back_faces = false
+script = ExtResource("2_interactor")
+
+[node name="ViewModel" type="Node3D" parent="Head/Camera"]
+script = ExtResource("3_viewmodel")
+
+[node name="LeftArm" type="Node3D" parent="Head/Camera/ViewModel"]
+
+[node name="Mesh" type="MeshInstance3D" parent="Head/Camera/ViewModel/LeftArm"]
+mesh = ExtResource("6_arm_left")
+
+[node name="LampSocket" type="Node3D" parent="Head/Camera/ViewModel/LeftArm"]
+transform = Transform3D(0.92, 0, 0, 0, 0.92, 0, 0, 0, 0.92, 0, 0.03, 0)
+
+[node name="RightArm" type="Node3D" parent="Head/Camera/ViewModel"]
+
+[node name="Mesh" type="MeshInstance3D" parent="Head/Camera/ViewModel/RightArm"]
+mesh = ExtResource("7_arm_right")
+
+[node name="ItemSocket" type="Node3D" parent="Head/Camera/ViewModel/RightArm"]
+transform = Transform3D(0.6553, 0.2632, 0.3759, 0.0, 0.6553, -0.4589, -0.4589, 0.3759, 0.5368, 0, 0.02, 0)
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("4_inventory")
+lamp_socket_path = NodePath("../Head/Camera/ViewModel/LeftArm/LampSocket")
+
+[node name="FootstepAudio" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0
+bus = &"Tomb"
+
+[node name="BodyAudio" type="AudioStreamPlayer" parent="."]
+volume_db = -6.0
+bus = &"SFX"
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("5_hud")

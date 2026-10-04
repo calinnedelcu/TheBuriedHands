@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://scenes/ui/Slots/Icons/icon_chisel.png" id="1_mgske"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactMining_000.ogg" id="2_knebp"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactMining_001.ogg" id="3_uss6k"]
+[ext_resource type="AudioStream" path="res://audio/sfx/impacts/impactMining_002.ogg" id="4_f6wwo"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="5_ie6rv"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/chisel.tscn" id="6_6jpjq"]
+
+[resource]
+script = ExtResource("5_ie6rv")
+id = &"chisel"
+name_key = "ITEM_CHISEL"
+description_key = "ITEM_DESC_CHISEL"
+icon = ExtResource("1_mgske")
+world_scene = ExtResource("6_6jpjq")
+throwable = true
+throw_noise_radius = 14.0
+mass = 0.4
+impact_sounds = Array[AudioStream]([ExtResource("2_knebp"), ExtResource("3_uss6k"), ExtResource("4_f6wwo")])

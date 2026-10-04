@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/interact_highlight.gdshader" id="1"]
+
+[resource]
+render_priority = 1
+shader = ExtResource("1")
+shader_parameter/rim_color = Color(1, 0.72, 0.38, 1)
+shader_parameter/rim_power = 2.6
+shader_parameter/strength = 0.55

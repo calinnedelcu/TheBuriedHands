@@ -1,0 +1,10 @@
+[gd_resource type="FontVariation" format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/Cinzel[wght].ttf" id="1_7hs8a"]
+
+[resource]
+base_font = ExtResource("1_7hs8a")
+variation_opentype = {
+2003265652: 600
+}
+spacing_glyph = 3

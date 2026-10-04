@@ -1,0 +1,115 @@
+[gd_scene format=3]
+
+[sub_resource type="Gradient" id="Gradient_pv2ni"]
+colors = PackedColorArray(0.36, 0.22, 0.12, 1, 0.5, 0.33, 0.18, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_rsmh5"]
+seed = 3
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7vy2n"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_rsmh5")
+color_ramp = SubResource("Gradient_pv2ni")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uab3l"]
+albedo_texture = SubResource("NoiseTexture2D_7vy2n")
+roughness = 0.82
+uv1_scale = Vector3(1, 6, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tg3am"]
+top_radius = 0.03
+bottom_radius = 0.034
+height = 0.2
+radial_segments = 10
+rings = 1
+
+[sub_resource type="Gradient" id="Gradient_1k0h6"]
+colors = PackedColorArray(0.24, 0.14, 0.08, 1, 0.34, 0.21, 0.12, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_yfo3n"]
+seed = 7
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_n8snc"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_yfo3n")
+color_ramp = SubResource("Gradient_1k0h6")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3tdj3"]
+albedo_texture = SubResource("NoiseTexture2D_n8snc")
+roughness = 0.82
+uv1_scale = Vector3(1, 6, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xc54l"]
+top_radius = 0.036
+bottom_radius = 0.036
+height = 0.03
+radial_segments = 10
+rings = 1
+
+[sub_resource type="Gradient" id="Gradient_vd8kt"]
+colors = PackedColorArray(0.42, 0.33, 0.17, 1, 0.55, 0.45, 0.25, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sbler"]
+seed = 11
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_yxmvp"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_sbler")
+color_ramp = SubResource("Gradient_vd8kt")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vx3gv"]
+albedo_texture = SubResource("NoiseTexture2D_yxmvp")
+metallic = 0.75
+roughness = 0.42
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_mmwmr"]
+top_radius = 0.034
+bottom_radius = 0.037
+height = 0.035
+radial_segments = 10
+rings = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_i1wb8"]
+size = Vector3(0.042, 0.016, 0.17)
+
+[sub_resource type="PrismMesh" id="PrismMesh_r46ta"]
+size = Vector3(0.042, 0.06, 0.016)
+
+[node name="Chisel" type="Node3D" unique_id=676428367]
+
+[node name="Handle" type="MeshInstance3D" parent="." unique_id=454086432]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0.04)
+material_override = SubResource("StandardMaterial3D_uab3l")
+mesh = SubResource("CylinderMesh_tg3am")
+
+[node name="Butt" type="MeshInstance3D" parent="." unique_id=1026349219]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0.145)
+material_override = SubResource("StandardMaterial3D_3tdj3")
+mesh = SubResource("CylinderMesh_xc54l")
+
+[node name="Ferrule" type="MeshInstance3D" parent="." unique_id=717113292]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, -0.075)
+material_override = SubResource("StandardMaterial3D_vx3gv")
+mesh = SubResource("CylinderMesh_mmwmr")
+
+[node name="Blade" type="MeshInstance3D" parent="." unique_id=1327830002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.17)
+material_override = SubResource("StandardMaterial3D_vx3gv")
+mesh = SubResource("BoxMesh_i1wb8")
+
+[node name="Edge" type="MeshInstance3D" parent="." unique_id=408565373]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -0.284)
+material_override = SubResource("StandardMaterial3D_vx3gv")
+mesh = SubResource("PrismMesh_r46ta")

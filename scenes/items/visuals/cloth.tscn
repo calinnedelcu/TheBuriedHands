@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[sub_resource type="Gradient" id="Gradient_jsr7w"]
+colors = PackedColorArray(0.52, 0.47, 0.38, 1, 0.62, 0.57, 0.47, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_aw04y"]
+seed = 9
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b8e5y"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_aw04y")
+color_ramp = SubResource("Gradient_jsr7w")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4t4is"]
+albedo_texture = SubResource("NoiseTexture2D_b8e5y")
+uv1_scale = Vector3(6, 6, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0yyqm"]
+size = Vector3(0.2, 0.03, 0.14)
+
+[sub_resource type="BoxMesh" id="BoxMesh_siwie"]
+size = Vector3(0.18, 0.026, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a50bq"]
+size = Vector3(0.14, 0.022, 0.1)
+
+[node name="Cloth" type="Node3D" unique_id=750742088]
+
+[node name="Fold1" type="MeshInstance3D" parent="." unique_id=1575443276]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_4t4is")
+mesh = SubResource("BoxMesh_0yyqm")
+
+[node name="Fold2" type="MeshInstance3D" parent="." unique_id=1884316294]
+transform = Transform3D(0.9939161, -0.034708314, -0.104528464, 0.034899496, 0.99939084, 0, 0.10446479, -0.0036479908, 0.9945219, 0.01, 0.026, 0.005)
+material_override = SubResource("StandardMaterial3D_4t4is")
+mesh = SubResource("BoxMesh_siwie")
+
+[node name="Fold3" type="MeshInstance3D" parent="." unique_id=88306989]
+transform = Transform3D(0.9697047, 0.033862833, 0.2419219, -0.034899496, 0.99939084, 0, -0.24177453, -0.008442952, 0.9702957, -0.005, 0.048, 0)
+material_override = SubResource("StandardMaterial3D_4t4is")
+mesh = SubResource("BoxMesh_a50bq")
