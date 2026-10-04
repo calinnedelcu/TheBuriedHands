@@ -48,6 +48,10 @@ func _run() -> void:
 	_build_mercury(data)
 	_build_treasury_and_exit(data)
 	_build_lights()
+	_build_materials()
+	_build_environment()
+	_build_atmosphere()
+	_build_mercury_hall()
 
 	get_tree().root.remove_child(root)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT.get_base_dir()))
@@ -583,7 +587,7 @@ func _build_mechanism(d: Dictionary) -> void:
 	var story := root.get_node("Story")
 	var tm: Transform3D = d.trig_mech
 	_trigger("MechanismEnter", story, tm, Vector3(8, 4, 4), {"quest_step": &"reach_mechanism", "completes_step": &"reach_mechanism", "dialogue": &"mechanism_enter"})
-	_trigger("TunnelsEnter", story, Transform3D(Basis(), Vector3(46.0, -5.5, -40.0)), Vector3(6, 3, 6), {"quest_from": &"talk_liang", "dialogue": &"tunnels_enter"})
+	_trigger("TunnelsEnter", story, Transform3D(Basis(), Vector3(30.8, -1.8, -40.0)), Vector3(6, 3, 6), {"quest_from": &"talk_liang", "dialogue": &"tunnels_enter"})
 	_pickup("Jar", mech, &"vase", Transform3D(Basis(), (d.vase as Transform3D).origin), {"quest_from": &"get_vase"})
 	_pickup("Cloth", mech, &"cloth", Transform3D(Basis(), (d.cloth as Transform3D).origin), {"quest_from": &"get_vase"})
 	var req := Node.new()
@@ -706,6 +710,27 @@ func _build_lights() -> void:
 		var s := l.get_script() as Script
 		if s != null and s.resource_path.ends_with("static_lamp_flicker.gd"):
 			l.set_script(load("res://Scripts/world/flicker_light.gd"))
+			# The jam's braziers lit whole wings through the walls: shadows on,
+			# a shorter reach and less glare in the fog.
+			l.shadow_enabled = true
+			l.shadow_bias = 0.08
+			l.shadow_normal_bias = 1.5
+			if _in_mercury_hall(l.global_position):
+				# The hall's hanging braziers are high up; they must reach the
+				# floor. A paler flame, so the mercury reads silver, not brass.
+				l.omni_range = 30.0
+				l.light_energy = 4.5
+				l.light_color = Color(1.0, 0.8, 0.6)
+				l.light_volumetric_fog_energy = 0.5
+			else:
+				l.omni_range = minf(l.omni_range, 17.0)
+				l.light_energy = clampf(l.light_energy * 0.42, 2.2, 4.6)
+			l.light_volumetric_fog_energy = 1.1
+			l.omni_attenuation = 1.15
+			l.distance_fade_enabled = true
+			l.distance_fade_begin = 55.0
+			l.distance_fade_shadow = 32.0
+			l.distance_fade_length = 12.0
 			swapped += 1
 	# Sconces of the map get a burning, refillable lamp.
 	var map := root.get_node("MapWithoutTreasure")
@@ -715,12 +740,288 @@ func _build_lights() -> void:
 		var name := String(n.name).to_lower()
 		if "_col" in name or "collision" in name or not (n is MeshInstance3D):
 			continue
-		var sconce := n as Node3D
+		var sconce := n as MeshInstance3D
 		var wl := WALL_LAMP.instantiate()
 		wl.name = "Sconce%02d" % count
 		var top := sconce.global_transform * Vector3(0, 0.4, 0)
-		_add(lamps, wl, Transform3D(Basis(), top))
+		# Face away from the wall so the light sits in the room, not in the stone.
+		var out := _wall_normal(top)
+		var basis := Basis.looking_at(out, Vector3.UP) if out != Vector3.ZERO else Basis()
+		_add(lamps, wl, Transform3D(basis, top))
 		(wl.get_node("Model") as Node3D).visible = false
 		wl.set(&"oil", [40.0, 60.0, 80.0][count % 3])
+		# The sconce's baked flame goes: the WallLamp's live flame replaces it.
+		for i in sconce.mesh.get_surface_count():
+			var m := sconce.get_active_material(i)
+			if m != null and m.resource_name == "Fire":
+				sconce.set_surface_override_material(i, _hidden_material())
 		count += 1
 	_report.append("lights: %d flicker lights converted, %d sconces" % [swapped, count])
+
+func _in_mercury_hall(p: Vector3) -> bool:
+	return p.x > -106.0 and p.x < -44.0 and p.z > 28.0 and p.z < 102.0
+
+var _hidden: Material
+
+func _hidden_material() -> Material:
+	if _hidden == null:
+		var m := ShaderMaterial.new()
+		m.shader = load("res://assets/shaders/hidden_surface.gdshader")
+		ResourceSaver.save(m, "res://assets/materials/hidden_surface.tres")
+		_hidden = load("res://assets/materials/hidden_surface.tres")
+	return _hidden
+
+## Horizontal normal of the closest wall around `at`, or zero if none is near.
+func _wall_normal(at: Vector3) -> Vector3:
+	var space := (root as Node3D).get_world_3d().direct_space_state
+	var best := 99.0
+	var normal := Vector3.ZERO
+	for i in 16:
+		var a := TAU * i / 16.0
+		var dir := Vector3(sin(a), 0.0, cos(a))
+		for dy in [0.0, -0.4]:
+			var from := at + Vector3(0, dy, 0)
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, from + dir * 1.8, 1))
+			if hit.is_empty():
+				continue
+			var d := from.distance_to(hit.position)
+			var nrm: Vector3 = (hit.normal as Vector3).slide(Vector3.UP)
+			if d < best and nrm.length() > 0.5:
+				best = d
+				normal = nrm.normalized()
+	return normal
+
+# --- Surfaces ----------------------------------------------------------------------------------
+
+const SURFACE_SHADER := "res://assets/shaders/surface_triplanar.gdshader"
+const MAT_DIR := "res://assets/materials/level"
+const TEX := "res://assets/textures/surfaces/%s/%s.jpg"
+# Mean luminance of each scanned colour map (measured), used to normalise it.
+const TEX_MEAN := {"concrete047a": 0.533, "rock030": 0.301, "ground104": 0.432, "planks037a": 0.256, "rock022": 0.388}
+
+# Jam material name -> detail set and look. Colours stay the jam's own.
+const SURFACES := {
+	"Walls": {"set": "concrete047a", "scale": 0.22, "strength": 0.85, "sat": 0.25, "normal": 0.9},
+	"Pillar1": {"set": "concrete047a", "scale": 0.3, "strength": 0.8, "sat": 0.25},
+	"Pillar2": {"set": "concrete047a", "scale": 0.3, "strength": 0.8, "sat": 0.25},
+	"Pillar1.001": {"set": "concrete047a", "scale": 0.3},
+	"Pillar2.001": {"set": "concrete047a", "scale": 0.3},
+	"FloorTiles1": {"set": "rock030", "scale": 0.22, "strength": 0.7, "normal": 0.55, "rough": 0.82},
+	"FloorTiles2": {"set": "rock030", "scale": 0.22, "strength": 0.7, "normal": 0.55, "rough": 0.82},
+	"FlootTiles3": {"set": "rock030", "scale": 0.22, "strength": 0.7, "normal": 0.55, "rough": 0.82},
+	"FloorTiles1.001": {"set": "rock030", "scale": 0.22, "strength": 0.7, "normal": 0.55, "rough": 0.82},
+	"TrapTiles": {"set": "rock030", "scale": 0.35, "strength": 0.7, "normal": 0.6},
+	"TreasurePlatform.001": {"set": "rock030", "scale": 0.3},
+	"Bluewish": {"set": "rock030", "scale": 0.3},
+	"Roof": {"set": "ground104", "scale": 0.12, "strength": 0.8, "sat": 0.35, "normal": 1.0},
+	"SecretaryRoof2": {"set": "ground104", "scale": 0.12, "strength": 0.8, "sat": 0.35},
+	"Dirt": {"set": "ground104", "scale": 0.16, "strength": 0.85, "sat": 0.4, "normal": 1.0},
+	"Dirt2": {"set": "ground104", "scale": 0.16, "strength": 0.85, "sat": 0.4},
+	"Rockys": {"set": "rock022", "scale": 0.3, "strength": 0.9, "normal": 1.1},
+	"Rocks": {"set": "rock022", "scale": 0.3, "strength": 0.9, "normal": 1.1},
+	"Stone": {"set": "rock022", "scale": 0.3},
+	"Stone.002": {"set": "rock022", "scale": 0.3},
+	"Stone2": {"set": "rock022", "scale": 0.3},
+	"Paper": {"set": "concrete047a", "scale": 0.25, "strength": 0.5, "sat": 0.15},
+	"Material.057": {"set": "ground104", "scale": 0.3, "strength": 0.8, "sat": 0.3, "normal": 1.0},
+	"Material.058": {"set": "rock030", "scale": 0.4, "strength": 0.6},
+	"Wood": {"set": "planks037a", "scale": 0.5, "strength": 0.75, "sat": 0.5, "normal": 0.7},
+	"Wood3": {"set": "planks037a", "scale": 0.5, "strength": 0.75, "sat": 0.5, "normal": 0.7},
+	"Wood BookShelf": {"set": "planks037a", "scale": 0.5, "strength": 0.75, "sat": 0.5, "normal": 0.7},
+	"WoodScales": {"set": "planks037a", "scale": 0.4, "strength": 0.75, "sat": 0.5, "normal": 0.7},
+	"WoodScales2": {"set": "planks037a", "scale": 0.4, "strength": 0.75, "sat": 0.5, "normal": 0.7},
+	"BookShelfs": {"set": "planks037a", "scale": 0.5, "strength": 0.6, "sat": 0.4},
+	"OldBookShelfs": {"set": "planks037a", "scale": 0.5, "strength": 0.6, "sat": 0.4},
+	"Ladder": {"set": "planks037a", "scale": 0.5, "strength": 0.7, "sat": 0.4},
+	"phong1": {"set": "planks037a", "scale": 0.5, "strength": 0.7, "sat": 0.4},
+	"CrossbowWood": {"set": "planks037a", "scale": 0.6, "strength": 0.7, "sat": 0.4},
+	"BigDoor.001": {"set": "planks037a", "scale": 0.35, "strength": 0.8, "sat": 0.4, "normal": 0.9},
+	"Golden": {"set": "rock030", "scale": 0.5, "strength": 0.25, "sat": 0.0, "normal": 0.35, "rough": 0.3, "rough_detail": 0.15, "metal": 1.0, "color": Color(0.93, 0.68, 0.3)},
+	"Copper": {"set": "rock022", "scale": 0.6, "strength": 0.35, "normal": 0.4, "rough": 0.48, "rough_detail": 0.3, "metal": 0.85},
+	"Copper2": {"set": "rock022", "scale": 0.6, "strength": 0.35, "normal": 0.4, "rough": 0.48, "rough_detail": 0.3, "metal": 0.85},
+	"farfurie": {"set": "rock022", "scale": 0.6, "strength": 0.35, "normal": 0.4, "rough": 0.45, "rough_detail": 0.3, "metal": 0.85},
+	"ChainLink": {"set": "rock022", "scale": 0.8, "strength": 0.3, "normal": 0.4, "rough": 0.5, "metal": 0.8},
+}
+
+var _materials := {}
+
+func _build_materials() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(MAT_DIR))
+	var mercury := ShaderMaterial.new()
+	mercury.shader = load("res://assets/shaders/mercury.gdshader")
+	ResourceSaver.save(mercury, MAT_DIR + "/mercury.tres")
+	mercury = load(MAT_DIR + "/mercury.tres")
+	var counts := {}
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i) as BaseMaterial3D
+			if mat == null:
+				continue
+			var key := mat.resource_name
+			var replacement: Material = null
+			if key == "Fluid":
+				replacement = mercury
+			elif SURFACES.has(key):
+				replacement = _surface_material(key, mat)
+			if replacement != null:
+				mi.set_surface_override_material(i, replacement)
+				counts[key] = int(counts.get(key, 0)) + 1
+	_report.append("materials: %d jam materials replaced on %d surfaces" % [counts.size(), counts.values().reduce(func(a, b): return a + b, 0)])
+
+func _surface_material(key: String, original: BaseMaterial3D) -> Material:
+	if _materials.has(key):
+		return _materials[key]
+	var cfg: Dictionary = SURFACES[key]
+	var set_name: String = cfg["set"]
+	var m := ShaderMaterial.new()
+	m.shader = load(SURFACE_SHADER)
+	m.set_shader_parameter(&"base_color", cfg.get("color", original.albedo_color))
+	m.set_shader_parameter(&"detail_albedo", load(TEX % [set_name, "albedo"]))
+	m.set_shader_parameter(&"detail_normal", load(TEX % [set_name, "normal"]))
+	m.set_shader_parameter(&"detail_roughness", load(TEX % [set_name, "roughness"]))
+	m.set_shader_parameter(&"albedo_mean", TEX_MEAN[set_name])
+	m.set_shader_parameter(&"tex_scale", cfg.get("scale", 0.25))
+	m.set_shader_parameter(&"detail_strength", cfg.get("strength", 0.8))
+	m.set_shader_parameter(&"detail_saturation", cfg.get("sat", 0.3))
+	m.set_shader_parameter(&"normal_strength", cfg.get("normal", 0.8))
+	m.set_shader_parameter(&"roughness_base", cfg.get("rough", maxf(original.roughness, 0.6)))
+	m.set_shader_parameter(&"roughness_detail", cfg.get("rough_detail", 0.5))
+	m.set_shader_parameter(&"metallic_value", cfg.get("metal", 0.0))
+	var file := MAT_DIR + "/" + key.to_lower().replace(" ", "_").replace(".", "_") + ".tres"
+	ResourceSaver.save(m, file)
+	var saved: Material = load(file)
+	_materials[key] = saved
+	return saved
+
+# --- Air and light ----------------------------------------------------------------------------
+
+func _build_environment() -> void:
+	var we := root.get_node("WorldEnvironment") as WorldEnvironment
+	var env := we.environment
+	# Neutral-cool darkness, warm flames: the colour now comes from the lights,
+	# not from an orange filter over everything.
+	env.background_color = Color(0.0, 0.0, 0.0)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.035, 0.04, 0.055)
+	env.ambient_light_energy = 1.0
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 1.0
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.012, 0.014, 0.02)
+	env.fog_density = 0.01
+	env.fog_aerial_perspective = 0.0
+	env.fog_height_density = 0.0
+	env.volumetric_fog_enabled = true
+	env.volumetric_fog_density = 0.008
+	env.volumetric_fog_albedo = Color(0.85, 0.82, 0.78)
+	env.volumetric_fog_emission = Color(0, 0, 0)
+	env.volumetric_fog_emission_energy = 0.0
+	env.volumetric_fog_anisotropy = 0.55
+	env.volumetric_fog_length = 48.0
+	env.volumetric_fog_detail_spread = 2.0
+	env.volumetric_fog_temporal_reprojection_enabled = true
+	env.ssr_enabled = true
+	env.ssr_max_steps = 56
+	env.ssr_fade_in = 0.15
+	env.ssr_fade_out = 2.0
+	env.ssr_depth_tolerance = 0.25
+	env.ssao_intensity = 1.6
+	env.ssao_light_affect = 0.1
+	env.ssil_intensity = 0.8
+	env.glow_enabled = true
+	env.glow_intensity = 0.6
+	env.glow_bloom = 0.04
+	env.glow_hdr_threshold = 1.0
+	env.glow_hdr_scale = 2.0
+	env.adjustment_enabled = true
+	env.adjustment_brightness = 1.0
+	env.adjustment_contrast = 1.08
+	env.adjustment_saturation = 0.92
+	_delete("SunLight")
+	var atmo := Node.new()
+	atmo.name = "Atmosphere"
+	atmo.set_script(load("res://Scripts/world/atmosphere.gd"))
+	_add(root, atmo, Transform3D.IDENTITY, false)
+	atmo.set(&"environment_path", atmo.get_path_to(we))
+
+func _zone(name: String, centre: Vector3, size: Vector3, props: Dictionary) -> AtmosphereZone:
+	var z := Area3D.new()
+	z.name = name
+	z.set_script(load("res://Scripts/world/atmosphere_zone.gd"))
+	for k in props:
+		z.set(k, props[k])
+	_add(_group("AtmosphereZones"), z, Transform3D(Basis(), centre))
+	var cs := CollisionShape3D.new()
+	cs.name = "Shape"
+	cs.shape = _box(size)
+	_add(z, cs, Transform3D.IDENTITY, false)
+	return z as AtmosphereZone
+
+func _build_atmosphere() -> void:
+	# The workshop is a place of work: warmer air, more bounce, a little dust.
+	_zone("Workshop", Vector3(-55.0, 4.0, -23.0), Vector3(62.0, 18.0, 52.0), {
+		"fog_color": Color(0.02, 0.016, 0.012), "fog_density": 0.008,
+		"volumetric_density": 0.011, "volumetric_albedo": Color(0.9, 0.8, 0.68),
+		"ambient_color": Color(0.05, 0.042, 0.036), "ambient_energy": 1.0, "saturation": 0.95,
+	})
+	# The service tunnels: close, dusty, almost no air light.
+	_zone("Tunnels", Vector3(20.0, -3.5, -5.0), Vector3(54.0, 5.0, 90.0), {
+		"zone_priority": 1, "fog_color": Color(0.01, 0.009, 0.008), "fog_density": 0.02,
+		"volumetric_density": 0.014, "volumetric_albedo": Color(0.8, 0.74, 0.66),
+		"ambient_color": Color(0.02, 0.02, 0.025), "ambient_energy": 0.7, "saturation": 0.88,
+	})
+	# The Mercury Hall: cold, metallic haze that glows faintly by itself.
+	_zone("MercuryHall", Vector3(-74.0, 10.0, 65.0), Vector3(66.0, 42.0, 76.0), {
+		"zone_priority": 1, "fog_color": Color(0.025, 0.04, 0.048), "fog_density": 0.009,
+		"volumetric_density": 0.011, "volumetric_albedo": Color(0.7, 0.84, 0.9),
+		"volumetric_emission": Color(0.01, 0.018, 0.022), "volumetric_emission_energy": 0.5,
+		"ambient_color": Color(0.04, 0.06, 0.07), "ambient_energy": 1.3, "saturation": 0.8,
+	})
+	# The treasury: still air with a gold cast.
+	_zone("Treasury", Vector3(0.0, 9.0, 100.0), Vector3(46.0, 24.0, 44.0), {
+		"zone_priority": 1, "fog_color": Color(0.03, 0.022, 0.012), "fog_density": 0.008,
+		"volumetric_density": 0.008, "volumetric_albedo": Color(0.95, 0.85, 0.65),
+		"ambient_color": Color(0.05, 0.04, 0.025), "ambient_energy": 1.0, "saturation": 1.0,
+	})
+	_report.append("atmosphere: base grade + 4 zones")
+
+func _build_mercury_hall() -> void:
+	var dome := root.get_node_or_null("MapWithoutTreasure/CupolaMercury") as MeshInstance3D
+	if dome != null:
+		var m := ShaderMaterial.new()
+		m.shader = load("res://assets/shaders/celestial_dome.gdshader")
+		var centre := (dome.global_transform * dome.get_aabb()).get_center()
+		centre.y = (dome.global_transform * dome.get_aabb()).position.y
+		m.set_shader_parameter(&"centre", centre)
+		ResourceSaver.save(m, MAT_DIR + "/celestial_dome.tres")
+		var saved: Material = load(MAT_DIR + "/celestial_dome.tres")
+		for i in dome.mesh.get_surface_count():
+			dome.set_surface_override_material(i, saved)
+	# Cold light off the mercury: a faint silver bounce under the dome.
+	var hall := _group("MercuryHallLights")
+	var spots := [Vector3(-62.0, 5.0, 52.0), Vector3(-86.0, 5.0, 52.0), Vector3(-62.0, 5.0, 80.0), Vector3(-86.0, 5.0, 80.0), Vector3(-74.0, 7.0, 66.0)]
+	for i in spots.size():
+		var l := OmniLight3D.new()
+		l.name = "MercuryGlow%d" % i
+		l.light_color = Color(0.62, 0.76, 0.9)
+		l.light_energy = 1.6
+		l.light_volumetric_fog_energy = 0.6
+		l.light_specular = 0.2
+		l.omni_range = 20.0
+		l.omni_attenuation = 1.4
+		l.shadow_enabled = false
+		_add(hall, l, Transform3D(Basis(), spots[i]))
+	for spec in [["MercuryProbe", Vector3(-74.0, 6.0, 65.0), Vector3(62.0, 30.0, 72.0)], ["TreasuryProbe", Vector3(0.0, 9.0, 100.0), Vector3(44.0, 20.0, 42.0)]]:
+		var probe := ReflectionProbe.new()
+		probe.name = spec[0]
+		probe.update_mode = ReflectionProbe.UPDATE_ONCE
+		probe.size = spec[2]
+		probe.interior = true
+		probe.box_projection = true
+		probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
+		probe.max_distance = 0.0
+		_add(_group("ReflectionProbes"), probe, Transform3D(Basis(), spec[1]))
+	_report.append("mercury hall: celestial dome, reflection probes")

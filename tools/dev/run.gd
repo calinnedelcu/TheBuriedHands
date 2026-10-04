@@ -16,6 +16,11 @@ func _initialize() -> void:
 	_start.call_deferred(runner_path)
 
 func _start(path: String) -> void:
-	var runner: Node = load(path).new()
+	var script := load(path) as GDScript
+	if script == null or not script.can_instantiate():
+		push_error("run.gd: could not load " + path)
+		quit(1)
+		return
+	var runner: Node = script.new()
 	runner.name = "Runner"
 	get_root().add_child(runner)

@@ -12,9 +12,11 @@ const SPOTS := [
 	["f_archives_deep", Vector3(10.0, 0.2, -30.0), 0.0, -3.0],
 	["g_liang", Vector3(33.0, 0.2, -28.0), -120.0, -8.0],
 	["h_corridor", Vector3(-30.0, 0.2, 12.0), -90.0, -6.0],
-	["i_tunnel", Vector3(30.0, -5.2, -46.0), 90.0, -4.0],
+	["i_tunnel", Vector3(30.0, -3.0, -30.0), 180.0, -4.0],
 	["j_mechanism", Vector3(0.5, 7.7, 44.5), 180.0, -8.0],
 	["k_mercury", Vector3(-46.0, 7.9, 70.0), 90.0, -18.0],
+	["k2_dome", Vector3(-46.0, 7.9, 70.0), 80.0, 32.0],
+	["k3_relief", Vector3(-60.0, 16.0, 62.0), 100.0, -55.0],
 	["l_treasury", Vector3(0.6, 7.5, 88.0), 180.0, -4.0],
 	["m_drain", Vector3(-3.0, 7.6, 132.0), 180.0, -2.0],
 ]
@@ -40,10 +42,17 @@ func _run() -> void:
 		if not only.is_empty() and not only.has(spot[0]):
 			continue
 		player.global_position = spot[1]
+		if spot[0] == "i_tunnel":
+			var hit := player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(spot[1] + Vector3.UP * 3.0, spot[1] + Vector3.DOWN * 10.0, 1))
+			print("tunnel floor: ", hit.get("position", "none"))
 		player.velocity = Vector3.ZERO
 		player.rotation.y = deg_to_rad(spot[2])
 		player._set_pitch(deg_to_rad(spot[3]))
-		await get_tree().create_timer(0.8).timeout
+		await get_tree().create_timer(0.4).timeout
+		var atmo := Game.level.get_node_or_null("Atmosphere")
+		if atmo != null:
+			atmo.call(&"snap")
+		await get_tree().create_timer(0.6).timeout
 		await RenderingServer.frame_post_draw
 		get_tree().root.get_texture().get_image().save_png(out.path_join(spot[0] + ".png"))
 		print("shot ", spot[0], " at ", player.global_position)

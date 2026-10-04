@@ -161,7 +161,7 @@ func _apply_flicker() -> void:
 	_light.light_energy = light_energy * strength * raise_e
 	_light.omni_range = light_range * lerpf(0.6, 1.0, low) * raise_r * (0.96 + n * 0.04)
 	_spot.light_energy = spot_energy * strength * raise_e
-	_hand_light.light_energy = 0.55 * strength
+	_hand_light.light_energy = 0.32 * strength
 	_spot.spot_range = spot_range * lerpf(0.55, 1.0, low) * raise_r
 	var s := 1.0 + _noise.get_noise_1d(_t * 9.0 + 50.0) * (0.15 + instability * 0.4)
 	_flame.scale = _flame_scale * Vector3(1.0, s, 1.0) * lerpf(0.5, 1.0, low)

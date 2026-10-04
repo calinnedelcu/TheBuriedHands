@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/celestial_dome.gdshader" id="1_3b6rg"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_3b6rg")
+shader_parameter/centre = Vector3(-74.48796, 7.416333, 64.89137)
+shader_parameter/lacquer = null
+shader_parameter/lacquer_band = null
+shader_parameter/pearl = null
+shader_parameter/density = null
+shader_parameter/star_size = null
+shader_parameter/bright_fraction = null
+shader_parameter/emission_energy = null
+shader_parameter/twinkle_speed = null

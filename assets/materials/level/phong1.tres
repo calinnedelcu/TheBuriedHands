@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/surface_triplanar.gdshader" id="1_fe3g0"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/planks037a/albedo.jpg" id="2_c8xkw"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/planks037a/normal.jpg" id="3_nn601"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/planks037a/roughness.jpg" id="4_xlamk"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_fe3g0")
+shader_parameter/base_color = Color(0.34955752, 0.23408775, 0.0061868588, 1)
+shader_parameter/detail_albedo = ExtResource("2_c8xkw")
+shader_parameter/detail_normal = ExtResource("3_nn601")
+shader_parameter/detail_roughness = ExtResource("4_xlamk")
+shader_parameter/tex_scale = 0.5
+shader_parameter/albedo_mean = 0.256
+shader_parameter/detail_strength = 0.7
+shader_parameter/detail_saturation = 0.4
+shader_parameter/normal_strength = 0.8
+shader_parameter/roughness_base = 1.0
+shader_parameter/roughness_detail = 0.5
+shader_parameter/metallic_value = 0.0
+shader_parameter/macro_scale = null
+shader_parameter/macro_strength = null
+shader_parameter/blend_sharpness = null

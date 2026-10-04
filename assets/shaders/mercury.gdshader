@@ -11,6 +11,12 @@ uniform float ripple_speed = 0.25;
 uniform float ripple_strength = 0.35;
 uniform float flow_speed = 0.05;
 uniform vec2 flow_dir = vec2(1.0, 0.3);
+// What a mirror shows in a hazy hall: a cold sheen toward grazing angles, and
+// small glints drifting with the flow, so the rivers read as metal even
+// where no flame is reflected.
+uniform vec3 sheen_color : source_color = vec3(0.55, 0.62, 0.68);
+uniform float sheen_strength = 0.5;
+uniform float glint_strength = 1.4;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
@@ -38,4 +44,8 @@ void fragment() {
 	METALLIC = 1.0;
 	ROUGHNESS = roughness_base + h * 0.04;
 	SPECULAR = 0.8;
+	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
+	vec2 g = world.xz * 7.0 + normalize(flow_dir) * TIME * flow_speed * 14.0;
+	float glint = smoothstep(0.93, 0.995, noise(g) * noise(g * 2.3 + 3.1) * 1.7);
+	EMISSION = sheen_color * (0.03 + fresnel * sheen_strength) + vec3(0.9, 0.95, 1.0) * glint * glint_strength * (0.3 + fresnel);
 }

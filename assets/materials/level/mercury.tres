@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/mercury.gdshader" id="1_k2c7f"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_k2c7f")
+shader_parameter/tint = null
+shader_parameter/roughness_base = null
+shader_parameter/ripple_scale = null
+shader_parameter/ripple_speed = null
+shader_parameter/ripple_strength = null
+shader_parameter/flow_speed = null
+shader_parameter/flow_dir = null

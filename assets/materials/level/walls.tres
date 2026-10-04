@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/surface_triplanar.gdshader" id="1_xywrl"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/concrete047a/albedo.jpg" id="2_nv26o"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/concrete047a/normal.jpg" id="3_bxstj"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/concrete047a/roughness.jpg" id="4_3gbfr"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_xywrl")
+shader_parameter/base_color = Color(0.3799905, 0.36617646, 0.36316222, 1)
+shader_parameter/detail_albedo = ExtResource("2_nv26o")
+shader_parameter/detail_normal = ExtResource("3_bxstj")
+shader_parameter/detail_roughness = ExtResource("4_3gbfr")
+shader_parameter/tex_scale = 0.22
+shader_parameter/albedo_mean = 0.533
+shader_parameter/detail_strength = 0.85
+shader_parameter/detail_saturation = 0.25
+shader_parameter/normal_strength = 0.9
+shader_parameter/roughness_base = 1.0
+shader_parameter/roughness_detail = 0.5
+shader_parameter/metallic_value = 0.0
+shader_parameter/macro_scale = null
+shader_parameter/macro_strength = null
+shader_parameter/blend_sharpness = null

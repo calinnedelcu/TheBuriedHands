@@ -9,6 +9,10 @@
   (footsteps, impacts, cloth, creaks and UI clicks under `audio/sfx/`)
 - Ceramic/tile breaking sounds by *spinopel* via Pixabay (Pixabay Content License)
 
+## Textures
+- **ambientCG** (ambientcg.com) — Concrete047A, Rock022, Rock030, Ground104, Planks037A — CC0 1.0
+  (surface detail under `assets/textures/surfaces/`)
+
 ## Engine
 - Made with [Godot Engine](https://godotengine.org) (MIT License)
 

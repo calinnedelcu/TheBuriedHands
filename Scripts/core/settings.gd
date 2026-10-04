@@ -164,6 +164,21 @@ func _apply(key: StringName) -> void:
 			var viewport := get_viewport()
 			viewport.scaling_3d_scale = clampf(float(value), 0.5, 1.0)
 			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2 if float(value) < 0.99 else Viewport.SCALING_3D_MODE_BILINEAR
+		&"quality":
+			_apply_quality(clampi(int(value), 0, 3))
+
+## Renderer-wide part of the quality preset. The level's Atmosphere switches
+## the environment effects (SSAO, SSIL, SSR) for the same setting.
+func _apply_quality(q: int) -> void:
+	var vp := get_viewport()
+	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X, Viewport.MSAA_4X][q]
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if q == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
+	vp.positional_shadow_atlas_size = [2048, 4096, 4096, 8192][q]
+	vp.mesh_lod_threshold = [4.0, 2.0, 1.0, 1.0][q]
+	var filters := [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, RenderingServer.SHADOW_QUALITY_SOFT_HIGH]
+	RenderingServer.positional_soft_shadow_filter_set_quality(filters[q])
+	RenderingServer.directional_soft_shadow_filter_set_quality(filters[q])
+	RenderingServer.environment_set_volumetric_fog_volume_size([64, 96, 128, 160][q], [48, 64, 64, 96][q])
 
 ## "auto" follows the OS language: Romanian systems get Romanian, everyone else English.
 func resolved_language() -> String:

@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/surface_triplanar.gdshader" id="1_rp5tp"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/rock022/albedo.jpg" id="2_633pl"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/rock022/normal.jpg" id="3_t4ugr"]
+[ext_resource type="Texture2D" path="res://assets/textures/surfaces/rock022/roughness.jpg" id="4_o1qna"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_rp5tp")
+shader_parameter/base_color = Color(0.4333247, 0.26602438, 0.14630973, 1)
+shader_parameter/detail_albedo = ExtResource("2_633pl")
+shader_parameter/detail_normal = ExtResource("3_t4ugr")
+shader_parameter/detail_roughness = ExtResource("4_o1qna")
+shader_parameter/tex_scale = 0.6
+shader_parameter/albedo_mean = 0.388
+shader_parameter/detail_strength = 0.35
+shader_parameter/detail_saturation = 0.3
+shader_parameter/normal_strength = 0.4
+shader_parameter/roughness_base = 0.48
+shader_parameter/roughness_detail = 0.3
+shader_parameter/metallic_value = 0.85
+shader_parameter/macro_scale = null
+shader_parameter/macro_strength = null
+shader_parameter/blend_sharpness = null
