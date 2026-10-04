@@ -1,7 +1,7 @@
 extends Node
 ## Dev runner: free-camera shots of the level, to check placements. A small
 ## warm light rides with the camera, like the player's lamp. The HUD is hidden.
-## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...]
+## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...] [--tipped]
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -13,16 +13,21 @@ func _vec(text: String) -> Vector3:
 func _run() -> void:
 	var out := ""
 	var shots := []
+	var tipped := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.substr(6)
 		elif arg.begins_with("--shot="):
 			var parts := arg.substr(7).split(";")
 			shots.append([parts[0], _vec(parts[1]), _vec(parts[2])])
+		elif arg == "--tipped":
+			tipped = true
 	DirAccess.make_dir_recursive_absolute(out)
 	get_tree().change_scene_to_file("res://scenes/level/mausoleum.tscn")
 	await Game.level_ready
 	Dialogue.stop()
+	if tipped:
+		Game.level.get_node("MapWithoutTreasure/Balanta").call(&"snap_to_end")
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	player.lock_controls(&"look", true)
 	var hud := player.get_node_or_null("HUD")

@@ -70,6 +70,9 @@ func _split() -> void:
 	tween.tween_property(_rock, "scale", Vector3(1.1, 0.25, 1.1), 0.5).set_trans(Tween.TRANS_BOUNCE)
 	tween.tween_property(_rock, "position:y", -0.6, 0.5)
 	_blocker.set_deferred(&"disabled", true)
+	# The use volume goes too, or it hides whatever is behind it (the ladder
+	# down the shaft) from the player's aim.
+	($Body as CollisionObject3D).set_deferred(&"collision_layer", 0)
 	if _external_body != null:
 		_external_body.set_deferred(&"collision_layer", 0)
 		_external_body.set_deferred(&"collision_mask", 0)
@@ -80,6 +83,7 @@ func _apply() -> void:
 		_rock.scale = Vector3(1.1, 0.25, 1.1)
 		_rock.position.y = -0.6
 		_blocker.disabled = true
+		($Body as CollisionObject3D).collision_layer = 0
 		if _external_body != null:
 			_external_body.collision_layer = 0
 			_external_body.collision_mask = 0

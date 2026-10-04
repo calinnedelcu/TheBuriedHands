@@ -1,7 +1,8 @@
 class_name MercuryPool
 extends Area3D
 ## Wading into mercury: slows you down and floods you with vapour. Stay in and
-## it kills you. Also where the jar is filled (see the child Usable).
+## it kills you. With a UseBody/Usable child it is also where the jar is
+## filled: hold the use key while looking at the mercury.
 
 const FILL_SOUND := preload("res://audio/sfx/mercury/fill.mp3")
 
@@ -15,7 +16,7 @@ func _ready() -> void:
 	collision_mask = 2
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
-	var usable := get_node_or_null("Usable") as DelegateUsable
+	var usable := get_node_or_null("UseBody/Usable") as DelegateUsable
 	if usable != null:
 		usable.hold_time = 2.6
 

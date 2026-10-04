@@ -71,11 +71,11 @@ func usable_hold_done(user: Node) -> void:
 
 func _tip(animate: bool) -> void:
 	tipped = true
+	var balance := get_node_or_null(balance_path)
 	if animate:
 		Dialogue.play(&"poured")
 		_audio.stream = GEARS
 		_audio.play()
-		var balance := get_node_or_null(balance_path)
 		if balance != null and balance.has_method(&"start_flow"):
 			balance.call(&"start_flow")
 		elif _anim != null:
@@ -92,15 +92,23 @@ func _tip(animate: bool) -> void:
 			player.add_shake(0.5)
 		await get_tree().create_timer(tip_seconds * 0.6, false).timeout
 	else:
-		if _anim != null and not _anim.get_animation_list().is_empty():
+		if balance != null and balance.has_method(&"snap_to_end"):
+			balance.call(&"snap_to_end")
+		elif _anim != null and not _anim.get_animation_list().is_empty():
 			var n := _anim.get_animation_list()[0]
 			_anim.play(n)
 			_anim.seek(_anim.get_animation(n).length, true)
 			_anim.pause()
+	var shown := false
 	for path in gate_paths:
-		var gate := get_node_or_null(path)
+		var gate := get_node_or_null(path) as Node3D
 		if gate != null and gate.has_method(&"open"):
 			gate.call(&"open", animate)
+			# Turn the player's head to what the weight just moved.
+			var p := get_tree().get_first_node_in_group(&"player") as Player
+			if animate and not shown and p != null:
+				shown = true
+				p.look_at_point(gate.global_position + Vector3.UP * 4.0, 1.6)
 	if animate:
 		Quest.complete(&"pour_mercury")
 		Game.advance_sealing(2)

@@ -95,6 +95,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/climb_ladder.tscn" id="92_sn6da"]
 [ext_resource type="PackedScene" path="res://scenes/items/Ladder.glb" id="94_be7pr"]
 [ext_resource type="PackedScene" path="res://scenes/world/counterweight.tscn" id="95_fn86e"]
+[ext_resource type="PackedScene" path="res://scenes/world/causeway.tscn" id="96_1ukyn"]
 [ext_resource type="Script" path="res://Scripts/world/vapor_zone.gd" id="97_nt1sd"]
 [ext_resource type="Script" path="res://Scripts/world/mercury_pool.gd" id="98_lytpu"]
 [ext_resource type="PackedScene" path="res://scenes/world/wall_lamp.tscn" id="99_pk17x"]
@@ -114,7 +115,7 @@ sky_material = SubResource("Sky_proc")
 background_mode = 1
 sky = SubResource("Sky_main")
 ambient_light_source = 2
-ambient_light_color = Color(0.035961982, 0.040128265, 0.053781487, 1)
+ambient_light_color = Color(0.037662096, 0.040354945, 0.051628012, 1)
 ambient_light_sky_contribution = 0.0
 tonemap_mode = 4
 tonemap_white = 6.0
@@ -134,19 +135,19 @@ glow_enabled = true
 glow_intensity = 0.6
 glow_bloom = 0.04
 fog_enabled = true
-fog_light_color = Color(0.012513057, 0.014128265, 0.019486941, 1)
-fog_density = 0.009871735
+fog_light_color = Color(0.013419785, 0.014354946, 0.018580215, 1)
+fog_density = 0.009645054
 fog_sky_affect = 0.0
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.008192397
-volumetric_fog_albedo = Color(0.85320663, 0.81871736, 0.77358675, 1)
+volumetric_fog_density = 0.00853242
+volumetric_fog_albedo = Color(0.85887367, 0.81645054, 0.7622526, 1)
 volumetric_fog_emission_energy = 0.0
 volumetric_fog_anisotropy = 0.55
 volumetric_fog_length = 48.0
 volumetric_fog_sky_affect = 0.0
 adjustment_enabled = true
 adjustment_contrast = 1.08
-adjustment_saturation = 0.921924
+adjustment_saturation = 0.9253242
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProc_global_dust"]
 emission_shape = 3
@@ -1178,9 +1179,6 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_2rfg8")
 
-[sub_resource type="BoxShape3D" id="Shape_tunnel_ceiling"]
-size = Vector3(8, 3, 8)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fndpi"]
 resource_name = "Wood3"
 cull_mode = 2
@@ -1398,17 +1396,14 @@ size = Vector3(6, 0.3, 6)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ddo8g"]
 size = Vector3(6, 0.3, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_7b07l"]
-size = Vector3(1.6, 1.6, 1.6)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_1mfp7"]
-size = Vector3(1.6, 1.6, 1.6)
+[sub_resource type="BoxShape3D" id="BoxShape3D_2uocy"]
+size = Vector3(54, 0.3, 58)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nx0x2"]
 size = Vector3(62, 18, 52)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_dgjdf"]
-size = Vector3(54, 5, 90)
+size = Vector3(62, 5, 100)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ht522"]
 size = Vector3(66, 42, 76)
@@ -1915,31 +1910,32 @@ surface_material_override/1 = ExtResource("17_dpovt")
 transform = Transform3D(0.13664928, 0, 0.9906196, 0, 1, 0, -0.9906196, 0, 0.13664928, 0.13066284, -0.04240644, -0.0070381113)
 
 [node name="Light" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="0"]
-light_energy = 9.952469
-omni_range = 11.269305
+light_energy = 10.097214
+omni_range = 11.301873
 
 [node name="FlameCore" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="1"]
-transform = Transform3D(2.722226, 0, 0, 0, 3.0818303, 0, 0, 0, 2.722226, 0, 0.35, 0)
+transform = Transform3D(2.589639, 0, 0, 0, 3.5743167, 0, 0, 0, 2.589639, 0, 0.35, 0)
 
 [node name="FlameCrossA" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="2"]
-transform = Transform3D(1.2049272, 0, 2.087305, 0, 2.7120526, 0, -2.087305, 0, 1.2049272, 0, 0.32, 0)
+transform = Transform3D(1.1119821, 0, 1.9262954, 0, 3.0514367, 0, -1.9262954, 0, 1.1119821, 0, 0.32, 0)
 
 [node name="FlameCrossB" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="3"]
-transform = Transform3D(-1.0099627, 0, 1.7489183, 0, 2.2574387, 0, -1.7489183, 0, -1.0099627, 0, 0.3, 0)
+transform = Transform3D(-0.90852565, 0, 1.5732633, 0, 2.4758086, 0, -1.5732633, 0, -0.90852565, 0, 0.3, 0)
 
 [node name="FlameSide1" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="4"]
-transform = Transform3D(1.6830426, 0, 0, 0, 2.1659353, 0, 0, 0, 1.6830426, 0.55, 0.22, 0)
+transform = Transform3D(1.4772415, 0, 0, 0, 2.317774, 0, 0, 0, 1.4772415, 0.55, 0.22, 0)
 visible = false
 
 [node name="FlameSide2" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="5"]
-transform = Transform3D(1.7152432, 0, 0, 0, 2.2073746, 0, 0, 0, 1.7152432, -0.55, 0.22, 0)
+transform = Transform3D(1.5352173, 0, 0, 0, 2.4087374, 0, 0, 0, 1.5352173, -0.55, 0.22, 0)
 visible = false
 
 [node name="FlameInnerGlow" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="6"]
-transform = Transform3D(1.4823543, 0, 0, 0, 2.1261914, 0, 0, 0, 1.4823543, 0, 0.28, 0)
+transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 0.986881
+pitch_scale = 1.0684187
+stream_paused = true
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="171" unique_id=2048551156]
@@ -2727,7 +2723,7 @@ surface_material_override/0 = ExtResource("29_kcdtl")
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_214" parent_id_path=PackedInt32Array(1259806216, 1981167856) index="1" unique_id=770021004]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.4268193
+light_energy = 4.220035
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -2736,7 +2732,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.878033
+omni_range = 29.531902
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -3334,7 +3330,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_212" parent_id_path=PackedInt32Array(1259806216, 2046811373) index="1" unique_id=770021002]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.809933
+light_energy = 4.6856217
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3343,14 +3339,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.516556
+omni_range = 30.319134
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_217" parent_id_path=PackedInt32Array(1259806216, 1977225594) index="1" unique_id=770021007]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.397824
+light_energy = 4.8096275
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3359,14 +3355,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.829706
+omni_range = 30.516302
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_210" parent_id_path=PackedInt32Array(1259806216, 597106595) index="1" unique_id=770021000]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.216835
+light_energy = 4.0499797
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3375,14 +3371,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.528059
+omni_range = 29.23441
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_211" parent_id_path=PackedInt32Array(1259806216, 475269882) index="1" unique_id=770021001]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.6573653
+light_energy = 4.6320224
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3391,14 +3387,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.262276
+omni_range = 30.222298
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_213" parent_id_path=PackedInt32Array(1259806216, 89575922) index="1" unique_id=770021003]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.649395
+light_energy = 4.4836726
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3407,14 +3403,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.248991
+omni_range = 29.977617
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_216" parent_id_path=PackedInt32Array(1259806216, 1769771549) index="1" unique_id=770021006]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.3675394
+light_energy = 4.526836
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3423,14 +3419,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.779232
+omni_range = 30.059736
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight" type="OmniLight3D" parent="MapWithoutTreasure/Cube_215" parent_id_path=PackedInt32Array(1259806216, 827443694) index="1" unique_id=770021005]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.183157
+light_energy = 4.511091
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3439,7 +3435,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.471928
+omni_range = 30.050398
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -3636,7 +3632,7 @@ metadata/generated_trimesh_collision = true
 [node name="AdminLamp_NW" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=592973638]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 37.0437, 1.0849003, 7.9026284)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 2.9078274
+light_energy = 2.6440763
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3645,14 +3641,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.236675
+omni_range = 16.841595
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_NW4" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1026349288]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 41.54479, 1.0849003, 10.259708)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 2.642128
+light_energy = 2.4699292
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3661,14 +3657,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.82671
+omni_range = 16.54942
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_NW2" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=345480718]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 32.65285, 1.0849003, 10.401913)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 2.5694385
+light_energy = 2.4570076
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3677,14 +3673,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.714554
+omni_range = 16.538324
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_NW3" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1123720647]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 28.385422, 1.0849003, 12.174448)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 2.974136
+light_energy = 2.8450232
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3693,14 +3689,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.338987
+omni_range = 17.169514
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_NE" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1475557415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.758186, 1.2169526, 8.135382)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.149467
+light_energy = 3.9288173
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3709,14 +3705,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.163157
+omni_range = 16.93341
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_NE2" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=387575285]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.438396, 1.2169526, 12.837624)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 3.9938405
+light_energy = 4.142617
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3725,14 +3721,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.99764
+omni_range = 17.163334
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_Center" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=276278167]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.522385, 1.2021127, -7.9161415)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3411245
+light_energy = 4.5954933
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3741,14 +3737,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.4458
+omni_range = 17.69867
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_Center2" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=2010436345]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.854454, 1.2021127, -2.4619198)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 3.9650772
+light_energy = 4.15718
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3757,14 +3753,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.03903
+omni_range = 17.243792
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=317735557]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 39.91358, 1.0849003, -2.4409032)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.0048895
+light_energy = 3.8253791
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3773,14 +3769,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.76482
+omni_range = 16.578218
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW2" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=34044779]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 31.274982, 1.0849003, -7.9811454)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.014984
+light_energy = 3.723248
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3789,14 +3785,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.774939
+omni_range = 16.46863
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW3" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1136788496]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 31.107199, 1.1747597, -14.997492)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.002969
+light_energy = 3.523412
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3805,14 +3801,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.762894
+omni_range = 16.248981
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW4" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1320518723]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 31.15176, 1.1747597, -20.032478)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.080079
+light_energy = 3.9737096
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3821,14 +3817,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.840195
+omni_range = 16.730955
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW5" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1039854775]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 37.416527, 1.1747597, -27.14674)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.2989273
+light_energy = 4.1385603
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3837,14 +3833,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.059586
+omni_range = 16.899635
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW6" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1653405188]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 42.09936, 1.1747597, -27.14674)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.148845
+light_energy = 4.107051
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3853,14 +3849,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.909132
+omni_range = 16.869825
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW7" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1091166475]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 45.204967, 1.1747597, -21.100147)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.0267515
+light_energy = 4.2046413
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3869,14 +3865,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.786736
+omni_range = 16.971718
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW9" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=951886362]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 62.184853, 1.1747597, -16.767998)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.2108507
+light_energy = 4.2563543
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3885,14 +3881,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.97129
+omni_range = 17.018019
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW10" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=1882427653]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 57.29541, 1.1638857, -10.8304405)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.369435
+light_energy = 4.261426
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3901,14 +3897,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.130268
+omni_range = 17.028633
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW11" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=942676105]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 68.84374, 1.1638857, -0.6626904)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.176234
+light_energy = 4.0464807
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3917,14 +3913,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.936588
+omni_range = 16.804733
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminLamp_SW8" type="OmniLight3D" parent="MapWithoutTreasure/AdministrativeRoomLights" unique_id=505785405]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 39.975903, 1.1747597, -15.457373)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.412165
+light_energy = 4.802434
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -3933,7 +3929,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.173105
+omni_range = 17.556454
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4129,43 +4125,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.30841, 0.32707912, 48.0877
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
 script = ExtResource("56_y6ncg")
 
-[node name="TunnelCeilingColliders" type="Node3D" parent="." unique_id=770028000]
-
-[node name="TunnelCeiling_01" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=770028001]
-transform = Transform3D(5.5738626, 0, 0, 0, 1, 0, 0, 0, 1, 6.8837185, -4.7448826, -34.23727)
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=770028002]
-shape = SubResource("Shape_tunnel_ceiling")
-
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=1736775771]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.786573, 0, -12.383465)
-shape = SubResource("Shape_tunnel_ceiling")
-
-[node name="CollisionShape3D3" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=6520850]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3570502, 0, 63.47317)
-shape = SubResource("Shape_tunnel_ceiling")
-
-[node name="CollisionShape3D4" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_01" unique_id=69080453]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0891216, 0, 69.64092)
-shape = SubResource("Shape_tunnel_ceiling")
-
-[node name="TunnelCeiling_05" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=770028009]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, -27.44034, -20)
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_05" unique_id=770028010]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 14.629896, 92.150116, 22.831528, -6.536539)
-shape = SubResource("Shape_tunnel_ceiling")
-
-[node name="TunnelCeiling_06" type="StaticBody3D" parent="TunnelCeilingColliders" unique_id=1012751566]
-transform = Transform3D(3.6137369, 0, 0, 0, 1, 0, 0, 0, 0.36970487, -363.524, -11.415, 61.897)
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeilingColliders/TunnelCeiling_06" unique_id=688890013]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 14.629896, 92.150116, 22.831528, -6.536539)
-shape = SubResource("Shape_tunnel_ceiling")
-
 [node name="Testamente2" parent="." unique_id=222499981 instance=ExtResource("57_i376l")]
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.508, 0.138, -19.567)
 
@@ -4213,7 +4172,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_012" index="0" unique_id=74105663]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.124462
+light_energy = 3.7773204
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4222,7 +4181,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.88469
+omni_range = 16.523554
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4232,7 +4191,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_016" index="0" unique_id=663046375]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.4358215
+light_energy = 4.0052314
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4241,7 +4200,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.19682
+omni_range = 16.772844
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4251,7 +4210,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_052" index="0" unique_id=54108004]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.420604
+light_energy = 4.3671217
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4260,7 +4219,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.181564
+omni_range = 17.13095
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4270,7 +4229,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_053" index="0" unique_id=45533764]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.315679
+light_energy = 4.2713776
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4279,7 +4238,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.07638
+omni_range = 17.032974
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4289,7 +4248,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_054" index="0" unique_id=99385236]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.163718
+light_energy = 4.294939
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4298,7 +4257,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.924042
+omni_range = 17.06205
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4308,7 +4267,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_055" index="0" unique_id=1733550032]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 3.991344
+light_energy = 4.6107645
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4317,7 +4276,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.75124
+omni_range = 17.383692
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4327,7 +4286,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_056" index="0" unique_id=1825132528]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.4592457
+light_energy = 4.6765795
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4336,7 +4295,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.220303
+omni_range = 17.428556
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4346,7 +4305,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_057" index="0" unique_id=1840834599]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.041526
+light_energy = 4.105006
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4355,7 +4314,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.801546
+omni_range = 16.868006
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4365,7 +4324,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_058" index="0" unique_id=1494677628]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 3.8494956
+light_energy = 4.0125756
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4374,7 +4333,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.60904
+omni_range = 16.78372
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4384,7 +4343,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_059" index="0" unique_id=947321566]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 3.919521
+light_energy = 3.8682184
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4393,7 +4352,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.67924
+omni_range = 16.633678
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4403,7 +4362,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_060" index="0" unique_id=72383836]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.00723
+light_energy = 4.4898777
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4412,7 +4371,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.767166
+omni_range = 17.261822
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4422,7 +4381,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_061" index="0" unique_id=76478974]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.6284556
+light_energy = 4.0681386
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4431,7 +4390,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.38993
+omni_range = 16.850903
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4441,7 +4400,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_062" index="0" unique_id=791647614]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.4136114
+light_energy = 4.419559
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4450,7 +4409,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.174555
+omni_range = 17.182646
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4460,7 +4419,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_063" index="0" unique_id=2057311143]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.037957
+light_energy = 4.291185
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4469,7 +4428,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.79797
+omni_range = 17.05866
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4479,7 +4438,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_064" index="0" unique_id=1581335707]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.166259
+light_energy = 4.4168897
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4488,7 +4447,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.926588
+omni_range = 17.182896
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4498,7 +4457,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_065" index="0" unique_id=92733901]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3364816
+light_energy = 4.2586904
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4507,7 +4466,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.097233
+omni_range = 17.024767
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4517,7 +4476,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_066" index="0" unique_id=89575889]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.1826773
+light_energy = 4.3084493
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4526,7 +4485,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.943048
+omni_range = 17.077398
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4536,7 +4495,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_067" index="0" unique_id=125629250]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.425581
+light_energy = 4.7850556
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4545,7 +4504,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.186554
+omni_range = 17.535091
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4555,7 +4514,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_068" index="0" unique_id=277513855]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.427734
+light_energy = 4.592842
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4564,7 +4523,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.188711
+omni_range = 17.354733
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4574,7 +4533,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_069" index="0" unique_id=876837922]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.089753
+light_energy = 3.797959
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4583,7 +4542,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.849894
+omni_range = 16.546577
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4593,7 +4552,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_070" index="0" unique_id=902357398]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.1119246
+light_energy = 3.8527637
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4602,14 +4561,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.87212
+omni_range = 16.608166
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight2" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_070" index="1" unique_id=1461624899]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -112.30519, -5.802309, -22.794712)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.4943237
+light_energy = 4.103578
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4618,14 +4577,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.255466
+omni_range = 16.87502
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight3" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_070" index="2" unique_id=233766228]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -95.14107, -5.601108, 54.617817)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3677416
+light_energy = 4.3813806
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4634,14 +4593,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.12857
+omni_range = 17.143372
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight4" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_070" index="3" unique_id=714494879]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -167.09996, -5.601108, 73.04833)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.264428
+light_energy = 3.9808924
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4650,7 +4609,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.025002
+omni_range = 16.738646
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4660,7 +4619,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_071" index="0" unique_id=1420702230]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.245281
+light_energy = 4.517888
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4669,7 +4628,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.005806
+omni_range = 17.276403
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4679,7 +4638,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_072" index="0" unique_id=2003729744]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.5393634
+light_energy = 4.876096
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4688,7 +4647,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.30062
+omni_range = 17.618639
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4698,7 +4657,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_073" index="0" unique_id=2008453243]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.273125
+light_energy = 4.2381463
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4707,7 +4666,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.03372
+omni_range = 17.003052
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4717,7 +4676,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_074" index="0" unique_id=214530310]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.2057624
+light_energy = 4.0434346
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4726,7 +4685,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.96619
+omni_range = 16.811993
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4736,7 +4695,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_075" index="0" unique_id=523443324]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.39236
+light_energy = 4.367301
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4745,7 +4704,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.15325
+omni_range = 17.130047
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4755,7 +4714,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_076" index="0" unique_id=1993341969]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.1423674
+light_energy = 4.5103235
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4764,7 +4723,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.902637
+omni_range = 17.273739
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4774,7 +4733,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_077" index="0" unique_id=747775682]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.2124496
+light_energy = 3.9451427
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4783,7 +4742,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.972893
+omni_range = 16.702816
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4793,7 +4752,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_078" index="0" unique_id=1863065608]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.4341083
+light_energy = 4.713493
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4802,7 +4761,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.195103
+omni_range = 17.463028
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4812,7 +4771,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_079" index="0" unique_id=1915781157]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3128824
+light_energy = 4.8795424
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4821,7 +4780,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.073576
+omni_range = 17.624939
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4831,7 +4790,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_080" index="0" unique_id=1929712580]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.2648377
+light_energy = 3.9565165
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4840,7 +4799,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.025412
+omni_range = 16.713654
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4850,7 +4809,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_081" index="0" unique_id=1753601024]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.0973067
+light_energy = 4.1030455
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4859,7 +4818,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.857466
+omni_range = 16.865353
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4869,7 +4828,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_082" index="0" unique_id=55871194]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.43335
+light_energy = 4.6307096
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4878,7 +4837,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.194342
+omni_range = 17.385738
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4888,7 +4847,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_083" index="0" unique_id=586241386]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3410354
+light_energy = 3.8209958
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4897,7 +4856,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.101799
+omni_range = 16.577425
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4907,7 +4866,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_084" index="0" unique_id=1303699479]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.1881633
+light_energy = 4.336536
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4916,7 +4875,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 16.948547
+omni_range = 17.099056
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -4926,7 +4885,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_085" index="0" unique_id=570354631]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.62, 0.28, 1)
-light_energy = 4.3069477
+light_energy = 4.0747876
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -4935,7 +4894,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 17.067627
+omni_range = 16.83587
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -5040,7 +4999,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=1395187834]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.509003
+light_energy = 4.1811533
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5049,14 +5008,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.015005
+omni_range = 29.470854
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight2" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=785127061]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 17.327314, -4.09302, -6.5483885)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.675763
+light_energy = 4.227682
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5065,14 +5024,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.292938
+omni_range = 29.563503
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight6" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=1691340144]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -51.274433, -4.09302, 34.58348)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.728878
+light_energy = 5.2198277
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5081,14 +5040,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.381464
+omni_range = 31.156744
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight7" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=245994493]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -110.579765, -4.0930195, 89.36763)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.675497
+light_energy = 4.7085605
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5097,14 +5056,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.292496
+omni_range = 30.354195
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight8" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=419089848]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -160.69318, -4.0930195, 136.49977)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.737557
+light_energy = 4.6758533
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5113,14 +5072,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.39593
+omni_range = 30.308222
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight9" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=1055971127]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -96.50815, -4.09302, 193.83972)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.7255206
+light_energy = 4.6186066
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5129,14 +5088,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.375868
+omni_range = 30.203417
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight10" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=1238914547]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -37.962326, -4.0930195, 287.77722)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.435194
+light_energy = 4.483632
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5145,14 +5104,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.89199
+omni_range = 29.973469
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight11" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=449821985]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, -16.332144, -4.0930195, 296.33987)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.469284
+light_energy = 4.549175
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5161,14 +5120,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.948807
+omni_range = 30.083405
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight3" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=1649161]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 116.15403, -4.0930195, 89.49072)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.2779245
+light_energy = 4.38779
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5177,14 +5136,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.629875
+omni_range = 29.8206
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight4" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=147650355]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 153.20465, -4.0930195, 138.3179)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.270315
+light_energy = 4.0589104
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5193,14 +5152,14 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.617191
+omni_range = 29.247288
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
 [node name="AdminStyleLight5" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_086" unique_id=99962196]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 65.14446, -4.0930195, 220.05957)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.292407
+light_energy = 3.8558838
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5209,7 +5168,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 29.654013
+omni_range = 28.885113
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -5221,7 +5180,7 @@ surface_material_override/0 = ExtResource("38_sjrkc")
 [node name="AdminStyleLight" type="OmniLight3D" parent="TreasureRoomUpdated/Sphere_087" unique_id=1637778038]
 transform = Transform3D(0.625, 0, 0, 0, 0.625, 0, 0, 0, 0.625, 0, 0, 0)
 light_color = Color(1, 0.8, 0.6, 1)
-light_energy = 4.538388
+light_energy = 4.222766
 light_volumetric_fog_energy = 1.1
 shadow_enabled = true
 shadow_bias = 0.08
@@ -5230,7 +5189,7 @@ distance_fade_enabled = true
 distance_fade_begin = 55.0
 distance_fade_shadow = 32.0
 distance_fade_length = 12.0
-omni_range = 30.06398
+omni_range = 29.537395
 omni_attenuation = 1.15
 script = ExtResource("36_j2dg5")
 
@@ -5391,7 +5350,7 @@ dialogue = &"mechanism_enter"
 shape = SubResource("BoxShape3D_wgjxp")
 
 [node name="TunnelsEnter" type="Area3D" parent="Story" unique_id=991466369]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.8, -1.8, -40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.8, -7.2, -40)
 collision_layer = 0
 collision_mask = 2
 monitorable = false
@@ -5447,36 +5406,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6)
 [node name="Guards" type="Node3D" parent="." unique_id=1444439590]
 
 [node name="GuardCaptain" parent="Guards" unique_id=2070871672 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -44.82407, 0.19248916, 16.29159)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -44.82407, 0.16962248, 16.29159)
 route_path = NodePath("../../Routes/ArchiveDoor")
 
 [node name="GuardEscort" parent="Guards" unique_id=1350089228 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -3.7108803, 0.24131827, 16.29159)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -3.7108803, 0.21845159, 16.29159)
 route_path = NodePath("../../Routes/CorridorWatch")
 carries_torch = true
 
 [node name="ArchiveGuard1" parent="Guards" unique_id=812367339 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8408203, 0.16043974, -16.51106)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8408203, 0.13757306, -16.51106)
 route_path = NodePath("../../Routes/ArchiveSouth")
 carries_torch = true
 
 [node name="ArchiveGuard2" parent="Guards" unique_id=1180360167 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(0.9985996, 0, 0.05290414, 0, 1, 0, -0.05290414, 0, 0.9985996, 17.24752, 0.005592834, -16.154305)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(0.98741984, 0, 0.15812014, 0, 1, 0, -0.15812014, 0, 0.98741984, 17.24752, -0.017273834, -16.154305)
 route_path = NodePath("../../Routes/ArchiveEast")
 
 [node name="ArchiveGuard3" parent="Guards" unique_id=1692658472 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(0.9924818, 0, -0.122392215, 0, 1, 0, 0.122392215, 0, 0.9924818, -2.2750015, 0.018485796, -35.62845)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(0.9330127, 0, -0.359843, 0, 1, 0, 0.359843, 0, 0.9330127, -2.2750015, -0.0043808734, -35.62845)
 route_path = NodePath("../../Routes/ArchiveNorthWest")
 carries_torch = true
 
 [node name="ArchiveGuard4" parent="Guards" unique_id=1101598378 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.473942, 0.17212917, -35.62845)
-velocity = Vector3(0, -0.78400004, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.473942, 0.14926249, -35.62845)
 route_path = NodePath("../../Routes/ArchiveNorthEast")
 
 [node name="Routes" type="Node3D" parent="." unique_id=342638491]
@@ -5645,30 +5598,35 @@ external_body_path = NodePath("../MapWithoutTreasure/TunnelEntrance2/TunnelEntra
 
 [node name="Plate1" parent="CorridorTraps" unique_id=2090823085 instance=ExtResource("85_mew8i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.174414, 0.25351334, 15.803097)
+crossbow_paths = Array[NodePath]([NodePath("../Crossbow1")])
 
 [node name="Crossbow1" parent="CorridorTraps" unique_id=545259074 instance=ExtResource("87_82mqr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -23.174414, 2.4435134, 8.431391)
 
 [node name="Plate2" parent="CorridorTraps" unique_id=472659292 instance=ExtResource("85_mew8i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.183556, 0.21354963, 16.140081)
+crossbow_paths = Array[NodePath]([NodePath("../Crossbow2")])
 
 [node name="Crossbow2" parent="CorridorTraps" unique_id=308185535 instance=ExtResource("87_82mqr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -36.183556, 2.4344068, 8.442797)
 
 [node name="Plate3" parent="CorridorTraps" unique_id=445341486 instance=ExtResource("85_mew8i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.657753, 0.25050688, 16.087652)
+crossbow_paths = Array[NodePath]([NodePath("../Crossbow3")])
 
 [node name="Crossbow3" parent="CorridorTraps" unique_id=1625654833 instance=ExtResource("87_82mqr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -48.657753, 2.482208, 8.451307)
 
 [node name="Plate4" parent="CorridorTraps" unique_id=1179945713 instance=ExtResource("85_mew8i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.177451, 0.17862214, 16.091541)
+crossbow_paths = Array[NodePath]([NodePath("../Crossbow4")])
 
 [node name="Crossbow4" parent="CorridorTraps" unique_id=320957459 instance=ExtResource("87_82mqr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.177451, 2.3914962, 8.43919)
 
 [node name="Plate5" parent="CorridorTraps" unique_id=1408207252 instance=ExtResource("85_mew8i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.13474, 0.21354939, 15.954927)
+crossbow_paths = Array[NodePath]([NodePath("../Crossbow5")])
 
 [node name="Crossbow5" parent="CorridorTraps" unique_id=258043568 instance=ExtResource("87_82mqr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 28.13474, 2.3890467, 10.150568)
@@ -5719,18 +5677,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6510887, -8.112573, 19.3906
 
 [node name="Ladder1" parent="Mechanism" unique_id=1924293497 instance=ExtResource("92_sn6da")]
 transform = Transform3D(-0.0018505284, 0, -0.9999983, 0, 1, 0, 0.9999983, 0, -0.0018505284, 48.171288, -7.1172647, -46.64582)
+top = Vector3(-0.0015182495, 7.952265, -0.72270966)
+landing = Vector3(-0.002998352, 7.4575624, -1.5227089)
 
 [node name="Model" parent="Mechanism/Ladder1" unique_id=1049608186 instance=ExtResource("94_be7pr")]
 transform = Transform3D(-5.380716e-07, -1.7264392e-07, 1.7694597, -0.27141616, 1.731812, -7.197197e-09, -0.9665792, -0.35195342, -8.873176e-07, 15.927404, 14.564449, 20.99356)
 
 [node name="Ladder2" parent="Mechanism" unique_id=1046607157 instance=ExtResource("92_sn6da")]
 transform = Transform3D(0.002981853, 0, -0.9999955, 0, 1, 0, 0.9999955, 0, 0.002981853, 2.795254, 8.308372, 47.367485)
+top = Vector3(-0.0006942749, 4.501629, -0.59975076)
+landing = Vector3(0.0016899109, 4.343932, -1.3997478)
 
 [node name="Model" parent="Mechanism/Ladder2" unique_id=558852556 instance=ExtResource("94_be7pr")]
 transform = Transform3D(2.7485657e-06, 1.6811828e-07, -1.0000001, -0.061048537, 0.99813473, 0, 0.9981348, 0.061048545, 2.753688e-06, -9.001343, 6.1581182, -23.110977)
 
 [node name="Ladder3" parent="Mechanism" unique_id=1211051680 instance=ExtResource("92_sn6da")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0.46830478, -7.4885263, 42.456657)
+top = Vector3(0.00030469894, 15.298527, -1.2003441)
+landing = Vector3(0.00030463934, 15.178242, -2.0003433)
 
 [node name="Model" parent="Mechanism/Ladder3" unique_id=1229869857 instance=ExtResource("94_be7pr")]
 transform = Transform3D(2.6177912e-07, 1.6011098e-08, -2, -0.20756504, 3.3936582, 0, 1.9962695, 0.122097075, 2.6226832e-07, -18.002558, 20.937605, -46.222)
@@ -5750,6 +5714,11 @@ metadata/usables = []
 [node name="Counterweight" parent="Mechanism" unique_id=715278369 instance=ExtResource("95_fn86e")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3069725, 14.046626, 48.9321)
 balance_path = NodePath("../../MapWithoutTreasure/Balanta")
+gate_paths = Array[NodePath]([NodePath("../Causeway")])
+flow_paths = Array[NodePath]([NodePath("../../MapWithoutTreasure/MercuryFlowingPoint")])
+
+[node name="Causeway" parent="Mechanism" unique_id=1887491731 instance=ExtResource("96_1ukyn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.3, 57.6)
 
 [node name="MercuryHall" type="Node3D" parent="." unique_id=279887438]
 
@@ -5758,7 +5727,7 @@ collision_layer = 0
 collision_mask = 2
 monitorable = false
 script = ExtResource("97_nt1sd")
-ambient = 0.18
+ambient = 0.12
 
 [node name="Shape" type="CollisionShape3D" parent="MercuryHall/Fumes1" unique_id=872316650]
 transform = Transform3D(5.6138334, 0, 0, 0, 8.11768, 0, 0, 0, 6.752539, -73.80503, 0.43781972, 65.18353)
@@ -5775,7 +5744,7 @@ collision_layer = 0
 collision_mask = 2
 monitorable = false
 script = ExtResource("97_nt1sd")
-ambient = 0.3
+ambient = 0.06
 
 [node name="Shape" type="CollisionShape3D" parent="MercuryHall/Fumes2" unique_id=184507483]
 transform = Transform3D(2.186149, 0, 0, 0, 10.668397, 0, 0, 0, 2.9014091, -3.8192554, -0.86616135, 57.02005)
@@ -5792,7 +5761,7 @@ collision_layer = 0
 collision_mask = 2
 monitorable = false
 script = ExtResource("97_nt1sd")
-ambient = 0.3
+ambient = 0.06
 
 [node name="Shape" type="CollisionShape3D" parent="MercuryHall/Fumes3" unique_id=810846021]
 transform = Transform3D(5.3178015, 0, 0, 0, 10.138702, 0, 0, 0, 5.4285235, -0.7734108, 0, 107.7126)
@@ -5840,37 +5809,17 @@ vapor = 0.0
 drag = 1.0
 
 [node name="UseBody" type="StaticBody3D" parent="MercuryHall/FillPoint1" unique_id=1974493969]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.79999995, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.280533, -0.5113901, 13.865246)
 collision_layer = 16
 collision_mask = 0
 metadata/usables = []
 
 [node name="Shape" type="CollisionShape3D" parent="MercuryHall/FillPoint1/UseBody" unique_id=1090475660]
-shape = SubResource("BoxShape3D_7b07l")
+shape = SubResource("BoxShape3D_2uocy")
 
 [node name="Usable" type="Node" parent="MercuryHall/FillPoint1/UseBody" unique_id=39739104]
 script = ExtResource("5_hp6sp")
-highlight = false
-
-[node name="FillPoint2" type="Area3D" parent="MercuryHall" unique_id=1268543083]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.8163, 0.4329319, 60.703945)
-collision_layer = 16
-collision_mask = 2
-script = ExtResource("98_lytpu")
-vapor = 0.0
-drag = 1.0
-
-[node name="UseBody" type="StaticBody3D" parent="MercuryHall/FillPoint2" unique_id=2069133435]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.79999995, 0)
-collision_layer = 16
-collision_mask = 0
-metadata/usables = []
-
-[node name="Shape" type="CollisionShape3D" parent="MercuryHall/FillPoint2/UseBody" unique_id=794775085]
-shape = SubResource("BoxShape3D_1mfp7")
-
-[node name="Usable" type="Node" parent="MercuryHall/FillPoint2/UseBody" unique_id=1244472987]
-script = ExtResource("5_hp6sp")
+hold_time = 2.6
 highlight = false
 
 [node name="WallLamps" type="Node3D" parent="." unique_id=165276794]
@@ -5878,273 +5827,347 @@ highlight = false
 [node name="Sconce00" parent="WallLamps" unique_id=1174920682 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -48.19381, 4.492192, -12.676083)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce01" parent="WallLamps" unique_id=834052184 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -48.144535, 4.492192, -26.495726)
+show_fixture = false
 
 [node name="Sconce02" parent="WallLamps" unique_id=986349235 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -70.41011, 4.492192, -12.680496)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce03" parent="WallLamps" unique_id=1167464621 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -70.40801, 4.492192, -26.500141)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce04" parent="WallLamps" unique_id=1767422275 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -35.03613, 4.492192, -12.676083)
+show_fixture = false
 
 [node name="Sconce05" parent="WallLamps" unique_id=1748158969 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -35.128143, 4.492192, -26.495726)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce06" parent="WallLamps" unique_id=749578700 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.033667307, 0, 0.9994331, 0, 1, 0, -0.9994331, 0, 0.033667307, -82.458084, 4.9029903, -15.924179)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce07" parent="WallLamps" unique_id=896416827 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.17506398, 0, 0.9845571, 0, 1.0000001, 0, -0.9845571, 0, -0.17506398, -81.6699, 3.9338834, -29.03321)
+show_fixture = false
 
 [node name="Sconce08" parent="WallLamps" unique_id=1524329392 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.5085833, 0, -0.8610128, 0, 1, 0, 0.8610128, 0, 0.5085833, -82.28399, 4.1958184, -3.2038898)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce09" parent="WallLamps" unique_id=837333561 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9790464, 0, -0.20363754, 0, 1.0000001, 0, 0.20363754, 0, -0.9790464, -75.96238, 3.8710148, -2.8706512)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce10" parent="WallLamps" unique_id=707468287 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9934183, 0, 0.1145435, 0, 1.0000001, 0, -0.1145435, 0, -0.9934183, -61.686134, 3.8267157, -2.327034)
+show_fixture = false
 
 [node name="Sconce11" parent="WallLamps" unique_id=1216324896 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.994663, 0, 0.10317702, 0, 1, 0, -0.10317702, 0, 0.994663, -54.145435, 4.0962677, -2.0644426)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce12" parent="WallLamps" unique_id=814610131 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.995505, 0, -0.09470978, 0, 1.0000001, 0, 0.09470978, 0, -0.995505, -40.996147, 4.0962677, -2.0814161)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce13" parent="WallLamps" unique_id=380742736 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.8063103, 0, -0.5914928, 0, 1, 0, 0.5914928, 0, -0.8063103, -29.375092, 3.833547, -2.2266567)
+show_fixture = false
 
 [node name="Sconce14" parent="WallLamps" unique_id=245376742 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.10558484, 0, -0.99441034, 0, 1.0000001, 0, 0.99441034, 0, 0.10558484, -28.432371, 3.833547, -14.078137)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce15" parent="WallLamps" unique_id=1680854627 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.1648051, 0, -0.98632616, 0, 1, 0, 0.98632616, 0, 0.1648051, -28.395065, 4.9371576, -21.049246)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce16" parent="WallLamps" unique_id=510559878 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.25660902, 0, 0.9665153, 0, 1, 0, -0.9665153, 0, -0.25660902, -28.020586, 4.630878, -27.864782)
+show_fixture = false
 
 [node name="Sconce17" parent="WallLamps" unique_id=1675122577 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.3614587, 0, -0.9323881, 0, 1, 0, 0.9323881, 0, -0.3614587, -28.034227, 3.8882968, -33.242046)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce18" parent="WallLamps" unique_id=211819602 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.994366, 0, -0.106001355, 0, 1, 0, 0.106001355, 0, 0.994366, -46.782974, 3.888017, -35.69627)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce19" parent="WallLamps" unique_id=75299329 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.9733555, 0, -0.22930147, 0, 1, 0, 0.22930147, 0, 0.9733555, -59.73736, 3.888017, -34.918335)
+show_fixture = false
 
 [node name="Sconce20" parent="WallLamps" unique_id=6035811 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99985594, 0, 0.016975256, 0, 1, 0, -0.016975256, 0, 0.99985594, -67.59824, 4.401379, -35.063393)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce21" parent="WallLamps" unique_id=2143531908 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9994331, 0, 0.033667147, 0, 1, 0, -0.033667147, 0, -0.9994331, 52.177727, 4.9029903, -3.6192303)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce22" parent="WallLamps" unique_id=246217218 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.98455703, 0, -0.1750641, 0, 1, 0, 0.1750641, 0, -0.98455703, 39.0687, 3.9338834, -4.407411)
+show_fixture = false
 
 [node name="Sconce23" parent="WallLamps" unique_id=2134809161 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.86101276, 0, 0.5085835, 0, 1.0000001, 0, -0.5085835, 0, 0.86101276, 56.657562, 4.1958184, -3.7933245)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce24" parent="WallLamps" unique_id=1622564054 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.20363754, 0, -0.9790464, 0, 1.0000001, 0, 0.9790464, 0, 0.20363754, 56.990807, 3.8710148, -10.114942)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce25" parent="WallLamps" unique_id=913262713 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.11454338, 0, -0.9934183, 0, 1.0000001, 0, 0.9934183, 0, -0.11454338, 57.534416, 3.8267157, -24.391178)
+show_fixture = false
 
 [node name="Sconce26" parent="WallLamps" unique_id=2127979104 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.10317707, 0, 0.994663, 0, 1, 0, -0.994663, 0, -0.10317707, 57.79701, 4.0962677, -31.931877)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce27" parent="WallLamps" unique_id=2014332940 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.094710015, 0, -0.9955049, 0, 1, 0, 0.9955049, 0, 0.094710015, 57.780033, 4.0962677, -45.08117)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce28" parent="WallLamps" unique_id=896322570 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99942535, 0, 0.033896465, 0, 1, 0, -0.033896465, 0, 0.99942535, 42.495876, 3.833547, -41.1309)
+show_fixture = false
 
 [node name="Sconce29" parent="WallLamps" unique_id=1205086836 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.9839137, 0, 0.17864443, 0, 1, 0, -0.17864443, 0, 0.9839137, 35.07581, 4.9371576, -41.16821)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce30" parent="WallLamps" unique_id=1664236044 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9665153, 0, -0.25660914, 0, 1.0000001, 0, 0.25660914, 0, -0.9665153, 54.281475, 4.630878, -41.097145)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce31" parent="WallLamps" unique_id=1055553098 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.9323882, 0, -0.36145854, 0, 1, 0, 0.36145854, 0, 0.9323882, 48.904213, 3.8882968, -41.083508)
+show_fixture = false
 
 [node name="Sconce32" parent="WallLamps" unique_id=78205062 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.106001236, 0, 0.994366, 0, 1, 0, -0.994366, 0, 0.106001236, 32.405636, 3.888017, -39.294342)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce33" parent="WallLamps" unique_id=1233909810 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.22930145, 0, 0.9733555, 0, 1, 0, -0.9733555, 0, 0.22930145, 33.183567, 3.888017, -26.339952)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce34" parent="WallLamps" unique_id=1852725279 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.016975256, 0, 0.99985594, 0, 1, 0, -0.99985594, 0, -0.016975256, 33.03851, 4.401379, -18.47908)
+show_fixture = false
 
 [node name="Sconce35" parent="WallLamps" unique_id=104456397 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-1, 0, 1.192093e-07, 0, 1, 0, -1.192093e-07, 0, -1, -63.256428, 4.1404457, 10.286669)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce36" parent="WallLamps" unique_id=8295539 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99328226, 0, 0.115716934, 0, 1, 0, -0.115716934, 0, -0.99328226, -55.81062, 3.7769532, 10.573351)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce37" parent="WallLamps" unique_id=1555111628 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, -42.406906, 3.7769532, 10.735334)
+show_fixture = false
 
 [node name="Sconce38" parent="WallLamps" unique_id=595585950 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, -29.79265, 3.7769532, 10.735334)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce39" parent="WallLamps" unique_id=1156567690 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, -16.967846, 3.7769532, 10.735334)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce40" parent="WallLamps" unique_id=641665212 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, -4.289257, 3.7769532, 10.735334)
+show_fixture = false
 
 [node name="Sconce41" parent="WallLamps" unique_id=1390526668 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, 20.9692, 3.7769532, 10.735334)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce42" parent="WallLamps" unique_id=783345019 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, 33.634674, 3.7769532, 10.735334)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce43" parent="WallLamps" unique_id=2007510828 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.99986935, 0, 0.0161649, 0, 1, 0, -0.0161649, 0, -0.99986935, 45.085175, 3.7769532, 10.735334)
+show_fixture = false
 
 [node name="Sconce44" parent="WallLamps" unique_id=277117883 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, -42.406906, 3.7769532, 21.30077)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce45" parent="WallLamps" unique_id=2117048023 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, -29.79265, 3.7769532, 21.30077)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce46" parent="WallLamps" unique_id=691746456 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, -16.967846, 3.7769532, 21.30077)
+show_fixture = false
 
 [node name="Sconce47" parent="WallLamps" unique_id=1968899145 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, -4.289257, 3.7769532, 21.30077)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce48" parent="WallLamps" unique_id=1685263419 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, 20.9692, 3.7769532, 21.30077)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce49" parent="WallLamps" unique_id=626975071 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, 33.634674, 3.7769532, 21.30077)
+show_fixture = false
 
 [node name="Sconce50" parent="WallLamps" unique_id=1110167237 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99986935, 0, -0.0161649, 0, 1, 0, 0.0161649, 0, 0.99986935, 45.085175, 3.7769532, 21.30077)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce51" parent="WallLamps" unique_id=192628274 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.64707184, 4.492192, -12.42847)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce52" parent="WallLamps" unique_id=1518997038 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.64707184, 4.492192, -32.432465)
+show_fixture = false
 
 [node name="Sconce53" parent="WallLamps" unique_id=1801945538 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.64707184, 4.492192, -51.77125)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce54" parent="WallLamps" unique_id=2132230719 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 15.96595, 4.492192, -12.42847)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce55" parent="WallLamps" unique_id=1526161903 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 15.96595, 4.492192, -32.432465)
+show_fixture = false
 
 [node name="Sconce56" parent="WallLamps" unique_id=1464134376 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 15.96595, 4.492192, -51.77125)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce57" parent="WallLamps" unique_id=548983244 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.28196678, 0, -0.9594242, 0, 1, 0, 0.9594242, 0, 0.28196678, 5.370392, 2.9816453, 1.3633633)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce58" parent="WallLamps" unique_id=797869782 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.28196633, 0, 0.9594243, 0, 1, 0, -0.9594243, 0, 0.28196633, 9.221008, 2.9816453, 1.3633633)
+show_fixture = false
 
 [node name="Sconce59" parent="WallLamps" unique_id=1963160237 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.0010364471, 0, 0.99999946, 0, 1, 0, -0.99999946, 0, -0.0010364471, 45.87919, 3.888278, -31.15589)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce60" parent="WallLamps" unique_id=1439008299 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.0010364471, 0, 0.99999946, 0, 1, 0, -0.99999946, 0, -0.0010364471, 45.87919, 3.888278, -16.929672)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce61" parent="WallLamps" unique_id=482791228 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.0032678004, 0, -0.9999947, 0, 1.0000001, 0, 0.9999947, 0, 0.0032678004, 44.646744, 3.888278, -31.15589)
+show_fixture = false
 
 [node name="Sconce62" parent="WallLamps" unique_id=1549092917 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.0032678004, 0, -0.9999947, 0, 1.0000001, 0, 0.9999947, 0, 0.0032678004, 44.646744, 3.888278, -16.929672)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce63" parent="WallLamps" unique_id=911065481 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9936324, 0, 0.1126708, 0, 1, 0, -0.1126708, 0, -0.9936324, -2.0934799, 10.654068, 43.244396)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce64" parent="WallLamps" unique_id=285667791 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.99732715, 0, -0.07306565, 0, 1, 0, 0.07306565, 0, 0.99732715, -2.0859344, 9.894492, 67.31179)
+show_fixture = false
 
 [node name="Sconce65" parent="WallLamps" unique_id=1272747819 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.008288786, 0, 0.99996567, 0, 1, 0, -0.99996567, 0, 0.008288786, -13.878379, 10.252098, 44.60824)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce66" parent="WallLamps" unique_id=360252660 instance=ExtResource("99_pk17x")]
 transform = Transform3D(3.5762787e-07, 0, -1, 0, 1, 0, 1, 0, 3.5762787e-07, -46.29533, 9.597171, 67.11881)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce67" parent="WallLamps" unique_id=276798235 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-3.5762787e-07, 0, 1, 0, 1, 0, -1, 0, -3.5762787e-07, -46.39001, 9.588279, 73.10415)
+show_fixture = false
 
 [node name="Sconce68" parent="WallLamps" unique_id=615554657 instance=ExtResource("99_pk17x")]
 transform = Transform3D(1, 0, 1.1924884e-08, 0, 1, 0, -1.1924884e-08, 0, 1, -66.934166, 3.1849678, 98.48904)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce69" parent="WallLamps" unique_id=332355794 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.9999807, 0, -0.006218506, 0, 1, 0, 0.006218506, 0, -0.9999807, -21.017694, 3.87743, -28.525763)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce70" parent="WallLamps" unique_id=246237516 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-0.15898375, 0, -0.9872812, 0, 1, 0, 0.9872812, 0, -0.15898375, -74.14522, 4.1404457, 22.316471)
+show_fixture = false
 
 [node name="Sconce71" parent="WallLamps" unique_id=2027258857 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.9999939, 0, 0.0034896317, 0, 1, 0, -0.0034896317, 0, 0.9999939, 8.3378105, 3.7769532, 21.303036)
 oil = 80.0
+show_fixture = false
 
 [node name="Sconce72" parent="WallLamps" unique_id=1826166803 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.9999805, 0, -0.0062493277, 0, 1.0000001, 0, 0.0062493277, 0, 0.9999805, -55.419975, 3.7769532, 21.283176)
 oil = 40.0
+show_fixture = false
 
 [node name="Sconce73" parent="WallLamps" unique_id=1106066318 instance=ExtResource("99_pk17x")]
 transform = Transform3D(0.97738004, 0, 0.21149059, 0, 1, 0, -0.21149059, 0, 0.97738004, -69.914314, 4.8066325, 21.048847)
+show_fixture = false
 
 [node name="Atmosphere" type="Node" parent="." unique_id=235213815]
 script = ExtResource("101_bjpi4")
@@ -6171,7 +6194,7 @@ music_until_flag = &"guards_hostile"
 shape = SubResource("BoxShape3D_nx0x2")
 
 [node name="Tunnels" type="Area3D" parent="AtmosphereZones" unique_id=1961828490]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -3.5, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, -7, -5)
 collision_layer = 0
 collision_mask = 2
 monitorable = false

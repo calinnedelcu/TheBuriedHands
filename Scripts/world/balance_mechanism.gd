@@ -50,6 +50,18 @@ func start_flow() -> void:
 		_audio.stop()
 		_audio.play()
 
+## Straight to the tipped pose (loading a checkpoint taken after the pour).
+func snap_to_end() -> void:
+	if _anim == null:
+		return
+	var anim_name := _resolve_animation_name()
+	if anim_name == &"":
+		return
+	_anim.play(anim_name)
+	_anim.seek(_anim.get_animation(anim_name).length, true)
+	_anim.pause()
+	_rebuild_complex_collision()
+
 func stop_flow() -> void:
 	if _anim != null and _anim.is_playing():
 		if rebuild_complex_collision_after_animation:

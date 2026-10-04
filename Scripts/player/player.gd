@@ -96,6 +96,8 @@ var _vapor_intake := 0.0
 var _locks: Dictionary = {}
 var _look_locks: Dictionary = {}
 var _ladder: Node3D = null
+var _auto_ducked := false
+var _duck_clear := 0.0
 var _cinematic_tween: Tween
 var _visibility_timer := 0.0
 var _occlusion_cache: Dictionary = {}
@@ -243,6 +245,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"skip_line"):
 		Dialogue.skip_line()
 	elif event.is_action_pressed(&"crouch"):
+		_auto_ducked = false
 		if Settings.get_value(&"crouch_toggle"):
 			_set_stance(Stance.STAND if stance == Stance.CROUCH else Stance.CROUCH)
 		else:
@@ -292,6 +295,8 @@ func _move(delta: float) -> void:
 		elif Input.is_action_just_pressed(&"jump") and stance != Stance.STAND:
 			_set_stance(Stance.STAND)
 	var dir := (global_transform.basis * Vector3(input.x, 0.0, input.y)).normalized()
+	if _locks.is_empty():
+		_auto_duck(dir, delta)
 	var target := dir * _target_speed()
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var rate := ground_accel if dir != Vector3.ZERO else ground_decel
@@ -327,20 +332,25 @@ func _wants_sprint() -> bool:
 ## at: probe up, forward and back down for a walkable top, then lift the body
 ## onto it. The camera eases up afterwards instead of popping.
 func _try_step_up(from: Vector3, dir: Vector3, _delta: float) -> void:
-	var up := Vector3.UP * max_step_height
 	var probe_forward := dir * (_capsule.radius + 0.12)
+	# Find the step's top by looking down onto it, then lift by just that much
+	# (lifting by the full step height fails under stairs overhead).
+	var space := get_world_3d().direct_space_state
+	var look_from := from + probe_forward + Vector3.UP * (max_step_height + 0.05)
+	var q := PhysicsRayQueryParameters3D.create(look_from, look_from + Vector3.DOWN * (max_step_height + 0.1), collision_mask & 1)
+	q.exclude = [get_rid()]
+	var hit := space.intersect_ray(q)
+	if hit.is_empty() or (hit.normal as Vector3).y < 0.7:
+		return
+	var rise: float = (hit.position as Vector3).y - from.y
+	if rise < 0.04 or rise > max_step_height:
+		return
+	var up := Vector3.UP * (rise + 0.03)
 	var xform := Transform3D(global_basis, from)
 	if test_move(xform, up):
 		return
 	xform.origin += up
-	if test_move(xform, probe_forward):
-		return
-	xform.origin += probe_forward
-	var hit := KinematicCollision3D.new()
-	if not test_move(xform, -up - Vector3.UP * 0.05, hit) or hit.get_normal().y < 0.7:
-		return
-	var rise := (xform.origin + hit.get_travel()).y - from.y
-	if rise < 0.04 or rise > max_step_height:
+	if test_move(xform, probe_forward * 0.6):
 		return
 	global_position = Vector3(global_position.x, from.y + rise + 0.01, global_position.z)
 	velocity.y = 0.0
@@ -359,6 +369,43 @@ func _ladder_move(delta: float) -> void:
 	if _distance_since_step > 1.1:
 		_distance_since_step = 0.0
 		_play_footstep("wood", 0.7)
+
+## Ducking under a low lintel or through a low passage happens by itself:
+## walking into a gap that is open at the body but too low for the head
+## crouches, and the player straightens up once there is room again.
+func _auto_duck(dir: Vector3, delta: float) -> void:
+	if stance == Stance.STAND and dir != Vector3.ZERO and is_on_floor() and _low_passage_ahead(dir):
+		_set_stance(Stance.CROUCH)
+		_auto_ducked = true
+		_duck_clear = 0.0
+	elif _auto_ducked:
+		if stance != Stance.CROUCH:
+			_auto_ducked = false
+		elif _ceiling_blocks(stand_height) or (dir != Vector3.ZERO and _low_passage_ahead(dir)):
+			_duck_clear = 0.0
+		else:
+			_duck_clear += delta
+			if _duck_clear > 0.3:
+				_auto_ducked = false
+				_set_stance(Stance.STAND)
+
+## Something at head height ahead while the way is open lower down — unlike a
+## table or a wall, which block below the waist too.
+func _low_passage_ahead(dir: Vector3) -> bool:
+	var space := get_world_3d().direct_space_state
+	var flat := Vector3(dir.x, 0.0, dir.z).normalized() * (_capsule.radius + 0.6)
+	for h in [0.5, 1.2, crouch_height - 0.15]:
+		if _ray_hits(space, global_position + Vector3.UP * h, flat):
+			return false
+	var ahead := global_position + flat
+	return _ray_hits(space, global_position + Vector3.UP * (stand_height - 0.15), flat) \
+		or _ray_hits(space, ahead + Vector3.UP * (crouch_height - 0.05), Vector3.UP * (stand_height - crouch_height + 0.1))
+
+func _ray_hits(space: PhysicsDirectSpaceState3D, from: Vector3, by: Vector3) -> bool:
+	var q := PhysicsRayQueryParameters3D.create(from, from + by, collision_mask & 1)
+	q.exclude = [get_rid()]
+	q.hit_back_faces = true
+	return not space.intersect_ray(q).is_empty()
 
 func _set_stance(target: Stance, force := false) -> void:
 	if target == stance:

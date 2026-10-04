@@ -15,6 +15,9 @@ const POUR_SOUND := preload("res://audio/sfx/mercury/fill.mp3")
 @export var light_energy := 2.6
 @export var light_range := 11.0
 @export var flicker := 0.14
+## The lamp's own bronze bracket. Off where the lamp sits in a sconce that is
+## part of the level's model.
+@export var show_fixture := true
 
 @onready var _light: OmniLight3D = $Light
 @onready var _flame: MeshInstance3D = $Flame
@@ -35,6 +38,7 @@ func _ready() -> void:
 	_t = randf() * 100.0
 	_usable.hold_time = 3.5
 	_usable.tap_enabled = true
+	($Model as Node3D).visible = show_fixture
 	_set_lit(start_lit and oil > 0.0, false)
 
 func _exit_tree() -> void:

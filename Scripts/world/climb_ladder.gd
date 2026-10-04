@@ -1,7 +1,22 @@
+@tool
 class_name ClimbLadder
 extends Node3D
-## A climbable ladder between `Bottom` and `Top` markers. Use it to grab on;
-## climbing past either end steps off onto the landing marker.
+## A climbable ladder from this node's origin (the bottom) up to `top`. Use
+## it to grab on; climbing past either end steps off — onto `landing` at the
+## top. The grab volume is sized from these, so placing a ladder in a level
+## means setting the three values on the instance (instanced scenes don't
+## save edits to their inner nodes).
+
+## Top of the climb, in the ladder's own space.
+@export var top := Vector3(0.0, 4.0, 0.0):
+	set(value):
+		top = value
+		_layout()
+## Where the climber is put after reaching the top, in the ladder's space.
+@export var landing := Vector3(0.0, 4.2, -0.9):
+	set(value):
+		landing = value
+		_layout()
 
 @onready var _bottom: Marker3D = $Bottom
 @onready var _top: Marker3D = $Top
@@ -10,8 +25,27 @@ extends Node3D
 var _climber: Player
 
 func _ready() -> void:
+	_layout()
+	if Engine.is_editor_hint():
+		return
 	_usable.prompt_key = "PROMPT_CLIMB"
 	_usable.used.connect(_on_used)
+
+func _layout() -> void:
+	if not is_inside_tree() or not has_node("Top"):
+		return
+	($Top as Node3D).position = top
+	($TopLanding as Node3D).position = landing
+	var shape := $Body/Shape as CollisionShape3D
+	# The grab volume runs from the foot to waist height above the top, so it
+	# can be aimed at from the landing as well as from below.
+	var h := maxf(top.y, 0.5) + 1.3
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.9, h, 0.35)
+	shape.shape = box
+	# Stood a little proud of the rungs, on the climber's side (+Z), so the
+	# wall behind the ladder doesn't catch the aim first.
+	shape.position = Vector3(top.x * 0.5, h * 0.5, top.z * 0.5 + 0.3)
 
 func _on_used(user: Node) -> void:
 	var p := user as Player
