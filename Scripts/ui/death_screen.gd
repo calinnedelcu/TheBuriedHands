@@ -59,6 +59,7 @@ func _ready() -> void:
 	Game.failed.connect(_on_failed)
 
 func _on_failed(reason_key: String) -> void:
+	Music.silence(0.6)
 	_reason.text = tr(reason_key)
 	await get_tree().create_timer(1.4).timeout
 	Sfx.play_ui(STING, -4.0)

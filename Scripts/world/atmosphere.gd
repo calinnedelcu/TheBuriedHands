@@ -14,6 +14,8 @@ var _current := {}
 var _target := {}
 var _player: Node3D
 var _check := 0.0
+var _zone: AtmosphereZone = null
+var _zone_music: StringName = &""
 
 func _ready() -> void:
 	var we := get_node_or_null(environment_path) as WorldEnvironment
@@ -26,6 +28,7 @@ func _ready() -> void:
 	_target = _base
 	_apply_quality()
 	_write(_current)
+	Music.set_ambience(&"tomb")
 	Settings.changed.connect(_on_setting)
 	Game.level_ready.connect(func(_l): snap.call_deferred(), CONNECT_ONE_SHOT)
 
@@ -58,7 +61,22 @@ func _pick_target() -> Dictionary:
 		var zone := z as AtmosphereZone
 		if zone.overlaps_body(_player) and (best == null or zone.zone_priority > best.zone_priority):
 			best = zone
+	_update_sound(best)
 	return best.profile() if best != null else _base
+
+## Music and ambience follow the zone too (a zone's music can change while
+## the player stands in it, when its flag gets set).
+func _update_sound(zone: AtmosphereZone) -> void:
+	var music := zone.music_track() if zone != null else &""
+	if zone != _zone:
+		_zone = zone
+		Music.set_ambience(zone.ambience if zone != null and zone.ambience != &"" else &"tomb")
+	if music != _zone_music:
+		_zone_music = music
+		if music == &"silence":
+			Music.stop(3.0)
+		elif music != &"":
+			Music.play(music, 4.0)
 
 func _lerp(a: Variant, b: Variant, k: float) -> Variant:
 	if a is Color:

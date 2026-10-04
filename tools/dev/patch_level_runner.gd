@@ -16,6 +16,7 @@ func _run() -> void:
 	get_tree().root.add_child(root)
 	await get_tree().physics_frame
 	_localize_drain()
+	_zone_sound()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -50,3 +51,38 @@ func _localize_drain() -> void:
 		var s := c.get_script() as Script
 		if s != null and not s.resource_path.begins_with("res://Scripts/world") and not s.resource_path.begins_with("res://Scripts/interaction"):
 			_log.append("drain: WARNING old script on %s: %s" % [drain.get_path_to(c), s.resource_path])
+
+func _zone(name: String, centre: Vector3, size: Vector3) -> AtmosphereZone:
+	var group := root.get_node("AtmosphereZones")
+	var z := group.get_node_or_null(name) as AtmosphereZone
+	if z != null:
+		return z
+	z = AtmosphereZone.new()
+	z.name = name
+	group.add_child(z)
+	z.owner = root
+	z.global_position = centre
+	var cs := CollisionShape3D.new()
+	cs.name = "Shape"
+	var box := BoxShape3D.new()
+	box.size = size
+	cs.shape = box
+	z.add_child(cs)
+	cs.owner = root
+	_log.append("zone: added " + name)
+	return z
+
+## Music and ambience per zone (Music.TRACKS / Music.AMBIENCE).
+func _zone_sound() -> void:
+	var zones := root.get_node("AtmosphereZones")
+	var ws := zones.get_node("Workshop") as AtmosphereZone
+	ws.music = &"workshop"
+	ws.music_until_flag = &"guards_hostile"
+	(zones.get_node("Tunnels") as AtmosphereZone).music = &"silence"
+	var hall := zones.get_node("MercuryHall") as AtmosphereZone
+	hall.music = &"mercury"
+	hall.ambience = &"mercury"
+	(zones.get_node("Treasury") as AtmosphereZone).music = &"mercury"
+	_zone("Archives", Vector3(16.0, 4.0, -30.0), Vector3(56.0, 14.0, 64.0)).music = &"archives"
+	_zone("Corridor", Vector3(-10.0, 3.0, 15.0), Vector3(84.0, 10.0, 22.0)).music = &"archives"
+	_log.append("zones: music and ambience set")

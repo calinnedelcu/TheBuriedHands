@@ -17,11 +17,25 @@ extends Area3D
 @export var saturation := 0.92
 @export var exposure := 1.0
 
+@export_group("Sound")
+## Music track while inside (see Music.TRACKS); empty keeps what is playing,
+## &"silence" fades the music out.
+@export var music: StringName = &""
+## Once this Game flag is set the zone's music no longer plays.
+@export var music_until_flag: StringName = &""
+## Ambience bed (see Music.AMBIENCE); empty means the tomb's own.
+@export var ambience: StringName = &""
+
 func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 2
 	monitorable = false
 	add_to_group(&"atmosphere_zones")
+
+func music_track() -> StringName:
+	if music_until_flag != &"" and Game.get_flag(music_until_flag):
+		return &"silence"
+	return music
 
 func profile() -> Dictionary:
 	return {

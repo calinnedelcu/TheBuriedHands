@@ -38,7 +38,8 @@ func _on_step(step: StringName) -> void:
 func _run() -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	await get_tree().create_timer(1.4, false).timeout
-	# The gate.
+	# The gate. The workshop's music dies with it.
+	Music.stop(0.4)
 	Sfx.play_ui(BOOM, 4.0)
 	if player != null:
 		player.add_shake(1.0)

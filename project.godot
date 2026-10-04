@@ -28,6 +28,7 @@ Dialogue="*res://Scripts/core/dialogue.gd"
 Quest="*res://Scripts/core/quest.gd"
 Stealth="*res://Scripts/core/stealth.gd"
 Game="*res://Scripts/core/game.gd"
+Music="*res://Scripts/core/music.gd"
 
 [display]
 

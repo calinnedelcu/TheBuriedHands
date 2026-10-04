@@ -10,7 +10,6 @@ const FLAME_MESH := preload("res://scenes/items/flame_teardrop.obj")
 const FLAME_SHADER := preload("res://scenes/items/oil_flame.gdshader")
 const SURFACE_SHADER := preload("res://assets/shaders/surface_triplanar.gdshader")
 const FLICKER := preload("res://Scripts/world/flicker_light.gd")
-const MUSIC := preload("res://audio/music/mainmenu.mp3")
 const CLICK := preload("res://audio/sfx/ui/click_001.ogg")
 const HOVER := preload("res://audio/sfx/ui/click_003.ogg")
 const CONFIRM := preload("res://audio/sfx/ui/confirmation_001.ogg")
@@ -31,7 +30,6 @@ const EYE_HEIGHT := 1.72
 var _camera: Camera3D
 var _walk := 0.0
 var _time := 0.0
-var _music: AudioStreamPlayer
 var _ui: Control
 var _menu: VBoxContainer
 var _overlay: Control
@@ -48,15 +46,8 @@ func _ready() -> void:
 	_build_aisle()
 	_build_camera()
 	_build_ui()
-	_music = AudioStreamPlayer.new()
-	_music.stream = MUSIC
-	_music.bus = &"Music"
-	_music.volume_db = -40.0
-	add_child(_music)
-	if _music.stream is AudioStreamMP3:
-		(_music.stream as AudioStreamMP3).loop = true
-	_music.play()
-	create_tween().tween_property(_music, "volume_db", -4.0, 4.0).set_trans(Tween.TRANS_SINE)
+	Music.silence(0.8)
+	Music.play(&"menu", 4.0)
 	create_tween().tween_property(_fade, "color:a", 0.0, 2.8).set_trans(Tween.TRANS_SINE).set_delay(0.3)
 	Settings.changed.connect(_on_setting)
 
@@ -562,6 +553,5 @@ func _leave(start: Callable) -> void:
 		return
 	_busy = true
 	Sfx.play_ui(CONFIRM, -6.0)
-	var t := create_tween()
-	t.tween_property(_music, "volume_db", -40.0, 1.2)
+	Music.stop(1.2)
 	start.call()

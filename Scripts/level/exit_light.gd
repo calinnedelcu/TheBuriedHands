@@ -2,7 +2,6 @@ class_name ExitLight
 extends Area3D
 ## The end of the drain: daylight. Walking into it ends the game.
 
-const FOREST := preload("res://audio/music/exit_ambient_woods.mp3")
 const ENDING_SCREEN := preload("res://scenes/ui/ending_screen.tscn")
 
 @export var light_path: NodePath
@@ -25,13 +24,8 @@ func _on_body_entered(body: Node3D) -> void:
 	if light != null:
 		p.look_at_point(light.global_position, 2.0, 40.0)
 	Dialogue.play(&"light")
-	var music := AudioStreamPlayer.new()
-	music.stream = FOREST
-	music.bus = &"Music"
-	music.volume_db = -40.0
-	add_child(music)
-	music.play()
-	create_tween().tween_property(music, "volume_db", -8.0, 4.0)
+	Music.stop(2.5)
+	Music.set_ambience(&"forest", 5.0)
 	var screen := ENDING_SCREEN.instantiate()
 	get_tree().current_scene.add_child(screen)
 	Quest.complete(&"escape")
