@@ -18,6 +18,8 @@ func _run() -> void:
 	_localize_drain()
 	_zone_sound()
 	_guard_torches()
+	_apprentice_kiln()
+	_chisel_under_bench()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -96,3 +98,40 @@ func _guard_torches() -> void:
 		if g != null and not g.carries_torch:
 			g.carries_torch = true
 			_log.append("torch: " + n)
+
+func _floor_at(p: Vector3) -> Vector3:
+	var space := root.get_world_3d().direct_space_state
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3.UP * 1.2, p + Vector3.DOWN * 3.0, 1))
+	return hit.position if not hit.is_empty() else p
+
+## "Hide in the cold kiln": the apprentice's hiding spot is the mouth of the
+## workshop kiln that isn't burning, and the lamp you may give him sits there
+## with him (he faces out, the NPC models look along local +X).
+func _apprentice_kiln() -> void:
+	var ws := root.get_node("Rooms/01_TerracottaWorkshop")
+	var spot := ws.get_node("ApprenticeHideSpot") as Marker3D
+	spot.global_transform = Transform3D(Basis(Vector3.UP, 3.0 * PI / 4.0), _floor_at(Vector3(-34.4, 0.0, -6.6)))
+	var lamp := spot.get_node_or_null("KilnLamp") as Node3D
+	if lamp == null:
+		lamp = (load("res://scenes/world/oil_lamp_prop.tscn") as PackedScene).instantiate() as Node3D
+		lamp.name = "KilnLamp"
+		spot.add_child(lamp)
+		lamp.owner = root
+	lamp.position = Vector3(0.35, 0.0, 0.8)
+	var appr := ws.get_node("Apprentice")
+	appr.set(&"lamp_prop_path", appr.get_path_to(lamp))
+	_log.append("apprentice: hides in the cold kiln at %s" % spot.global_position.snapped(Vector3.ONE * 0.1))
+
+## "The chisel rolled under the bench" — it was lying on the bench top. Put it
+## on the floor half under the bench's north edge, on the open side (not in
+## the narrow gap behind the apprentice's chair, where nobody fits).
+func _chisel_under_bench() -> void:
+	var chisel := root.get_node("Rooms/01_TerracottaWorkshop/FallenChisel") as Node3D
+	var space := root.get_world_3d().direct_space_state
+	var at := Vector3(-70.6, 0.9, -6.45)
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(at, at + Vector3.DOWN * 3.0, 1))
+	if hit.is_empty():
+		_log.append("chisel: WARNING no floor under " + str(at))
+		return
+	chisel.global_transform = Transform3D(Basis(Vector3.UP, 0.15), (hit.position as Vector3) + Vector3.UP * 0.02)
+	_log.append("chisel: on the floor at %s" % chisel.global_position.snapped(Vector3.ONE * 0.01))

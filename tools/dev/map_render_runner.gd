@@ -2,7 +2,7 @@ extends Node
 ## Dev runner: top-down orthographic cut-away maps of the level with the
 ## gameplay nodes drawn on top (spawn, guards and their routes, NPCs, pickups,
 ## triggers, traps, lamps, ladders). For checking placements at a glance.
-## godot --path . --resolution 1400x1400 -s res://tools/dev/run.gd -- --runner=res://tools/dev/map_render_runner.gd --out=/abs/dir [--only=workshop,archives]
+## godot --path . --resolution 1400x1400 -s res://tools/dev/run.gd -- --runner=res://tools/dev/map_render_runner.gd --out=/abs/dir [--only=workshop,archives] [--nav] [--region="name;cx,cy,cz;size;depth"]
 
 # name, centre (x, cut height, z), ortho size, depth below the cut
 const REGIONS := [
@@ -20,6 +20,7 @@ const REGIONS := [
 
 var _overlay: Control
 var _cam: Camera3D
+var _nav := false
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -27,11 +28,19 @@ func _ready() -> void:
 func _run() -> void:
 	var out := ""
 	var only: PackedStringArray = []
+	var custom := []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.substr(6)
 		elif arg.begins_with("--only="):
 			only = arg.substr(7).split(",")
+		elif arg == "--nav":
+			_nav = true
+		elif arg.begins_with("--region="):
+			# name;cx,cy,cz;size;depth — a custom close-up instead of the presets
+			var parts := arg.substr(9).split(";")
+			var c := parts[1].split(",")
+			custom.append([parts[0], Vector3(float(c[0]), float(c[1]), float(c[2])), float(parts[2]), float(parts[3])])
 	DirAccess.make_dir_recursive_absolute(out)
 	get_tree().change_scene_to_file("res://scenes/level/mausoleum.tscn")
 	await Game.level_ready
@@ -59,7 +68,7 @@ func _run() -> void:
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(_overlay)
-	for region in REGIONS:
+	for region in (custom if not custom.is_empty() else REGIONS):
 		if not only.is_empty() and not only.has(region[0]):
 			continue
 		var c: Vector3 = region[1]
@@ -83,6 +92,8 @@ func _run() -> void:
 func _draw_markers(level: Node3D, top: float, bottom: float) -> void:
 	for c in _overlay.get_children():
 		c.free()
+	if _nav:
+		_draw_navmesh(level, top, bottom)
 	var in_slice := func(p: Vector3) -> bool: return p.y <= top + 1.0 and p.y >= bottom - 1.0
 	for n in level.find_children("*", "", true, false):
 		if not (n is Node3D):
@@ -186,3 +197,30 @@ func _area(area: Area3D, color: Color, text: String) -> void:
 		_overlay.add_child(line)
 	if text != "":
 		_dot(area.global_position, color, 4, text)
+
+## Outlines every navmesh polygon in the slice (green), to spot gaps and
+## islands (e.g. table tops) the walkers could snap to.
+func _draw_navmesh(level: Node3D, top: float, bottom: float) -> void:
+	for r in level.find_children("*", "NavigationRegion3D", true, false):
+		var nm := (r as NavigationRegion3D).navigation_mesh
+		if nm == null:
+			continue
+		var verts := nm.get_vertices()
+		var xf := (r as Node3D).global_transform
+		for i in nm.get_polygon_count():
+			var poly := nm.get_polygon(i)
+			var pts := PackedVector2Array()
+			var y := 0.0
+			for vi in poly:
+				var w := xf * verts[vi]
+				y += w.y
+				pts.append(_screen(w))
+			y /= maxf(poly.size(), 1)
+			if y > top + 1.0 or y < bottom - 1.0:
+				continue
+			pts.append(pts[0])
+			var line := Line2D.new()
+			line.width = 1.0
+			line.default_color = Color(0.2, 1.0, 0.3, 0.55)
+			line.points = pts
+			_overlay.add_child(line)

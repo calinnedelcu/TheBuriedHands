@@ -2,6 +2,7 @@ class_name ApprenticeNpc
 extends Npc
 ## The apprentice. Gives the opening task, and after the sealing asks for
 ## help: the player can leave him their lamp (an ending changes) or keep it.
+## Either way he hides in the mouth of the cold kiln once you look away.
 
 @export var lamp_prop_path: NodePath
 @export var hide_spot_path: NodePath
@@ -36,7 +37,6 @@ func _plea(player: Player) -> void:
 	var choice := await Dialogue.choose(options)
 	if options[choice] == "CHOICE_GIVE_LAMP":
 		player.inventory.give_lamp()
-		_set_has_lamp(true)
 		Game.set_flag(&"gave_lamp")
 		await Dialogue.play(&"apprentice_gave_lamp")
 	else:
@@ -70,6 +70,8 @@ func _snap_to_hide_spot() -> void:
 	rotation.y = spot.global_rotation.y
 	_base_yaw = rotation.y
 	play(&"work")
+	# The lamp you gave him burns beside him in the kiln mouth.
+	_set_has_lamp(bool(Game.get_flag(&"gave_lamp")))
 
 func _seen_by(player: Player) -> bool:
 	var eye := global_position + Vector3.UP * 1.6

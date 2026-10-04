@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://TripoModels/ucenic.glb" id="4_dv7y3"]
 [ext_resource type="Script" path="res://Scripts/interaction/delegate_usable.gd" id="5_hp6sp"]
 [ext_resource type="Script" path="res://Scripts/level/clay_statue.gd" id="6_5texo"]
+[ext_resource type="PackedScene" path="res://scenes/world/oil_lamp_prop.tscn" id="6_028ba"]
 [ext_resource type="PackedScene" path="res://scenes/items/claybowl.glb" id="7_w5qqo"]
 [ext_resource type="PackedScene" path="res://scenes/items/pickup.tscn" id="8_ugvnn"]
 [ext_resource type="PackedScene" path="res://scenes/world/lamp_stand.tscn" id="10_i1quj"]
@@ -1464,6 +1465,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.572548, 1.5021752, -16.29
 [node name="Apprentice" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1606482042]
 transform = Transform3D(0.5719741, 0, -0.8202717, 0, 1, 0, 0.8202717, 0, 0.5719741, -16.892227, 0.21505696, 7.39615)
 script = ExtResource("3_irxgl")
+lamp_prop_path = NodePath("../ApprenticeHideSpot/KilnLamp")
 hide_spot_path = NodePath("../ApprenticeHideSpot")
 anims = {
 "bow": "NlaTrack_002_Armature",
@@ -1493,7 +1495,11 @@ script = ExtResource("5_hp6sp")
 prompt_key = "PROMPT_TALK"
 
 [node name="ApprenticeHideSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1662548272]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -27.5, 0.18702745, 3.5)
+transform = Transform3D(-0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, -0.70710677, 17.599998, 1.1059895, 8.4)
+
+[node name="KilnLamp" parent="Rooms/01_TerracottaWorkshop/ApprenticeHideSpot" unique_id=1468824464 instance=ExtResource("6_028ba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0, 0.8)
+visible = false
 
 [node name="ClayStatue" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1708194504]
 transform = Transform3D(0.86601907, 0, 0.500011, 0, 1, 0, -0.500011, 0, 0.86601907, -15.971832, 0.97528744, 8.28519)
@@ -1525,7 +1531,7 @@ dialogue = &"bowl_taken"
 metadata/usables = []
 
 [node name="FallenChisel" parent="Rooms/01_TerracottaWorkshop" unique_id=1412604141 instance=ExtResource("8_ugvnn")]
-transform = Transform3D(0.3623577, 0, 0.9320391, 0, 1, 0, -0.9320391, 0, 0.3623577, -17.371834, 0.7943249, 9.385189)
+transform = Transform3D(0.9887711, 0, 0.14943814, 0, 1, 0, -0.14943814, 0, 0.9887711, -18.599998, 0.17725255, 8.55)
 quest_from = &"find_chisel"
 completes_step = &"find_chisel"
 dialogue = &"chisel_found"
@@ -1933,7 +1939,7 @@ visible = false
 transform = Transform3D(1.4823543, 0, 0, 0, 2.1261914, 0, 0, 0, 1.4823543, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 0.9502737
+pitch_scale = 0.986881
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="171" unique_id=2048551156]

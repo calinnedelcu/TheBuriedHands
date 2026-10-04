@@ -443,7 +443,8 @@ func _on_choice_requested(options: PackedStringArray) -> void:
 	for i in options.size():
 		var b := Button.new()
 		b.theme_type_variation = &"SmallButton"
-		b.text = "%d.  %s" % [i + 1, options[i]]
+		b.text = "[%s]  %s" % [Settings.binding_label(StringName("slot_%d" % (i + 1))), tr(options[i])]
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.pressed.connect(_pick_choice.bind(i))
@@ -458,13 +459,16 @@ func _pick_choice(index: int) -> void:
 	Sfx.play_ui(UI_TICK, -10.0)
 	Dialogue.choose_option(index)
 
+## Choices are picked with the slot keys (1, 2 by default, rebindable), so
+## any device that can select a slot can answer.
 func _unhandled_input(event: InputEvent) -> void:
-	if not _ready_done or _choice_options.is_empty() or not (event is InputEventKey) or not event.pressed:
+	if not _ready_done or _choice_options.is_empty() or not event.is_pressed() or event.is_echo():
 		return
-	var k := (event as InputEventKey).physical_keycode
-	if k >= KEY_1 and k < KEY_1 + _choice_options.size():
-		get_viewport().set_input_as_handled()
-		_pick_choice(k - KEY_1)
+	for i in mini(_choice_options.size(), 4):
+		if event.is_action_pressed(StringName("slot_%d" % (i + 1))):
+			get_viewport().set_input_as_handled()
+			_pick_choice(i)
+			return
 
 func _on_setting_changed(key: StringName, value: Variant) -> void:
 	if key == &"subtitle_scale":
