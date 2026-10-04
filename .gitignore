@@ -17,3 +17,8 @@ export_presets.cfg
 .idea/
 
 # MapWithoutTreasure.glb (~257 MB) is now tracked via Git LFS (see .gitattributes).
+
+# OS clutter
+.DS_Store
+desktop.ini
+Thumbs.db

@@ -71,7 +71,7 @@ shape = SubResource("BoxShape_entry")
 
 [node name="Interactable" type="Node" parent="EntryBody"]
 script = ExtResource("2_interact")
-prompt_text = "├Ämpinge-te prin pasaj"
+prompt_text = "Împinge-te prin pasaj"
 mechanism_path = NodePath("../..")
 
 [node name="PassageGate" type="StaticBody3D" parent="."]

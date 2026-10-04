@@ -3,8 +3,8 @@ extends Node3D
 
 @export var taps_required: int = 8
 @export var require_crawl: bool = true
-@export var prompt_needs_crawl: String = "Trebuie s─â te t├ór─â╚Öti prin deschiz─âtur─â"
-@export var prompt_squeeze: String = "├Ämpinge-te prin pasaj"
+@export var prompt_needs_crawl: String = "Trebuie să te târăști prin deschizătură"
+@export var prompt_squeeze: String = "Împinge-te prin pasaj"
 @export var prompt_open: String = "Treci mai departe"
 @export var prompt_collapsed: String = "Tunelul este blocat"
 
