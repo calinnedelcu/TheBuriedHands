@@ -1,5 +1,5 @@
 extends Node
-## Dev test runner (loaded by test_player.gd once autoloads exist): drives the
+## Dev test runner (loaded by run.gd once autoloads exist): drives the
 ## player in the test room with simulated input, checks movement, stances and
 ## items, and saves screenshots from the player's camera.
 

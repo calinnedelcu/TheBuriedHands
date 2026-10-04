@@ -15,7 +15,7 @@ signal finished(ending: Dictionary)
 signal level_ready(level: Node)
 
 const LEVEL_SCENE := "res://scenes/level/mausoleum.tscn"
-const MENU_SCENE := "res://scenes/main_menu.tscn"
+const MENU_SCENE := "res://scenes/menu/title.tscn"
 const SAVE_FILE := "user://savegame.json"
 const SAVE_VERSION := 1
 

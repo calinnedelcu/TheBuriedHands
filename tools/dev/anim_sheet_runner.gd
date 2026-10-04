@@ -1,7 +1,7 @@
 extends Node
 ## Dev runner: renders a contact sheet of every animation in a character
 ## model (4 poses each, side and front view) so tracks can be identified.
-## godot --path . --resolution 1800x260 -s res://tools/dev/test_player.gd -- --runner=res://tools/dev/anim_sheet_runner.gd --model=res://TripoModels/samurai.glb --out=/abs/sheet.png
+## godot --path . --resolution 1800x260 -s res://tools/dev/run.gd -- --runner=res://tools/dev/anim_sheet_runner.gd --model=res://TripoModels/samurai.glb --out=/abs/sheet.png
 
 func _ready() -> void:
 	_run.call_deferred()

@@ -2,7 +2,7 @@ extends Node
 ## Dev runner: renders the first-person view (lamp + an item) in the test room.
 ## Overrides viewmodel exports via --vm='{"left_grip":[x,y,z], ...}' and item
 ## socket transform via --socket='[rx,ry,rz, x,y,z]' (degrees, metres).
-## Run with: godot --path . --resolution 1600x900 -s res://tools/dev/test_player.gd -- --runner=res://tools/dev/vm_tune_runner.gd --out=/abs/file.png [--item=chisel]
+## Run with: godot --path . --resolution 1600x900 -s res://tools/dev/run.gd -- --runner=res://tools/dev/vm_tune_runner.gd --out=/abs/file.png [--item=chisel]
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

@@ -2,7 +2,7 @@ extends SceneTree
 ## Dev check: loads every script under the given folders and reports which
 ## fail to compile. Usage: godot --headless --path . -s res://tools/dev/check_scripts.gd
 
-const FOLDERS := ["res://Scripts/core", "res://Scripts/player", "res://Scripts/items", "res://Scripts/interaction", "res://Scripts/ui", "res://Scripts/world", "res://Scripts/data", "res://Scripts/ai"]
+const FOLDERS := ["res://Scripts/core", "res://Scripts/player", "res://Scripts/items", "res://Scripts/interaction", "res://Scripts/ui", "res://Scripts/world", "res://Scripts/data", "res://Scripts/ai", "res://Scripts/level", "res://tools/import"]
 
 func _initialize() -> void:
 	var failed := 0

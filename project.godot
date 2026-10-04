@@ -11,7 +11,8 @@ config_version=5
 [application]
 
 config/name="TheBuriedHands"
-run/main_scene="res://scenes/main_menu.tscn"
+config/version="0.2.0"
+run/main_scene="res://scenes/menu/title.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -27,10 +28,6 @@ Dialogue="*res://Scripts/core/dialogue.gd"
 Quest="*res://Scripts/core/quest.gd"
 Stealth="*res://Scripts/core/stealth.gd"
 Game="*res://Scripts/core/game.gd"
-NoiseBus="*res://Scripts/noise_bus.gd"
-Objectives="*res://Scripts/objectives.gd"
-GameEvents="*res://Scripts/game_events.gd"
-SettingsManager="*res://Scripts/settings_manager.gd"
 
 [display]
 

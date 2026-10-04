@@ -3,13 +3,6 @@ extends CanvasLayer
 ## Fades the world to white, then tells what became of the evidence and the
 ## apprentice, quotes Sima Qian, and rolls into the credits.
 
-const CREDITS := [
-	["CREDITS_TEAM", "Calin Nedelcu · Vlad · ache12345"],
-	["CREDITS_FONTS", "Cinzel — Natanael Gama · EB Garamond — Georg Duffner, Octavio Pardo"],
-	["CREDITS_AUDIO", "Kenney (CC0) · spinopel (Pixabay)"],
-	["CREDITS_ENGINE", ""],
-]
-
 var _bg: ColorRect
 var _box: VBoxContainer
 
@@ -77,7 +70,7 @@ func _credits() -> void:
 	title.text = "GAME_TITLE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_box.add_child(title)
-	for entry in CREDITS:
+	for entry in CreditsDB.ENTRIES:
 		var head := Label.new()
 		head.theme_type_variation = &"HeaderLabel"
 		head.text = entry[0]

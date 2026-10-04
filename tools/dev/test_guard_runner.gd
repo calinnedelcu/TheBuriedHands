@@ -1,6 +1,6 @@
 extends Node
 ## Dev test: guard patrol, light-based sight, darkness, noise and attack in
-## the test room. Run through test_player.gd with --runner=this --out=/dir.
+## the test room. Run through run.gd with --runner=this --out=/dir.
 
 var _out := ""
 
