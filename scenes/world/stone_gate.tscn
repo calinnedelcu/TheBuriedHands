@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/world/stone_gate.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_bronze"]
+albedo_color = Color(0.3, 0.24, 0.15, 1)
+metallic = 0.65
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="Mesh_door"]
+material = SubResource("Mat_bronze")
+size = Vector3(4.0, 6.0, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_door"]
+size = Vector3(4.0, 6.0, 0.4)
+
+[node name="StoneGate" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Door" type="Node3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Door"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+mesh = SubResource("Mesh_door")
+
+[node name="Blocker" type="StaticBody3D" parent="Door"]
+
+[node name="Shape" type="CollisionShape3D" parent="Door/Blocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+shape = SubResource("Shape_door")

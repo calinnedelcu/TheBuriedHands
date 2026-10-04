@@ -36,9 +36,22 @@ func _ready() -> void:
 	_usable.quest_step = quest_step
 	_usable.quest_from = quest_from
 	_usable.used.connect(_on_used)
+	_usable.block_reason = _why_not
 	var item := ItemDB.get_item(item_id)
 	if item != null:
 		_usable.prompt_args = {"item": item.display_name()}
+
+## Tools are carried one of each, and a full pair of hands can't take more.
+func _why_not(user: Node) -> String:
+	var player := user as Player
+	var item := ItemDB.get_item(item_id)
+	if player == null or item == null or item.key_item:
+		return ""
+	if item.max_stack == 1 and player.inventory.has_item(item_id):
+		return "PICKUP_ALREADY_HAVE"
+	if not player.inventory.has_room_for(item_id, 1):
+		return "PICKUP_HANDS_FULL"
+	return ""
 
 func _on_used(user: Node) -> void:
 	var player := user as Player

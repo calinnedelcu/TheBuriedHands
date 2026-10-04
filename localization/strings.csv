@@ -165,6 +165,8 @@ ITEM_DESC_CLOTH,"Over mouth and nose, it slows the poison of the fumes.","Pusă 
 ITEM_DESC_REGISTER,Bamboo slips with the names of everyone sealed inside.,Fâșii de bambus cu numele tuturor celor închiși înăuntru.
 PICKUP_ITEM,Take: {item},Ia: {item}
 INVENTORY_FULL,Your hands are full,Ai mâinile pline
+PICKUP_ALREADY_HAVE,You already have one,Ai deja așa ceva
+PICKUP_HANDS_FULL,Hands full — drop something with {drop},Ai mâinile pline — lasă ceva jos cu {drop}
 DLG_INTRO_1,The First Emperor has been dead forty days. And still we knead his army out of clay.,Primul Împărat e mort de patruzeci de zile. Și noi încă îi frământăm armata din lut.
 DLG_INTRO_2,A few more statues. Then they'll let us go home.,Încă câteva statui. Apoi ne lasă să ne întoarcem acasă.
 DLG_APPR_1,"Master, the soldier's legs are cracking again. The clay dried too fast.","Maestre, picioarele soldatului crapă iar. Lutul s-a uscat prea repede."

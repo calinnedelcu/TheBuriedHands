@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/world/wall_crossbow.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/interaction/delegate_usable.gd" id="2"]
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(1.2, 0.5, 1.0)
+
+[node name="WallCrossbow" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Body"]
+shape = SubResource("Shape_body")
+
+[node name="Usable" type="Node" parent="Body"]
+script = ExtResource("2")
+prompt_key = "PROMPT_DISARM"
+highlight_root_path = NodePath("../../Visual")

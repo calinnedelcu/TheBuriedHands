@@ -150,14 +150,13 @@ func _take_snapshot(step_id: StringName) -> Dictionary:
 func _apply_snapshot(data: Dictionary) -> void:
 	flags = _decode_flags(data.get("flags", {}))
 	sealing_stage = int(data.get("sealing", 0))
+	# Quest first, so nodes restoring themselves can ask where the story is.
+	Quest.start_at(StringName(data.get("step", QuestDB.STEPS[0]["id"])))
 	var saved_nodes: Dictionary = data.get("nodes", {})
 	for path in saved_nodes:
 		var node := level.get_node_or_null(NodePath(path))
 		if node != null and node.has_method("persist_load"):
 			node.call("persist_load", saved_nodes[path])
-	Quest.start_at(StringName(data.get("step", QuestDB.STEPS[0]["id"])))
-	if sealing_stage > 0:
-		sealing_advanced.emit(sealing_stage)
 
 func _encode_flags() -> Dictionary:
 	var out := {}

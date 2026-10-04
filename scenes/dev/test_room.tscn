@@ -1,16 +1,15 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://Scripts/world/level.gd" id="1_hmlu3"]
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_ic7lf"]
-[ext_resource type="Script" path="res://Scripts/player/player.gd" id="3_7tc1v"]
-[ext_resource type="PackedScene" path="res://scenes/world/lamp_stand.tscn" id="4_5bnc7"]
-[ext_resource type="Script" path="res://Scripts/world/lamp_stand.gd" id="5_pxcxd"]
-[ext_resource type="PackedScene" path="res://scenes/world/wall_lamp.tscn" id="6_xbuhh"]
-[ext_resource type="Script" path="res://Scripts/world/wall_lamp.gd" id="7_wuloy"]
-[ext_resource type="PackedScene" path="res://scenes/items/pickup.tscn" id="8_vua1c"]
-[ext_resource type="Script" path="res://Scripts/items/pickup.gd" id="9_jfc7t"]
+[ext_resource type="Script" path="res://Scripts/world/level.gd" id="1_5bnc7"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_pxcxd"]
+[ext_resource type="PackedScene" path="res://scenes/world/lamp_stand.tscn" id="4_wuloy"]
+[ext_resource type="NavigationMesh" path="res://scenes/dev/test_room_navmesh.res" id="6_g2w7r"]
+[ext_resource type="PackedScene" path="res://scenes/world/wall_lamp.tscn" id="6_jfc7t"]
+[ext_resource type="PackedScene" path="res://scenes/items/pickup.tscn" id="8_og735"]
+[ext_resource type="Script" path="res://Scripts/ai/patrol_route.gd" id="10_c70dd"]
+[ext_resource type="PackedScene" path="res://scenes/ai/guard.tscn" id="11_xa4u0"]
 
-[sub_resource type="Environment" id="Environment_7lhus"]
+[sub_resource type="Environment" id="Environment_c65et"]
 background_mode = 1
 background_color = Color(0.01, 0.008, 0.006, 1)
 ambient_light_source = 2
@@ -21,175 +20,177 @@ glow_enabled = true
 fog_enabled = true
 fog_light_color = Color(0.05, 0.035, 0.02, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_og735"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cj0n6"]
 albedo_color = Color(0.42, 0.36, 0.3, 1)
 roughness = 0.9
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ncxdd"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j5ahr"]
 albedo_color = Color(0.35, 0.22, 0.13, 1)
 
-[node name="TestRoom" type="Node3D" unique_id=1402751391]
-script = ExtResource("1_hmlu3")
+[node name="TestRoom" type="Node3D" unique_id=1810432935]
+script = ExtResource("1_5bnc7")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1874932707]
-environment = SubResource("Environment_7lhus")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1970227037]
+environment = SubResource("Environment_c65et")
 
-[node name="Floor" type="CSGBox3D" parent="." unique_id=1183096204]
+[node name="Floor" type="CSGBox3D" parent="." unique_id=1511888758]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
 size = Vector3(30, 1, 30)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Ceiling" type="CSGBox3D" parent="." unique_id=1096451030]
+[node name="Ceiling" type="CSGBox3D" parent="." unique_id=897783677]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
 use_collision = true
 size = Vector3(30, 1, 30)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="WallN" type="CSGBox3D" parent="." unique_id=86413628]
+[node name="WallN" type="CSGBox3D" parent="." unique_id=1666368188]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -15)
 use_collision = true
 size = Vector3(30, 7, 1)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="WallS" type="CSGBox3D" parent="." unique_id=95260913]
+[node name="WallS" type="CSGBox3D" parent="." unique_id=77565350]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 15)
 use_collision = true
 size = Vector3(30, 7, 1)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="WallE" type="CSGBox3D" parent="." unique_id=1658815848]
+[node name="WallE" type="CSGBox3D" parent="." unique_id=1082322357]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 3, 0)
 use_collision = true
 size = Vector3(1, 7, 30)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="WallW" type="CSGBox3D" parent="." unique_id=190343442]
+[node name="WallW" type="CSGBox3D" parent="." unique_id=195414286]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 3, 0)
 use_collision = true
 size = Vector3(1, 7, 30)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Table" type="CSGBox3D" parent="." unique_id=123867557]
+[node name="Table" type="CSGBox3D" parent="." unique_id=1477817146]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.9, -8)
 use_collision = true
 size = Vector3(3, 1.8, 1.4)
-material = SubResource("StandardMaterial3D_ncxdd")
+material = SubResource("StandardMaterial3D_j5ahr")
 metadata/surface = "wood"
 
-[node name="Step0" type="CSGBox3D" parent="." unique_id=314241624]
+[node name="Step0" type="CSGBox3D" parent="." unique_id=1347928898]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.175, -4)
 use_collision = true
 size = Vector3(3, 0.35, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Step1" type="CSGBox3D" parent="." unique_id=128438459]
+[node name="Step1" type="CSGBox3D" parent="." unique_id=1771204931]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.35, -4.8)
 use_collision = true
 size = Vector3(3, 0.7, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Step2" type="CSGBox3D" parent="." unique_id=1323095524]
+[node name="Step2" type="CSGBox3D" parent="." unique_id=1311155057]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.525, -5.6)
 use_collision = true
 size = Vector3(3, 1.05, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Step3" type="CSGBox3D" parent="." unique_id=397604575]
+[node name="Step3" type="CSGBox3D" parent="." unique_id=62835801]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.7, -6.4)
 use_collision = true
 size = Vector3(3, 1.4, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Step4" type="CSGBox3D" parent="." unique_id=61638723]
+[node name="Step4" type="CSGBox3D" parent="." unique_id=1602930670]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.875, -7.2)
 use_collision = true
 size = Vector3(3, 1.75, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Step5" type="CSGBox3D" parent="." unique_id=202820531]
+[node name="Step5" type="CSGBox3D" parent="." unique_id=963580660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.05, -8)
 use_collision = true
 size = Vector3(3, 2.1, 0.8)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Landing" type="CSGBox3D" parent="." unique_id=171691173]
+[node name="Landing" type="CSGBox3D" parent="." unique_id=352127349]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.05, -10.8)
 use_collision = true
 size = Vector3(3, 2.1, 4)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="TunnelRoof" type="CSGBox3D" parent="." unique_id=1169444242]
+[node name="TunnelRoof" type="CSGBox3D" parent="." unique_id=753549771]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 3.35, 6)
 use_collision = true
 size = Vector3(4, 4.5, 6)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="TunnelWallA" type="CSGBox3D" parent="." unique_id=922902477]
+[node name="TunnelWallA" type="CSGBox3D" parent="." unique_id=663964212]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.55, 6)
 use_collision = true
 size = Vector3(1, 1.1, 6)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="TunnelWallB" type="CSGBox3D" parent="." unique_id=670446347]
+[node name="TunnelWallB" type="CSGBox3D" parent="." unique_id=853667598]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.55, 6)
 use_collision = true
 size = Vector3(1, 1.1, 6)
-material = SubResource("StandardMaterial3D_og735")
+material = SubResource("StandardMaterial3D_cj0n6")
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=1208007616 instance=ExtResource("2_ic7lf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 6)
-collision_layer = 2
-collision_mask = 5
-floor_max_angle = 0.872665
-floor_snap_length = 0.35
-safe_margin = 0.04
-script = ExtResource("3_7tc1v")
+[node name="Player" parent="." unique_id=585225546 instance=ExtResource("2_pxcxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07223333, 6)
+velocity = Vector3(0, -0.833, 0)
 
-[node name="LampStand" type="Node3D" parent="." unique_id=960433681 instance=ExtResource("4_5bnc7")]
+[node name="LampStand" parent="." unique_id=2122075257 instance=ExtResource("4_wuloy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.8, -8)
-script = ExtResource("5_pxcxd")
 oil = 70.0
 
-[node name="WallLamp" type="Node3D" parent="." unique_id=967254702 instance=ExtResource("6_xbuhh")]
+[node name="WallLamp" parent="." unique_id=1114476838 instance=ExtResource("6_jfc7t")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4, 3.2, -14.1)
-script = ExtResource("7_wuloy")
 
-[node name="WallLamp2" type="Node3D" parent="." unique_id=1050842412 instance=ExtResource("6_xbuhh")]
+[node name="WallLamp2" parent="." unique_id=414789110 instance=ExtResource("6_jfc7t")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -14.1, 3.2, -2)
-script = ExtResource("7_wuloy")
 
-[node name="Pickup_chisel" type="StaticBody3D" parent="." unique_id=1034451014 instance=ExtResource("8_vua1c")]
+[node name="Pickup_chisel" parent="." unique_id=752009836 instance=ExtResource("8_og735")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 1.82, -7.7)
-collision_layer = 16
-collision_mask = 0
-script = ExtResource("9_jfc7t")
+metadata/usables = []
 
-[node name="Pickup_hammer" type="StaticBody3D" parent="." unique_id=1132062679 instance=ExtResource("8_vua1c")]
+[node name="Pickup_hammer" parent="." unique_id=1520217066 instance=ExtResource("8_og735")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 1.82, -7.7)
-collision_layer = 16
-collision_mask = 0
-script = ExtResource("9_jfc7t")
 item_id = &"hammer"
+metadata/usables = []
 
-[node name="Pickup_wedge" type="StaticBody3D" parent="." unique_id=2076104072 instance=ExtResource("8_vua1c")]
+[node name="Pickup_wedge" parent="." unique_id=1706841304 instance=ExtResource("8_og735")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.82, -7.7)
-collision_layer = 16
-collision_mask = 0
-script = ExtResource("9_jfc7t")
 item_id = &"wedge"
+metadata/usables = []
 
-[node name="Pickup_ceramic" type="StaticBody3D" parent="." unique_id=2011147361 instance=ExtResource("8_vua1c")]
+[node name="Pickup_ceramic" parent="." unique_id=246119933 instance=ExtResource("8_og735")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 1.82, -7.7)
-collision_layer = 16
-collision_mask = 0
-script = ExtResource("9_jfc7t")
 item_id = &"ceramic"
 count = 3
+metadata/usables = []
 
-[node name="Pickup_cloth" type="StaticBody3D" parent="." unique_id=806782179 instance=ExtResource("8_vua1c")]
+[node name="Pickup_cloth" parent="." unique_id=993300598 instance=ExtResource("8_og735")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 1.82, -7.7)
-collision_layer = 16
-collision_mask = 0
-script = ExtResource("9_jfc7t")
 item_id = &"cloth"
+metadata/usables = []
+
+[node name="NavigationRegion" type="NavigationRegion3D" parent="." unique_id=85338901]
+navigation_mesh = ExtResource("6_g2w7r")
+
+[node name="GuardRoute" type="Node3D" parent="." unique_id=158610576]
+script = ExtResource("10_c70dd")
+
+[node name="P1" type="Marker3D" parent="GuardRoute" unique_id=1899163381]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 8)
+
+[node name="P2" type="Marker3D" parent="GuardRoute" unique_id=1470784518]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -2)
+
+[node name="P3" type="Marker3D" parent="GuardRoute" unique_id=1960088835]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -2)
+
+[node name="Guard" parent="." unique_id=713396321 instance=ExtResource("11_xa4u0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.073866665, 8)
+velocity = Vector3(0, -0.78400004, 0)
+route_path = NodePath("../GuardRoute")

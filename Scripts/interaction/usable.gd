@@ -30,6 +30,10 @@ signal hold_completed(user: Node)
 
 ## Values substituted into the prompt text, e.g. {"item": "Daltă"}.
 var prompt_args := {}
+## Optional extra condition: called with the user, returns a translation key
+## saying why the object can't be used right now ("" = fine). The reason is
+## shown, dimmed, in place of the prompt.
+var block_reason: Callable = Callable()
 var _used_once := false
 
 func _ready() -> void:
@@ -48,10 +52,20 @@ func _exit_tree() -> void:
 		list.erase(self)
 
 ## Localized prompt, or "" to show nothing (the object is ignored entirely).
-func get_prompt(_user: Node) -> String:
-	return tr(prompt_key).format(prompt_args) if not prompt_args.is_empty() else tr(prompt_key)
+func get_prompt(user: Node) -> String:
+	var key := _blocked_by(user)
+	if key == "":
+		key = prompt_key
+	return tr(key).format(prompt_args) if not prompt_args.is_empty() else tr(key)
 
-func can_use(_user: Node) -> bool:
+func can_use(user: Node) -> bool:
+	return _available() and _blocked_by(user) == ""
+
+## Whether the prompt should show even when `can_use` is false (e.g. "You need a chisel").
+func shows_when_blocked(user: Node) -> bool:
+	return _available() and _blocked_by(user) != ""
+
+func _available() -> bool:
 	if not enabled or (single_use and _used_once):
 		return false
 	if quest_step != &"" and not Quest.is_at(quest_step):
@@ -60,9 +74,8 @@ func can_use(_user: Node) -> bool:
 		return false
 	return true
 
-## Whether the prompt should show even when `can_use` is false (e.g. "You need a chisel").
-func shows_when_blocked(_user: Node) -> bool:
-	return false
+func _blocked_by(user: Node) -> String:
+	return String(block_reason.call(user)) if block_reason.is_valid() else ""
 
 func is_hold() -> bool:
 	return hold_time > 0.0

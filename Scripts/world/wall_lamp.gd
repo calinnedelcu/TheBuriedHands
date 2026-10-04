@@ -22,6 +22,7 @@ const POUR_SOUND := preload("res://audio/sfx/mercury/fill.mp3")
 @onready var _audio: AudioStreamPlayer3D = $Audio
 
 var lit := true
+var _gust := 0.0
 var _noise := FastNoiseLite.new()
 var _t := 0.0
 var _last_progress := 0.0
@@ -43,11 +44,16 @@ func _process(delta: float) -> void:
 	if not lit:
 		return
 	_t += delta
+	_gust = maxf(0.0, _gust - delta * 0.8)
 	var n := _noise.get_noise_1d(_t * 5.0)
-	var strength := clampf(oil / 12.0, 0.25, 1.0)
+	var strength := clampf(oil / 12.0, 0.25, 1.0) * (1.0 - _gust * 0.6 * absf(_noise.get_noise_1d(_t * 23.0)))
 	_light.light_energy = light_energy * strength * (1.0 + n * flicker)
 	_light.omni_range = light_range * lerpf(0.6, 1.0, strength) * (1.0 + n * 0.03)
 	_flame.scale = Vector3.ONE * lerpf(0.55, 1.0, strength) * (1.0 + _noise.get_noise_1d(_t * 8.0 + 30.0) * 0.12)
+
+## A draught (doors, the gates slamming) makes the flame gutter.
+func gust(strength := 1.0) -> void:
+	_gust = maxf(_gust, strength)
 
 func _set_lit(value: bool, with_sound := true) -> void:
 	lit = value

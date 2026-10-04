@@ -404,7 +404,7 @@ func _on_prompt_changed(text: String, action: StringName, is_hold: bool, blocked
 		return
 	_prompt_key.text = Settings.binding_label(action)
 	_prompt_key.get_parent().visible = not blocked
-	_prompt_text.text = text + ("  ·  " + tr("HUD_HOLD").to_lower() if is_hold and not blocked else "")
+	_prompt_text.text = InputHint.format(text) + ("  ·  " + tr("HUD_HOLD").to_lower() if is_hold and not blocked else "")
 	_prompt_text.modulate = Color(1, 1, 1, 0.55) if blocked else Color.WHITE
 	create_tween().tween_property(_prompt_box, "modulate:a", 1.0, 0.1)
 

@@ -1,4 +1,4 @@
-class_name Guard
+# (class_name removed: replaced by Scripts/ai/guard.gd)
 extends CharacterBody3D
 
 signal state_changed(state: int)

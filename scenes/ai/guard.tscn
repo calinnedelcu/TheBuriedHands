@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/ai/guard.gd" id="1_guard"]
+[ext_resource type="PackedScene" path="res://TripoModels/samurai.glb" id="2_model"]
+[ext_resource type="FontVariation" path="res://assets/ui/fonts/title_bold.tres" id="3_font"]
+[ext_resource type="AudioStream" path="res://audio/sfx/player/footsteps/stone/footstep_concrete_001.ogg" id="4_step"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.45
+height = 3.0
+
+[node name="Guard" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_guard")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("Shape_body")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(0, 0, 3.25, 0, 3.25, 0, -3.25, 0, 0, 0, 0, 0)
+
+[node name="Agent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.8
+target_desired_distance = 1.0
+path_height_offset = 0.3
+radius = 0.6
+height = 3.0
+max_speed = 7.0
+avoidance_enabled = true
+neighbor_distance = 8.0
+
+[node name="AwarenessIcon" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0)
+pixel_size = 0.006
+billboard = 1
+no_depth_test = true
+fixed_size = false
+modulate = Color(1, 0.82, 0.4, 1)
+outline_modulate = Color(0, 0, 0, 0.85)
+text = "?"
+font = ExtResource("3_font")
+font_size = 96
+outline_size = 18
+
+[node name="FootstepAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_step")
+volume_db = -10.0
+unit_size = 6.0
+max_distance = 28.0
+bus = &"Tomb"

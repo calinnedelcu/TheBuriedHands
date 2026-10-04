@@ -38,6 +38,18 @@ func lamp() -> HeldLamp:
 func has_item(id: StringName) -> bool:
 	return count_of(id) > 0
 
+## Whether `add(id, count)` would succeed.
+func has_room_for(id: StringName, count := 1) -> bool:
+	var item := ItemDB.get_item(id)
+	if item == null:
+		return false
+	if item.key_item:
+		return true
+	for s in slots:
+		if s == null or (s["id"] == id and int(s["count"]) + count <= item.max_stack):
+			return true
+	return false
+
 func count_of(id: StringName) -> int:
 	var total: int = key_items.get(id, 0)
 	for s in slots:

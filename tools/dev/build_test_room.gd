@@ -82,6 +82,37 @@ func _initialize() -> void:
 		p.position = Vector3(x, 1.82, -7.7)
 		x += 0.6
 
+	# Navigation + one guard on a short beat along the east side.
+	var region := NavigationRegion3D.new()
+	region.name = "NavigationRegion"
+	var nm := NavigationMesh.new()
+	nm.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
+	nm.geometry_collision_mask = 1
+	nm.agent_radius = 0.55
+	nm.agent_height = 3.0
+	nm.agent_max_climb = 0.5
+	nm.agent_max_slope = 45.0
+	nm.cell_size = 0.25
+	nm.cell_height = 0.25
+	region.navigation_mesh = nm
+	_add(root, region)
+
+	var route := Node3D.new()
+	route.name = "GuardRoute"
+	route.set_script(load("res://Scripts/ai/patrol_route.gd"))
+	_add(root, route)
+	for pt in [Vector3(10, 0, 8), Vector3(10, 0, -2), Vector3(4, 0, -2)]:
+		var m := Marker3D.new()
+		m.position = pt
+		route.add_child(m)
+		m.owner = root
+		m.name = "P%d" % route.get_child_count()
+	var guard: Node3D = (load("res://scenes/ai/guard.tscn") as PackedScene).instantiate()
+	guard.name = "Guard"
+	_add(root, guard)
+	guard.position = Vector3(10, 0.1, 8)
+	guard.set(&"route_path", NodePath("../GuardRoute"))
+
 	var packed := PackedScene.new()
 	packed.pack(root)
 	print("save err=", ResourceSaver.save(packed, "res://scenes/dev/test_room.tscn"))

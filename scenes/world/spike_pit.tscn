@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/items/Spikes.glb" id="1"]
+[ext_resource type="Script" path="res://Scripts/world/kill_zone.gd" id="2"]
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(3, 0.1, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_kill"]
+size = Vector3(3.8, 1.4, 2.4)
+
+[node name="SpikePit" type="Node3D"]
+
+[node name="Spikes" parent="." instance=ExtResource("1")]
+transform = Transform3D(1.44, 0, 0, 0, 1.44, 0, 0, 0, 1.44, -28.111326, 8.731562, -33.066414)
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="Shape" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="Kill" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+script = ExtResource("2")
+death_reason = "DEATH_SPIKES"
+
+[node name="Shape" type="CollisionShape3D" parent="Kill"]
+shape = SubResource("Shape_kill")

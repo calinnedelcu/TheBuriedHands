@@ -9,6 +9,23 @@ extends SceneTree
 const LEVEL := "res://scenes/tomb_layout.tscn"
 
 # name, position, yaw (deg), pitch (deg)
+const POSES_EXTRA := [
+	["30_statue", Vector3(-63.0, 3.0, -2.5), 50.0, -18.0],
+	["31_statue_close", Vector3(-65.5, 2.6, -4.5), 45.0, -25.0],
+	["32_bowl_station", Vector3(-28.0, 3.0, -31.0), 135.0, -20.0],
+	["33_liang", Vector3(34.0, 2.6, -29.0), -140.0, -12.0],
+	["34_liang_shaft", Vector3(44.0, 3.0, -42.0), -50.0, -25.0],
+	["35_mech_from_platform", Vector3(5.0, 15.5, 48.0), 160.0, -30.0],
+	["36_mech_room", Vector3(0.0, 10.4, 42.0), 180.0, -10.0],
+	["37_balance", Vector3(-3.8, 9.5, 50.0), 180.0, -35.0],
+	["38_mercury_entry", Vector3(-47.0, 10.0, 70.0), 90.0, -20.0],
+	["39_mercury_hall", Vector3(-55.0, 6.0, 58.0), 60.0, -25.0],
+	["40_treasury", Vector3(0.6, 10.5, 84.0), 180.0, -8.0],
+	["41_drain", Vector3(-3.0, 9.6, 128.0), 180.0, -5.0],
+	["42_corridor_traps", Vector3(-30.0, 3.0, 12.0), -90.0, -15.0],
+	["43_archives_door", Vector3(5.0, 3.0, 4.0), 0.0, -5.0],
+]
+
 const POSES := [
 	["00_spawn", Vector3(-75.74, 4.38, -24.2), -90.6, -8.0],
 	["01_workshop_center", Vector3(-60.0, 2.6, -20.0), -90.0, -6.0],
@@ -66,7 +83,7 @@ func _run() -> void:
 	for i in 30:
 		await process_frame
 	cam.make_current()
-	for pose in POSES:
+	for pose in POSES + POSES_EXTRA:
 		var pose_name: String = pose[0]
 		if not _only.is_empty() and not _only.has(pose_name):
 			continue
