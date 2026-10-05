@@ -60,6 +60,9 @@ const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 ## Where the fist is, in the hand bone's space (metres); the torch keeps
 ## itself upright.
 @export var torch_offset := Vector3(0.0, 0.07, 0.02)
+## Multiplies the armour's colour: lacquer and dye varied from man to man,
+## and an officer's armour is red.
+@export var armor_tint := Color(1, 1, 1)
 
 const TORCH := preload("res://scenes/ai/guard_torch.tscn")
 
@@ -116,9 +119,24 @@ func _ready() -> void:
 	_icon.visible = false
 	if carries_torch:
 		_attach_torch()
+	if armor_tint != Color(1, 1, 1):
+		_tint_armor()
 
 func _exit_tree() -> void:
 	Stealth.unregister_guard(self)
+
+func _tint_armor() -> void:
+	for n in _model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.name == &"Ji" or mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i) as StandardMaterial3D
+			if mat == null:
+				continue
+			var tinted := mat.duplicate() as StandardMaterial3D
+			tinted.albedo_color = mat.albedo_color * armor_tint
+			mi.set_surface_override_material(i, tinted)
 
 func _attach_torch() -> void:
 	# The model has a grip in the left hand for it.

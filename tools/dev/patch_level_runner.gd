@@ -40,6 +40,7 @@ func _run() -> void:
 	_miniature_empire()
 	_apprentice_clips()
 	_tunnel_timbers()
+	_guard_variety()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -792,3 +793,20 @@ func _tunnel_timbers() -> void:
 					n += 1
 			t += float(run[4])
 	_log.append("tunnels: %d timber frames" % n)
+
+## Six guards, one face: at least their armour differs. The captain's is
+## lacquered red.
+func _guard_variety() -> void:
+	var tints := {
+		"GuardCaptain": Color(1.25, 0.62, 0.5),
+		"GuardEscort": Color(0.9, 0.88, 0.85),
+		"ArchiveGuard1": Color(0.8, 0.8, 0.82),
+		"ArchiveGuard2": Color(1.05, 0.95, 0.85),
+		"ArchiveGuard3": Color(0.72, 0.7, 0.68),
+		"ArchiveGuard4": Color(0.95, 0.9, 1.0),
+	}
+	for n in tints:
+		var g := root.get_node_or_null("Guards/" + n) as Guard
+		if g != null:
+			g.armor_tint = tints[n]
+	_log.append("guards: armour tints")
