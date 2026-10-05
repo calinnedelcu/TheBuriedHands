@@ -20,6 +20,17 @@ extends Node3D
 @export var bolts := 0
 
 var _anim: AnimationPlayer
+var _working := false
+var _last_pos := 0.0
+
+## Moments of the work clips (seconds into the loop) that make a sound:
+## the tool scraping clay, the clay pressed down on the table.
+const WORK_BEATS := {
+	&"sculpt": [0.42, 1.42, 2.42, 3.42],
+	&"knead": [0.42, 1.21],
+}
+const SCRAPE := [preload("res://audio/sfx/impacts/cloth1.ogg"), preload("res://audio/sfx/impacts/cloth3.ogg"), preload("res://audio/sfx/impacts/cloth4.ogg")]
+const PRESS := [preload("res://audio/sfx/impacts/impactSoft_medium_000.ogg"), preload("res://audio/sfx/impacts/impactSoft_medium_001.ogg")]
 
 func _ready() -> void:
 	_anim = _first_anim_player()
@@ -32,14 +43,32 @@ func _ready() -> void:
 		_lie_dead()
 		return
 	_play(work_anim, true)
+	_working = WORK_BEATS.has(StringName(anims.get(work_anim, work_anim)))
 	Game.sealing_advanced.connect(_on_sealing)
 	if Game.sealing_stage >= 1:
+		_working = false
 		_play(after_sealing_anim, false)
+
+## The sound of the work, in step with the clip, close by only.
+func _process(_delta: float) -> void:
+	if not _working or _anim == null or not _anim.is_playing():
+		return
+	var clip := _anim.current_animation
+	var pos := _anim.current_animation_position
+	var beats: Array = WORK_BEATS.get(StringName(clip), [])
+	for beat in beats:
+		var b: float = beat
+		var crossed: bool = (_last_pos < b and pos >= b) or (pos < _last_pos and (b > _last_pos or b <= pos))
+		if crossed:
+			var sounds: Array = SCRAPE if clip == &"sculpt" else PRESS
+			Sfx.play_at(sounds.pick_random(), global_position + Vector3.UP * 1.6, -14.0, 0.12, &"Tomb", 13.0, 2.5)
+	_last_pos = pos
 
 func _on_sealing(stage: int) -> void:
 	if stage != 1:
 		return
 	await get_tree().create_timer(randf_range(0.3, 1.6), false).timeout
+	_working = false
 	_play(&"idle", false)
 	_show_tool(false)
 	await get_tree().create_timer(randf_range(2.0, 4.0), false).timeout

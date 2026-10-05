@@ -7,6 +7,8 @@ extends Node3D
 ## means setting the three values on the instance (instanced scenes don't
 ## save edits to their inner nodes).
 
+const TIMBER := preload("res://assets/materials/level/timber.tres")
+
 ## Top of the climb, in the ladder's own space.
 @export var top := Vector3(0.0, 4.0, 0.0):
 	set(value):
@@ -26,6 +28,10 @@ var _climber: Player
 
 func _ready() -> void:
 	_layout()
+	# The jam ladder's pale flat colour glared white in the lamp a hand's
+	# breadth away: the same dark timber as the tunnel props.
+	for n in find_children("*", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).material_override = TIMBER
 	if Engine.is_editor_hint():
 		return
 	_usable.prompt_key = "PROMPT_CLIMB"

@@ -44,6 +44,7 @@ func _run() -> void:
 	_close_mechanism_wall()
 	_makers_names()
 	_liang_seated()
+	_the_coffin()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -887,3 +888,25 @@ func _liang_seated() -> void:
 	var liang := root.get_node("Liang")
 	liang.set(&"anims", {"sit": "sit", "talk": "talk", "surprised": "surprised", "frustrated": "frustrated"})
 	_log.append("liang: seated talk")
+
+## The lacquered chest on the treasury's island is the Emperor's coffin;
+## stepping up to it, the craftsman says so.
+func _the_coffin() -> void:
+	var story := root.get_node("Story")
+	var t := story.get_node_or_null("CoffinNear") as StoryTrigger
+	if t == null:
+		t = StoryTrigger.new()
+		t.name = "CoffinNear"
+		story.add_child(t)
+		t.owner = root
+		var cs := CollisionShape3D.new()
+		cs.name = "Shape"
+		var box := BoxShape3D.new()
+		box.size = Vector3(6.0, 4.0, 5.0)
+		cs.shape = box
+		t.add_child(cs)
+		cs.owner = root
+	t.global_position = Vector3(-1.5, 9.5, 106.5)
+	t.quest_from = &"find_drain"
+	t.dialogue = &"coffin"
+	_log.append("treasury: a word at the coffin")

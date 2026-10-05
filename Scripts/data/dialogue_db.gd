@@ -129,6 +129,10 @@ const SEQUENCES := {
 		[&"craftsman", "DLG_TREASURY_1"],
 		[&"craftsman", "DLG_TREASURY_2"],
 	],
+	&"coffin": [
+		[&"craftsman", "DLG_COFFIN_1"],
+		[&"craftsman", "DLG_COFFIN_2"],
+	],
 	&"drain_found": [
 		[&"craftsman", "DLG_DRAIN_FOUND"],
 	],
