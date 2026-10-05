@@ -1,7 +1,7 @@
 extends Node
 ## Dev runner: frame time at the level tour's spots (slowly turning in place),
 ## with draw calls, lights and memory. Needs a window; run it in the front.
-## godot --path . --resolution 1920x1080 -s res://tools/dev/run.gd -- --runner=res://tools/dev/perf_runner.gd [--quality=0..3]
+## godot --path . --resolution 1920x1080 -s res://tools/dev/run.gd -- --runner=res://tools/dev/perf_runner.gd [--quality=0..3] [--exp=name] (experiments: noshadow, nostatic)
 
 const SPOTS := [
 	["spawn", Vector3(-75.7, 0.2, -24.2)],
@@ -18,15 +18,29 @@ func _ready() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	var experiment := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--quality="):
 			Settings.set_value(&"quality", int(arg.substr(10)), false)
+		elif arg.begins_with("--exp="):
+			experiment = arg.substr(6)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	get_tree().change_scene_to_file("res://scenes/level/mausoleum.tscn")
 	await Game.level_ready
 	Dialogue.stop()
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	player.inventory.take_lamp(90.0, true)
+	var n := 0
+	for l in Game.level.find_children("*", "OmniLight3D", true, false):
+		var light := l as OmniLight3D
+		if experiment == "noshadow" and light.shadow_enabled:
+			light.shadow_enabled = false
+			n += 1
+		elif experiment == "nostatic" and light.shadow_enabled and not player.is_ancestor_of(light) and not (light.get_parent() is HeldTorch or light.get_parent().get_parent() is HeldTorch):
+			light.shadow_enabled = false
+			n += 1
+	if experiment != "":
+		print("experiment %s: %d shadows off" % [experiment, n])
 	print("quality=%d  %s" % [Settings.get_value(&"quality"), RenderingServer.get_video_adapter_name()])
 	for spot in SPOTS:
 		player.global_position = spot[1]

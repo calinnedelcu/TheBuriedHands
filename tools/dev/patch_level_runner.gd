@@ -28,6 +28,7 @@ func _run() -> void:
 	_causeway()
 	_link_plates()
 	_gentler_fumes()
+	_performance()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -291,3 +292,43 @@ func _gentler_fumes() -> void:
 		if z != null:
 			z.set(&"ambient", levels[n])
 	_log.append("fumes: ambient %s" % str(levels))
+
+## Frame time pass (the archives ran at 5 fps): the heaviest decorative meshes
+## (1.9 M triangles of scrolls, 140 k-triangle cloth banners) stop casting
+## shadows and draw at a lower level of detail, and static lights only render
+## shadows close to the player.
+func _performance() -> void:
+	var heavy := 0
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var tris := 0
+		for i in am.get_surface_count():
+			tris += am.surface_get_array_index_len(i) / 3
+		var name := String(mi.name)
+		var decorative := name == "Testamente" or name.begins_with("Plane_0") or name.begins_with("rope_crossbow")
+		if decorative and tris > 30000:
+			_editable_up_to(mi)
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mi.lod_bias = 0.25
+			heavy += 1
+	var lights := 0
+	for n in root.find_children("*", "OmniLight3D", true, false):
+		var l := n as OmniLight3D
+		if l.shadow_enabled and l is FlickerLight and not root.get_node("Guards").is_ancestor_of(l):
+			l.distance_fade_enabled = true
+			l.distance_fade_shadow = 18.0
+			l.distance_fade_length = 6.0
+			lights += 1
+	_log.append("performance: %d heavy meshes simplified, %d brazier shadows shortened" % [heavy, lights])
+
+## Edits inside an instanced scene are only saved if the instance is marked
+## "editable children" (as the map already is).
+func _editable_up_to(node: Node) -> void:
+	var n := node.get_parent()
+	while n != null and n != root:
+		if n.scene_file_path != "" and n.owner == root:
+			root.set_editable_instance(n, true)
+		n = n.get_parent()
