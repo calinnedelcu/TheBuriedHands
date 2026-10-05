@@ -45,6 +45,7 @@ func _run() -> void:
 	_makers_names()
 	_liang_seated()
 	_the_coffin()
+	_one_crossbow_per_trap()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -910,3 +911,13 @@ func _the_coffin() -> void:
 	t.quest_from = &"find_drain"
 	t.dialogue = &"coffin"
 	_log.append("treasury: a word at the coffin")
+
+## The jam's big decorative crossbows doubled the traps' own (or hung on the
+## wrong wall, never firing): each trap now shows its own Qin crossbow.
+func _one_crossbow_per_trap() -> void:
+	var map := root.get_node("MapWithoutTreasure")
+	for n in ["rope_crossbow_0_004", "rope_crossbow_0_007", "rope_crossbow_0_009", "rope_crossbow_0_013", "rope_crossbow_0_015"]:
+		var mi := map.get_node_or_null(n) as Node3D
+		if mi != null:
+			mi.visible = false
+	_log.append("corridor: the jam's decorative crossbows hidden")

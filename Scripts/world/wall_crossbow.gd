@@ -114,6 +114,8 @@ func _build_visual() -> void:
 	# bolt in the groove come and go with the trap's state.
 	root = MODEL.instantiate() as Node3D
 	root.name = "Visual"
+	# The tomb is built at about 1.6 times life size; so are its traps.
+	root.scale = Vector3.ONE * 1.5
 	add_child(root)
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
