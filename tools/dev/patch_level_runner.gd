@@ -559,3 +559,31 @@ func _workshop_at_work() -> void:
 		w.after_sealing_anim = p[4]
 		w.holds_tool = p[1] == &"sculpt"
 	_log.append("workshop: %d more craftsmen at work" % people.size())
+	# Working hours: the workshop is lit for work until the gate slams, then
+	# its lamps gutter out and the air darkens (SealingDimmer, AtmosphereZone).
+	var zone := root.get_node("AtmosphereZones/Workshop") as AtmosphereZone
+	zone.lit_before_sealing = true
+	var lights := room.get_node_or_null("WorkLights") as Node3D
+	if lights == null:
+		lights = Node3D.new()
+		lights.name = "WorkLights"
+		lights.set_script(load("res://Scripts/world/sealing_dimmer.gd"))
+		room.add_child(lights)
+		lights.owner = root
+	var spots := [Vector3(-75, 5.2, -20), Vector3(-63, 5.2, -27), Vector3(-50, 5.2, -21), Vector3(-37, 5.2, -24),
+			Vector3(-63, 5.2, -11), Vector3(-46, 5.2, -9)]
+	for i in spots.size():
+		var name := "Lamp%d" % (i + 1)
+		var l := lights.get_node_or_null(name) as OmniLight3D
+		if l == null:
+			l = OmniLight3D.new()
+			l.name = name
+			lights.add_child(l)
+			l.owner = root
+		l.global_position = spots[i]
+		l.light_color = Color(1.0, 0.7, 0.44)
+		l.light_energy = 1.0
+		l.omni_range = 15.0
+		l.omni_attenuation = 1.1
+		l.light_volumetric_fog_energy = 0.4
+		l.shadow_enabled = false

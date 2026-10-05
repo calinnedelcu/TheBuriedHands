@@ -17,6 +17,13 @@ extends Area3D
 @export var saturation := 0.92
 @export var exposure := 1.0
 
+@export_group("Working hours")
+## Before the gate slams (sealing stage 1) the zone is lit for work: this
+## brighter ambient and exposure replace the ones above.
+@export var lit_before_sealing := false
+@export var lit_ambient_color := Color(0.1, 0.072, 0.05)
+@export var lit_exposure := 1.5
+
 @export_group("Sound")
 ## Music track while inside (see Music.TRACKS); empty keeps what is playing,
 ## &"silence" fades the music out.
@@ -38,6 +45,7 @@ func music_track() -> StringName:
 	return music
 
 func profile() -> Dictionary:
+	var lit := lit_before_sealing and Game.sealing_stage < 1
 	return {
 		"fog_color": fog_color,
 		"fog_density": fog_density,
@@ -45,8 +53,8 @@ func profile() -> Dictionary:
 		"volumetric_albedo": volumetric_albedo,
 		"volumetric_emission": volumetric_emission,
 		"volumetric_emission_energy": volumetric_emission_energy,
-		"ambient_color": ambient_color,
+		"ambient_color": lit_ambient_color if lit else ambient_color,
 		"ambient_energy": ambient_energy,
 		"saturation": saturation,
-		"exposure": exposure,
+		"exposure": lit_exposure if lit else exposure,
 	}

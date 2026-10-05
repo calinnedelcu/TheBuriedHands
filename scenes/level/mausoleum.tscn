@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://TripoModels/mester-mestesugar-real.glb" id="13_v8ix0"]
 [ext_resource type="PackedScene" path="res://scenes/ai/craftsman.tscn" id="14_miefi"]
 [ext_resource type="PackedScene" path="res://scenes/items/MapWithoutTreasure.glb" id="14_p3lpp"]
+[ext_resource type="Script" path="res://Scripts/world/sealing_dimmer.gd" id="15_v8ix0"]
 [ext_resource type="Material" path="res://assets/materials/level/phong1.tres" id="15_waxgk"]
 [ext_resource type="Material" path="res://assets/materials/level/material_057.tres" id="16_da1n6"]
 [ext_resource type="Material" path="res://assets/materials/level/material_058.tres" id="17_dpovt"]
@@ -1675,46 +1676,80 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.139393, 0.14826274, 5.6147
 [node name="DoorLook" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks" unique_id=64008154]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.4, 12.8)
 
-[node name="Sculptor1" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1142578206 instance=ExtResource("14_miefi")]
+[node name="Sculptor1" parent="Rooms/01_TerracottaWorkshop" unique_id=1142578206 instance=ExtResource("14_miefi")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 4.5999985, 0.15975761, -10.25)
-script = ExtResource("12_miefi")
-work_anim = &"sculpt"
 holds_tool = true
 
-[node name="Sculptor2" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1084752438 instance=ExtResource("14_miefi")]
+[node name="Sculptor2" parent="Rooms/01_TerracottaWorkshop" unique_id=1084752438 instance=ExtResource("14_miefi")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.450001, 0.17701793, 2.1000004)
-script = ExtResource("12_miefi")
-work_anim = &"sculpt"
 after_sealing_anim = &"idle"
 holds_tool = true
 
-[node name="Sculptor3" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1955866300 instance=ExtResource("14_miefi")]
+[node name="Sculptor3" parent="Rooms/01_TerracottaWorkshop" unique_id=1955866300 instance=ExtResource("14_miefi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.650002, 0.7901714, 1.6000004)
-script = ExtResource("12_miefi")
-work_anim = &"sculpt"
 holds_tool = true
 
-[node name="Sculptor4" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1027812741 instance=ExtResource("14_miefi")]
+[node name="Sculptor4" parent="Rooms/01_TerracottaWorkshop" unique_id=1027812741 instance=ExtResource("14_miefi")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -28.849998, 0.18825936, -3.1000004)
-script = ExtResource("12_miefi")
-work_anim = &"sculpt"
 holds_tool = true
 
-[node name="Kneader1" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=182244795 instance=ExtResource("14_miefi")]
+[node name="Kneader1" parent="Rooms/01_TerracottaWorkshop" unique_id=182244795 instance=ExtResource("14_miefi")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16, 0.1762867, -15.15)
-script = ExtResource("12_miefi")
 work_anim = &"knead"
 
-[node name="Kneader2" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=187543386 instance=ExtResource("14_miefi")]
+[node name="Kneader2" parent="Rooms/01_TerracottaWorkshop" unique_id=187543386 instance=ExtResource("14_miefi")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 11, 0.18118334, -17.45)
-script = ExtResource("12_miefi")
 work_anim = &"knead"
 after_sealing_anim = &"idle"
 
-[node name="Kneader3" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1651879083 instance=ExtResource("14_miefi")]
+[node name="Kneader3" parent="Rooms/01_TerracottaWorkshop" unique_id=1651879083 instance=ExtResource("14_miefi")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.7000008, 0.19516182, -1.8500004)
-script = ExtResource("12_miefi")
 work_anim = &"knead"
+
+[node name="WorkLights" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=2134472659]
+script = ExtResource("15_v8ix0")
+
+[node name="Lamp1" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=272612714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 5.2, -5)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
+
+[node name="Lamp2" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=1775702162]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 5.2, -12)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
+
+[node name="Lamp3" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=1249933887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 5.2, -6)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
+
+[node name="Lamp4" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=1764862064]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 5.2, -9)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
+
+[node name="Lamp5" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=662277593]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 5.2, 4)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
+
+[node name="Lamp6" type="OmniLight3D" parent="Rooms/01_TerracottaWorkshop/WorkLights" unique_id=1321206440]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 5.2, 6)
+light_color = Color(1, 0.7, 0.44, 1)
+light_volumetric_fog_energy = 0.4
+omni_range = 15.0
+omni_attenuation = 1.1
 
 [node name="MapWithoutTreasure" parent="." unique_id=1259806216 instance=ExtResource("14_p3lpp")]
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
@@ -2012,7 +2047,7 @@ visible = false
 transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 1.0245516
+pitch_scale = 1.0325658
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="171" unique_id=2048551156]
@@ -6312,6 +6347,7 @@ volumetric_density = 0.011
 volumetric_albedo = Color(0.9, 0.8, 0.68, 1)
 ambient_color = Color(0.05, 0.042, 0.036, 1)
 saturation = 0.95
+lit_before_sealing = true
 music = &"workshop"
 music_until_flag = &"guards_hostile"
 
@@ -6496,7 +6532,7 @@ transform = Transform3D(0.9063077, 0, 0.42261824, 0, 1, 0, -0.42261824, 0, 0.906
 transform = Transform3D(0.93969256, 0, -0.3420201, 0, 1, 0, 0.3420201, 0, 0.93969256, 2.3, 7.4604526, 103.9)
 
 [node name="HuWest" parent="GraveGoods" unique_id=2055772740 instance=ExtResource("108_v8ix0")]
-transform = Transform3D(0.9848075, 0, 0.17364813, 0, 1, 0, -0.17364813, 0, 0.9848075, -5.5, 7.4604526, 111.4)
+transform = Transform3D(0.9848074, 0, 0.17364812, 0, 1, 0, -0.17364812, 0, 0.9848074, -5.5, 7.4604526, 111.4)
 
 [node name="HuEast" parent="GraveGoods" unique_id=191913001 instance=ExtResource("108_v8ix0")]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 2.5, 7.460452, 111.4)
@@ -6505,7 +6541,7 @@ transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 7.4604526, 107.6)
 
 [node name="Gold" parent="GraveGoods" unique_id=734425451 instance=ExtResource("110_waxgk")]
-transform = Transform3D(0.9659256, 0, 0.25881898, 0, 1, 0, -0.25881898, 0, 0.9659256, 0.95, 8.588078, 107.6)
+transform = Transform3D(0.9659255, 0, 0.25881895, 0, 1, 0, -0.25881895, 0, 0.9659255, 0.95, 8.588078, 107.6)
 
 [node name="Bi" parent="GraveGoods" unique_id=707699832 instance=ExtResource("111_da1n6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.95, 8.587266, 107.6)
