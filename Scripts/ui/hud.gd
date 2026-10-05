@@ -27,6 +27,7 @@ var _player: Player
 var _root: Control
 var _effects_mat: ShaderMaterial
 var _crosshair: Crosshair
+var _detection: DetectionRing
 var _prompt_box: HBoxContainer
 var _prompt_key: Label
 var _prompt_text: Label
@@ -94,6 +95,9 @@ func _build() -> void:
 	_crosshair.offset_right = 40
 	_crosshair.offset_bottom = 40
 	_root.add_child(_crosshair)
+	_detection = DetectionRing.new()
+	_detection.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(_detection)
 
 	# Interaction prompt, just below the crosshair.
 	_prompt_box = HBoxContainer.new()
@@ -348,6 +352,8 @@ func _process(delta: float) -> void:
 	_tox_meter.breath = _player.breath / _player.breath_capacity
 	_tox_meter.modulate.a = move_toward(_tox_meter.modulate.a, 1.0 if _player.toxicity > 0.5 or _player.holding_breath else 0.0, delta * 2.0)
 
+	_detection.track(delta, _player.camera)
+
 	# Visibility eye.
 	_eye_open = lerpf(_eye_open, Stealth.player_exposure, clampf(delta * 6.0, 0.0, 1.0))
 	_eye_mat.set_shader_parameter(&"open_amount", _eye_open)
@@ -559,6 +565,54 @@ class Crosshair extends Control:
 			draw_circle(c, 2.2, Color(1, 1, 1, 0.45))
 		if hold_progress > 0.0:
 			draw_arc(c, 11.0, -PI * 0.5, -PI * 0.5 + TAU * hold_progress, 48, gold, 3.0, true)
+
+## Arcs around the middle of the screen, one per guard who has noticed
+## something, pointing toward him (even behind) and filling as he grows sure:
+## amber while he wonders, red once he has seen you.
+class DetectionRing extends Control:
+	const RADIUS := 118.0
+	const SPAN := 0.42
+	var _levels := {}
+	var _camera: Camera3D
+	var _time := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func track(delta: float, camera: Camera3D) -> void:
+		_camera = camera
+		_time += delta
+		var live := {}
+		for g in Stealth.guards():
+			if not is_instance_valid(g):
+				continue
+			var guard := g as Guard
+			var alarmed := guard.state == Guard.State.CHASE or guard.state == Guard.State.ATTACK
+			var target := 1.0 if alarmed else guard.awareness_level()
+			var shown := move_toward(float(_levels.get(guard, 0.0)), target, delta * 2.5)
+			if shown > 0.03 or target > 0.03:
+				live[guard] = shown
+		_levels = live
+		queue_redraw()
+
+	func _draw() -> void:
+		if _camera == null:
+			return
+		var c := size * 0.5
+		for g in _levels:
+			var guard := g as Guard
+			var level: float = _levels[g]
+			var local := _camera.global_transform.affine_inverse() * guard.global_position
+			var at := atan2(local.x, -local.z) - PI * 0.5
+			var alarmed := guard.state == Guard.State.CHASE or guard.state == Guard.State.ATTACK
+			var col := Color(1.0, 0.8, 0.38).lerp(Color(1.0, 0.5, 0.18), clampf((level - 0.4) / 0.5, 0.0, 1.0))
+			var alpha := clampf(level * 2.0, 0.0, 0.9)
+			if alarmed:
+				col = Color(0.95, 0.2, 0.12)
+				alpha = 0.75 + 0.2 * sin(_time * 9.0)
+			draw_arc(c, RADIUS, at - SPAN * 0.5, at + SPAN * 0.5, 24, Color(0, 0, 0, alpha * 0.35), 7.0, true)
+			var half := SPAN * 0.5 * clampf(level, 0.08, 1.0)
+			draw_arc(c, RADIUS, at - half, at + half, 24, Color(col, alpha), 4.0, true)
 
 class HealthPips extends Control:
 	var current := 6.0
