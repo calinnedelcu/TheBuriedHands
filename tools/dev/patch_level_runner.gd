@@ -39,6 +39,7 @@ func _run() -> void:
 	_the_fallen()
 	_miniature_empire()
 	_apprentice_clips()
+	_tunnel_timbers()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -743,3 +744,51 @@ func _apprentice_clips() -> void:
 		"scared": "scared", "talk": "talk", "work": "work", "cower": "cower", "walk": "walk",
 	})
 	_log.append("apprentice: clips by name, scared and cower")
+
+## The service tunnels were bare rock: now dug tunnels, shored up with pit
+## props (TimberFrame) every few metres, sized to the tunnel by rays, an oil
+## lamp left burning on every third one.
+func _tunnel_timbers() -> void:
+	var group := root.get_node_or_null("TunnelTimbers") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "TunnelTimbers"
+		root.add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	var space := root.get_world_3d().direct_space_state
+	var ray := func(a: Vector3, b: Vector3) -> Variant:
+		var r := space.intersect_ray(PhysicsRayQueryParameters3D.create(a, b, 1))
+		return null if r.is_empty() else r.position
+	# Corridors: [axis along, fixed coordinate across, from, to, step]
+	var runs := [["z", 27.0, -42.0, 26.0, 6.0], ["x", -34.0, -12.0, 20.0, 6.0], ["x", 31.0, 4.0, 22.0, 6.0], ["x", -46.0, 32.0, 42.0, 5.0]]
+	var n := 0
+	for run in runs:
+		var along_z: bool = run[0] == "z"
+		var t: float = run[2]
+		while t <= float(run[3]) + 0.01:
+			var p := Vector3(run[1], -7.0, t) if along_z else Vector3(t, -7.0, run[1])
+			var across := Vector3.RIGHT if along_z else Vector3.BACK
+			var floor_hit = ray.call(p, p + Vector3.DOWN * 3.0)
+			var ceil_hit = ray.call(p, p + Vector3.UP * 4.0)
+			var a = ray.call(p, p + across * 6.0)
+			var b = ray.call(p, p - across * 6.0)
+			if floor_hit != null and ceil_hit != null and a != null and b != null:
+				var w: float = (a as Vector3).distance_to(b)
+				var h: float = (ceil_hit as Vector3).y - (floor_hit as Vector3).y
+				if w > 2.5 and w < 6.0 and h > 3.1 and h < 5.0:
+					var centre: Vector3 = ((a as Vector3) + (b as Vector3)) * 0.5
+					var frame := TimberFrame.new()
+					frame.name = "Frame%d" % n
+					group.add_child(frame)
+					frame.owner = root
+					frame.global_position = Vector3(centre.x, (floor_hit as Vector3).y, centre.z)
+					frame.rotation.y = 0.0 if along_z else PI * 0.5
+					frame.width = w
+					frame.height = h
+					frame.with_lamp = n % 3 == 1
+					n += 1
+			t += float(run[4])
+	_log.append("tunnels: %d timber frames" % n)
