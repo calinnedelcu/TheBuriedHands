@@ -13,6 +13,11 @@ extends Node3D
 @export var freeze_after := false
 ## Shows the modelling tool in his hand (craftsman.glb's "Tool") while he works.
 @export var holds_tool := false
+## One of those who didn't make it: plays `work_anim` once and stays on its
+## last frame, deaf to the sealing.
+@export var dead := false
+## Crossbow bolts in his back.
+@export var bolts := 0
 
 var _anim: AnimationPlayer
 
@@ -23,6 +28,9 @@ func _ready() -> void:
 		for clip in _anim.get_animation_list():
 			_anim.get_animation(clip).loop_mode = Animation.LOOP_NONE if (freeze_after and clip == last) else Animation.LOOP_LINEAR
 	_show_tool(holds_tool)
+	if dead:
+		_lie_dead()
+		return
 	_play(work_anim, true)
 	Game.sealing_advanced.connect(_on_sealing)
 	if Game.sealing_stage >= 1:
@@ -46,6 +54,63 @@ func _play(key: StringName, random_start: bool) -> void:
 	_anim.play(n, 0.4)
 	if random_start:
 		_anim.seek(randf() * _anim.get_animation(n).length, true)
+
+func _lie_dead() -> void:
+	# Bodies don't stand in the way.
+	for shape in find_children("*", "CollisionShape3D", true, false):
+		(shape as CollisionShape3D).disabled = true
+	if _anim != null:
+		var n := StringName(anims.get(work_anim, work_anim))
+		if _anim.has_animation(n):
+			_anim.get_animation(n).loop_mode = Animation.LOOP_NONE
+			_anim.play(n)
+			_anim.seek(_anim.get_animation(n).length, true)
+			_anim.pause()
+	var skeletons := find_children("*", "Skeleton3D", true, false)
+	if bolts <= 0 or skeletons.is_empty():
+		return
+	var skeleton := skeletons[0] as Skeleton3D
+	var bone := skeleton.find_bone("Spine02")
+	if bone < 0:
+		return
+	var chest := BoneAttachment3D.new()
+	chest.bone_name = "Spine02"
+	skeleton.add_child(chest)
+	var inv := 1.0 / maxf(skeleton.global_transform.basis.get_scale().x, 0.001)
+	# His back, in the chest bone's space (the model faces +x).
+	var rest := skeleton.get_bone_global_rest(bone).basis
+	var back := (rest.inverse() * Vector3(-1.0, 0.0, 0.0)).normalized()
+	var up := (rest.inverse() * Vector3.UP).normalized()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(name)
+	for i in bolts:
+		var dir := (back + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.3, 0.3), rng.randf_range(-0.3, 0.3))).normalized()
+		var bolt := _bolt()
+		chest.add_child(bolt)
+		bolt.transform = Transform3D(Basis.looking_at(-dir).scaled(Vector3.ONE * inv), back * 0.04 + up * rng.randf_range(-0.02, 0.05))
+
+## A bronze-tipped bolt, its point buried; the shaft sticks out behind (+z).
+func _bolt() -> Node3D:
+	var n := Node3D.new()
+	var shaft := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.025, 0.025, 0.5)
+	shaft.mesh = box
+	shaft.position.z = 0.22
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.32, 0.22, 0.12)
+	shaft.material_override = wood
+	n.add_child(shaft)
+	var fletch := MeshInstance3D.new()
+	var vanes := BoxMesh.new()
+	vanes.size = Vector3(0.09, 0.005, 0.12)
+	fletch.mesh = vanes
+	fletch.position.z = 0.42
+	var feather := StandardMaterial3D.new()
+	feather.albedo_color = Color(0.55, 0.5, 0.42)
+	fletch.material_override = feather
+	n.add_child(fletch)
+	return n
 
 func _show_tool(on: bool) -> void:
 	var tool := find_child("Tool", true, false) as Node3D

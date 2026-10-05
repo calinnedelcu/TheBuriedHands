@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.32, 0.22, 0.12, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="Mesh_shaft"]
+material = SubResource("Mat_wood")
+size = Vector3(0.025, 0.025, 0.65)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bronze"]
+albedo_color = Color(0.5, 0.4, 0.22, 1)
+metallic = 0.7
+roughness = 0.4
+
+[sub_resource type="PrismMesh" id="Mesh_tip"]
+material = SubResource("Mat_bronze")
+size = Vector3(0.05, 0.1, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="Mat_feather"]
+albedo_color = Color(0.55, 0.5, 0.42, 1)
+roughness = 0.9
+cull_mode = 2
+
+[sub_resource type="BoxMesh" id="Mesh_vanes"]
+material = SubResource("Mat_feather")
+size = Vector3(0.09, 0.004, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_vanes2"]
+material = SubResource("Mat_feather")
+size = Vector3(0.004, 0.09, 0.12)
+
+[node name="Bolt" type="Node3D"]
+
+[node name="Shaft" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_shaft")
+
+[node name="Tip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -0.37)
+mesh = SubResource("Mesh_tip")
+
+[node name="Vanes" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.27)
+mesh = SubResource("Mesh_vanes")
+
+[node name="Vanes2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.27)
+mesh = SubResource("Mesh_vanes2")

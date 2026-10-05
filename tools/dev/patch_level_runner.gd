@@ -36,6 +36,7 @@ func _run() -> void:
 	_tunnel_rock()
 	_grave_goods()
 	_workshop_at_work()
+	_the_fallen()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -587,3 +588,64 @@ func _workshop_at_work() -> void:
 		l.omni_attenuation = 1.1
 		l.light_volumetric_fog_energy = 0.4
 		l.shadow_enabled = false
+
+## The sealing traps thousands; the player only ever met two of them after
+## it. Now the way tells it: a craftsman shot down by the corridor's
+## crossbows with a friend kneeling by him, another fallen near the plates
+## at the far end, one who breathed the mercury fumes on the way to the hall.
+func _the_fallen() -> void:
+	var group := root.get_node_or_null("TheFallen") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "TheFallen"
+		root.add_child(group)
+		group.owner = root
+	var people := [
+		# name, clip, position, facing (degrees), dead, bolts
+		["ShotAtPlate3", &"collapse", Vector3(-47.4, 0, 17.6), 200.0, true, 2],
+		["Mourner", &"kneel", Vector3(-46.0, 0, 18.9), 150.0, false, 0],
+		["ShotAtPlate4", &"collapse", Vector3(16.6, 0, 17.8), 15.0, true, 1],
+		["Fumes", &"collapse", Vector3(-38.0, 0, 70.2), 175.0, true, 0],
+	]
+	var space := root.get_world_3d().direct_space_state
+	for p in people:
+		var w := group.get_node_or_null(String(p[0])) as Worker
+		if w == null:
+			w = (load("res://scenes/ai/craftsman.tscn") as PackedScene).instantiate() as Worker
+			w.name = String(p[0])
+			group.add_child(w)
+			w.owner = root
+		var at: Vector3 = p[2]
+		var top := 9.5 if at.z > 60.0 else 3.0
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(at.x, top, at.z), Vector3(at.x, top - 6.0, at.z), 1))
+		w.global_position = Vector3(at.x, hit.position.y if not hit.is_empty() else at.y, at.z)
+		w.rotation = Vector3(0.0, deg_to_rad(float(p[3])), 0.0)
+		w.work_anim = p[1]
+		w.after_sealing_anim = p[1]
+		w.dead = p[4]
+		w.bolts = p[5]
+		w.holds_tool = false
+	_log.append("the fallen: %d along the way" % people.size())
+	# Bolts that found the wall instead: the corridor warns who looks.
+	var bolt_scene := load("res://scenes/props/bolt.tscn") as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 214
+	for cb_name in ["Crossbow3", "Crossbow4", "Crossbow1"]:
+		var cb := root.get_node_or_null("CorridorTraps/" + cb_name) as Node3D
+		if cb == null:
+			continue
+		var dir := -cb.global_basis.z
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(cb.global_position + dir * 0.6, cb.global_position + dir * 40.0, 1))
+		if hit.is_empty():
+			continue
+		for k in 2:
+			var name := "Bolt%s_%d" % [cb_name.trim_prefix("Crossbow"), k]
+			var b := group.get_node_or_null(name) as Node3D
+			if b == null:
+				b = bolt_scene.instantiate() as Node3D
+				b.name = name
+				group.add_child(b)
+				b.owner = root
+			var jitter := cb.global_basis.x * rng.randf_range(-0.35, 0.35) + Vector3.UP * rng.randf_range(-0.12, 0.1)
+			var tilt := Basis(cb.global_basis.x, rng.randf_range(-0.06, 0.06)) * Basis(Vector3.UP, rng.randf_range(-0.08, 0.08))
+			b.global_transform = Transform3D(tilt * cb.global_basis, hit.position + jitter - dir * 0.15)
