@@ -66,7 +66,8 @@ const SEQUENCES := {
 		[&"craftsman", "DLG_GAVE_2"],
 	],
 	&"apprentice_kept_lamp": [
-		[&"apprentice", "DLG_KEPT_1", {"anim": &"scared"}],
+		# He bows to his master all the same.
+		[&"apprentice", "DLG_KEPT_1", {"anim": &"bow"}],
 	],
 	# --- Act II: the archives and Liang ---------------------------------------
 	&"archives_enter": [

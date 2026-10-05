@@ -38,6 +38,7 @@ func _run() -> void:
 	_workshop_at_work()
 	_the_fallen()
 	_miniature_empire()
+	_apprentice_clips()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -731,3 +732,14 @@ func _miniature_empire() -> void:
 		node.scale = Vector3.ONE * float(ch[2])
 		i += 1
 	_log.append("miniatures: %d on the map (%d flat spots)" % [chosen.size(), candidates.size()])
+
+## The apprentice's model is now apprentice.glb (tools/blender/
+## build_apprentice.py), its clips named for what they are, with "scared"
+## and "cower" for after the sealing.
+func _apprentice_clips() -> void:
+	var a := root.get_node("Rooms/01_TerracottaWorkshop/Apprentice")
+	a.set(&"anims", {
+		"bow": "bow", "idle": "hands_on_hips", "idle_hips": "hands_on_hips", "point": "point",
+		"scared": "scared", "talk": "talk", "work": "work", "cower": "cower", "walk": "walk",
+	})
+	_log.append("apprentice: clips by name, scared and cower")

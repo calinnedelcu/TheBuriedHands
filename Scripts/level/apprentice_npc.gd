@@ -50,10 +50,10 @@ func _set_has_lamp(value: bool) -> void:
 	if _lamp_prop != null:
 		_lamp_prop.visible = value
 
-## He hides once the player has looked away, so nobody watches him slide
-## across the floor (the rig has no walk cycle).
+## He hides once the player has looked away (there is no path-finding for
+## him, so nobody should watch him cross the floor), scared until then.
 func _go_hide() -> void:
-	play(&"idle_hips")
+	play(&"scared")
 	var spot := get_node_or_null(hide_spot_path) as Node3D
 	if spot == null:
 		return
@@ -69,7 +69,8 @@ func _snap_to_hide_spot() -> void:
 	global_position = spot.global_position
 	rotation.y = spot.global_rotation.y
 	_base_yaw = rotation.y
-	play(&"work")
+	# Curled up in the kiln mouth, as far from the door as he can get.
+	play(&"cower")
 	# The lamp you gave him burns beside him in the kiln mouth.
 	_set_has_lamp(bool(Game.get_flag(&"gave_lamp")))
 

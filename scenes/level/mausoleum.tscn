@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/world/level.gd" id="1_1ukyn"]
 [ext_resource type="PackedScene" path="res://scenes/world/furnace_fire.tscn" id="2_e5ko3"]
 [ext_resource type="Script" path="res://Scripts/level/apprentice_npc.gd" id="3_irxgl"]
-[ext_resource type="PackedScene" path="res://TripoModels/ucenic.glb" id="4_dv7y3"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/apprentice.glb" id="4_dv7y3"]
 [ext_resource type="Script" path="res://Scripts/interaction/delegate_usable.gd" id="5_hp6sp"]
 [ext_resource type="Script" path="res://Scripts/level/clay_statue.gd" id="6_5texo"]
 [ext_resource type="PackedScene" path="res://scenes/world/oil_lamp_prop.tscn" id="6_028ba"]
@@ -1493,13 +1493,15 @@ script = ExtResource("3_irxgl")
 lamp_prop_path = NodePath("../ApprenticeHideSpot/KilnLamp")
 hide_spot_path = NodePath("../ApprenticeHideSpot")
 anims = {
-"bow": "NlaTrack_002_Armature",
-"idle": "NlaTrack_004_Armature",
-"idle_hips": "NlaTrack_005_Armature",
-"point": "NlaTrack_001_Armature",
-"scared": "NlaTrack_002_Armature",
-"talk": "NlaTrack_Armature",
-"work": "NlaTrack_003_Armature"
+"bow": "bow",
+"cower": "cower",
+"idle": "hands_on_hips",
+"idle_hips": "hands_on_hips",
+"point": "point",
+"scared": "scared",
+"talk": "talk",
+"walk": "walk",
+"work": "work"
 }
 idle_anim = &"work"
 
@@ -3444,7 +3446,7 @@ visible = false
 transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 1.0354075
+pitch_scale = 1.0527761
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="627" unique_id=1874498541]
@@ -5988,63 +5990,63 @@ highlight = false
 
 [node name="Miniatures" type="Node3D" parent="MercuryHall" unique_id=1837378493]
 
-[node name="City0" type="Node3D" parent="MercuryHall/Miniatures" unique_id=495657837 instance=ExtResource("103_am6l4")]
+[node name="City0" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1753320553 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-6.556708e-08, 0, 1.5, 0, 1.5, 0, -1.5, 0, -6.556708e-08, -78.11738, -0.055679835, 67.77968)
 script = ExtResource("104_yempy")
 
-[node name="Palace1" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1117320212 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -70.01738, -0.40756276, 56.079674)
+[node name="Palace1" type="Node3D" parent="MercuryHall/Miniatures" unique_id=2101043337 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -69.11738, -0.17350772, 60.579674)
 script = ExtResource("104_yempy")
 
-[node name="Tower2" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1416941619 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -67.31738, -0.2550011, 59.679676)
+[node name="Tower2" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1539933843 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -70.01738, -0.40756276, 56.079674)
 script = ExtResource("104_yempy")
 
-[node name="Palace3" type="Node3D" parent="MercuryHall/Miniatures" unique_id=415414090 instance=ExtResource("105_5r7ot")]
+[node name="Palace3" type="Node3D" parent="MercuryHall/Miniatures" unique_id=764846245 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -60.117382, -0.28264907, 74.979675)
 script = ExtResource("104_yempy")
 
-[node name="City4" type="Node3D" parent="MercuryHall/Miniatures" unique_id=164353150 instance=ExtResource("103_am6l4")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -83.51738, -0.25500014, 66.87968)
-script = ExtResource("104_yempy")
-
-[node name="Tower5" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1714634696 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -73.61738, 0.06233736, 64.17967)
-script = ExtResource("104_yempy")
-
-[node name="Palace6" type="Node3D" parent="MercuryHall/Miniatures" unique_id=307060226 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -54.71738, -0.14928392, 72.27968)
-script = ExtResource("104_yempy")
-
-[node name="Palace7" type="Node3D" parent="MercuryHall/Miniatures" unique_id=62085694 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -87.11738, -0.07545046, 69.57967)
-script = ExtResource("104_yempy")
-
-[node name="Tower8" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1483048208 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -75.41738, -0.25500062, 50.679676)
-script = ExtResource("104_yempy")
-
-[node name="City9" type="Node3D" parent="MercuryHall/Miniatures" unique_id=182936778 instance=ExtResource("103_am6l4")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -82.61738, -0.16835502, 56.979675)
-script = ExtResource("104_yempy")
-
-[node name="Palace10" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1121329972 instance=ExtResource("105_5r7ot")]
+[node name="City4" type="Node3D" parent="MercuryHall/Miniatures" unique_id=509527987 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, -0.4358745, 69.57967)
 script = ExtResource("104_yempy")
 
-[node name="Tower11" type="Node3D" parent="MercuryHall/Miniatures" unique_id=74797908 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -70.01738, -0.39407638, 66.87968)
+[node name="Tower5" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1252381423 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -75.41738, -0.25500062, 50.679676)
 script = ExtResource("104_yempy")
 
-[node name="Palace12" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1001320717 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -79.91738, -0.26749232, 61.479675)
+[node name="Palace6" type="Node3D" parent="MercuryHall/Miniatures" unique_id=183187113 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -81.717384, -0.22955707, 65.07967)
 script = ExtResource("104_yempy")
 
-[node name="Tower13" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1277266938 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -58.317383, 0.2006068, 63.279675)
+[node name="Palace7" type="Node3D" parent="MercuryHall/Miniatures" unique_id=242308642 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -82.61738, -0.16835502, 56.979675)
 script = ExtResource("104_yempy")
 
-[node name="Palace14" type="Node3D" parent="MercuryHall/Miniatures" unique_id=292431428 instance=ExtResource("105_5r7ot")]
+[node name="Tower8" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1553844506 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -73.61738, 0.11358496, 65.07967)
+script = ExtResource("104_yempy")
+
+[node name="City9" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1633533066 instance=ExtResource("103_am6l4")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -87.11738, -0.07545046, 69.57967)
+script = ExtResource("104_yempy")
+
+[node name="Palace10" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1577348360 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -54.71738, -0.14928392, 72.27968)
+script = ExtResource("104_yempy")
+
+[node name="Tower11" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1017609387 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -57.41738, -0.3780699, 64.17967)
+script = ExtResource("104_yempy")
+
+[node name="Palace12" type="Node3D" parent="MercuryHall/Miniatures" unique_id=2015750636 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -66.41738, -0.553752, 70.479675)
+script = ExtResource("104_yempy")
+
+[node name="Tower13" type="Node3D" parent="MercuryHall/Miniatures" unique_id=999350156 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -82.61738, -0.3657203, 46.179676)
+script = ExtResource("104_yempy")
+
+[node name="Palace14" type="Node3D" parent="MercuryHall/Miniatures" unique_id=145089473 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -63.71738, -0.39002278, 62.379677)
 script = ExtResource("104_yempy")
 
@@ -6598,7 +6600,7 @@ transform = Transform3D(0.9063077, 0, 0.42261824, 0, 1, 0, -0.42261824, 0, 0.906
 transform = Transform3D(0.93969256, 0, -0.3420201, 0, 1, 0, 0.3420201, 0, 0.93969256, 2.3, 7.4604526, 103.9)
 
 [node name="HuWest" parent="GraveGoods" unique_id=2055772740 instance=ExtResource("108_v8ix0")]
-transform = Transform3D(0.9848071, 0, 0.17364806, 0, 1, 0, -0.17364806, 0, 0.9848071, -5.5, 7.4604526, 111.4)
+transform = Transform3D(0.984807, 0, 0.17364806, 0, 1, 0, -0.17364806, 0, 0.984807, -5.5, 7.4604526, 111.4)
 
 [node name="HuEast" parent="GraveGoods" unique_id=191913001 instance=ExtResource("108_v8ix0")]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 2.5, 7.460452, 111.4)
@@ -6652,7 +6654,7 @@ transform = Transform3D(-0.8660254, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.8
 work_anim = &"kneel"
 
 [node name="ShotAtPlate4" parent="TheFallen" unique_id=1274709013 instance=ExtResource("14_miefi")]
-transform = Transform3D(0.9659256, 0, 0.25881898, 0, 1, 0, -0.25881898, 0, 0.9659256, 16.6, 0.16862226, 17.8)
+transform = Transform3D(0.9659255, 0, 0.25881895, 0, 1, 0, -0.25881895, 0, 0.9659255, 16.6, 0.16862226, 17.8)
 work_anim = &"collapse"
 after_sealing_anim = &"collapse"
 dead = true
