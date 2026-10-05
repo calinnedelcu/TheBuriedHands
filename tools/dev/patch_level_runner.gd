@@ -37,6 +37,7 @@ func _run() -> void:
 	_grave_goods()
 	_workshop_at_work()
 	_the_fallen()
+	_miniature_empire()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -649,3 +650,84 @@ func _the_fallen() -> void:
 			var jitter := cb.global_basis.x * rng.randf_range(-0.35, 0.35) + Vector3.UP * rng.randf_range(-0.12, 0.1)
 			var tilt := Basis(cb.global_basis.x, rng.randf_range(-0.06, 0.06)) * Basis(Vector3.UP, rng.randf_range(-0.08, 0.08))
 			b.global_transform = Transform3D(tilt * cb.global_basis, hit.position + jitter - dir * 0.15)
+
+## The map of the empire in the Mercury Hall was bare clay. Now it carries
+## its cities ("palaces and towers for the hundred officials"): walled
+## cities, palaces and watchtowers in bronze with gilded roofs, along the
+## mercury rivers, the capital in the middle, all facing the same way as
+## Qin halls did. Spots are found on flat ground of the map by rays.
+func _miniature_empire() -> void:
+	var group := root.get_node_or_null("MercuryHall/Miniatures") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "Miniatures"
+		root.get_node("MercuryHall").add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	var terrain := root.find_child("tripo_node_8a344439*", true, false) as MeshInstance3D
+	var box := terrain.global_transform * terrain.get_aabb()
+	var space := root.get_world_3d().direct_space_state
+	var ground := func(x: float, z: float) -> Dictionary:
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 5.5, z), Vector3(x, -3.0, z), 1))
+		if hit.is_empty():
+			return {}
+		return {"y": hit.position.y, "terrain": String((hit.collider as Node).name).contains("8a344439")}
+	# Candidates: flat terrain, scored by mercury close by (cities by rivers).
+	var candidates := []
+	var step := 0.9
+	var x := box.position.x + 2.0
+	while x < box.end.x - 2.0:
+		var z := box.position.z + 2.0
+		while z < box.end.z - 2.0:
+			var here: Dictionary = ground.call(x, z)
+			if not here.is_empty() and here["terrain"]:
+				var flat := true
+				var wet := 0
+				for o in [Vector2(0.9, 0), Vector2(-0.9, 0), Vector2(0, 0.9), Vector2(0, -0.9), Vector2(0.7, 0.7), Vector2(-0.7, -0.7), Vector2(0.7, -0.7), Vector2(-0.7, 0.7)]:
+					var g: Dictionary = ground.call(x + o.x, z + o.y)
+					if g.is_empty() or not g["terrain"] or absf(float(g["y"]) - float(here["y"])) > 0.45:
+						flat = false
+						break
+				if flat:
+					for o in [Vector2(3, 0), Vector2(-3, 0), Vector2(0, 3), Vector2(0, -3)]:
+						var g: Dictionary = ground.call(x + o.x, z + o.y)
+						if not g.is_empty() and not g["terrain"] and float(g["y"]) < -0.2:
+							wet += 1
+					candidates.append({"p": Vector3(x, here["y"], z), "score": wet + randf() * 0.5})
+			z += step
+		x += step
+	var centre := box.get_center()
+	candidates.sort_custom(func(a, b): return a["score"] > b["score"])
+	var chosen := []
+	# The capital first: the flattest ground nearest the middle.
+	var capital: Dictionary = {}
+	for c in candidates:
+		if capital.is_empty() or (c["p"] as Vector3).distance_to(centre) < (capital["p"] as Vector3).distance_to(centre):
+			capital = c
+	if not capital.is_empty():
+		chosen.append([capital["p"], "city", 1.5])
+	var kinds := ["palace", "tower", "palace", "city", "tower", "palace", "palace", "tower", "city", "palace", "tower", "palace", "tower", "palace"]
+	for c in candidates:
+		if chosen.size() >= kinds.size() + 1:
+			break
+		var p: Vector3 = c["p"]
+		var ok := true
+		for ch in chosen:
+			if (ch[0] as Vector3).distance_to(p) < 4.2:
+				ok = false
+				break
+		if ok:
+			chosen.append([p, kinds[chosen.size() - 1], 1.3 if kinds[chosen.size() - 1] != "tower" else 1.2])
+	var i := 0
+	for ch in chosen:
+		var node := (load("res://scenes/props/miniatures/%s.tscn" % ch[1]) as PackedScene).instantiate() as Node3D
+		node.name = "%s%d" % [String(ch[1]).capitalize(), i]
+		group.add_child(node)
+		node.owner = root
+		node.global_position = ch[0] - Vector3.UP * 0.04
+		node.rotation = Vector3(0.0, PI * 0.5, 0.0)
+		node.scale = Vector3.ONE * float(ch[2])
+		i += 1
+	_log.append("miniatures: %d on the map (%d flat spots)" % [chosen.size(), candidates.size()])
