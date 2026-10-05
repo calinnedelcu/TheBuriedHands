@@ -14,7 +14,9 @@ func _on_level_ready(_level: Node) -> void:
 	if not Quest.is_at(&"talk_apprentice") or Game.get_flag(&"intro_done"):
 		return
 	Game.set_flag(&"intro_done")
-	await get_tree().create_timer(1.6, false).timeout
+	await get_tree().create_timer(1.2, false).timeout
+	Game.start_chapter(1)
+	await get_tree().create_timer(4.5, false).timeout
 	Dialogue.play(&"intro", Dialogue.Priority.HINT)
 
 func _on_sealing(stage: int) -> void:

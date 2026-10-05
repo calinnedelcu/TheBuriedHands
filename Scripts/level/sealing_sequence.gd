@@ -14,6 +14,8 @@ const BOOM := preload("res://audio/sfx/tunnel/rock_cinematic.mp3")
 ## Marker3D children: the way out of the workshop, toward the archives.
 @export var exit_path: NodePath
 @export var dust_path: NodePath
+## Where the guards come in (looked at as they enter).
+@export var door_look_path: NodePath
 @export var after_route_a := 0
 @export var after_route_b := 0
 
@@ -56,6 +58,10 @@ func _run() -> void:
 	var spot_a := get_node_or_null(talk_spot_a_path) as Node3D
 	var spot_b := get_node_or_null(talk_spot_b_path) as Node3D
 	if _guard_a != null and _guard_b != null and spot_a != null and spot_b != null:
+		# Turn to the door as they come in.
+		var door := get_node_or_null(door_look_path) as Node3D
+		if player != null and door != null:
+			player.look_at_point(door.global_position, 1.4)
 		_guard_a.scripted_walk_to(spot_a.global_position)
 		await get_tree().create_timer(0.6, false).timeout
 		await _guard_b.scripted_walk_to(spot_b.global_position)

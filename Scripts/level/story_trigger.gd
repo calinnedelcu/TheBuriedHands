@@ -11,6 +11,8 @@ signal triggered
 @export var completes_step: StringName = &""
 @export var dialogue: StringName = &""
 @export var sets_flag: StringName = &""
+## Opens this chapter (its title card) when fired; 0 = none.
+@export var chapter := 0
 @export var once := true
 
 var fired := false
@@ -31,6 +33,8 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	fired = true
 	triggered.emit()
+	if chapter > 0:
+		Game.start_chapter(chapter)
 	Story.fire(completes_step, dialogue, sets_flag)
 
 func persist_save() -> Dictionary:

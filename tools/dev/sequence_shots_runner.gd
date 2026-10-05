@@ -1,0 +1,74 @@
+extends Node
+## Dev runner: frames of a scripted moment, to review how it plays.
+## --seq=opening : a new game from the title, the first seconds
+## --seq=sealing : the sealing cutscene, from the last chisel strike
+## --seq=causeway : pouring the mercury, the causeway rising
+## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/sequence_shots_runner.gd --seq=opening --out=/abs/dir
+
+var out := ""
+var _n := 0
+
+func _ready() -> void:
+	_run.call_deferred()
+
+func _shot(tag: String) -> void:
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(out.path_join("%02d_%s.png" % [_n, tag]))
+	_n += 1
+
+func _frames(seconds: float, every: float, tag: String) -> void:
+	var t := 0.0
+	while t < seconds:
+		await get_tree().create_timer(every).timeout
+		t += every
+		await _shot("%s_%04.1f" % [tag, t])
+
+## The capture window can catch the real mouse; keep the view the script's.
+func _hold_view() -> void:
+	await Game.level_ready
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	player.set_process_unhandled_input(false)
+
+func _run() -> void:
+	var seq := "opening"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--out="):
+			out = arg.substr(6)
+		elif arg.begins_with("--seq="):
+			seq = arg.substr(6)
+	DirAccess.make_dir_recursive_absolute(out)
+	_hold_view()
+	match seq:
+		"opening":
+			Game.new_game()
+			await _frames(16.0, 1.6, "open")
+		"sealing":
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			player.global_position = Vector3(-66.5, 0.2, -4.2)
+			player.rotation.y = deg_to_rad(40.0)
+			player.inventory.take_lamp(90.0, true)
+			Quest.start_at(&"finish_statue")
+			Quest.complete(&"finish_statue")
+			await _frames(40.0, 2.0, "seal")
+		"causeway":
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			Game.set_flag(&"guards_hostile")
+			Game.advance_sealing(1)
+			Quest.start_at(&"pour_mercury")
+			player.inventory.take_lamp(90.0, true)
+			player.inventory.add(&"vase_full")
+			player.inventory.add(&"cloth")
+			player.global_position = Vector3(4.2, 12.6, 47.4)
+			player.rotation.y = deg_to_rad(-60.0)
+			await get_tree().create_timer(1.0).timeout
+			var cw := Game.level.get_node("Mechanism/Counterweight/Body/Usable") as Usable
+			cw.complete_hold(player)
+			await _frames(14.0, 1.4, "pour")
+	Game._delete_save()
+	get_tree().quit()

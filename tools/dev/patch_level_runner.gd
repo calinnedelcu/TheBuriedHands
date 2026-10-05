@@ -29,6 +29,8 @@ func _run() -> void:
 	_link_plates()
 	_gentler_fumes()
 	_performance()
+	_chapters()
+	_sealing_guards_closer()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -332,3 +334,35 @@ func _editable_up_to(node: Node) -> void:
 		if n.scene_file_path != "" and n.owner == root:
 			root.set_editable_instance(n, true)
 		n = n.get_parent()
+
+## Chapter title cards open as the player first walks into each act.
+func _chapters() -> void:
+	var chapters := {"ArchivesEnter": 2, "TunnelsEnter": 3, "CorridorEnter": 3, "CorridorEnterEast": 3, "MechanismEnter": 4, "TreasuryEnter": 5}
+	for n in chapters:
+		var t := root.get_node_or_null("Story/" + n) as StoryTrigger
+		if t != null:
+			t.chapter = chapters[n]
+	_log.append("chapters: cards on %s" % ", ".join(chapters.keys()))
+
+## The guards of the sealing scene waited 30 and 70 m away and took over half
+## a minute to walk in. They now stand just outside the workshop door.
+func _sealing_guards_closer() -> void:
+	var spots := {"GuardCaptain": Vector3(-56.8, 0.2, 10.8), "GuardEscort": Vector3(-58.6, 0.2, 12.2)}
+	for n in spots:
+		var g := root.get_node("Guards/" + n) as Node3D
+		g.global_position = spots[n]
+		g.rotation.y = 0.0
+	# And they stop to talk a few steps from the statue, not across the room.
+	var marks := root.get_node("Rooms/01_TerracottaWorkshop/SealingMarks")
+	(marks.get_node("TalkSpotA") as Node3D).global_position = _floor_at(Vector3(-61.6, 0.0, -5.6))
+	(marks.get_node("TalkSpotB") as Node3D).global_position = _floor_at(Vector3(-62.9, 0.0, -3.4))
+	var door := marks.get_node_or_null("DoorLook") as Marker3D
+	if door == null:
+		door = Marker3D.new()
+		door.name = "DoorLook"
+		marks.add_child(door)
+		door.owner = root
+	door.global_position = Vector3(-57.0, 2.4, -2.2)
+	var seq := root.get_node("Story/SealingSequence")
+	seq.set(&"door_look_path", seq.get_path_to(door))
+	_log.append("sealing: guards wait at the workshop door")

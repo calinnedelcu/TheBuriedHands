@@ -44,6 +44,7 @@ const SEQUENCES := {
 	&"sealing_first": [
 		[&"apprentice", "DLG_SEAL1_1"],
 		[&"craftsman", "DLG_SEAL1_2"],
+		[&"craftsman", "DLG_SEAL1_3"],
 	],
 	&"guards_talk": [
 		[&"guard_a", "DLG_GUARDS_1"],

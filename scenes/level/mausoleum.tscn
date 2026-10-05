@@ -1602,10 +1602,10 @@ transform = Transform3D(3.1000001, 0, 0, 0, 3.1000001, 0, 0, 0, 3.1000001, 0, 0,
 [node name="SealingMarks" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1593506327]
 
 [node name="TalkSpotA" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks" unique_id=151168993]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.15781188, 9)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.599998, 0.15349352, 9.4)
 
 [node name="TalkSpotB" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks" unique_id=1322404723]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.15731406, 10.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.900002, 0.22387296, 11.6)
 
 [node name="GuardExit" type="Node3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks" unique_id=1263596578]
 
@@ -1641,6 +1641,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.5351, 0.037187338, 5.61476
 
 [node name="E20" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks/GuardExit" unique_id=1655271115]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.139393, 0.14826274, 5.6147633)
+
+[node name="DoorLook" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/SealingMarks" unique_id=64008154]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.4, 12.8)
 
 [node name="MapWithoutTreasure" parent="." unique_id=1259806216 instance=ExtResource("14_p3lpp")]
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, -55.466217, 0.12383652, -19.561668)
@@ -1938,7 +1941,7 @@ visible = false
 transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 1.0694394
+pitch_scale = 1.0540974
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="171" unique_id=2048551156]
@@ -5314,6 +5317,7 @@ talk_spot_a_path = NodePath("../../Rooms/01_TerracottaWorkshop/SealingMarks/Talk
 talk_spot_b_path = NodePath("../../Rooms/01_TerracottaWorkshop/SealingMarks/TalkSpotB")
 exit_path = NodePath("../../Rooms/01_TerracottaWorkshop/SealingMarks/GuardExit")
 dust_path = NodePath("../../Rooms/01_TerracottaWorkshop/Dust")
+door_look_path = NodePath("../../Rooms/01_TerracottaWorkshop/SealingMarks/DoorLook")
 
 [node name="ArchivesEnter" type="Area3D" parent="Story" unique_id=937110216]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -2)
@@ -5323,6 +5327,7 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"find_liang"
 dialogue = &"archives_enter"
+chapter = 2
 
 [node name="Shape" type="CollisionShape3D" parent="Story/ArchivesEnter" unique_id=307075318]
 shape = SubResource("BoxShape3D_7mkyc")
@@ -5347,6 +5352,7 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"reach_mechanism"
 dialogue = &"corridor_enter"
+chapter = 3
 
 [node name="Shape" type="CollisionShape3D" parent="Story/CorridorEnter" unique_id=479842756]
 shape = SubResource("BoxShape3D_7yve8")
@@ -5359,6 +5365,7 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"reach_mechanism"
 dialogue = &"corridor_enter"
+chapter = 3
 
 [node name="Shape" type="CollisionShape3D" parent="Story/CorridorEnterEast" unique_id=802095334]
 shape = SubResource("BoxShape3D_opf5x")
@@ -5372,6 +5379,7 @@ script = ExtResource("75_th3aq")
 quest_step = &"reach_mechanism"
 completes_step = &"reach_mechanism"
 dialogue = &"mechanism_enter"
+chapter = 4
 
 [node name="Shape" type="CollisionShape3D" parent="Story/MechanismEnter" unique_id=1526435828]
 shape = SubResource("BoxShape3D_wgjxp")
@@ -5384,6 +5392,7 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"talk_liang"
 dialogue = &"tunnels_enter"
+chapter = 3
 
 [node name="Shape" type="CollisionShape3D" parent="Story/TunnelsEnter" unique_id=1444122188]
 shape = SubResource("BoxShape3D_rxmqy")
@@ -5413,6 +5422,7 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"find_drain"
 dialogue = &"treasury_enter"
+chapter = 5
 
 [node name="Shape" type="CollisionShape3D" parent="Story/TreasuryEnter" unique_id=1458894972]
 shape = SubResource("BoxShape3D_nvpwy")
@@ -5433,11 +5443,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6)
 [node name="Guards" type="Node3D" parent="." unique_id=1444439590]
 
 [node name="GuardCaptain" parent="Guards" unique_id=2070871672 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -44.82407, 0.16962248, 16.29159)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -56.8, 0.2, 10.8)
 route_path = NodePath("../../Routes/ArchiveDoor")
 
 [node name="GuardEscort" parent="Guards" unique_id=1350089228 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(-1, 0, -1.509958e-07, 0, 1, 0, 1.509958e-07, 0, -1, -3.7108803, 0.21845159, 16.29159)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.6, 0.2, 12.2)
 route_path = NodePath("../../Routes/CorridorWatch")
 carries_torch = true
 

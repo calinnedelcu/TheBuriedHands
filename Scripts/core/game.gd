@@ -13,6 +13,7 @@ signal checkpoint_saved(step_id: StringName)
 signal failed(reason_key: String)
 signal finished(ending: Dictionary)
 signal level_ready(level: Node)
+signal chapter_started(number: int)
 
 const LEVEL_SCENE := "res://scenes/level/mausoleum.tscn"
 const MENU_SCENE := "res://scenes/menu/title.tscn"
@@ -45,6 +46,14 @@ func set_flag(flag: StringName, value: Variant = true) -> void:
 		return
 	flags[flag] = value
 	flag_changed.emit(flag, value)
+
+## Shows a chapter's title card the first time the story gets there.
+func start_chapter(number: int) -> void:
+	var flag := StringName("chapter_%d" % number)
+	if get_flag(flag):
+		return
+	set_flag(flag)
+	chapter_started.emit(number)
 
 func advance_sealing(stage: int) -> void:
 	if stage <= sealing_stage:

@@ -108,6 +108,7 @@ HINT_INTERACT,{interact} use / pick up,{interact} folosește / ia
 HINT_LAMP,{toggle_lamp} light / snuff the lamp  ·  hold {raise_lamp} to raise it,{toggle_lamp} aprinde / stinge lampa  ·  ține {raise_lamp} ca s-o ridici
 HINT_HOLD,Hold {interact},Ține apăsat {interact}
 HINT_CROUCH,{crouch} crouch  ·  {crawl} crawl,{crouch} ghemuit  ·  {crawl} târâș
+HINT_HIDE,{crouch} crouch out of sight,"{crouch} ghemuiește-te, să nu te vadă"
 HINT_STEALTH,Light gives you away. Snuff your lamp with {toggle_lamp} and keep to the shadows.,Lumina te trădează. Stinge-ți lampa cu {toggle_lamp} și ține-te în umbră.
 HINT_THROW,{throw} throw the selected item to distract,{throw} aruncă obiectul selectat ca să distragi
 HINT_BREATH,Hold {hold_breath} to hold your breath in the fumes,Ține {hold_breath} ca să-ți ții respirația în vapori
@@ -180,6 +181,7 @@ DLG_CHISEL_FOUND,There you are.,Aici erai.
 DLG_STATUE_DONE,Done. He'll stand for a thousand years.,Gata. O să stea în picioare o mie de ani.
 DLG_SEAL1_1,Master... what was that?,Maestre... ce-a fost asta?
 DLG_SEAL1_2,The bronze gate. But the work isn't finished...,Poarta de bronz. Dar lucrările nu s-au terminat...
+DLG_SEAL1_3,"Footsteps. Guards — get down, behind the statue.","Pași. Gărzile — jos, după statuie."
 DLG_GUARDS_1,You heard it. The first gate is shut. The order came from the top.,Ai auzit. Prima poartă s-a închis. Ordinul a venit de sus.
 DLG_GUARDS_2,And the craftsmen? There are hundreds still in the workshops.,Și meșterii? Mai sunt sute în ateliere.
 DLG_GUARDS_3,Whoever has seen the tomb from within will never see the sun again. So the new emperor commands.,Cine a văzut mormântul pe dinăuntru nu mai vede soarele. Așa poruncește noul împărat.
@@ -258,6 +260,17 @@ END_APPRENTICE,"The lamp you left your apprentice burned until dawn. Days later,
 END_NO_APPRENTICE,You often thought of your apprentice. You never learned what became of him.,Te-ai gândit des la ucenic. N-ai aflat niciodată ce s-a ales de el.
 END_HISTORY,"""The artisans who had built the machinery and knew of the treasures were sealed inside; none came out."" — after Sima Qian, Records of the Grand Historian","„Meșteșugarii care făcuseră mecanismele și știau de comori au fost închiși înăuntru; niciunul n-a mai ieșit.” — după Sima Qian, Însemnările marelui istoric"
 END_THANKS,Thank you for playing.,Mulțumim că ai jucat.
+CHAPTER_1,Chapter I,Capitolul I
+CHAPTER_2,Chapter II,Capitolul II
+CHAPTER_3,Chapter III,Capitolul III
+CHAPTER_4,Chapter IV,Capitolul IV
+CHAPTER_5,Chapter V,Capitolul V
+CHAPTER_TITLE_1,The Workshop,Atelierul
+CHAPTER_TITLE_2,The Archives,Arhivele
+CHAPTER_TITLE_3,Under the Mountain,Sub munte
+CHAPTER_TITLE_4,Rivers of Living Silver,Râuri de argint viu
+CHAPTER_TITLE_5,The Treasury,Tezaurul
+CHAPTER_PLACE_1,"Mount Li, 210 BC","Muntele Li, anul 210 î.Hr."
 CREDITS_TEAM,A game by,Un joc de
 CREDITS_FONTS,Fonts,Fonturi
 CREDITS_AUDIO,Audio,Sunet

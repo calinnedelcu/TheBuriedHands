@@ -13,7 +13,7 @@ const STEPS := [
 	{"id": &"apply_slip", "text": "OBJ_APPLY_SLIP", "hint": "HINT_HOLD"},
 	{"id": &"find_chisel", "text": "OBJ_FIND_CHISEL", "hint": "HINT_CROUCH"},
 	{"id": &"finish_statue", "text": "OBJ_FINISH_STATUE"},
-	{"id": &"sealing", "text": ""},
+	{"id": &"sealing", "text": "", "hint": "HINT_HIDE"},
 	{"id": &"answer_apprentice", "text": "OBJ_ANSWER_APPRENTICE", "checkpoint": true},
 	# Act II — the archives
 	{"id": &"find_liang", "text": "OBJ_FIND_LIANG", "hint": "HINT_STEALTH", "checkpoint": true},

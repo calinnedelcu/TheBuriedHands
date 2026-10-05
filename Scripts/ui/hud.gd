@@ -297,6 +297,7 @@ func _connect_signals() -> void:
 	Dialogue.choice_requested.connect(_on_choice_requested)
 	Game.checkpoint_saved.connect(func(_id): toast(tr("CHECKPOINT_SAVED")))
 	_player.interactor.prompt_changed.connect(_on_prompt_changed)
+	Game.chapter_started.connect(_on_chapter_started)
 	_player.interactor.hold_progress_changed.connect(func(p): _crosshair.hold_progress = p)
 	_player.interactor.target_changed.connect(func(u): _crosshair.has_target = u != null)
 	_player.health_changed.connect(_on_health_changed)
@@ -479,6 +480,42 @@ func _on_setting_changed(key: StringName, value: Variant) -> void:
 		_subtitle_panel.modulate.a = 0.0
 
 ## A short message that fades by itself.
+## A chapter's title card: the numeral, the title, and (for the first) the
+## place and year, faded in over the middle of the screen.
+func _on_chapter_started(number: int) -> void:
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override(&"separation", 10)
+	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	box.offset_top = 210
+	box.offset_left = -600
+	box.offset_right = 600
+	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	var numeral := _label("HeaderLabel", tr("CHAPTER_%d" % number))
+	numeral.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(numeral)
+	var title := _label("TitleLabel", tr("CHAPTER_TITLE_%d" % number))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+	var rule := ColorRect.new()
+	rule.color = Color(0.83, 0.66, 0.38, 0.5)
+	rule.custom_minimum_size = Vector2(260, 1)
+	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	box.add_child(rule)
+	var place_key := "CHAPTER_PLACE_%d" % number
+	if tr(place_key) != place_key:
+		var place := _label("QuoteText", tr(place_key))
+		place.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(place)
+	_root.add_child(box)
+	box.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(box, "modulate:a", 1.0, 1.6).set_trans(Tween.TRANS_SINE)
+	tween.tween_interval(3.2)
+	tween.tween_property(box, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(box.queue_free)
+
 func toast(text: String) -> void:
 	var l := _label("ToastLabel", text)
 	_toast_box.add_child(l)
