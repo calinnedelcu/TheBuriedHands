@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/world/prop_materials.gd" id="1_mat"]
+[ext_resource type="PackedScene" path="res://assets/models/props/treasure/lamp.glb" id="2_model"]
+[ext_resource type="ArrayMesh" path="res://scenes/items/flame_teardrop.obj" id="3_flame"]
+[ext_resource type="Shader" path="res://scenes/items/oil_flame.gdshader" id="4_flame_shader"]
+[ext_resource type="Script" path="res://Scripts/world/flicker_light.gd" id="5_flicker"]
+
+[sub_resource type="ShaderMaterial" id="Mat_flame"]
+shader = ExtResource("4_flame_shader")
+shader_parameter/outer_color = Color(1, 0.3, 0.05, 0.75)
+shader_parameter/core_color = Color(1, 0.84, 0.32, 0.95)
+shader_parameter/tip_color = Color(1, 0.55, 0.1, 0.55)
+shader_parameter/emission_strength = 3.6
+shader_parameter/alpha_scale = 0.8
+shader_parameter/depth_squash = 0.0
+
+[sub_resource type="CylinderShape3D" id="Shape_body"]
+radius = 0.2
+height = 1.5
+
+[node name="BronzeLamp" type="Node3D"]
+script = ExtResource("1_mat")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+
+[node name="Flame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 1.47, 0)
+cast_shadow = 0
+material_override = SubResource("Mat_flame")
+mesh = ExtResource("3_flame")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.72, 0)
+script = ExtResource("5_flicker")
+light_color = Color(1, 0.62, 0.3, 1)
+light_energy = 3.0
+omni_range = 9.0
+omni_attenuation = 1.4
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_shadow = 18.0
+distance_fade_length = 6.0
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("Shape_body")

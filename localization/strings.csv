@@ -146,6 +146,7 @@ PROMPT_PUSH,Push forward,Împinge-te înainte
 PROMPT_MUST_CRAWL,Too low — crawl,Prea jos — târăște-te
 PROMPT_OPEN,Open,Deschide
 PROMPT_READ,Read,Citește
+PROMPT_STRIKE_BELLS,Strike the bells,Lovește clopotele
 PROMPT_HIDE,Hide,Ascunde-te
 ITEM_LAMP,Oil lamp,Lampă cu ulei
 ITEM_CHISEL,Bronze chisel,Daltă de bronz

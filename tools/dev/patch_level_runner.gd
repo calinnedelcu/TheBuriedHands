@@ -34,6 +34,7 @@ func _run() -> void:
 	_statue_parts()
 	_way_out()
 	_tunnel_rock()
+	_grave_goods()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -458,3 +459,69 @@ func _tunnel_rock() -> void:
 		_editable_up_to(mi)
 		mi.material_override = rock
 	_log.append("tunnels: hewn rock")
+
+## The treasury held a single chest. Now the Emperor's grave goods
+## (tools/blender/build_treasures.py): bronze ding and hu, gold, a heap of
+## coins and jade discs on the island, a rack of bells on the west gallery,
+## vessels along the east one, and a warm light that makes the metal glint.
+func _grave_goods() -> void:
+	var group := root.get_node_or_null("GraveGoods") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "GraveGoods"
+		root.add_child(group)
+		group.owner = root
+	var items := [
+		# name, prop, position (y found by ray), yaw degrees
+		["DingWest", "ding", Vector3(-5.2, 0, 103.9), 25.0],
+		["DingEast", "ding", Vector3(2.3, 0, 103.9), -20.0],
+		["HuWest", "hu", Vector3(-5.5, 0, 111.4), 10.0],
+		["HuEast", "hu", Vector3(2.5, 0, 111.4), -35.0],
+		["Coins", "coins", Vector3(-5.4, 0, 107.6), 0.0],
+		["Gold", "gold", Vector3(0.95, 0, 107.6), 15.0],
+		["Bi", "bi", Vector3(-3.95, 0, 107.6), 0.0],
+		# The east gallery leads nowhere, so the bells stand there; the west
+		# one is the way to the drain and stays clear.
+		["Bells", "bianzhong", Vector3(16.95, 0, 104.5), -90.0],
+		["GalleryHuNorth", "hu", Vector3(16.9, 0, 98.6), 0.0],
+		["LampBridgeWest", "bronze_lamp", Vector3(-3.3, 0, 103.1), 0.0],
+		["LampBridgeEast", "bronze_lamp", Vector3(0.3, 0, 103.1), 0.0],
+		["LampBellsNorth", "bronze_lamp", Vector3(16.9, 0, 101.6), 0.0],
+		["LampBellsSouth", "bronze_lamp", Vector3(16.9, 0, 107.6), 0.0],
+	]
+	for gone in ["GalleryHuSouth", "LampGallery", "GalleryDing"]:
+		var old := group.get_node_or_null(gone)
+		if old != null:
+			group.remove_child(old)
+			old.free()
+	var space := root.get_world_3d().direct_space_state
+	# Rays find the floor, not the props already standing there.
+	var own: Array[RID] = []
+	for body in group.find_children("*", "CollisionObject3D", true, false):
+		own.append((body as CollisionObject3D).get_rid())
+	for it in items:
+		var node := group.get_node_or_null(String(it[0])) as Node3D
+		if node == null:
+			node = (load("res://scenes/props/treasure/%s.tscn" % it[1]) as PackedScene).instantiate() as Node3D
+			node.name = String(it[0])
+			group.add_child(node)
+			node.owner = root
+		var at: Vector3 = it[2]
+		var ray := PhysicsRayQueryParameters3D.create(Vector3(at.x, 14.0, at.z), Vector3(at.x, 0.0, at.z), 1)
+		ray.exclude = own
+		var hit := space.intersect_ray(ray)
+		node.global_position = Vector3(at.x, hit.position.y if not hit.is_empty() else 7.5, at.z)
+		node.rotation = Vector3(0.0, deg_to_rad(float(it[3])), 0.0)
+	var glint := group.get_node_or_null("Glint") as OmniLight3D
+	if glint == null:
+		glint = OmniLight3D.new()
+		glint.name = "Glint"
+		group.add_child(glint)
+		glint.owner = root
+	glint.global_position = Vector3(-1.5, 11.6, 107.4)
+	glint.light_color = Color(1.0, 0.76, 0.46)
+	glint.light_energy = 2.4
+	glint.omni_range = 9.0
+	glint.omni_attenuation = 1.2
+	glint.light_volumetric_fog_energy = 0.3
+	_log.append("treasury: %d grave goods and a glint over the chest" % items.size())

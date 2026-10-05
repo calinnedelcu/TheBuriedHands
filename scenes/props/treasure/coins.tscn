@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/world/prop_materials.gd" id="1_mat"]
+[ext_resource type="PackedScene" path="res://assets/models/props/treasure/coins.glb" id="2_model"]
+
+[node name="Coins" type="Node3D"]
+script = ExtResource("1_mat")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]

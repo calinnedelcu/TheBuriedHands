@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/bronze.gdshader" id="1_shd"]
+
+[sub_resource type="FastNoiseLite" id="Noise_bronze"]
+frequency = 0.02
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTex_bronze"]
+width = 256
+height = 256
+seamless = true
+noise = SubResource("Noise_bronze")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_shd")
+shader_parameter/noise = SubResource("NoiseTex_bronze")
