@@ -75,6 +75,10 @@ func play(track: StringName, fade := 3.0) -> void:
 	p.play()
 	_fade(p, _music_gain + _duck, fade)
 
+## The track playing (or fading in), &"" for none.
+func track() -> StringName:
+	return _track
+
 func stop(fade := 2.0) -> void:
 	play(&"", fade)
 

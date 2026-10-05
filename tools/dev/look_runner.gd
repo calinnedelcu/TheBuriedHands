@@ -1,7 +1,7 @@
 extends Node
 ## Dev runner: free-camera shots of the level, to check placements. A small
 ## warm light rides with the camera, like the player's lamp. The HUD is hidden.
-## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...] [--tipped]
+## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...] [--tipped] [--quest=step_id] [--nolamp]
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -14,6 +14,8 @@ func _run() -> void:
 	var out := ""
 	var shots := []
 	var tipped := false
+	var quest := &""
+	var with_lamp := true
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.substr(6)
@@ -22,12 +24,18 @@ func _run() -> void:
 			shots.append([parts[0], _vec(parts[1]), _vec(parts[2])])
 		elif arg == "--tipped":
 			tipped = true
+		elif arg.begins_with("--quest="):
+			quest = StringName(arg.substr(8))
+		elif arg == "--nolamp":
+			with_lamp = false
 	DirAccess.make_dir_recursive_absolute(out)
 	get_tree().change_scene_to_file("res://scenes/level/mausoleum.tscn")
 	await Game.level_ready
 	Dialogue.stop()
 	if tipped:
 		Game.level.get_node("MapWithoutTreasure/Balanta").call(&"snap_to_end")
+	if quest != &"":
+		Quest.start_at(quest)
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	player.lock_controls(&"look", true)
 	var hud := player.get_node_or_null("HUD")
@@ -43,6 +51,7 @@ func _run() -> void:
 	lamp.omni_range = 9.0
 	lamp.shadow_enabled = true
 	lamp.position = Vector3(-0.25, -0.2, -0.3)
+	lamp.visible = with_lamp
 	cam.add_child(lamp)
 	cam.make_current()
 	for s in shots:

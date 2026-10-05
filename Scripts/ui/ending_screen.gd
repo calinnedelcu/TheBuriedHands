@@ -1,92 +1,238 @@
 class_name EndingScreen
 extends CanvasLayer
-## Fades the world to white, then tells what became of the evidence and the
-## apprentice, quotes Sima Qian, and rolls into the credits.
+## The walk into the light ends in white. The white settles into old paper and
+## the epilogue is written on it in ink: what became of the craftsman, the
+## register and the apprentice, then Sima Qian's line under a red seal, and
+## the credits roll over the menu's theme. Holding a key speeds the credits
+## up; Esc skips them.
 
-var _bg: ColorRect
-var _box: VBoxContainer
+const PAPER_SHADER := preload("res://assets/shaders/ui/paper.gdshader")
+const STAMP_SOUND := preload("res://audio/sfx/impacts/impactSoft_medium_000.ogg")
+const INK := Color(0.13, 0.095, 0.07)
+const INK_SOFT := Color(0.33, 0.25, 0.18)
+const VERMILION := SealStamp.VERMILION
+## Credits scroll speed, in base-resolution pixels per second.
+const ROLL_SPEED := 46.0
+
+var _white: ColorRect
+var _paper: ColorRect
+var _page: Control
+var _rolling := false
+var _skip_roll := false
 
 func _ready() -> void:
 	layer = 90
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_bg = ColorRect.new()
-	_bg.color = Color(1, 1, 1, 0)
-	_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(_bg)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	_box = VBoxContainer.new()
-	_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	_box.add_theme_constant_override("separation", 26)
-	_box.custom_minimum_size = Vector2(1100, 0)
-	center.add_child(_box)
+	_white = ColorRect.new()
+	_white.color = Color(1.0, 0.985, 0.95, 0.0)
+	_white.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_white.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_white)
+	_paper = ColorRect.new()
+	_paper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	mat.shader = PAPER_SHADER
+	var noise := FastNoiseLite.new()
+	noise.frequency = 0.02
+	var tex := NoiseTexture2D.new()
+	tex.seamless = true
+	tex.noise = noise
+	mat.set_shader_parameter(&"noise", tex)
+	_paper.material = mat
+	_paper.modulate.a = 0.0
+	_paper.visible = false
+	add_child(_paper)
+	_page = Control.new()
+	_page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_page.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_page)
 	Game.finished.connect(_on_finished)
 
+func _process(_delta: float) -> void:
+	if _paper.visible:
+		(_paper.material as ShaderMaterial).set_shader_parameter(&"aspect", _paper.size.x / maxf(_paper.size.y, 1.0))
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _rolling and event.is_action_pressed(&"pause"):
+		_skip_roll = true
+		get_viewport().set_input_as_handled()
+
 func _on_finished(ending: Dictionary) -> void:
-	await get_tree().create_timer(3.5).timeout
+	await _wait(3.2)
 	var t := create_tween()
-	t.tween_property(_bg, "color", Color(1, 0.98, 0.94, 1), 3.0)
+	t.tween_property(_white, "color:a", 1.0, 3.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	await t.finished
-	await get_tree().create_timer(1.5).timeout
-	var t2 := create_tween()
-	t2.tween_property(_bg, "color", Color(0.05, 0.035, 0.03, 1), 3.0)
-	await t2.finished
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	await _card("END_TITLE", "TitleLabel", 2.0)
-	await _card("END_BASE", "BodyText", 6.5)
-	await _card("END_EVIDENCE" if ending.get("evidence", false) else "END_NO_EVIDENCE", "BodyText", 6.0)
-	await _card("END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE", "BodyText", 7.0)
-	await _card("END_HISTORY", "QuoteText", 8.0)
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	await _wait(1.4)
+	# The white settles into paper.
+	_paper.visible = true
+	var p := create_tween()
+	p.tween_property(_paper, "modulate:a", 1.0, 2.8).set_trans(Tween.TRANS_SINE)
+	await p.finished
+	_white.visible = false
+	await _wait(0.6)
+	await _epilogue_card()
+	await _card("END_BASE")
+	await _card("END_EVIDENCE" if ending.get("evidence", false) else "END_NO_EVIDENCE")
+	await _card("END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE")
+	Music.set_ambience(&"", 10.0)
+	Music.play(&"menu", 6.0)
+	await _quote()
 	await _credits()
-	await _card("END_THANKS", "TitleLabel", 3.0, 0.0)
+	await _thanks()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Game.return_to_menu()
 
-## Shows one centred line, holds it, fades it out (unless `hold_after` is 0).
-func _card(key: String, variation: String, seconds: float, hold_after := 0.9) -> void:
-	for c in _box.get_children():
-		c.queue_free()
+func _wait(seconds: float) -> void:
+	await get_tree().create_timer(seconds, true).timeout
+
+## A label in ink. `key` is translated here: these labels are built at
+## runtime and the text is set once.
+func _ink(variation: StringName, key: String, color := INK) -> Label:
 	var l := Label.new()
-	l.theme_type_variation = StringName(variation)
-	l.text = key
+	l.theme_type_variation = variation
+	l.text = tr(key)
+	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.custom_minimum_size = Vector2(1100, 0)
-	l.modulate.a = 0.0
-	_box.add_child(l)
-	var t := create_tween()
-	t.tween_property(l, "modulate:a", 1.0, 1.2)
-	t.tween_interval(seconds)
-	if hold_after > 0.0:
-		t.tween_property(l, "modulate:a", 0.0, 1.0)
-		t.tween_interval(hold_after * 0.5)
-	await t.finished
+	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_constant_override(&"outline_size", 0)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
 
-func _credits() -> void:
-	for c in _box.get_children():
-		c.queue_free()
-	var title := Label.new()
-	title.theme_type_variation = &"TitleLabel"
-	title.text = "GAME_TITLE"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_box.add_child(title)
-	for entry in CreditsDB.ENTRIES:
-		var head := Label.new()
-		head.theme_type_variation = &"HeaderLabel"
-		head.text = entry[0]
-		head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_box.add_child(head)
-		if entry[1] != "":
-			var body := Label.new()
-			body.theme_type_variation = &"BodyText"
-			body.text = entry[1]
-			body.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-			body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			_box.add_child(body)
-	_box.modulate.a = 0.0
+func _column(width := 1000.0) -> VBoxContainer:
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_page.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.custom_minimum_size = Vector2(width, 0)
+	box.add_theme_constant_override(&"separation", 18)
+	center.add_child(box)
+	return box
+
+func _rule(width: float) -> ColorRect:
+	var rule := ColorRect.new()
+	rule.color = Color(INK_SOFT, 0.55)
+	rule.custom_minimum_size = Vector2(width, 1)
+	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	return rule
+
+## Writes a page in, holds it, lets it fade off the paper.
+func _show_page(node: Control, hold: float) -> void:
+	node.modulate.a = 0.0
 	var t := create_tween()
-	t.tween_property(_box, "modulate:a", 1.0, 1.5)
-	t.tween_interval(9.0)
-	t.tween_property(_box, "modulate:a", 0.0, 1.5)
+	t.tween_property(node, "modulate:a", 1.0, 1.8).set_trans(Tween.TRANS_SINE)
+	t.tween_interval(hold)
+	t.tween_property(node, "modulate:a", 0.0, 1.3).set_trans(Tween.TRANS_SINE)
+	t.tween_interval(0.5)
 	await t.finished
-	_box.modulate.a = 1.0
+	node.get_parent().queue_free()
+
+## The same shape as the chapter cards: this is the last one.
+func _epilogue_card() -> void:
+	var box := _column(1200.0)
+	box.add_theme_constant_override(&"separation", 10)
+	box.add_child(_ink(&"HeaderLabel", "END_EPILOGUE", VERMILION))
+	box.add_child(_ink(&"TitleLabel", "END_TITLE"))
+	box.add_child(_rule(260.0))
+	box.add_child(_ink(&"QuoteText", "END_PLACE", INK_SOFT))
+	await _show_page(box, 3.6)
+
+func _card(key: String) -> void:
+	var box := _column()
+	var text := _ink(&"BodyText", key)
+	text.add_theme_font_size_override(&"font_size", 34)
+	box.add_child(text)
+	await _show_page(box, 5.6)
+
+func _quote() -> void:
+	var box := _column(1050.0)
+	box.add_theme_constant_override(&"separation", 34)
+	var line := _ink(&"QuoteText", "END_HISTORY")
+	line.add_theme_font_size_override(&"font_size", 31)
+	box.add_child(line)
+	var seal := SealStamp.new()
+	seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	seal.modulate.a = 0.0
+	box.add_child(seal)
+	box.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(box, "modulate:a", 1.0, 1.8).set_trans(Tween.TRANS_SINE)
+	t.tween_interval(2.6)
+	await t.finished
+	# The seal is pressed under the line.
+	seal.pivot_offset = seal.custom_minimum_size * 0.5
+	seal.scale = Vector2.ONE * 1.35
+	var s := create_tween().set_parallel(true).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	s.tween_property(seal, "scale", Vector2.ONE, 0.16)
+	s.tween_property(seal, "modulate:a", 0.93, 0.12)
+	await _wait(0.12)
+	Sfx.play_ui(STAMP_SOUND, -4.0)
+	await _wait(5.5)
+	var out := create_tween()
+	out.tween_property(box, "modulate:a", 0.0, 1.6).set_trans(Tween.TRANS_SINE)
+	out.tween_interval(0.8)
+	await out.finished
+	box.get_parent().queue_free()
+
+## The credits roll up the paper.
+func _credits() -> void:
+	var holder := Control.new()
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.clip_contents = true
+	_page.add_child(holder)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 14)
+	box.custom_minimum_size = Vector2(1000, 0)
+	holder.add_child(box)
+	var seal := SealStamp.new()
+	seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	seal.modulate.a = 0.93
+	box.add_child(seal)
+	box.add_child(_spacer(18))
+	box.add_child(_ink(&"TitleLabel", "GAME_TITLE"))
+	box.add_child(_spacer(40))
+	for entry in CreditsDB.ENTRIES:
+		box.add_child(_ink(&"HeaderLabel", entry[0], VERMILION))
+		if entry[1] != "":
+			var body := _ink(&"BodyText", "")
+			body.text = entry[1]
+			box.add_child(body)
+		box.add_child(_spacer(30))
+	box.add_child(_ink(&"HeaderLabel", "CREDITS_HISTORY", VERMILION))
+	box.add_child(_ink(&"QuoteText", "CREDITS_HISTORY_TEXT", INK_SOFT))
+	await get_tree().process_frame
+	var view := holder.size
+	box.size = Vector2(1000, box.get_combined_minimum_size().y)
+	box.position = Vector2((view.x - 1000.0) * 0.5, view.y + 20.0)
+	_rolling = true
+	_skip_roll = false
+	while box.position.y + box.size.y > -20.0 and not _skip_roll:
+		var fast := Input.is_action_pressed(&"jump") or Input.is_action_pressed(&"skip_line") or Input.is_action_pressed(&"interact") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		box.position.y -= ROLL_SPEED * (6.0 if fast else 1.0) * get_process_delta_time()
+		await get_tree().process_frame
+	_rolling = false
+	if _skip_roll:
+		var t := create_tween()
+		t.tween_property(box, "modulate:a", 0.0, 0.8)
+		await t.finished
+	holder.queue_free()
+
+func _spacer(height: float) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(0, height)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
+
+func _thanks() -> void:
+	var box := _column()
+	box.add_child(_ink(&"TitleLabel", "END_THANKS"))
+	box.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(box, "modulate:a", 1.0, 1.8).set_trans(Tween.TRANS_SINE)
+	t.tween_interval(3.4)
+	await t.finished

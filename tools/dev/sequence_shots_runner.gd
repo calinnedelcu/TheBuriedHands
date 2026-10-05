@@ -3,6 +3,8 @@ extends Node
 ## --seq=opening : a new game from the title, the first seconds
 ## --seq=sealing : the sealing cutscene, from the last chisel strike
 ## --seq=causeway : pouring the mercury, the causeway rising
+## --seq=ending : the walk down the last tunnel into the light, the epilogue
+## (run it with --fixed-fps 30 so game time doesn't depend on the frame rate)
 ## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/sequence_shots_runner.gd --seq=opening --out=/abs/dir
 
 var out := ""
@@ -41,6 +43,7 @@ func _run() -> void:
 	match seq:
 		"opening":
 			Game.new_game()
+			await Game.level_ready
 			await _frames(16.0, 1.6, "open")
 		"sealing":
 			Game.new_game()
@@ -70,5 +73,24 @@ func _run() -> void:
 			var cw := Game.level.get_node("Mechanism/Counterweight/Body/Usable") as Usable
 			cw.complete_hold(player)
 			await _frames(14.0, 1.4, "pour")
+		"ending":
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			Game.set_flag(&"guards_hostile")
+			Game.set_flag(&"has_evidence")
+			Game.set_flag(&"gave_lamp")
+			Quest.start_at(&"escape")
+			player.inventory.take_lamp(90.0, true)
+			player.global_position = Vector3(-1.75, 7.6, 146.0)
+			player.rotation.y = PI
+			await get_tree().create_timer(1.0).timeout
+			Game.level.get_node("Atmosphere").call(&"snap")
+			await _shot("corridor")
+			Input.action_press(&"move_forward")
+			await _frames(9.0, 1.0, "walk")
+			Input.action_release(&"move_forward")
+			await _frames(100.0, 2.0, "end")
 	Game._delete_save()
 	get_tree().quit()

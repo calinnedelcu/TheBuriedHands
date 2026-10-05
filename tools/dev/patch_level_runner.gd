@@ -32,6 +32,7 @@ func _run() -> void:
 	_chapters()
 	_sealing_guards_closer()
 	_statue_parts()
+	_way_out()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -402,3 +403,47 @@ func _statue_parts() -> void:
 		if not hit.is_empty():
 			bowl.global_position = hit.position
 	_log.append("statue: legs + head become a whole soldier on the last strike")
+
+## The end of the drain opened onto nothing: a black void, and the "light" was
+## a marker behind the player. Now the tunnel ends in a morning hillside (the
+## DaylightExit scene), the walk out starts a few metres before the mouth, the
+## lumpy stretched floor mesh is replaced by a flat one and the tunnel gets
+## its own air for the sun's shaft.
+func _way_out() -> void:
+	var mouth := Vector3(-1.75, 7.45, 185.65)
+	var day := root.get_node_or_null("DaylightExit") as DaylightExit
+	if day == null:
+		day = (load("res://scenes/world/daylight_exit.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as DaylightExit
+		day.name = "DaylightExit"
+		root.add_child(day)
+		day.owner = root
+	day.global_position = mouth
+	# Its _ready hides it until Act V; the scene itself stays visible.
+	day.visible = true
+	var old_floor := root.get_node("TreasureRoomUpdated/Cube_296") as MeshInstance3D
+	old_floor.visible = false
+	var floor := root.get_node_or_null("EscapeFloor") as MeshInstance3D
+	if floor == null:
+		floor = MeshInstance3D.new()
+		floor.name = "EscapeFloor"
+		root.add_child(floor)
+		floor.owner = root
+	var box := BoxMesh.new()
+	box.size = Vector3(6.0, 0.6, 55.2)
+	floor.mesh = box
+	# A drainage channel: damp stone that catches the daylight.
+	floor.material_override = load("res://assets/materials/level/drain_floor.tres")
+	floor.global_position = Vector3(-1.5, 7.47 - 0.3, 130.9 + 55.2 * 0.5)
+	var exit := root.get_node("Story/ExitLight") as Node3D
+	exit.global_position = Vector3(-1.75, 8.6, 178.0)
+	(exit.get_node("Light") as Node3D).global_position = mouth + Vector3(0.0, 3.0, 0.0) + day.sun_direction * 60.0
+	var air := _zone("Escape", Vector3(-1.75, 10.5, 158.3), Vector3(9.0, 9.0, 56.0))
+	air.zone_priority = 2
+	air.fog_color = Color(0.02, 0.022, 0.026)
+	air.fog_density = 0.005
+	air.volumetric_density = 0.012
+	air.volumetric_albedo = Color(0.95, 0.9, 0.82)
+	air.ambient_color = Color(0.045, 0.05, 0.065)
+	air.saturation = 0.95
+	air.music = &"silence"
+	_log.append("way out: daylight at the mouth, flat floor, walk-out trigger at z 178")

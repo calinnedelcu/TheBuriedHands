@@ -252,7 +252,9 @@ DEATH_SPIKES,You fell onto the spikes.,Ai căzut în țepi.
 DEATH_MERCURY,The mercury fumes poisoned you.,Vaporii de mercur te-au otrăvit.
 DEATH_FALL,You fell.,Ai căzut.
 DEATH_GENERIC,You were struck down.,Ai fost doborât.
-END_TITLE,You escaped,Ai scăpat
+END_TITLE,Daylight,Lumina zilei
+END_EPILOGUE,Epilogue,Epilog
+END_PLACE,"Mount Li, the next morning","Muntele Li, a doua zi dimineața"
 END_BASE,The First Emperor's tomb was sealed with its builders inside. You are one of the few who saw the sky again.,Mormântul Primului Împărat a fost sigilat cu constructorii lui înăuntru. Tu ești unul dintre puținii care au mai văzut cerul.
 END_EVIDENCE,The register came out with you. Their names will not be forgotten.,Registrul a ieșit odată cu tine. Numele lor nu vor fi uitate.
 END_NO_EVIDENCE,No one will ever write of those left beneath the mountain.,"Despre cei rămași sub munte nu va scrie nimeni, niciodată."
@@ -276,3 +278,5 @@ CREDITS_FONTS,Fonts,Fonturi
 CREDITS_AUDIO,Audio,Sunet
 CREDITS_TEXTURES,Textures,Texturi
 CREDITS_ENGINE,Made with Godot Engine,Realizat cu Godot Engine
+CREDITS_HISTORY,History,Istorie
+CREDITS_HISTORY_TEXT,"The closing quotation follows Sima Qian, Records of the Grand Historian, chapter 6.","Citatul de la final urmează textul lui Sima Qian, Însemnările marelui istoric, capitolul 6."

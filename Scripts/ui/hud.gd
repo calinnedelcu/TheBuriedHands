@@ -488,10 +488,18 @@ func _on_chapter_started(number: int) -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override(&"separation", 10)
 	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	box.offset_top = 210
+	box.offset_top = 160
 	box.offset_left = -600
 	box.offset_right = 600
 	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	# The chapter's numeral on a seal, as on a scroll.
+	if number >= 1 and number <= 5:
+		var seal := SealStamp.new()
+		seal.text = "一二三四五"[number - 1]
+		seal.side = 46.0
+		seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		seal.modulate.a = 0.9
+		box.add_child(seal)
 	var numeral := _label("HeaderLabel", tr("CHAPTER_%d" % number))
 	numeral.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(numeral)

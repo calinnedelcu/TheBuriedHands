@@ -12,6 +12,7 @@ const SPOTS := [
 	["mechanism", Vector3(0.5, 7.7, 44.5)],
 	["mercury", Vector3(-46.0, 7.9, 70.0)],
 	["treasury", Vector3(0.6, 7.5, 88.0)],
+	["exit", Vector3(-1.75, 7.6, 160.0)],
 ]
 
 func _ready() -> void:
@@ -43,6 +44,9 @@ func _run() -> void:
 		print("experiment %s: %d shadows off" % [experiment, n])
 	print("quality=%d  %s" % [Settings.get_value(&"quality"), RenderingServer.get_video_adapter_name()])
 	for spot in SPOTS:
+		if spot[0] == "exit":
+			# The daylight outside only exists from the drain on.
+			Quest.start_at(&"escape")
 		player.global_position = spot[1]
 		player.velocity = Vector3.ZERO
 		await get_tree().create_timer(1.5).timeout

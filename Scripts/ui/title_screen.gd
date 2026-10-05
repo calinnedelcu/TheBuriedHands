@@ -46,7 +46,10 @@ func _ready() -> void:
 	_build_aisle()
 	_build_camera()
 	_build_ui()
-	Music.silence(0.8)
+	# Coming back from the credits the theme is already playing: let it run on.
+	if Music.track() != &"menu":
+		Music.silence(0.8)
+	Music.set_ambience(&"", 0.8)
 	Music.play(&"menu", 4.0)
 	create_tween().tween_property(_fade, "color:a", 0.0, 2.8).set_trans(Tween.TRANS_SINE).set_delay(0.3)
 	Settings.changed.connect(_on_setting)

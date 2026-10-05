@@ -16,8 +16,15 @@ var _player: Node3D
 var _check := 0.0
 var _zone: AtmosphereZone = null
 var _zone_music: StringName = &""
+## Multiplies the exposure on top of the zone's (the ending's walk into daylight).
+var flare := 1.0:
+	set(value):
+		flare = value
+		if _env != null:
+			_write(_current)
 
 func _ready() -> void:
+	add_to_group(&"atmosphere")
 	var we := get_node_or_null(environment_path) as WorldEnvironment
 	if we == null or we.environment == null:
 		set_process(false)
@@ -41,6 +48,11 @@ func _process(delta: float) -> void:
 	for key in _current:
 		_current[key] = _lerp(_current[key], _target[key], k)
 	_write(_current)
+
+## Eases the exposure up to `value` times its normal over `seconds`.
+func flare_to(value: float, seconds: float) -> void:
+	var t := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.tween_property(self, "flare", value, seconds)
 
 ## Jumps straight to the air of wherever the player is (after a teleport or
 ## a checkpoint load) instead of blending.
@@ -107,7 +119,7 @@ func _write(p: Dictionary) -> void:
 	_env.ambient_light_color = p["ambient_color"]
 	_env.ambient_light_energy = p["ambient_energy"]
 	_env.adjustment_saturation = p["saturation"]
-	_env.tonemap_exposure = float(p["exposure"]) * float(Settings.get_value(&"brightness"))
+	_env.tonemap_exposure = float(p["exposure"]) * float(Settings.get_value(&"brightness")) * flare
 
 func _on_setting(key: StringName, _value: Variant) -> void:
 	if key == &"quality":

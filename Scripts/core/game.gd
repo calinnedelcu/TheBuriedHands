@@ -28,6 +28,7 @@ var _checkpoint: Dictionary = {}
 var _pending_restore: Dictionary = {}
 var _has_pending_restore := false
 var _is_dead := false
+var _finished := false
 var _transition: CanvasLayer
 var _fade: ColorRect
 var _loading_label: Label
@@ -103,6 +104,7 @@ func quit_game() -> void:
 func register_level(level_root: Node) -> void:
 	level = level_root
 	_is_dead = false
+	_finished = false
 	if _has_pending_restore:
 		_has_pending_restore = false
 		_apply_snapshot(_pending_restore)
@@ -114,6 +116,10 @@ func register_level(level_root: Node) -> void:
 
 func is_dead() -> bool:
 	return _is_dead
+
+## Dead, or walked out into the ending: the run can't be paused any more.
+func is_over() -> bool:
+	return _is_dead or _finished
 
 ## Ends the run with a death screen. `reason_key` is a translation key.
 func fail(reason_key: String) -> void:
@@ -128,6 +134,7 @@ func finish() -> void:
 		"evidence": bool(get_flag(&"has_evidence")),
 		"apprentice": bool(get_flag(&"gave_lamp")),
 	}
+	_finished = true
 	_delete_save()
 	finished.emit(ending)
 
@@ -183,6 +190,7 @@ func _reset_session() -> void:
 	flags.clear()
 	sealing_stage = 0
 	_is_dead = false
+	_finished = false
 	Quest.reset()
 	Dialogue.stop()
 

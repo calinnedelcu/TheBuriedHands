@@ -225,6 +225,11 @@ func _act5() -> bool:
 	await _walk_to(light.global_position, 1.0)
 	await _wait(1.0)
 	_expect(&"escape")
+	_check("walked out into the ending", Game.is_over() and not Game.is_dead())
+	# The walk-out takes over: the craftsman goes on toward the mouth by himself.
+	var from := player.global_position
+	await _wait(3.0)
+	_check("walking out on his own (%.1f m)" % from.distance_to(player.global_position), from.distance_to(player.global_position) > 1.5)
 	return true
 
 # --- Ladders ---------------------------------------------------------------------------------

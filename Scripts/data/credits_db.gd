@@ -5,7 +5,7 @@ extends RefCounted
 
 const ENTRIES := [
 	["CREDITS_TEAM", "Calin Nedelcu · Vlad · ache12345"],
-	["CREDITS_FONTS", "Cinzel — Natanael Gama · EB Garamond — Georg Duffner, Octavio Pardo"],
+	["CREDITS_FONTS", "Cinzel — Natanael Gama · EB Garamond — Georg Duffner, Octavio Pardo · Ma Shan Zheng (OFL)"],
 	["CREDITS_AUDIO", "Kenney (CC0) · spinopel (Pixabay)"],
 	["CREDITS_TEXTURES", "ambientCG (CC0)"],
 	["CREDITS_ENGINE", ""],

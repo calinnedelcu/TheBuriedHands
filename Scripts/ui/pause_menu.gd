@@ -58,7 +58,7 @@ func _button(key: String, action: Callable) -> void:
 	_menu.add_child(b)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&"pause") or Game.is_dead():
+	if not event.is_action_pressed(&"pause") or Game.is_over():
 		return
 	get_viewport().set_input_as_handled()
 	if _options.visible:

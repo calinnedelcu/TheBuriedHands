@@ -99,6 +99,8 @@ var _ladder: Node3D = null
 var _auto_ducked := false
 var _duck_clear := 0.0
 var _cinematic_tween: Tween
+var _walk_target := Vector3.INF
+var _walk_speed := 0.0
 var _visibility_timer := 0.0
 var _occlusion_cache: Dictionary = {}
 
@@ -212,6 +214,15 @@ func look_at_point(target: Vector3, duration := 0.6, fov := -1.0) -> void:
 		_cinematic_tween.tween_property(camera, "fov", fov, duration)
 	await _cinematic_tween.finished
 
+## Walks the body to `target` on its own (for cutscenes, with the controls
+## locked), at `speed` m/s; the view stays wherever it is turned.
+func walk_to(target: Vector3, speed := 1.2) -> void:
+	_walk_target = target
+	_walk_speed = speed
+
+func stop_walking() -> void:
+	_walk_target = Vector3.INF
+
 func reset_fov(duration := 0.5) -> void:
 	var tween := create_tween().set_trans(Tween.TRANS_SINE)
 	tween.tween_property(camera, "fov", float(Settings.get_value(&"fov")), duration)
@@ -295,9 +306,18 @@ func _move(delta: float) -> void:
 		elif Input.is_action_just_pressed(&"jump") and stance != Stance.STAND:
 			_set_stance(Stance.STAND)
 	var dir := (global_transform.basis * Vector3(input.x, 0.0, input.y)).normalized()
+	var speed := _target_speed()
+	if _walk_target != Vector3.INF:
+		var to := _walk_target - global_position
+		to.y = 0.0
+		if to.length() < 0.2:
+			_walk_target = Vector3.INF
+		else:
+			dir = to.normalized()
+			speed = minf(_walk_speed, to.length() * 2.0 + 0.3)
 	if _locks.is_empty():
 		_auto_duck(dir, delta)
-	var target := dir * _target_speed()
+	var target := dir * speed
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var rate := ground_accel if dir != Vector3.ZERO else ground_decel
 	if not on_floor:
