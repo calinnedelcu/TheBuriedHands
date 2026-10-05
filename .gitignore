@@ -22,3 +22,6 @@ export_presets.cfg
 .DS_Store
 desktop.ini
 Thumbs.db
+
+# Python bytecode from the Blender build scripts
+__pycache__/
