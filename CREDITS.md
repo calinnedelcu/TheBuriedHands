@@ -4,7 +4,7 @@
 - **Cinzel** — Natanael Gama, SIL Open Font License 1.1 (`assets/fonts/OFL-Cinzel.txt`)
 - **EB Garamond** — Georg Duffner, Octavio Pardo, SIL Open Font License 1.1 (`assets/fonts/OFL-EBGaramond.txt`)
 - **Ma Shan Zheng** — The Ma Shan Zheng Project Authors, SIL Open Font License 1.1 (`assets/fonts/OFL-MaShanZheng.txt`);
-  subset to the few glyphs the ending's seal uses (`MaShanZheng-Seal.ttf`)
+  subset to the few glyphs the seals and the names on the statues use (`MaShanZheng-Seal.ttf`)
 
 ## Audio
 - **Kenney** (kenney.nl) — Impact Sounds, RPG Audio, Interface Sounds — CC0 1.0

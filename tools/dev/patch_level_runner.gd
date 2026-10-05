@@ -42,6 +42,7 @@ func _run() -> void:
 	_tunnel_timbers()
 	_guard_variety()
 	_close_mechanism_wall()
+	_makers_names()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -819,3 +820,62 @@ func _close_mechanism_wall() -> void:
 	var shell := root.get_node("MapWithoutTreasure/BalantaRoof") as MeshInstance3D
 	shell.set_surface_override_material(1, load("res://assets/materials/level/dirt_double.tres"))
 	_log.append("mechanism room: west wall drawn from both sides")
+
+## The makers' names pressed into the figures' clay (NameMark, NamesDB),
+## one on each of eight statues along the way, on the side you pass.
+func _makers_names() -> void:
+	var group := root.get_node_or_null("MakersNames") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "MakersNames"
+		root.add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	# name, statue centre (x, z), where you pass by it (x, z), height of the mark
+	var spots := [
+		[&"gong_jiang", Vector2(-71.3, -27.8), Vector2(-68.4, -27.8), 1.9],
+		[&"xianyang_yi", Vector2(-63.6, -33.7), Vector2(-63.6, -30.8), 1.8],
+		[&"gong_de", Vector2(-46.1, -35.0), Vector2(-46.1, -32.0), 1.2],
+		[&"xianyang_ci", Vector2(-24.9, -25.9), Vector2(-27.9, -25.9), 1.2],
+		[&"xianyang_ye", Vector2(-20.7, -40.2), Vector2(-20.7, -37.4), 1.25],
+		[&"gong_cang", Vector2(55.8, -12.0), Vector2(52.8, -12.0), 1.2],
+		[&"xianyang_qing", Vector2(52.2, -56.3), Vector2(52.2, -53.3), 1.2],
+		[&"gong_shui", Vector2(33.2, -35.6), Vector2(30.6, -35.6), 1.2],
+	]
+	var space := root.get_world_3d().direct_space_state
+	var placed := 0
+	for s in spots:
+		var centre: Vector2 = s[1]
+		var want: Vector2 = (s[2] as Vector2 - centre).normalized()
+		var y: float = s[3]
+		# Try the wanted side first, then turn round until a ray meets the
+		# statue itself (not a table or wall in between).
+		var best: Dictionary = {}
+		for k in 16:
+			var turn := (k + 1) / 2 * (1 if k % 2 == 0 else -1) * TAU / 16.0
+			var d := want.rotated(turn)
+			var from := Vector3(centre.x + d.x * 2.4, y, centre.y + d.y * 2.4)
+			var to := Vector3(centre.x, y, centre.y)
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, 1))
+			if hit.is_empty():
+				continue
+			var p: Vector3 = hit.position
+			if Vector2(p.x, p.z).distance_to(centre) < 0.85:
+				best = hit
+				break
+		if best.is_empty():
+			_log.append("names: WARNING no statue surface for %s" % s[0])
+			continue
+		var mark := NameMark.new()
+		mark.name = String(s[0]).to_pascal_case()
+		mark.name_id = s[0]
+		group.add_child(mark)
+		mark.owner = root
+		var n: Vector3 = best.normal
+		n.y = 0.0
+		n = n.normalized()
+		mark.global_transform = Transform3D(Basis.looking_at(-n), best.position + n * 0.01)
+		placed += 1
+	_log.append("names: %d makers' names on statues" % placed)

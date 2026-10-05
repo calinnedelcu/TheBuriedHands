@@ -19,6 +19,8 @@ var _paper: ColorRect
 var _page: Control
 var _rolling := false
 var _skip_roll := false
+## The makers' names the player read on the way (NamesDB entries).
+var _names: Array = []
 
 func _ready() -> void:
 	layer = 90
@@ -76,6 +78,12 @@ func _on_finished(ending: Dictionary) -> void:
 	await _card("END_BASE")
 	await _card("END_EVIDENCE" if ending.get("evidence", false) else "END_NO_EVIDENCE")
 	await _card("END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE")
+	var names: Array = ending.get("names", [])
+	_names = names
+	if names.is_empty():
+		await _card("END_NO_NAMES")
+	else:
+		await _card_text(tr("END_NAMES") % names.size())
 	Music.set_ambience(&"", 10.0)
 	Music.play(&"menu", 6.0)
 	await _quote()
@@ -142,8 +150,12 @@ func _epilogue_card() -> void:
 	await _show_page(box, 3.6)
 
 func _card(key: String) -> void:
+	await _card_text(tr(key))
+
+func _card_text(line: String) -> void:
 	var box := _column()
-	var text := _ink(&"BodyText", key)
+	var text := _ink(&"BodyText", "")
+	text.text = line
 	text.add_theme_font_size_override(&"font_size", 34)
 	box.add_child(text)
 	await _show_page(box, 5.6)
@@ -202,6 +214,11 @@ func _credits() -> void:
 			var body := _ink(&"BodyText", "")
 			body.text = entry[1]
 			box.add_child(body)
+		box.add_child(_spacer(30))
+	if not _names.is_empty():
+		box.add_child(_ink(&"HeaderLabel", "CREDITS_REMEMBERED", VERMILION))
+		for n in _names:
+			box.add_child(_ink(&"QuoteText", String(n["key"]), INK_SOFT))
 		box.add_child(_spacer(30))
 	box.add_child(_ink(&"HeaderLabel", "CREDITS_HISTORY", VERMILION))
 	box.add_child(_ink(&"QuoteText", "CREDITS_HISTORY_TEXT", INK_SOFT))

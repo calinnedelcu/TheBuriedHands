@@ -21,7 +21,7 @@ const SAVE_FILE := "user://savegame.json"
 ## Shown while the level loads: what history says of the place, and how to
 ## stay alive in it.
 const LOADING_NOTES := ["LOAD_FACT_1", "LOAD_FACT_2", "LOAD_FACT_3", "LOAD_FACT_4", "LOAD_FACT_5", "LOAD_FACT_6",
-	"LOAD_TIP_1", "LOAD_TIP_2", "LOAD_TIP_3", "LOAD_TIP_4", "LOAD_TIP_5"]
+	"LOAD_TIP_1", "LOAD_TIP_2", "LOAD_TIP_3", "LOAD_TIP_4", "LOAD_TIP_5", "LOAD_TIP_6"]
 const SAVE_VERSION := 1
 
 var flags: Dictionary = {}
@@ -139,6 +139,7 @@ func finish() -> void:
 	var ending := {
 		"evidence": bool(get_flag(&"has_evidence")),
 		"apprentice": bool(get_flag(&"gave_lamp")),
+		"names": NamesDB.found(),
 	}
 	_finished = true
 	_delete_save()

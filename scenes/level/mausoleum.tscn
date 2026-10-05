@@ -121,6 +121,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/treasure/bronze_lamp.tscn" id="112_miefi"]
 [ext_resource type="PackedScene" path="res://scenes/props/bolt.tscn" id="115_p3lpp"]
 [ext_resource type="Script" path="res://Scripts/world/timber_frame.gd" id="120_yempy"]
+[ext_resource type="Script" path="res://Scripts/world/name_mark.gd" id="122_uixjv"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
 sky_top_color = Color(0.01, 0.01, 0.015, 1)
@@ -3448,7 +3449,7 @@ visible = false
 transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 1.057869
+pitch_scale = 0.96657234
 bus = &"Tomb"
 
 [node name="tripo_node_738d7477-4130-4789-b50a-1568b58469f2_004" parent="MapWithoutTreasure" index="627" unique_id=1874498541]
@@ -5998,64 +5999,64 @@ highlight = false
 
 [node name="Miniatures" type="Node3D" parent="MercuryHall" unique_id=1837378493]
 
-[node name="City0" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1010635736 instance=ExtResource("103_am6l4")]
+[node name="City0" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1294334959 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-6.556708e-08, 0, 1.5, 0, 1.5, 0, -1.5, 0, -6.556708e-08, -78.11738, -0.055679835, 67.77968)
 script = ExtResource("104_yempy")
 
-[node name="Palace1" type="Node3D" parent="MercuryHall/Miniatures" unique_id=143979028 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -70.01738, -0.40756276, 56.079674)
+[node name="Palace1" type="Node3D" parent="MercuryHall/Miniatures" unique_id=395295658 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -67.31738, -0.2550011, 59.679676)
 script = ExtResource("104_yempy")
 
-[node name="Tower2" type="Node3D" parent="MercuryHall/Miniatures" unique_id=728705005 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -69.11738, -0.17350772, 60.579674)
+[node name="Tower2" type="Node3D" parent="MercuryHall/Miniatures" unique_id=469446776 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -70.01738, -0.40756276, 56.079674)
 script = ExtResource("104_yempy")
 
-[node name="Palace3" type="Node3D" parent="MercuryHall/Miniatures" unique_id=83209044 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, -0.4358745, 69.57967)
-script = ExtResource("104_yempy")
-
-[node name="City4" type="Node3D" parent="MercuryHall/Miniatures" unique_id=361321624 instance=ExtResource("103_am6l4")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -82.61738, -0.29491332, 55.179676)
-script = ExtResource("104_yempy")
-
-[node name="Tower5" type="Node3D" parent="MercuryHall/Miniatures" unique_id=376882629 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -81.717384, -0.22955707, 65.07967)
-script = ExtResource("104_yempy")
-
-[node name="Palace6" type="Node3D" parent="MercuryHall/Miniatures" unique_id=640122809 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -70.01738, -0.39407638, 66.87968)
-script = ExtResource("104_yempy")
-
-[node name="Palace7" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1865860052 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -86.217384, -0.18046716, 68.67967)
-script = ExtResource("104_yempy")
-
-[node name="Tower8" type="Node3D" parent="MercuryHall/Miniatures" unique_id=912247308 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -60.117382, -0.28264907, 74.979675)
-script = ExtResource("104_yempy")
-
-[node name="City9" type="Node3D" parent="MercuryHall/Miniatures" unique_id=195271555 instance=ExtResource("103_am6l4")]
+[node name="Palace3" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1817216982 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -54.71738, -0.14928392, 72.27968)
 script = ExtResource("104_yempy")
 
-[node name="Palace10" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1561234524 instance=ExtResource("105_5r7ot")]
+[node name="City4" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1221016277 instance=ExtResource("103_am6l4")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -81.717384, -0.22955707, 65.07967)
+script = ExtResource("104_yempy")
+
+[node name="Tower5" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1739582256 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -82.61738, -0.29491332, 55.179676)
+script = ExtResource("104_yempy")
+
+[node name="Palace6" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1850710494 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -75.41738, -0.25500062, 50.679676)
 script = ExtResource("104_yempy")
 
-[node name="Tower11" type="Node3D" parent="MercuryHall/Miniatures" unique_id=955586189 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -73.61738, 0.06233736, 64.17967)
+[node name="Palace7" type="Node3D" parent="MercuryHall/Miniatures" unique_id=783251315 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -87.11738, -0.07545046, 69.57967)
 script = ExtResource("104_yempy")
 
-[node name="Palace12" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1434266393 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -80.81738, -0.31783727, 59.679676)
+[node name="Tower8" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1547511136 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -60.117382, -0.28264907, 74.979675)
 script = ExtResource("104_yempy")
 
-[node name="Tower13" type="Node3D" parent="MercuryHall/Miniatures" unique_id=695255994 instance=ExtResource("106_uixjv")]
-transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -65.51738, -0.27125886, 56.979675)
+[node name="City9" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1562060 instance=ExtResource("103_am6l4")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -73.61738, 0.11358496, 65.07967)
 script = ExtResource("104_yempy")
 
-[node name="Palace14" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1888083023 instance=ExtResource("105_5r7ot")]
-transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, 0.2006068, 63.279675)
+[node name="Palace10" type="Node3D" parent="MercuryHall/Miniatures" unique_id=414932633 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, -0.4358745, 69.57967)
+script = ExtResource("104_yempy")
+
+[node name="Tower11" type="Node3D" parent="MercuryHall/Miniatures" unique_id=383359984 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -79.91738, -0.31634143, 58.779675)
+script = ExtResource("104_yempy")
+
+[node name="Palace12" type="Node3D" parent="MercuryHall/Miniatures" unique_id=553584368 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -82.61738, -0.3657203, 46.179676)
+script = ExtResource("104_yempy")
+
+[node name="Tower13" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1048265303 instance=ExtResource("106_uixjv")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -57.41738, -0.3780699, 64.17967)
+script = ExtResource("104_yempy")
+
+[node name="Palace14" type="Node3D" parent="MercuryHall/Miniatures" unique_id=548719564 instance=ExtResource("105_5r7ot")]
+transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -87.11738, -0.08193878, 47.079674)
 script = ExtResource("104_yempy")
 
 [node name="WallLamps" type="Node3D" parent="." unique_id=165276794]
@@ -6608,7 +6609,7 @@ transform = Transform3D(0.9063077, 0, 0.42261824, 0, 1, 0, -0.42261824, 0, 0.906
 transform = Transform3D(0.93969256, 0, -0.3420201, 0, 1, 0, 0.3420201, 0, 0.93969256, 2.3, 7.4604526, 103.9)
 
 [node name="HuWest" parent="GraveGoods" unique_id=2055772740 instance=ExtResource("108_v8ix0")]
-transform = Transform3D(0.9848068, 0, 0.17364801, 0, 1, 0, -0.17364801, 0, 0.9848068, -5.5, 7.4604526, 111.4)
+transform = Transform3D(0.9848065, 0, 0.17364796, 0, 1, 0, -0.17364796, 0, 0.9848065, -5.5, 7.4604526, 111.4)
 
 [node name="HuEast" parent="GraveGoods" unique_id=191913001 instance=ExtResource("108_v8ix0")]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 2.5, 7.460452, 111.4)
@@ -6694,163 +6695,205 @@ transform = Transform3D(-0.9999946, -4.0928545e-09, 0.00329883, -0.00015444474, 
 
 [node name="TunnelTimbers" type="Node3D" parent="." unique_id=918395245]
 
-[node name="Frame0" type="Node3D" parent="TunnelTimbers" unique_id=402474691]
+[node name="Frame0" type="Node3D" parent="TunnelTimbers" unique_id=1952167181]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.537424, -8.55747, -42)
 script = ExtResource("120_yempy")
 width = 3.5077362
 height = 3.2882524
 
-[node name="Frame1" type="Node3D" parent="TunnelTimbers" unique_id=1403840404]
+[node name="Frame1" type="Node3D" parent="TunnelTimbers" unique_id=209837023]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.651737, -8.63616, -36)
 script = ExtResource("120_yempy")
 width = 5.2788486
 height = 3.4473104
 with_lamp = true
 
-[node name="Frame2" type="Node3D" parent="TunnelTimbers" unique_id=2104083205]
+[node name="Frame2" type="Node3D" parent="TunnelTimbers" unique_id=504990287]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.520382, -8.636053, -30)
 script = ExtResource("120_yempy")
 width = 3.5442104
 height = 3.347227
 
-[node name="Frame3" type="Node3D" parent="TunnelTimbers" unique_id=1008933337]
+[node name="Frame3" type="Node3D" parent="TunnelTimbers" unique_id=468286183]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.555305, -8.589418, -24)
 script = ExtResource("120_yempy")
 width = 3.4588833
 height = 3.3691173
 
-[node name="Frame4" type="Node3D" parent="TunnelTimbers" unique_id=1032899823]
+[node name="Frame4" type="Node3D" parent="TunnelTimbers" unique_id=552776492]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.555656, -8.624673, -18)
 script = ExtResource("120_yempy")
 width = 3.4876003
 height = 3.5129623
 with_lamp = true
 
-[node name="Frame5" type="Node3D" parent="TunnelTimbers" unique_id=1875421414]
+[node name="Frame5" type="Node3D" parent="TunnelTimbers" unique_id=1553586207]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.551582, -8.576702, -12)
 script = ExtResource("120_yempy")
 width = 3.4689884
 height = 3.4311624
 
-[node name="Frame6" type="Node3D" parent="TunnelTimbers" unique_id=611327988]
+[node name="Frame6" type="Node3D" parent="TunnelTimbers" unique_id=1143394962]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.54719, -8.642532, -6)
 script = ExtResource("120_yempy")
 width = 3.4457397
 height = 3.5420523
 
-[node name="Frame7" type="Node3D" parent="TunnelTimbers" unique_id=187445983]
+[node name="Frame7" type="Node3D" parent="TunnelTimbers" unique_id=97486411]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.522346, -8.636475, 0)
 script = ExtResource("120_yempy")
 width = 3.5398846
 height = 3.541112
 with_lamp = true
 
-[node name="Frame8" type="Node3D" parent="TunnelTimbers" unique_id=1040369183]
+[node name="Frame8" type="Node3D" parent="TunnelTimbers" unique_id=954215555]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.542316, -8.614422, 6)
 script = ExtResource("120_yempy")
 width = 3.4910412
 height = 3.4493375
 
-[node name="Frame9" type="Node3D" parent="TunnelTimbers" unique_id=642910044]
+[node name="Frame9" type="Node3D" parent="TunnelTimbers" unique_id=1849773367]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.519283, -8.608058, 12)
 script = ExtResource("120_yempy")
 width = 3.538597
 height = 3.488429
 
-[node name="Frame10" type="Node3D" parent="TunnelTimbers" unique_id=1371499997]
+[node name="Frame10" type="Node3D" parent="TunnelTimbers" unique_id=714946878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.537052, -8.610581, 18)
 script = ExtResource("120_yempy")
 width = 3.4607162
 height = 3.419013
 with_lamp = true
 
-[node name="Frame11" type="Node3D" parent="TunnelTimbers" unique_id=1248783970]
+[node name="Frame11" type="Node3D" parent="TunnelTimbers" unique_id=90318826]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.561317, -8.577454, 24)
 script = ExtResource("120_yempy")
 width = 3.4445934
 height = 3.2261653
 
-[node name="Frame12" type="Node3D" parent="TunnelTimbers" unique_id=1461391858]
+[node name="Frame12" type="Node3D" parent="TunnelTimbers" unique_id=176850239]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, -8.54857, -33.994343)
 script = ExtResource("120_yempy")
 width = 3.6609344
 height = 3.856965
 
-[node name="Frame13" type="Node3D" parent="TunnelTimbers" unique_id=1701254536]
+[node name="Frame13" type="Node3D" parent="TunnelTimbers" unique_id=1672696054]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, -8.574556, -33.99048)
 script = ExtResource("120_yempy")
 width = 3.695095
 height = 3.5560675
 with_lamp = true
 
-[node name="Frame14" type="Node3D" parent="TunnelTimbers" unique_id=1362284183]
+[node name="Frame14" type="Node3D" parent="TunnelTimbers" unique_id=1401858777]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, -8.530089, -33.948402)
 script = ExtResource("120_yempy")
 width = 3.8460808
 height = 3.7115712
 
-[node name="Frame15" type="Node3D" parent="TunnelTimbers" unique_id=134302983]
+[node name="Frame15" type="Node3D" parent="TunnelTimbers" unique_id=881524723]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6, -8.638906, -33.960308)
 script = ExtResource("120_yempy")
 width = 3.8801498
 height = 3.7112775
 
-[node name="Frame16" type="Node3D" parent="TunnelTimbers" unique_id=933743434]
+[node name="Frame16" type="Node3D" parent="TunnelTimbers" unique_id=1228463620]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, -8.593573, -33.952587)
 script = ExtResource("120_yempy")
 width = 3.9355469
 height = 3.747929
 with_lamp = true
 
-[node name="Frame17" type="Node3D" parent="TunnelTimbers" unique_id=1144964363]
+[node name="Frame17" type="Node3D" parent="TunnelTimbers" unique_id=24228480]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 18, -8.673263, -33.98526)
 script = ExtResource("120_yempy")
 width = 3.8414574
 height = 3.7504053
 
-[node name="Frame18" type="Node3D" parent="TunnelTimbers" unique_id=1145608350]
+[node name="Frame18" type="Node3D" parent="TunnelTimbers" unique_id=1808126842]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 4, -8.638887, 30.151447)
 script = ExtResource("120_yempy")
 width = 3.9000492
 height = 3.4316034
 
-[node name="Frame19" type="Node3D" parent="TunnelTimbers" unique_id=1531415823]
+[node name="Frame19" type="Node3D" parent="TunnelTimbers" unique_id=899876569]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, -8.620085, 30.151085)
 script = ExtResource("120_yempy")
 width = 3.8993244
 height = 3.4834428
 with_lamp = true
 
-[node name="Frame20" type="Node3D" parent="TunnelTimbers" unique_id=776319819]
+[node name="Frame20" type="Node3D" parent="TunnelTimbers" unique_id=382464565]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16, -8.627705, 30.150723)
 script = ExtResource("120_yempy")
 width = 3.8985996
 height = 3.4552946
 
-[node name="Frame21" type="Node3D" parent="TunnelTimbers" unique_id=1773177534]
+[node name="Frame21" type="Node3D" parent="TunnelTimbers" unique_id=25703742]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 22, -8.56699, 30.150707)
 script = ExtResource("120_yempy")
 width = 3.898573
 height = 3.3915653
 
-[node name="Frame22" type="Node3D" parent="TunnelTimbers" unique_id=1756356696]
+[node name="Frame22" type="Node3D" parent="TunnelTimbers" unique_id=757392937]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 32, -8.522342, -46.419426)
 script = ExtResource("120_yempy")
 width = 2.8871803
 height = 3.185979
 with_lamp = true
 
-[node name="Frame23" type="Node3D" parent="TunnelTimbers" unique_id=108078492]
+[node name="Frame23" type="Node3D" parent="TunnelTimbers" unique_id=2028398942]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 37, -8.490652, -46.336502)
 script = ExtResource("120_yempy")
 width = 2.9571037
 height = 3.1745453
 
-[node name="Frame24" type="Node3D" parent="TunnelTimbers" unique_id=1706011405]
+[node name="Frame24" type="Node3D" parent="TunnelTimbers" unique_id=1317603487]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 42, -8.471485, -46.371395)
 script = ExtResource("120_yempy")
 width = 3.0698013
 height = 3.1889715
+
+[node name="MakersNames" type="Node3D" parent="." unique_id=267110564]
+
+[node name="GongJiang" type="Node3D" parent="MakersNames" unique_id=124082861]
+transform = Transform3D(0.3643385, 0, 0.9312666, 0, 1, 0, -0.9312666, 0, 0.3643385, -70.870926, 1.9, -27.796356)
+script = ExtResource("122_uixjv")
+name_id = &"gong_jiang"
+
+[node name="XianyangYi" type="Node3D" parent="MakersNames" unique_id=1958342924]
+transform = Transform3D(0.6521204, 0, 0.7581154, 0, 1, 0, -0.7581154, 0, 0.6521204, -63.202568, 1.8, -33.531998)
+script = ExtResource("122_uixjv")
+name_id = &"xianyang_yi"
+
+[node name="GongDe" type="Node3D" parent="MakersNames" unique_id=2075611189]
+transform = Transform3D(0.99984133, 0, 0.017814338, 0, 1, 0, -0.017814338, 0, 0.99984133, -46.09982, 1.2, -34.693798)
+script = ExtResource("122_uixjv")
+name_id = &"gong_de"
+
+[node name="XianyangCi" type="Node3D" parent="MakersNames" unique_id=1199404798]
+transform = Transform3D(0.87825996, 0, -0.47818348, 0, 1, 0, 0.47818348, 0, 0.87825996, -25.090605, 1.2, -25.442598)
+script = ExtResource("122_uixjv")
+name_id = &"xianyang_ci"
+
+[node name="XianyangYe" type="Node3D" parent="MakersNames" unique_id=1521575766]
+transform = Transform3D(0.9999987, 0, -0.0016211312, 0, 1, 0, 0.0016211312, 0, 0.9999987, -20.700016, 1.25, -39.91891)
+script = ExtResource("122_uixjv")
+name_id = &"xianyang_ye"
+
+[node name="GongCang" type="Node3D" parent="MakersNames" unique_id=975731807]
+transform = Transform3D(0.34476694, 0, -0.93868834, 0, 1.0000001, 0, 0.93868834, 0, 0.34476694, 55.57446, 1.2, -11.907019)
+script = ExtResource("122_uixjv")
+name_id = &"gong_cang"
+
+[node name="XianyangQing" type="Node3D" parent="MakersNames" unique_id=1912618404]
+transform = Transform3D(0.99838924, 0, -0.05673515, 0, 1, 0, 0.05673515, 0, 0.99838924, 52.199432, 1.2, -56.073235)
+script = ExtResource("122_uixjv")
+name_id = &"xianyang_qing"
+
+[node name="GongShui" type="Node3D" parent="MakersNames" unique_id=1124163828]
+transform = Transform3D(0.83341324, 0, -0.5526504, 0, 1.0000001, 0, 0.5526504, 0, 0.83341324, 33.056446, 1.2, -35.258434)
+script = ExtResource("122_uixjv")
+name_id = &"gong_shui"
 
 [editable path="MapWithoutTreasure"]
 [editable path="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire"]

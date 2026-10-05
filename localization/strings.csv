@@ -147,6 +147,21 @@ PROMPT_MUST_CRAWL,Too low — crawl,Prea jos — târăște-te
 PROMPT_OPEN,Open,Deschide
 PROMPT_READ,Read,Citește
 PROMPT_STRIKE_BELLS,Strike the bells,Lovește clopotele
+PROMPT_READ_NAME,Read the name pressed in the clay,Citește numele apăsat în lut
+NAME_READ,"A name, pressed into the clay: %s","Un nume, apăsat în lut: %s"
+NAMES_COUNT,Names remembered: %d of %d,Nume păstrate: %d din %d
+NAME_GONG_JIANG,"Gong Jiang, of the palace workshops","Gong Jiang, din atelierele palatului"
+NAME_XIANYANG_YI,"Yi, potter of Xianyang","Yi, olar din Xianyang"
+NAME_GONG_DE,"Gong De, of the palace workshops","Gong De, din atelierele palatului"
+NAME_XIANYANG_YE,"Ye, potter of Xianyang","Ye, olar din Xianyang"
+NAME_GONG_CANG,"Gong Cang, of the palace workshops","Gong Cang, din atelierele palatului"
+NAME_XIANYANG_QING,"Qing, potter of Xianyang","Qing, olar din Xianyang"
+NAME_GONG_SHUI,"Gong Shui, of the palace workshops","Gong Shui, din atelierele palatului"
+NAME_XIANYANG_CI,"Ci, potter of Xianyang","Ci, olar din Xianyang"
+END_NAMES,You carried %d of their names out of the mountain.,Ai scos din munte %d dintre numele lor.
+END_NO_NAMES,"Their names stayed in the clay, under the mountain.","Numele lor au rămas în lut, sub munte."
+CREDITS_REMEMBERED,Remembered,Păstrați în amintire
+LOAD_TIP_6,"The figures carry their makers' names, pressed into the clay. Look closely.","Statuile poartă numele celor care le-au făcut, apăsate în lut. Uită-te cu atenție."
 PROMPT_HIDE,Hide,Ascunde-te
 ITEM_LAMP,Oil lamp,Lampă cu ulei
 ITEM_CHISEL,Bronze chisel,Daltă de bronz
