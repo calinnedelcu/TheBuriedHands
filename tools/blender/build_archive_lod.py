@@ -1,7 +1,8 @@
 # Builds assets/models/level/archive_scrolls.glb: the archives' shelves of
 # scrolls (TripoModels/Testamente.glb, 1.9 M triangles, 148 MB) decimated to a
 # fraction, with the same materials and placement, so the level loads and
-# draws faster. The heaviest part (Wood.002, the scroll rods) is cut hardest.
+# draws faster. The source is not in the working tree: see
+# TripoModels/source/README.md to restore it.
 #
 #   blender -b --python tools/blender/build_archive_lod.py [-- ratio]
 

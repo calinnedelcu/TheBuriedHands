@@ -5,7 +5,8 @@
 #   cloth banners (Plane.00x, 144 k triangles each)   -> 4 %
 #   ceiling slabs ("Roof" material, 50-90 k each)     -> 30 %
 #   the barred doors (LockedDoor, Plane.002)           -> 30 %
-# The untouched source lives in TripoModels/source/ (out of Godot's import).
+# The untouched source is not in the working tree: see
+# TripoModels/source/README.md to restore it into TripoModels/source/.
 #
 #   blender -b --python tools/blender/build_map_lod.py
 
