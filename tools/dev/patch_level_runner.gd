@@ -31,6 +31,7 @@ func _run() -> void:
 	_performance()
 	_chapters()
 	_sealing_guards_closer()
+	_statue_parts()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -366,3 +367,29 @@ func _sealing_guards_closer() -> void:
 	var seq := root.get_node("Story/SealingSequence")
 	seq.set(&"door_look_path", seq.get_path_to(door))
 	_log.append("sealing: guards wait at the workshop door")
+
+## The statue the tutorial builds: the legs on the plinth and the head waiting
+## on the bench, and the whole soldier that replaces them on the last strike.
+func _statue_parts() -> void:
+	var statue := root.get_node("Rooms/01_TerracottaWorkshop/ClayStatue") as ClayStatue
+	var legs := root.get_node("MapWithoutTreasure/tripo_node_50f1d62e-4661-4fcc-9639-fb0d08fe7406_017") as MeshInstance3D
+	var head := root.get_node("MapWithoutTreasure/tripo_node_000b2929-e822-4b65-9ed3-d59ceee77067_003") as MeshInstance3D
+	var parts: Array[NodePath] = [statue.get_path_to(legs), statue.get_path_to(head)]
+	statue.unfinished_paths = parts
+	var whole := statue.get_node_or_null("WholeSoldier") as Node3D
+	if whole == null:
+		whole = (load("res://TripoModels/statue1-idle.glb") as PackedScene).instantiate() as Node3D
+		whole.name = "WholeSoldier"
+		statue.add_child(whole)
+		whole.owner = root
+	var box := legs.global_transform * legs.get_aabb()
+	whole.global_transform = Transform3D(Basis(Vector3.UP, 0.0).scaled(Vector3.ONE * 3.3), Vector3(box.get_center().x, box.position.y, box.get_center().z))
+	whole.visible = false
+	statue.finished_path = statue.get_path_to(whole)
+	# "Set the bowl on the workbench": on the bench top, not the floor.
+	var bowl := statue.get_node_or_null("PlacedBowl") as Node3D
+	if bowl != null:
+		var hit := root.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-66.9, 4.0, -5.9), Vector3(-66.9, 0.0, -5.9), 1))
+		if not hit.is_empty():
+			bowl.global_position = hit.position
+	_log.append("statue: legs + head become a whole soldier on the last strike")
