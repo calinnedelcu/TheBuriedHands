@@ -58,7 +58,8 @@ Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 - `Scripts/player/`, `Scripts/ai/` (gardieni, NPC-uri), `Scripts/world/` (lămpi, capcane, mercur, atmosferă), `Scripts/level/` (momentele de poveste), `Scripts/ui/`.
 - `scenes/level/mausoleum.tscn` — nivelul; `scenes/menu/title.tscn` — meniul; `scenes/dev/test_room.tscn` — camera de test.
 - `localization/strings.csv` — toate textele, EN + RO (`tools/dev/edit_strings.py` le editează sigur).
-- `assets/` — shadere, materiale, texturi, fonturi, tema UI; `audio/` — sunet și muzică.
+- `assets/` — shadere, materiale, texturi, fonturi, tema UI, modele (`assets/models/`); `audio/` — sunet și muzică.
+- `tools/blender/` — scripturi Blender care construiesc modelele și animațiile (gardianul Qin cu halebarda *ji*, meșteșugarii, ucenicul, bunurile funerare din tezaur, orașele în miniatură de pe harta imperiului, versiunile ușoare ale hărții și arhivelor). Se rulează cu `blender -b --python tools/blender/<script>.py`, apoi `godot --headless --import`.
 
 ## Unelte și teste
 
@@ -68,14 +69,15 @@ Toate se rulează prin `tools/dev/run.gd`:
 godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/quest_bot_runner.gd
 ```
 
+- `autopilot_runner` — joacă tot jocul cu input real (mers, scări, folosire), de la `--from=act1` la `act5`.
 - `quest_bot_runner` — joacă toată povestea automat și verifică fiecare pas.
 - `checkpoint_test_runner` — salvare, moarte, reîncercare, „Continuă".
 - `test_player_runner`, `test_guard_runner` — mișcare, poziții, lampă; vedere, auz și atac la gardieni (au nevoie de fereastră: fără `--headless`, cu `--out=/folder`).
 - `music_test_runner` — muzica și ambianța pe zone.
-- `level_tour_runner`, `map_render_runner`, `title_shots_runner` — capturi pentru verificare vizuală.
+- `level_tour_runner`, `map_render_runner`, `title_shots_runner`, `look_runner`, `sequence_shots_runner` (`--seq=opening|sealing|chase|climb|causeway|ending`), `anim_sheet_runner` — capturi pentru verificare vizuală.
 - `patch_level_runner` — modificări automate în nivel, fără să piardă ce s-a editat în editor.
 - `tools/dev/check_scripts.gd` — compilează toate scripturile.
-- `tools/audio/synth_ambience.sh` — regenerează ambianțele sintetizate.
+- `tools/audio/synth_ambience.sh`, `tools/audio/synth_echoes.py` — regenerează ambianțele și ecourile sintetizate.
 
 ## Credite
 
