@@ -43,6 +43,7 @@ func _run() -> void:
 	_guard_variety()
 	_close_mechanism_wall()
 	_makers_names()
+	_liang_seated()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -879,3 +880,10 @@ func _makers_names() -> void:
 		mark.global_transform = Transform3D(Basis.looking_at(-n), best.position + n * 0.01)
 		placed += 1
 	_log.append("names: %d makers' names on statues" % placed)
+
+## Liang talks from where he sits (liang.glb, tools/blender/build_liang.py):
+## no more standing up for each line and dropping back onto the stool.
+func _liang_seated() -> void:
+	var liang := root.get_node("Liang")
+	liang.set(&"anims", {"sit": "sit", "talk": "talk", "surprised": "surprised", "frustrated": "frustrated"})
+	_log.append("liang: seated talk")
