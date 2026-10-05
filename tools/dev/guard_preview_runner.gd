@@ -47,9 +47,9 @@ func _run() -> void:
 	var cam := Camera3D.new()
 	world.add_child(cam)
 	cam.make_current()
-	for anim in [&"idle", &"walk"]:
+	for anim in [&"idle", &"walk", &"ready", &"attack"]:
 		guard.play_animation(anim)
-		await get_tree().create_timer(0.6).timeout
+		await get_tree().create_timer(0.45 if anim == &"attack" else 0.6).timeout
 		for view in [["front", Vector3(0.6, 2.0, -3.6)], ["side", Vector3(3.6, 2.0, 0.4)]]:
 			cam.global_position = view[1]
 			cam.look_at(Vector3(0, 1.7, 0))

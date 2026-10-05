@@ -11,14 +11,21 @@ signal scripted_arrived
 
 enum State { PATROL, SUSPICIOUS, INVESTIGATE, CHASE, ATTACK, SEARCH, RETURN, SCRIPTED }
 
+## Clips of qin_guard.glb (tools/blender/build_guard.py builds it). A guard
+## with a torch plays the torch_* version of each, torch held up in his left.
 const ANIM := {
-	&"idle": &"NlaTrack_003_Armature",
-	&"idle_alt": &"NlaTrack_004_Armature",
-	&"walk": &"NlaTrack_002_Armature_001",
-	&"run": &"NlaTrack_Armature_001",
-	&"talk": &"NlaTrack_002_Armature",
-	&"listen": &"NlaTrack_001_Armature_001",
+	&"idle": &"idle",
+	&"idle_alt": &"idle_alt",
+	&"walk": &"walk",
+	&"run": &"run",
+	&"talk": &"talk",
+	&"listen": &"idle",
+	&"ready": &"ready",
+	&"advance": &"advance",
+	&"attack": &"attack",
 }
+const ONE_SHOT := [&"attack"]
+const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 
 @export var route_path: NodePath
 @export var walk_speed := 2.2
@@ -37,9 +44,12 @@ const ANIM := {
 @export var eye_height := 2.75
 
 @export_group("Combat")
-@export var attack_range := 2.3
+## The ji reaches: guards thrust from a little further than arm's length.
+@export var attack_range := 2.8
 @export var attack_damage := 2.0
 @export var attack_windup := 0.45
+## After the thrust lands, the guard recovers before moving again.
+@export var attack_recover := 0.45
 @export var attack_cooldown := 1.2
 @export var call_radius := 22.0
 
@@ -76,6 +86,7 @@ var _search_points: Array[Vector3] = []
 var _look_timer := 0.0
 var _look_base_yaw := 0.0
 var _attack_timer := 0.0
+var _struck := false
 var _cooldown := 0.0
 var _perception_timer := 0.0
 var _step_distance := 0.0
@@ -93,9 +104,10 @@ func _ready() -> void:
 	_home = global_position
 	_desired_yaw = rotation.y
 	_anim = _first_anim_player()
-	for key in ANIM:
-		if _anim != null and _anim.has_animation(ANIM[key]):
-			_anim.get_animation(ANIM[key]).loop_mode = Animation.LOOP_LINEAR
+	if _anim != null:
+		for clip in _anim.get_animation_list():
+			var base := String(clip).trim_prefix("torch_")
+			_anim.get_animation(clip).loop_mode = Animation.LOOP_NONE if StringName(base) in ONE_SHOT else Animation.LOOP_LINEAR
 	_route = get_node_or_null(route_path) as PatrolRoute
 	Stealth.register_guard(self)
 	Stealth.noise_made.connect(_on_noise)
@@ -109,6 +121,13 @@ func _exit_tree() -> void:
 	Stealth.unregister_guard(self)
 
 func _attach_torch() -> void:
+	# The model has a grip in the left hand for it.
+	var grip := _model.find_child("TorchGrip", true, false) as Node3D
+	if grip != null:
+		var held := TORCH.instantiate() as Node3D
+		grip.add_child(held)
+		held.set(&"side_out", 0.0)
+		return
 	var skeleton := _model.find_children("*", "Skeleton3D", true, false)
 	if skeleton.is_empty():
 		return
@@ -322,6 +341,10 @@ func _set_state(s: State) -> void:
 			_agent.target_position = _route_point() if _route != null else _home
 			if prev == State.SEARCH:
 				_bark(&"calm")
+		State.ATTACK:
+			_struck = false
+			_play(&"attack", true)
+			Sfx.play_at(THRUST, global_position + Vector3.UP * 1.5, -2.0, 0.1)
 		State.SCRIPTED:
 			_stop()
 			awareness = 0.0
@@ -348,7 +371,7 @@ func _tick_patrol(delta: float) -> void:
 
 func _tick_suspicious(delta: float) -> void:
 	_stop()
-	_play(&"listen")
+	_play(&"ready")
 	_face(_stimulus)
 	_look_timer -= delta
 	if _look_timer <= 0.0 and awareness < 0.5:
@@ -357,7 +380,7 @@ func _tick_suspicious(delta: float) -> void:
 
 func _tick_investigate(delta: float) -> void:
 	_agent.target_position = _stimulus
-	if _move_along(walk_speed * 1.25, delta):
+	if _move_along(walk_speed * 1.25, delta, &"advance"):
 		_set_state(State.SEARCH)
 
 func _tick_chase(delta: float) -> void:
@@ -379,21 +402,26 @@ func _tick_chase(delta: float) -> void:
 	if _move_along(run_speed, delta, &"run") and _seen_timer >= 0.15:
 		_set_state(State.SEARCH)
 
+## A thrust of the ji: wind up (still turning to follow), strike, recover.
 func _tick_attack(delta: float) -> void:
 	_stop()
-	_face(_player.global_position)
-	_play(&"run")
 	_attack_timer -= delta
-	if _attack_timer > 0.0:
+	if not _struck:
+		_face(_player.global_position)
+		if _attack_timer > 0.0:
+			return
+		_struck = true
+		_attack_timer = attack_recover
+		var to := _player.global_position - global_position
+		var in_front := (-global_basis.z).dot(Vector3(to.x, 0, to.z).normalized()) > 0.4
+		if to.length() <= attack_range + 0.5 and in_front and not Game.is_dead():
+			_player.apply_damage(attack_damage, self, "DEATH_GUARD")
+			_player.velocity += Vector3(to.x, 0, to.z).normalized() * 6.0
+			Sfx.play_at(preload("res://audio/sfx/impacts/impactPunch_medium_000.ogg"), _player.global_position, 2.0)
 		return
-	var to := _player.global_position - global_position
-	var in_front := (-global_basis.z).dot(Vector3(to.x, 0, to.z).normalized()) > 0.4
-	if to.length() <= attack_range + 0.5 and in_front and not Game.is_dead():
-		_player.apply_damage(attack_damage, self, "DEATH_GUARD")
-		_player.velocity += Vector3(to.x, 0, to.z).normalized() * 6.0
-		Sfx.play_at(preload("res://audio/sfx/impacts/impactPunch_medium_000.ogg"), _player.global_position, 2.0)
-	_cooldown = attack_cooldown
-	_set_state(State.CHASE)
+	if _attack_timer <= 0.0:
+		_cooldown = attack_cooldown
+		_set_state(State.CHASE)
 
 func _tick_search(delta: float) -> void:
 	if _look_timer > 0.0:
@@ -407,7 +435,7 @@ func _tick_search(delta: float) -> void:
 		_set_state(State.RETURN)
 		return
 	_agent.target_position = _search_points[0]
-	if _move_along(walk_speed * 1.15, delta):
+	if _move_along(walk_speed * 1.15, delta, &"advance"):
 		_search_points.pop_front()
 		_look_timer = randf_range(1.5, 2.5)
 		_look_base_yaw = rotation.y
@@ -484,14 +512,18 @@ func _route_point() -> Vector3:
 		return _home
 	return _route.points()[_route_index % _route.points().size()].global_position
 
-func _play(key: StringName) -> void:
+func _play(key: StringName, restart := false) -> void:
 	if _anim == null:
 		return
 	var anim_name: StringName = ANIM.get(key, key)
-	if anim_name == _current_anim or not _anim.has_animation(anim_name):
+	if carries_torch and _anim.has_animation(StringName("torch_" + String(anim_name))):
+		anim_name = StringName("torch_" + String(anim_name))
+	if (anim_name == _current_anim and not restart) or not _anim.has_animation(anim_name):
 		return
 	_current_anim = anim_name
-	_anim.play(anim_name, 0.25, 1.15 if key == &"run" else 1.0)
+	if restart:
+		_anim.stop()
+	_anim.play(anim_name, 0.12 if key == &"attack" else 0.25, 1.15 if key == &"run" else 1.0)
 
 func _update_footsteps(delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()

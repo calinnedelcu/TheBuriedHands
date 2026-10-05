@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scripts/ai/guard.gd" id="1_guard"]
-[ext_resource type="PackedScene" path="res://TripoModels/samurai.glb" id="2_model"]
+[ext_resource type="PackedScene" uid="uid://c4ore27mfag5y" path="res://assets/models/characters/qin_guard.glb" id="2_model"]
 [ext_resource type="FontVariation" path="res://assets/ui/fonts/title_bold.tres" id="3_font"]
 [ext_resource type="AudioStream" path="res://audio/sfx/player/footsteps/stone/footstep_concrete_001.ogg" id="4_step"]
 
