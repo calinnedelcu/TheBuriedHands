@@ -267,6 +267,15 @@ func _causeway() -> void:
 	if jet != null:
 		var jets: Array[NodePath] = [counterweight.get_path_to(jet)]
 		counterweight.set(&"flow_paths", jets)
+	# Lamps at both ends, so the rising stone can be seen in the dark pit.
+	for spec in [["CausewayLampNW", Vector3(-4.6, 0.0, 49.6)], ["CausewayLampNE", Vector3(-1.4, 0.0, 49.6)], ["CausewayLampS", Vector3(-4.6, 0.0, 65.8)]]:
+		var lamp := mech.get_node_or_null(spec[0]) as Node3D
+		if lamp == null:
+			lamp = (load("res://scenes/world/oil_lamp_prop.tscn") as PackedScene).instantiate() as Node3D
+			lamp.name = spec[0]
+			mech.add_child(lamp)
+			lamp.owner = root
+		lamp.global_position = _floor_at(spec[1] + Vector3.UP * 8.0)
 	_log.append("causeway: across the balance pit, raised by the counterweight")
 
 ## The plates' links to their crossbows were set as plain arrays on a typed
