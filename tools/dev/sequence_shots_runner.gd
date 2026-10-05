@@ -90,6 +90,32 @@ func _run() -> void:
 			player.global_position = guard.global_position + fwd.normalized() * 9.0 + Vector3.UP * 0.1
 			player.look_at_point(guard.global_position + Vector3.UP * 2.0, 0.01)
 			await _frames(9.0, 0.45, "chase")
+		"climb":
+			# Hands on a ladder, then crawling along a passage.
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			player.inventory.take_lamp(90.0, true)
+			player.inventory.add(&"chisel")
+			player.inventory.select(0)
+			var ladder := Game.level.get_node("Mechanism/Ladder1") as Node3D
+			var foot := (ladder.get_node("Bottom") as Node3D).global_position
+			player.global_position = foot + ladder.global_basis.z * 0.8 + Vector3.UP * 0.1
+			player.look_at_point(foot + Vector3.UP * 2.6, 0.01)
+			await get_tree().create_timer(0.5).timeout
+			ladder.call(&"_on_used", player)
+			Input.action_press(&"move_forward")
+			await _frames(2.4, 0.2, "climb")
+			Input.action_release(&"move_forward")
+			player.exit_ladder()
+			player.global_position = Vector3(27.5, -8.5, -20.0)
+			player.rotation.y = PI
+			player._set_stance(Player.Stance.CRAWL, true)
+			await get_tree().create_timer(0.6).timeout
+			Input.action_press(&"move_forward")
+			await _frames(1.6, 0.2, "crawl")
+			Input.action_release(&"move_forward")
 		"ending":
 			Game.new_game()
 			await Game.level_ready

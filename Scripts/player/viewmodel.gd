@@ -2,7 +2,9 @@ class_name Viewmodel
 extends Node3D
 ## First-person arms. The left hand carries the lamp, the right hand the
 ## selected item; each arm slides into view only while it holds something.
-## Adds mouse sway, walk bob, breathing and a small "use" strike animation.
+## Adds mouse sway, walk bob, breathing and a small "use" strike animation;
+## on a ladder the hands reach up for the rungs in turn, crawling they paw
+## forward along the ground.
 
 @export_group("Arm layout (camera space)")
 ## Where each hand grips, relative to the camera.
@@ -26,6 +28,9 @@ extends Node3D
 @export var hidden_drop := 0.55
 @export var raise_offset := Vector3(0.06, 0.2, -0.08)
 @export var crawl_drop := 0.12
+## How far each hand reaches for the next rung, and drags forward crawling.
+@export var climb_reach := 0.11
+@export var crawl_reach := 0.07
 
 @onready var _left: Node3D = $LeftArm
 @onready var _right: Node3D = $RightArm
@@ -42,6 +47,9 @@ var _sway := Vector2.ZERO
 var _bob_t := 0.0
 var _t := 0.0
 var _item_visual: Node3D
+var _climb := 0.0
+var _climb_t := 0.0
+var _crawl_t := 0.0
 var _ready_done := false
 
 func _ready() -> void:
@@ -73,8 +81,13 @@ func _process(delta: float) -> void:
 	_t += delta
 	var inventory := _player.inventory
 	var lamp := inventory.lamp()
+	var climbing := _player.on_ladder()
+	_climb = move_toward(_climb, 1.0 if climbing else 0.0, delta * 4.0)
 	_left_show = move_toward(_left_show, 1.0 if lamp != null else 0.0, delta * 3.0)
-	_right_show = move_toward(_right_show, 1.0 if _item_visual != null else 0.0, delta * 4.0)
+	# A free hand comes up for the rungs; what it held goes in the belt.
+	_right_show = move_toward(_right_show, 1.0 if _item_visual != null or climbing else 0.0, delta * 4.0)
+	if _item_visual != null:
+		_item_visual.visible = _climb < 0.5
 	_raise = lerpf(_raise, 1.0 if lamp != null and lamp.is_raised else 0.0, clampf(delta * 8.0, 0.0, 1.0))
 	_use = move_toward(_use, 0.0, delta * 3.5)
 	_sway = _sway.lerp(Vector2.ZERO, clampf(delta * 9.0, 0.0, 1.0))
@@ -90,11 +103,28 @@ func _process(delta: float) -> void:
 	var stance_drop := Vector3.DOWN * crawl_drop if _player.is_crawling() else Vector3.ZERO
 	var common := bob + breath + sway + stance_drop
 
-	var left_offset := common + raise_offset * _raise + Vector3.DOWN * hidden_drop * (1.0 - _ease(_left_show))
+	# Climbing: hand over hand, in step with the climb.
+	if climbing:
+		_climb_t += absf(_player.velocity.y) * delta * 3.2
+	var reach_r := (sin(_climb_t) * 0.5 + 0.5) * _climb
+	var reach_l := (sin(_climb_t + PI) * 0.5 + 0.5) * _climb
+	var climb_r := Vector3(-0.04, 0.06 + climb_reach * reach_r, -0.06) * _climb
+	var climb_l := Vector3(0.03, 0.04 + climb_reach * 0.6 * reach_l, -0.04) * _climb
+	# Crawling: each hand drags forward in turn.
+	var crawl_l := Vector3.ZERO
+	var crawl_r := Vector3.ZERO
+	if _player.is_crawling():
+		var speed_c := Vector2(_player.velocity.x, _player.velocity.z).length()
+		_crawl_t += speed_c * delta * 4.5
+		var amount := clampf(speed_c / maxf(_player.crawl_speed, 0.01), 0.0, 1.0)
+		crawl_l = Vector3(0.0, -absf(sin(_crawl_t)) * 0.02, -cos(_crawl_t) * crawl_reach) * amount
+		crawl_r = Vector3(0.0, -absf(cos(_crawl_t)) * 0.02, cos(_crawl_t) * crawl_reach) * amount
+
+	var left_offset := common + raise_offset * _raise + climb_l + crawl_l + Vector3.DOWN * hidden_drop * (1.0 - _ease(_left_show))
 	_left.transform = Transform3D(_left_rest.basis, _left_rest.origin + left_offset)
 	var strike := sin(_use * PI)
-	var right_offset := common * 1.1 + Vector3(0.0, 0.03, -0.12) * strike + Vector3.DOWN * hidden_drop * (1.0 - _ease(_right_show))
-	var right_basis := _right_rest.basis.rotated(Vector3.RIGHT, -0.5 * strike)
+	var right_offset := common * 1.1 + Vector3(0.0, 0.03, -0.12) * strike + climb_r + crawl_r + Vector3.DOWN * hidden_drop * (1.0 - _ease(_right_show))
+	var right_basis := _right_rest.basis.rotated(Vector3.RIGHT, -0.5 * strike + 0.6 * _climb * (0.4 + reach_r))
 	_right.transform = Transform3D(right_basis, _right_rest.origin + right_offset)
 	_left.visible = _left_show > 0.01
 	_right.visible = _right_show > 0.01
