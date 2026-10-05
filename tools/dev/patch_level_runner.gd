@@ -33,6 +33,7 @@ func _run() -> void:
 	_sealing_guards_closer()
 	_statue_parts()
 	_way_out()
+	_tunnel_rock()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -447,3 +448,13 @@ func _way_out() -> void:
 	air.saturation = 0.95
 	air.music = &"silence"
 	_log.append("way out: daylight at the mouth, flat floor, walk-out trigger at z 178")
+
+## The service tunnels (and the passage from the mechanism room to the Mercury
+## Hall) were flat orange plaster from the jam: now hewn rock.
+func _tunnel_rock() -> void:
+	var rock := load("res://assets/materials/level/tunnel_rock.tres") as Material
+	for n in ["Tunele/Cube_266", "Tunele/Cube_264"]:
+		var mi := root.get_node(n) as MeshInstance3D
+		_editable_up_to(mi)
+		mi.material_override = rock
+	_log.append("tunnels: hewn rock")

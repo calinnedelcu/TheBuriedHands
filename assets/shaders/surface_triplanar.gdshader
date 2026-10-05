@@ -24,6 +24,10 @@ uniform float metallic_value : hint_range(0.0, 1.0) = 0.0;
 uniform float macro_scale = 0.045;
 uniform float macro_strength : hint_range(0.0, 1.0) = 0.3;
 uniform float blend_sharpness = 6.0;
+// Light and project by each triangle's own facing instead of the mesh's
+// normals, for meshes whose normals are broken (the jam's tunnels). Gives a
+// faceted, hewn look.
+uniform bool geometric_normals = false;
 
 varying vec3 v_world_pos;
 varying vec3 v_world_nrm;
@@ -40,6 +44,10 @@ vec3 tri_weights(vec3 n) {
 
 void fragment() {
 	vec3 n = normalize(v_world_nrm);
+	if (geometric_normals) {
+		vec3 g = normalize(cross(dFdx(v_world_pos), dFdy(v_world_pos)));
+		n = dot(g, CAMERA_POSITION_WORLD - v_world_pos) < 0.0 ? -g : g;
+	}
 	vec3 w = tri_weights(n);
 	vec3 s = sign(n);
 	s = vec3(s.x == 0.0 ? 1.0 : s.x, s.y == 0.0 ? 1.0 : s.y, s.z == 0.0 ? 1.0 : s.z);

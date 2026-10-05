@@ -3,8 +3,8 @@ class_name DaylightExit
 extends Node3D
 ## The way out: the morning beyond the drain's mouth. A grassy shelf with
 ## rocks, the valley and hills painted on a sky box around it, a low sun whose
-## light reaches down the tunnel, and the forest growing louder as the
-## craftsman walks toward it. It stays dark and silent until the drain has
+## light reaches down the tunnel (and a faint glow of it back where the drain
+## comes out), and the forest growing louder as the craftsman walks toward it. It stays dark and silent until the drain has
 ## been opened, so it costs nothing before then.
 ##
 ## Local frame: the origin is the tunnel floor at the mouth's centre and +Z

@@ -123,6 +123,15 @@ light_cull_mask = 4294966271
 omni_range = 16.0
 omni_attenuation = 1.2
 
+[node name="FarGlow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -41)
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 0.7
+light_volumetric_fog_energy = 0.3
+light_cull_mask = 4294966271
+omni_range = 12.0
+omni_attenuation = 1.6
+
 [node name="Dust" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -13)
 cast_shadow = 0
