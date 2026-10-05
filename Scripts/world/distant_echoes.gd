@@ -65,6 +65,10 @@ func _play_one() -> void:
 		return
 	var kind := _pick_kind()
 	var choices: Array = SOUNDS[kind].filter(func(p): return p != _last)
+	if choices.is_empty():
+		# The only sound of its kind just played: something else this time.
+		kind = &"pounding"
+		choices = SOUNDS[kind]
 	var path: String = choices.pick_random()
 	_last = path
 	var angle := randf() * TAU
