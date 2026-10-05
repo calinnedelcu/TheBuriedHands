@@ -35,6 +35,7 @@ func _run() -> void:
 	_way_out()
 	_tunnel_rock()
 	_grave_goods()
+	_workshop_at_work()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -525,3 +526,36 @@ func _grave_goods() -> void:
 	glint.omni_attenuation = 1.2
 	glint.light_volumetric_fog_energy = 0.3
 	_log.append("treasury: %d grave goods and a glint over the chest" % items.size())
+
+## Two craftsmen worked a workshop built for hundreds. Seven more now: four
+## shaping clay figures, three kneading clay at the tables (craftsman.glb,
+## tools/blender/build_craftsman.py). At the sealing they stop and despair.
+func _workshop_at_work() -> void:
+	var room := root.get_node("Rooms/01_TerracottaWorkshop")
+	var people := [
+		# name, clip, position (floor found by ray), facing (degrees, 0 = +x), after the sealing
+		["Sculptor1", &"sculpt", Vector3(-47.4, 0, -25.25), 90.0, &"kneel"],
+		["Sculptor2", &"sculpt", Vector3(-46.55, 0, -12.9), 180.0, &"idle"],
+		["Sculptor3", &"sculpt", Vector3(-35.35, 0, -13.4), 0.0, &"kneel"],
+		["Sculptor4", &"sculpt", Vector3(-80.85, 0, -18.1), 180.0, &"kneel"],
+		["Kneader1", &"knead", Vector3(-68.0, 0, -30.15), 90.0, &"kneel"],
+		["Kneader2", &"knead", Vector3(-41.0, 0, -32.45), 90.0, &"idle"],
+		["Kneader3", &"knead", Vector3(-49.3, 0, -16.85), -90.0, &"kneel"],
+	]
+	var space := root.get_world_3d().direct_space_state
+	for p in people:
+		var w := room.get_node_or_null(String(p[0])) as Worker
+		if w == null:
+			w = (load("res://scenes/ai/craftsman.tscn") as PackedScene).instantiate() as Worker
+			w.name = String(p[0])
+			room.add_child(w)
+			w.owner = root
+		var at: Vector3 = p[2]
+		var ray := PhysicsRayQueryParameters3D.create(Vector3(at.x, 3.0, at.z), Vector3(at.x, -2.0, at.z), 1)
+		var hit := space.intersect_ray(ray)
+		w.global_position = Vector3(at.x, hit.position.y if not hit.is_empty() else 0.2, at.z)
+		w.rotation = Vector3(0.0, deg_to_rad(float(p[3])), 0.0)
+		w.work_anim = p[1]
+		w.after_sealing_anim = p[4]
+		w.holds_tool = p[1] == &"sculpt"
+	_log.append("workshop: %d more craftsmen at work" % people.size())
