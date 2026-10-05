@@ -12,7 +12,9 @@
 - Ceramic/tile breaking sounds by *spinopel* via Pixabay (Pixabay Content License)
 - Ambience beds, the heartbeat layer and the "spotted" stinger are synthesized
   with ffmpeg by `tools/audio/synth_ambience.sh` (no samples); so is the bronze
-  bell of the treasury's bianzhong (`audio/sfx/treasure/bell.wav`)
+  bell of the treasury's bianzhong (`audio/sfx/treasure/bell.wav`) and the
+  distant pounding, ringing and settling heard after the sealing
+  (`tools/audio/synth_echoes.py`)
 
 ## Textures
 - **ambientCG** (ambientcg.com) — Concrete047A, Rock022, Rock030, Ground104, Planks037A — CC0 1.0

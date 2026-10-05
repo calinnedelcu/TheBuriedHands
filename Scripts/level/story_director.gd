@@ -1,14 +1,18 @@
 class_name StoryDirector
 extends Node
 ## Story beats that don't belong to a single object: the drift through the
-## workshop and the craftsman's opening thoughts on a new game, and the second
-## gate slamming shut somewhere behind him once the counterweight drops.
+## workshop and the craftsman's opening thoughts on a new game, the second
+## gate slamming shut somewhere behind him once the counterweight drops, and
+## (DistantEchoes) the others trapped somewhere in the dark.
 
 const BOOM := preload("res://audio/sfx/tunnel/rock_cinematic.mp3")
 
 func _ready() -> void:
 	Game.level_ready.connect(_on_level_ready, CONNECT_ONE_SHOT)
 	Game.sealing_advanced.connect(_on_sealing)
+	var echoes := DistantEchoes.new()
+	echoes.name = "DistantEchoes"
+	add_child(echoes)
 
 func _on_level_ready(level: Node) -> void:
 	if not Quest.is_at(&"talk_apprentice") or Game.get_flag(&"intro_done"):
