@@ -10,11 +10,11 @@ Jocul e în **română și engleză** (se schimbă din meniu sau din Opțiuni).
 
 1. **Atelierul.** Termini un soldat de lut. Poarta de bronz se închide; doi gardieni discută ordinul. Ucenicul tău îți cere lampa — i-o dai sau nu.
 2. **Arhivele.** Gardieni cu torțe patrulează printre mesele scribilor. Găsește-l pe Liang, inginerul mecanismelor; registrul lucrătorilor e o dovadă, dacă ai curaj să-l iei.
-3. **Coridorul arbaletelor și tunelurile.** Plăci de presiune, dale care se prăbușesc, o piatră de spart cu pana și ciocanul.
-4. **Sala Mercurului.** Harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești și înclină marea balanță.
-5. **Tezaurul și canalul.** Târăște-te spre lumină.
+3. **Sub munte.** Coridorul arbaletelor și tunelurile de serviciu: plăci de presiune, dale care se prăbușesc, o piatră de spart cu pana și ciocanul.
+4. **Râuri de argint viu.** Sala Mercurului: harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești, înclină marea balanță și ridică podul de piatră.
+5. **Tezaurul.** Canalul de scurgere, apoi lumina zilei.
 
-Finalul depinde de ce ai făcut pe drum.
+Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneală pe hârtie, sub sigiliul meșteșugarilor — depinde de ce ai făcut pe drum: registrul, ucenicul.
 
 ## Mecanici
 
