@@ -18,6 +18,10 @@ signal chapter_started(number: int)
 const LEVEL_SCENE := "res://scenes/level/mausoleum.tscn"
 const MENU_SCENE := "res://scenes/menu/title.tscn"
 const SAVE_FILE := "user://savegame.json"
+## Shown while the level loads: what history says of the place, and how to
+## stay alive in it.
+const LOADING_NOTES := ["LOAD_FACT_1", "LOAD_FACT_2", "LOAD_FACT_3", "LOAD_FACT_4", "LOAD_FACT_5", "LOAD_FACT_6",
+	"LOAD_TIP_1", "LOAD_TIP_2", "LOAD_TIP_3", "LOAD_TIP_4", "LOAD_TIP_5"]
 const SAVE_VERSION := 1
 
 var flags: Dictionary = {}
@@ -32,6 +36,8 @@ var _finished := false
 var _transition: CanvasLayer
 var _fade: ColorRect
 var _loading_label: Label
+var _note: Label
+var _note_index := -1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -221,12 +227,23 @@ func _change_scene(path: String) -> void:
 	get_tree().paused = false
 	await _fade_to(1.0, 0.45)
 	_loading_label.visible = true
+	var notes := path == LEVEL_SCENE
+	if notes:
+		_show_note()
 	level = null
 	ResourceLoader.load_threaded_request(path)
+	var shown := Time.get_ticks_msec()
 	while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		# A long first load (shaders compiling) gets a second note.
+		if notes and Time.get_ticks_msec() - shown > 9000:
+			shown = Time.get_ticks_msec()
+			_show_note()
 		await get_tree().process_frame
 	var packed := ResourceLoader.load_threaded_get(path) as PackedScene
 	_loading_label.visible = false
+	if notes:
+		var out := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		out.tween_property(_note, "modulate:a", 0.0, 0.35)
 	if packed == null:
 		push_error("Failed to load scene %s" % path)
 		await _fade_to(0.0, 0.3)
@@ -236,6 +253,17 @@ func _change_scene(path: String) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	await _fade_to(0.0, 0.8)
+
+func _show_note() -> void:
+	var pick := randi() % LOADING_NOTES.size()
+	if pick == _note_index:
+		pick = (pick + 1) % LOADING_NOTES.size()
+	_note_index = pick
+	var t := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	if _note.modulate.a > 0.0:
+		t.tween_property(_note, "modulate:a", 0.0, 0.5)
+	t.tween_callback(func(): _note.text = InputHint.format(tr(LOADING_NOTES[pick])))
+	t.tween_property(_note, "modulate:a", 1.0, 0.8)
 
 func _fade_to(alpha: float, seconds: float) -> void:
 	var tween := create_tween()
@@ -263,3 +291,18 @@ func _build_transition_layer() -> void:
 	_loading_label.offset_bottom = -40
 	_loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_transition.add_child(_loading_label)
+	_note = Label.new()
+	_note.theme_type_variation = &"QuoteText"
+	_note.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_note.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_note.add_theme_font_size_override(&"font_size", 27)
+	_note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_note.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_note.offset_left = -470
+	_note.offset_right = 470
+	_note.offset_top = -80
+	_note.offset_bottom = 80
+	_note.modulate.a = 0.0
+	_transition.add_child(_note)

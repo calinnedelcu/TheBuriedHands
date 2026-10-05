@@ -280,3 +280,14 @@ CREDITS_TEXTURES,Textures,Texturi
 CREDITS_ENGINE,Made with Godot Engine,Realizat cu Godot Engine
 CREDITS_HISTORY,History,Istorie
 CREDITS_HISTORY_TEXT,"The closing quotation follows Sima Qian, Records of the Grand Historian, chapter 6.","Citatul de la final urmează textul lui Sima Qian, Însemnările marelui istoric, capitolul 6."
+LOAD_FACT_1,Sima Qian wrote that more than seven hundred thousand men were sent to build the First Emperor's tomb at Mount Li.,Sima Qian scria că peste șapte sute de mii de oameni au fost trimiși să ridice mormântul Primului Împărat de la muntele Li.
+LOAD_FACT_2,The mound over the tomb has never been opened. The soil on it holds far more mercury than the land around it.,Movila de deasupra mormântului n-a fost deschisă niciodată. Pământul ei are mult mai mult mercur decât cel din jur.
+LOAD_FACT_3,"Thousands of clay soldiers have been dug up near the tomb, and no two faces are alike.",Lângă mormânt au fost dezgropați mii de soldați de lut și nu există două chipuri la fel.
+LOAD_FACT_4,"Some of the clay soldiers bear the names of the men who made them, stamped or scratched into the clay.","Unii dintre soldații de lut poartă numele celor care i-au făcut, ștampilate sau zgâriate în lut."
+LOAD_FACT_5,"According to the Records of the Grand Historian, crossbows were set inside the tomb to shoot anyone who broke in.","După Însemnările marelui istoric, în mormânt au fost puse arbalete care să tragă în oricine ar pătrunde."
+LOAD_FACT_6,"The rivers and seas of the tomb were said to be made of mercury, kept flowing by machines.","Se spune că râurile și mările din mormânt erau din mercur, ținute în mișcare de mașinării."
+LOAD_TIP_1,"A lit lamp shows you the way, and shows the guards where you are.",O lampă aprinsă îți arată drumul și le arată gărzilor unde ești.
+LOAD_TIP_2,"Crouched, you make little noise. Running, you can be heard from far away.","Ghemuit, faci puțin zgomot. Alergând, te aud de departe."
+LOAD_TIP_3,"A guard who loses sight of you goes to where he saw you last, and searches.",O gardă care te pierde din ochi merge unde te-a văzut ultima oară și caută.
+LOAD_TIP_4,Hold {hold_breath} to hold your breath in the fumes. A cloth over your face helps.,Ține {hold_breath} ca să-ți ții respirația în vapori. O cârpă la gură ajută.
+LOAD_TIP_5,"Thrown, a shard of pottery draws the guards away from you.","Aruncat, un ciob îi atrage pe gardieni departe de tine."
