@@ -59,7 +59,7 @@
 [ext_resource type="PackedScene" path="res://scenes/items/tunele.glb" id="55_mk5fp"]
 [ext_resource type="Script" path="res://Scripts/world/runtime_collision.gd" id="56_y6ncg"]
 [ext_resource type="Material" path="res://assets/materials/level/tunnel_rock.tres" id="57_dv7y3"]
-[ext_resource type="PackedScene" path="res://TripoModels/Testamente.glb" id="57_i376l"]
+[ext_resource type="PackedScene" uid="uid://ocytbn6oallg" path="res://assets/models/level/archive_scrolls.glb" id="57_i376l"]
 [ext_resource type="PackedScene" path="res://TripoModels/TreasureRoomUpdated.glb" id="58_wu2k1"]
 [ext_resource type="Material" path="res://assets/materials/level/paper.tres" id="59_pywt6"]
 [ext_resource type="Material" path="res://assets/materials/level/golden.tres" id="60_5nugq"]
