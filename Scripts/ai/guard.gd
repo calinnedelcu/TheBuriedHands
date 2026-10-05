@@ -388,9 +388,16 @@ func _tick_chase(delta: float) -> void:
 		_agent.target_position = _last_seen
 		_lost_timer = 0.0
 		var d := global_position.distance_to(_player.global_position)
-		if d <= attack_range and _cooldown <= 0.0:
-			_set_state(State.ATTACK)
-			_attack_timer = attack_windup
+		if d <= attack_range:
+			if _cooldown <= 0.0:
+				_set_state(State.ATTACK)
+				_attack_timer = attack_windup
+				return
+			# In reach but not ready to strike again: keep the ji between
+			# you, levelled, instead of walking into your face.
+			_stop()
+			_face(_player.global_position)
+			_play(&"ready")
 			return
 	else:
 		_lost_timer += delta

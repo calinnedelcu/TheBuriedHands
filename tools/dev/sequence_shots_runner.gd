@@ -3,6 +3,7 @@ extends Node
 ## --seq=opening : a new game from the title, the first seconds
 ## --seq=sealing : the sealing cutscene, from the last chisel strike
 ## --seq=causeway : pouring the mercury, the causeway rising
+## --seq=chase : an archive guard spots the lit lamp, levels his ji, attacks
 ## --seq=ending : the walk down the last tunnel into the light, the epilogue
 ## (run it with --fixed-fps 30 so game time doesn't depend on the frame rate)
 ## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/sequence_shots_runner.gd --seq=opening --out=/abs/dir
@@ -73,6 +74,22 @@ func _run() -> void:
 			var cw := Game.level.get_node("Mechanism/Counterweight/Body/Usable") as Usable
 			cw.complete_hold(player)
 			await _frames(14.0, 1.4, "pour")
+		"chase":
+			# Seen by an archive guard with the lamp lit: he levels his ji,
+			# comes on and thrusts.
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			Game.set_flag(&"guards_hostile")
+			Quest.start_at(&"find_liang")
+			player.inventory.take_lamp(90.0, true)
+			var guard := Game.level.get_node("Guards/ArchiveGuard1") as Guard
+			var fwd := -guard.global_basis.z
+			fwd.y = 0.0
+			player.global_position = guard.global_position + fwd.normalized() * 9.0 + Vector3.UP * 0.1
+			player.look_at_point(guard.global_position + Vector3.UP * 2.0, 0.01)
+			await _frames(9.0, 0.45, "chase")
 		"ending":
 			Game.new_game()
 			await Game.level_ready
