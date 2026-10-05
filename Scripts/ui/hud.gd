@@ -38,6 +38,7 @@ var _objective_box: VBoxContainer
 var _objective_header: Label
 var _objective_label: Label
 var _hint_label: Label
+var _names_label: Label
 var _toast_box: VBoxContainer
 var _oil_fill_mat: ShaderMaterial
 var _oil_group: Control
@@ -163,6 +164,10 @@ func _build() -> void:
 	_objective_box.add_child(rule)
 	_objective_box.add_child(_objective_label)
 	_objective_box.add_child(_hint_label)
+	# In the journal (held key) only: how many makers' names you carry.
+	_names_label = _label("HintLabel", "")
+	_names_label.visible = false
+	_objective_box.add_child(_names_label)
 	_objective_box.modulate.a = 0.0
 	_root.add_child(_objective_box)
 
@@ -324,8 +329,13 @@ func _process(delta: float) -> void:
 	_objective_timer -= delta
 	if _objective_timer <= 0.0 and _objective_box.modulate.a > 0.0 and not Input.is_action_pressed(&"journal"):
 		_objective_box.modulate.a = move_toward(_objective_box.modulate.a, 0.0, delta * 0.7)
-	if Input.is_action_pressed(&"journal") and _objective_label.text != "":
+	var journal := Input.is_action_pressed(&"journal")
+	if journal and _objective_label.text != "":
 		_objective_box.modulate.a = move_toward(_objective_box.modulate.a, 1.0, delta * 6.0)
+	var names := NamesDB.found().size() if journal else 0
+	_names_label.visible = names > 0
+	if names > 0:
+		_names_label.text = tr("NAMES_COUNT") % [names, NamesDB.NAMES.size()]
 
 	_item_name_timer -= delta
 	if _item_name_timer <= 0.0:

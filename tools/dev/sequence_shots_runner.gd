@@ -124,6 +124,8 @@ func _run() -> void:
 			Game.set_flag(&"guards_hostile")
 			Game.set_flag(&"has_evidence")
 			Game.set_flag(&"gave_lamp")
+			for id in [&"gong_jiang", &"xianyang_yi", &"gong_shui"]:
+				Game.set_flag(NamesDB.flag(id))
 			Quest.start_at(&"escape")
 			player.inventory.take_lamp(90.0, true)
 			player.global_position = Vector3(-1.75, 7.6, 146.0)

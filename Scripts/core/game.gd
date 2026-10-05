@@ -241,6 +241,12 @@ func _change_scene(path: String) -> void:
 			_show_note()
 		await get_tree().process_frame
 	var packed := ResourceLoader.load_threaded_get(path) as PackedScene
+	if packed == null:
+		# A threaded load can (rarely) fail to resolve one of the scene's
+		# resources; a plain load right after has always worked.
+		push_warning("Threaded load of %s failed; loading it again" % path)
+		await get_tree().process_frame
+		packed = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE) as PackedScene
 	_loading_label.visible = false
 	if notes:
 		var out := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)

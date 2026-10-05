@@ -24,6 +24,7 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 - **Poziții:** în picioare, ghemuit, târâș (prin locuri joase).
 - **Mercurul:** vaporii te otrăvesc; cârpa umedă ajută, ținutul respirației la fel.
 - **Inventar:** 4 sloturi în mâini plus obiecte în traistă; uneltele (daltă, pană, ciocan) au mai multe întrebuințări.
+- **Numele meșteșugarilor:** ca pe soldații reali de teracotă, unele statui poartă numele celor care le-au făcut, apăsate în lut. Citește-le pe drum: epilogul spune câte nume ai scos din munte.
 - **Checkpoint-uri:** la momentele importante; după moarte reîncepi de acolo, iar „Continuă" din meniu încarcă ultimul.
 
 ## Controale (implicite, se pot schimba din Opțiuni)
