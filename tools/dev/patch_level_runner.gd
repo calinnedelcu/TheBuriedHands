@@ -41,6 +41,7 @@ func _run() -> void:
 	_apprentice_clips()
 	_tunnel_timbers()
 	_guard_variety()
+	_close_mechanism_wall()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -810,3 +811,11 @@ func _guard_variety() -> void:
 		if g != null:
 			g.armor_tint = tints[n]
 	_log.append("guards: armour tints")
+
+## The mechanism room's west wall was one-sided, facing out: from inside it
+## was invisible and the Mercury Hall's starry dome showed through. Its
+## earth is now drawn from both sides.
+func _close_mechanism_wall() -> void:
+	var shell := root.get_node("MapWithoutTreasure/BalantaRoof") as MeshInstance3D
+	shell.set_surface_override_material(1, load("res://assets/materials/level/dirt_double.tres"))
+	_log.append("mechanism room: west wall drawn from both sides")
