@@ -83,7 +83,16 @@ func _build_visual() -> void:
 	var item := ItemDB.get_item(item_id)
 	if item == null or item.world_scene == null:
 		return
-	_visual_root.add_child(item.world_scene.instantiate())
+	# A stack lies as a little heap: one piece for each (up to four), so a
+	# few shards on the floor catch the eye.
+	var pieces := clampi(count, 1, 4) if item.max_stack > 1 else 1
+	for i in pieces:
+		var piece := item.world_scene.instantiate()
+		_visual_root.add_child(piece)
+		if i > 0 and piece is Node3D:
+			var a := TAU * float(i) / float(pieces) + 0.7
+			(piece as Node3D).position = Vector3(cos(a), 0.0, sin(a)) * 0.14
+			(piece as Node3D).rotation.y = a * 1.7
 
 func persist_save() -> Dictionary:
 	return {"taken": taken}

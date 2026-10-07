@@ -9,8 +9,8 @@ Jocul e în **română și engleză** (se schimbă din meniu sau din Opțiuni).
 ## Povestea, pe scurt
 
 1. **Atelierul.** Termini un soldat de lut. Poarta de bronz se închide; doi gardieni discută ordinul. Ucenicul tău îți cere lampa — i-o dai sau nu. În drum spre Liang, ghemuit în umbră, îl vezi pe supraveghetorul Wei venind cu lista și cu doi oameni: îl scot pe ucenic din cuptorul rece și îl duc în gropile armatei.
-2. **Arhivele.** Gardieni cu torțe patrulează printre mesele scribilor. Găsește-l pe Liang, inginerul mecanismelor; registrul lucrătorilor e o dovadă, dacă ai curaj să-l iei.
-3. **Sub munte.** Coridorul arbaletelor și tunelurile de serviciu: plăci de presiune, dale care se prăbușesc, o piatră de spart cu pana și ciocanul. Sau drumul lung: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut, unde oamenii lui Wei își țin prizonierii într-un țarc — printre ei, ucenicul tău.
+2. **Arhivele.** Din atelier ieși în marele coridor, cu plăci de presiune, arbalete și dale care se prăbușesc (un ciob aruncat pe o placă o face să tragă în gol). Apoi arhivele, unde gardieni cu torțe patrulează printre mesele scribilor. Găsește-l pe Liang, inginerul mecanismelor; registrul lucrătorilor e o dovadă, dacă ai curaj să-l iei.
+3. **Sub munte.** O piatră de spart cu pana și ciocanul, apoi tunelurile de serviciu. Tunelul spre mecanism s-a surpat când s-a închis poarta, așa că singurul drum e în jos: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut. Oamenii lui Wei își țin acolo prizonierii într-un țarc (printre ei, ucenicul tău), iar scara lucrătorilor urcă din gropi înapoi la camera mecanismului.
 4. **Râuri de argint viu.** Sala Mercurului: harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești, înclină marea balanță și ridică podul de piatră.
 5. **Tezaurul.** Canalul de scurgere, apoi lumina zilei.
 
@@ -71,7 +71,7 @@ Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 - `Scripts/data/` — povestea ca date: pașii questului (`quest_db.gd`), dialogurile (`dialogue_db.gd`), creditele.
 - `Scripts/player/`, `Scripts/ai/` (gardieni, NPC-uri), `Scripts/world/` (lămpi, capcane, mercur, atmosferă, liftul, țarcul, rândurile de soldați), `Scripts/level/` (momentele de poveste), `Scripts/ui/`.
 - Trusa de nivel (`Scripts/world/level_box.gd`, `level_solid.gd`, `level_ramp.gd`, `level_opening.gd`): camere, tuneluri și puțuri văzute din interior, cu goluri unde se leagă de altele, blocuri, scări — cu coliziune și materiale triplanare. Din ea sunt făcute tunelurile de serviciu, puțul lucrătorilor, gropile armatei și scara; se editează și în editor.
-- Cu `masonry` pornit, piesele trusei sunt construite ca atelierul, chiar cu pietrele lui: blocurile din peretele atelierului și lespezile din podeaua lui, scoase din hartă de `tools/blender/build_workshop_stones.py` (`assets/models/level/workshop_stones.glb`), puse în asize pe pereți, ca podele și ca trepte; tavanele de lemn din scânduri (`Scripts/world/masonry.gd`, totul ca multimesh-uri, fără coliziune în plus). `TimberCeiling` face un tavan de scânduri pe bârne pe o grilă de celule: așa e acum tavanul atelierului, în locul plăcilor înclinate de la jam.
+- Cu `masonry` pornit, piesele trusei sunt construite ca atelierul, chiar cu pietrele lui: blocurile din peretele atelierului și lespezile din podeaua lui, scoase din hartă de `tools/blender/build_workshop_stones.py` (`assets/models/level/workshop_stones.glb`), puse în asize pe pereți, ca podele și ca trepte; tavanele de lemn din scânduri (`Scripts/world/masonry.gd`, totul ca multimesh-uri, fără coliziune în plus). `TimberCeiling` face un tavan de scânduri pe bârne pe o grilă de celule: așa e acum tavanul atelierului, în locul plăcilor înclinate de la jam. `Rubble` (`Scripts/world/rubble.gd`) e o surpătură: piatră spartă de la un perete la altul și până în tavan, cu panta spre partea deschisă și proptelele rupte în ea, cu coliziune; așa sunt închise tunelurile surpate.
 - `scenes/level/mausoleum.tscn` — nivelul; `scenes/menu/title.tscn` — meniul; `scenes/dev/test_room.tscn` — camera de test.
 - `localization/strings.csv` — toate textele, EN + RO (`tools/dev/edit_strings.py` le editează sigur).
 - `assets/` — shadere, materiale, texturi, fonturi, tema UI, modele (`assets/models/`); `audio/` — sunet și muzică.
@@ -85,7 +85,7 @@ Toate se rulează prin `tools/dev/run.gd`:
 godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/quest_bot_runner.gd
 ```
 
-- `autopilot_runner` — joacă tot jocul cu input real (mers, scări, folosire), de la `--from=act1` la `act5`; cu `--route=pits` actul III trece prin puțul lucrătorilor (liftul, camuflajul printre statui, țarcul, scara).
+- `autopilot_runner` — joacă tot jocul cu input real (mers, scări, folosire), de la `--from=act1` la `act5`; actul III trece prin puțul lucrătorilor (liftul, camuflajul printre statui, țarcul, scara).
 - `quest_bot_runner` — joacă toată povestea automat și verifică fiecare pas.
 - `checkpoint_test_runner` — salvare, moarte, reîncercare, „Continuă".
 - `pits_stealth_runner` — stealth în gropile armatei: paznicul aude liftul, printre statui nu te vede, cu lampa aprinsă sau pe culoar te observă.

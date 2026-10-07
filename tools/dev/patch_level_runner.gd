@@ -38,6 +38,8 @@ func _run() -> void:
 	_way_out()
 	_tunnel_rock()
 	_kit_service_tunnels()
+	# Before the props are sized by rays: the falls must be there every run.
+	_tunnels_fallen_in()
 	await get_tree().physics_frame
 	_grave_goods()
 	_workshop_at_work()
@@ -45,6 +47,7 @@ func _run() -> void:
 	_miniature_empire()
 	_apprentice_clips()
 	_tunnel_timbers()
+	_no_props_past_the_falls()
 	_guard_variety()
 	_close_mechanism_wall()
 	_makers_names()
@@ -58,6 +61,7 @@ func _run() -> void:
 	# Last: its lamps and guards draw on the shared random numbers, which
 	# would reshuffle what the patches above scatter.
 	_workers_shaft_and_pits()
+	_corridor_on_the_way_to_the_archives()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -373,7 +377,7 @@ func _editable_up_to(node: Node) -> void:
 
 ## Chapter title cards open as the player first walks into each act.
 func _chapters() -> void:
-	var chapters := {"ArchivesEnter": 2, "TunnelsEnter": 3, "CorridorEnter": 3, "CorridorEnterEast": 3, "MechanismEnter": 4, "TreasuryEnter": 5}
+	var chapters := {"ArchivesEnter": 2, "TunnelsEnter": 3, "MechanismEnter": 4, "TreasuryEnter": 5}
 	for n in chapters:
 		var t := root.get_node_or_null("Story/" + n) as StoryTrigger
 		if t != null:
@@ -538,6 +542,80 @@ func _kit_service_tunnels() -> void:
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 12.79), Vector2(3.11, 3.9)),
 	])
 	_log.append("tunnels: rebuilt from %d LevelBox pieces" % group.get_child_count())
+
+## The sealing brought the service tunnel down where it ran on to the
+## mechanism (Liang felt it go), and the branch west under the archives that
+## led nowhere: the way on is the workers' shaft, through the army pits,
+## whose stairs come up by the mechanism's ladder. Three falls of rock, each
+## spilling toward the side still open: west of the main tunnel, south of
+## the shaft's passage, and at the far end of the southern run, so neither
+## side of the sealed stretch is a long walk to a dead end.
+const FALLS := [
+	# name, where the roof came down, facing (yaw: the open side is -z), size, spill
+	["WestBranch", Vector3(22.0, -8.58, -33.95), -PI * 0.5, Vector3(3.9, 3.63, 2.5), 2.6],
+	["PastTheShaft", Vector3(27.55, -8.63, -12.0), 0.0, Vector3(3.5, 3.43, 2.5), 3.0],
+	["SouthRun", Vector3(5.5, -8.63, 30.15), PI * 0.5, Vector3(3.9, 3.43, 2.5), 2.6],
+]
+
+func _tunnels_fallen_in() -> void:
+	var group := root.get_node_or_null("TunnelFalls") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "TunnelFalls"
+		root.add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	for i in FALLS.size():
+		var f: Array = FALLS[i]
+		var fall := Rubble.new()
+		fall.name = String(f[0])
+		fall.size = f[3]
+		fall.spill = f[4]
+		fall.pattern_seed = 31 + i
+		group.add_child(fall)
+		fall.owner = root
+		var at: Vector3 = f[1]
+		fall.global_transform = Transform3D(Basis(Vector3.UP, float(f[2])), at)
+	# A word as he comes to it, with both falls in sight.
+	var story := root.get_node("Story")
+	var t := story.get_node_or_null("TunnelFallen") as StoryTrigger
+	if t == null:
+		t = StoryTrigger.new()
+		t.name = "TunnelFallen"
+		story.add_child(t)
+		t.owner = root
+		var cs := CollisionShape3D.new()
+		cs.name = "Shape"
+		var box := BoxShape3D.new()
+		box.size = Vector3(3.4, 3.0, 6.0)
+		cs.shape = box
+		t.add_child(cs)
+		cs.owner = root
+	t.global_position = Vector3(27.55, -7.2, -24.0)
+	t.quest_from = &"talk_liang"
+	t.dialogue = &"tunnel_fallen"
+	_log.append("tunnels: %d falls of rock, the way on is the workers' shaft" % FALLS.size())
+
+## The pit props past (and under) the falls go: whatever stood there came
+## down with the roof, and no lamp burns where no one can go.
+func _no_props_past_the_falls() -> void:
+	var sealed := [
+		AABB(Vector3(-20.0, -10.0, -36.5), Vector3(20.0 + 22.0, 6.0, 5.0)),
+		AABB(Vector3(25.0, -10.0, -12.0), Vector3(5.0, 6.0, 45.0)),
+		AABB(Vector3(3.0, -10.0, 27.0), Vector3(23.5, 6.0, 6.0)),
+	]
+	var gone := 0
+	for frame in root.get_node("TunnelTimbers").get_children():
+		var p := (frame as Node3D).global_position + Vector3.UP
+		for box in sealed:
+			if (box as AABB).has_point(p):
+				frame.get_parent().remove_child(frame)
+				frame.free()
+				gone += 1
+				break
+	_log.append("tunnels: %d props gone with the falls" % gone)
 
 ## Act I's last turn (ApprenticeTaken): crossing the workshop to find Liang,
 ## the craftsman watches Overseer Wei and two of his men come in from the
@@ -882,6 +960,9 @@ func _workers_shaft_and_pits() -> void:
 	seen.name = "PitsEnter"
 	seen.dialogue = &"pits_enter"
 	seen.quest_from = &"talk_liang"
+	# The pits are the way on, and guarded: a fall there doesn't send him
+	# back up to Liang's.
+	seen.checkpoint = true
 	group.add_child(seen)
 	seen.owner = root
 	seen.global_position = Vector3(44.0, pit_floor, 9.0)
@@ -1460,3 +1541,53 @@ func _jar_and_cloth_any_time() -> void:
 		if p != null:
 			p.quest_from = &"reach_mechanism"
 	_log.append("mechanism: jar and cloth can be taken any time")
+
+## The great corridor is Act II's: the way from the workshop to the archives,
+## with its plates and crossbows. The craftsman's word on them comes as he
+## steps into it from the workshop door (it waited for Act III before, at a
+## point he had already passed, and spoke of a route to the mechanism that
+## never existed); a few shards lie there to try the trick on. Nobody comes
+## in from the east end. At the west end, the door to the Mercury Hall is
+## nailed shut, and he says so.
+func _corridor_on_the_way_to_the_archives() -> void:
+	var story := root.get_node("Story")
+	var enter := story.get_node("CorridorEnter") as StoryTrigger
+	enter.global_position = Vector3(-58.4, 1.5, 12.0)
+	enter.quest_from = &"find_liang"
+	enter.quest_step = &""
+	enter.chapter = 0
+	enter.hint = "HINT_PLATES"
+	var shape := enter.get_node("Shape") as CollisionShape3D
+	var box := BoxShape3D.new()
+	box.size = Vector3(9.0, 3.0, 3.0)
+	shape.shape = box
+	var east := story.get_node_or_null("CorridorEnterEast")
+	if east != null:
+		story.remove_child(east)
+		east.free()
+	var door := story.get_node_or_null("BarredDoor") as StoryTrigger
+	if door == null:
+		door = StoryTrigger.new()
+		door.name = "BarredDoor"
+		story.add_child(door)
+		door.owner = root
+		var cs := CollisionShape3D.new()
+		cs.name = "Shape"
+		var b := BoxShape3D.new()
+		b.size = Vector3(4.2, 3.0, 4.0)
+		cs.shape = b
+		door.add_child(cs)
+		cs.owner = root
+	door.global_position = Vector3(-72.6, 1.5, 28.0)
+	door.quest_from = &"find_liang"
+	door.dialogue = &"barred_door"
+	var shards := root.get_node_or_null("CorridorShards") as Pickup
+	if shards == null:
+		shards = (load("res://scenes/items/pickup.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+		shards.name = "CorridorShards"
+		root.add_child(shards)
+		shards.owner = root
+	shards.item_id = &"ceramic"
+	shards.count = 3
+	shards.global_transform = Transform3D(Basis(Vector3.UP, 0.6), _floor_at(Vector3(-60.6, 0.2, 7.0)) + Vector3.UP * 0.02)
+	_log.append("corridor: its word on entering from the workshop (Act II), shards by the door, the barred door to the Mercury Hall")

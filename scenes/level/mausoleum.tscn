@@ -112,7 +112,6 @@
 [ext_resource type="PackedScene" path="res://scenes/world/daylight_exit.tscn" id="103_irxgl"]
 [ext_resource type="Material" path="res://assets/materials/level/drain_floor.tres" id="104_irxgl"]
 [ext_resource type="PackedScene" path="res://scenes/props/miniatures/palace.tscn" id="105_5r7ot"]
-[ext_resource type="Script" path="res://Scripts/world/prop_materials.gd" id="105_aw20t"]
 [ext_resource type="PackedScene" path="res://scenes/props/treasure/ding.tscn" id="106_emv34"]
 [ext_resource type="PackedScene" path="res://scenes/props/miniatures/tower.tscn" id="106_uixjv"]
 [ext_resource type="PackedScene" path="res://scenes/props/treasure/hu.tscn" id="108_v8ix0"]
@@ -133,6 +132,7 @@
 [ext_resource type="Script" path="res://Scripts/world/workers_pen.gd" id="129_lhc30"]
 [ext_resource type="Script" path="res://Scripts/world/level_ramp.gd" id="130_oxgd7"]
 [ext_resource type="Script" path="res://Scripts/world/timber_ceiling.gd" id="131_t2d0y"]
+[ext_resource type="Script" path="res://Scripts/world/rubble.gd" id="133_lhc30"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_proc"]
 sky_top_color = Color(0.01, 0.01, 0.015, 1)
@@ -1391,11 +1391,8 @@ size = Vector3(10, 3, 3)
 [sub_resource type="BoxShape3D" id="BoxShape3D_xoaem"]
 size = Vector3(14, 4, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_7yve8"]
-size = Vector3(4, 3, 12)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_opf5x"]
-size = Vector3(4, 3, 12)
+[sub_resource type="BoxShape3D" id="BoxShape3D_74mq3"]
+size = Vector3(9, 3, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wgjxp"]
 size = Vector3(8, 4, 4)
@@ -1415,8 +1412,14 @@ size = Vector3(6, 6, 3)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ielbb"]
 size = Vector3(6, 4, 5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_lhc30"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_j2dg5"]
+size = Vector3(3.4, 3, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_detgy"]
 size = Vector3(5, 4, 31.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sjrkc"]
+size = Vector3(4.2, 3, 4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cukis"]
 radius = 0.7
@@ -1440,7 +1443,7 @@ size = Vector3(6, 0.3, 6)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ddo8g"]
 size = Vector3(6, 0.3, 6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_oxgd7"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_iej82"]
 size = Vector3(54, 0.3, 58)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nx0x2"]
@@ -1464,116 +1467,116 @@ size = Vector3(84, 10, 22)
 [sub_resource type="BoxShape3D" id="BoxShape3D_w5qqo"]
 size = Vector3(9, 9, 56)
 
-[sub_resource type="BoxMesh" id="BoxMesh_74mq3"]
+[sub_resource type="BoxMesh" id="BoxMesh_8mokf"]
 size = Vector3(6, 0.6, 55.2)
 
-[sub_resource type="Resource" id="Resource_j2dg5"]
+[sub_resource type="Resource" id="Resource_87ind"]
 script = ExtResource("124_g05mq")
 face = 3
 offset = Vector2(-38.665, 0)
 size = Vector2(2.9, 3.3)
 
-[sub_resource type="Resource" id="Resource_detgy"]
+[sub_resource type="Resource" id="Resource_mxltb"]
 script = ExtResource("124_g05mq")
 face = 2
 offset = Vector2(-25.935, 0)
 size = Vector2(3.9, 3.43)
 
-[sub_resource type="Resource" id="Resource_sjrkc"]
+[sub_resource type="Resource" id="Resource_1p581"]
 script = ExtResource("124_g05mq")
 face = 2
 offset = Vector2(38.165, 0)
 size = Vector2(3.9, 3.43)
 
-[sub_resource type="Resource" id="Resource_iej82"]
+[sub_resource type="Resource" id="Resource_deopr"]
 script = ExtResource("124_g05mq")
 face = 3
 offset = Vector2(-11.985, 0)
 size = Vector2(3.5, 3.43)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_8mokf"]
+[sub_resource type="Resource" id="Resource_lf22v"]
 script = ExtResource("124_g05mq")
 face = 1
 offset = Vector2(0, 7.77)
 size = Vector2(3, 4.57)
 
-[sub_resource type="Resource" id="Resource_87ind"]
+[sub_resource type="Resource" id="Resource_aju81"]
 script = ExtResource("124_g05mq")
 face = 3
 offset = Vector2(-5.355, 0)
 size = Vector2(3.9, 3.25)
 
-[sub_resource type="Resource" id="Resource_mxltb"]
+[sub_resource type="Resource" id="Resource_tt78p"]
 script = ExtResource("124_g05mq")
 face = 1
 offset = Vector2(0.03, 5.7)
 size = Vector2(3.11, 3.21)
 
-[sub_resource type="Resource" id="Resource_1p581"]
+[sub_resource type="Resource" id="Resource_ckcug"]
 script = ExtResource("124_g05mq")
 face = 3
 offset = Vector2(-0.505, 0)
 size = Vector2(2, 3.25)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_deopr"]
+[sub_resource type="Resource" id="Resource_ojd4u"]
 script = ExtResource("124_g05mq")
 face = 5
 offset = Vector2(0, 12.79)
 size = Vector2(3.11, 3.9)
 
-[sub_resource type="Resource" id="Resource_lf22v"]
+[sub_resource type="Resource" id="Resource_2p3qn"]
 script = ExtResource("124_g05mq")
 face = 2
 offset = Vector2(0.5, 17.37)
 size = Vector2(3.5, 3.43)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_aju81"]
+[sub_resource type="Resource" id="Resource_d2pjw"]
 script = ExtResource("124_g05mq")
 face = 5
 size = Vector2(6, 4.5)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_tt78p"]
+[sub_resource type="Resource" id="Resource_ptkif"]
 script = ExtResource("124_g05mq")
 offset = Vector2(-6, 0)
 size = Vector2(6, 4.5)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_ckcug"]
+[sub_resource type="Resource" id="Resource_bjoy1"]
 script = ExtResource("124_g05mq")
 face = 5
 offset = Vector2(-17, 0)
 size = Vector2(3.5, 3.43)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_ojd4u"]
+[sub_resource type="Resource" id="Resource_yghf2"]
 script = ExtResource("124_g05mq")
 face = 2
 offset = Vector2(6, 0)
 size = Vector2(3.5, 3.43)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_2p3qn"]
+[sub_resource type="Resource" id="Resource_mk5fp"]
 script = ExtResource("124_g05mq")
 face = 3
 offset = Vector2(4.2, 0)
 size = Vector2(3.5, 3.43)
 jambs = false
 
-[sub_resource type="Resource" id="Resource_d2pjw"]
+[sub_resource type="Resource" id="Resource_y6ncg"]
 script = ExtResource("124_g05mq")
 face = 2
 offset = Vector2(-5.3, 17.46)
 size = Vector2(2, 3.25)
 jambs = false
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ptkif"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_i376l"]
 size = Vector3(6, 4, 2)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_bjoy1"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wu2k1"]
 size = Vector3(3.5, 4, 2)
 
 [node name="Mausoleum" type="Node3D" unique_id=1286639533]
@@ -1887,38 +1890,38 @@ light_volumetric_fog_energy = 0.4
 omni_range = 15.0
 omni_attenuation = 1.1
 
-[node name="TakenMarks" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1644536335]
+[node name="TakenMarks" type="Node3D" parent="Rooms/01_TerracottaWorkshop" unique_id=1408898241]
 
-[node name="WeiSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1651515773]
+[node name="WeiSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=960031508]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.200001, 0.2, 3.8000002)
 
-[node name="ManASpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1818123417]
+[node name="ManASpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=648687042]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.099998, 0.2, 6.6000004)
 
-[node name="ManBSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1044244895]
+[node name="ManBSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1199596752]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.400002, 0.2, 4.6000004)
 
-[node name="Approach" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=47064768]
+[node name="Approach" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=439411506]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.2, 2.5)
 
-[node name="PullSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=725404137]
+[node name="PullSpot" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=600715866]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.400002, 0.2, 4.3999996)
 
-[node name="KilnMouth" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1682398275]
+[node name="KilnMouth" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=809054790]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.400002, 0.8, 8)
 
-[node name="Watch" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=617096199]
+[node name="Watch" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1689337882]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.799999, 1.6, 3.8000002)
 
-[node name="Way" type="Node3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=5388250]
+[node name="Way" type="Node3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks" unique_id=1278440708]
 
-[node name="W0" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=776741379]
+[node name="W0" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=1008771230]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 0.2, -15)
 
-[node name="W1" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=203322482]
+[node name="W1" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=30962729]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.5, 0.2, -14.5)
 
-[node name="W2" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=133303056]
+[node name="W2" type="Marker3D" parent="Rooms/01_TerracottaWorkshop/TakenMarks/Way" unique_id=311396756]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 0.2, -8)
 
 [node name="MapWithoutTreasure" parent="." unique_id=1259806216 instance=ExtResource("14_p3lpp")]
@@ -3622,7 +3625,7 @@ visible = false
 transform = Transform3D(1.3641007, 0, 0, 0, 2.3854265, 0, 0, 0, 1.3641007, 0, 0.28, 0)
 
 [node name="CrackleSFX" parent="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire" index="9"]
-pitch_scale = 1.0171261
+pitch_scale = 1.0676945
 stream_paused = true
 bus = &"Tomb"
 
@@ -5648,30 +5651,17 @@ completes_step = &"find_liang"
 shape = SubResource("BoxShape3D_xoaem")
 
 [node name="CorridorEnter" type="Area3D" parent="Story" unique_id=2006715936]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 1.5, 13)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.4, 1.5, 12)
 collision_layer = 0
 collision_mask = 2
 monitorable = false
 script = ExtResource("75_th3aq")
-quest_from = &"reach_mechanism"
+quest_from = &"find_liang"
 dialogue = &"corridor_enter"
-chapter = 3
+hint = "HINT_PLATES"
 
 [node name="Shape" type="CollisionShape3D" parent="Story/CorridorEnter" unique_id=479842756]
-shape = SubResource("BoxShape3D_7yve8")
-
-[node name="CorridorEnterEast" type="Area3D" parent="Story" unique_id=378425689]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1.5, 13)
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-script = ExtResource("75_th3aq")
-quest_from = &"reach_mechanism"
-dialogue = &"corridor_enter"
-chapter = 3
-
-[node name="Shape" type="CollisionShape3D" parent="Story/CorridorEnterEast" unique_id=802095334]
-shape = SubResource("BoxShape3D_opf5x")
+shape = SubResource("BoxShape3D_74mq3")
 
 [node name="MechanismEnter" type="Area3D" parent="Story" unique_id=2041632995]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 45.567898)
@@ -5755,7 +5745,19 @@ dialogue = &"coffin"
 [node name="Shape" type="CollisionShape3D" parent="Story/CoffinNear" unique_id=588632333]
 shape = SubResource("BoxShape3D_ielbb")
 
-[node name="ApprenticeTaken" type="Area3D" parent="Story" unique_id=568913106]
+[node name="TunnelFallen" type="Area3D" parent="Story" unique_id=182114803]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -7.2, -24)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("75_th3aq")
+quest_from = &"talk_liang"
+dialogue = &"tunnel_fallen"
+
+[node name="Shape" type="CollisionShape3D" parent="Story/TunnelFallen" unique_id=1839497383]
+shape = SubResource("BoxShape3D_j2dg5")
+
+[node name="ApprenticeTaken" type="Area3D" parent="Story" unique_id=152822169]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.5, 2, -17.2)
 collision_layer = 0
 collision_mask = 2
@@ -5771,8 +5773,20 @@ approach_path = NodePath("../../Rooms/01_TerracottaWorkshop/TakenMarks/Approach"
 way_path = NodePath("../../Rooms/01_TerracottaWorkshop/TakenMarks/Way")
 watch_path = NodePath("../../Rooms/01_TerracottaWorkshop/TakenMarks/Watch")
 
-[node name="@CollisionShape3D@2360" type="CollisionShape3D" parent="Story/ApprenticeTaken" unique_id=360609530]
-shape = SubResource("BoxShape3D_lhc30")
+[node name="@CollisionShape3D@2387" type="CollisionShape3D" parent="Story/ApprenticeTaken" unique_id=628190784]
+shape = SubResource("BoxShape3D_detgy")
+
+[node name="BarredDoor" type="Area3D" parent="Story" unique_id=1001559945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.6, 1.5, 28)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("75_th3aq")
+quest_from = &"find_liang"
+dialogue = &"barred_door"
+
+[node name="Shape" type="CollisionShape3D" parent="Story/BarredDoor" unique_id=913678314]
+shape = SubResource("BoxShape3D_sjrkc")
 
 [node name="Guards" type="Node3D" parent="." unique_id=1444439590]
 
@@ -5783,7 +5797,6 @@ armor_tint = Color(1.25, 0.62, 0.5, 1)
 
 [node name="GuardEscort" parent="Guards" unique_id=1350089228 instance=ExtResource("78_4gtt1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.6, 0.18693334, 12.2)
-velocity = Vector3(0, -0.78400004, 0)
 route_path = NodePath("../../Routes/CorridorWatch")
 carries_torch = true
 armor_tint = Color(0.9, 0.88, 0.85, 1)
@@ -5795,12 +5808,12 @@ carries_torch = true
 armor_tint = Color(0.8, 0.8, 0.82, 1)
 
 [node name="ArchiveGuard2" parent="Guards" unique_id=1180360167 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(0.91168416, 0, 0.41089058, 0, 1, 0, -0.41089058, 0, 0.91168416, 17.24752, -0.017273836, -16.154305)
+transform = Transform3D(0.8886696, 0, 0.45854703, 0, 1, 0, -0.45854703, 0, 0.8886696, 17.24752, -0.017273836, -16.154305)
 route_path = NodePath("../../Routes/ArchiveEast")
 armor_tint = Color(1.05, 0.95, 0.85, 1)
 
 [node name="ArchiveGuard3" parent="Guards" unique_id=1692658472 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(0.55569357, 0, -0.83138657, 0, 1, 0, 0.83138657, 0, 0.55569357, -2.7996874, 0.029371172, -35.629215)
+transform = Transform3D(0.44976044, 0, -0.8931486, 0, 1, 0, 0.8931486, 0, 0.44976044, -2.7996874, 0.029371172, -35.629215)
 route_path = NodePath("../../Routes/ArchiveNorthWest")
 carries_torch = true
 armor_tint = Color(0.72, 0.7, 0.68, 1)
@@ -5810,31 +5823,40 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.473942, 0.14926249, -35.62
 route_path = NodePath("../../Routes/ArchiveNorthEast")
 armor_tint = Color(0.95, 0.9, 1, 1)
 
-[node name="Wei" parent="Guards" unique_id=356332313 instance=ExtResource("78_4gtt1")]
+[node name="Wei" parent="Guards" unique_id=1628234591 instance=ExtResource("78_4gtt1")]
+process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.5, 0.2, -30)
+visible = false
+collision_layer = 0
 armor_tint = Color(0.42, 0.22, 0.2, 1)
 carries_ji = false
 held_scene = ExtResource("91_lhc30")
 held_offset = Vector3(0, 0.06, 0.04)
 held_rotation = Vector3(0, 0, 90)
 
-[node name="WeiManA" parent="Guards" unique_id=1535277796 instance=ExtResource("78_4gtt1")]
+[node name="WeiManA" parent="Guards" unique_id=1164936258 instance=ExtResource("78_4gtt1")]
+process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.5, 0.2, -30)
+visible = false
+collision_layer = 0
 carries_torch = true
 armor_tint = Color(0.95, 0.9, 0.85, 1)
 
-[node name="WeiManB" parent="Guards" unique_id=303090955 instance=ExtResource("78_4gtt1")]
+[node name="WeiManB" parent="Guards" unique_id=1761678943 instance=ExtResource("78_4gtt1")]
+process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.5, 0.2, -30)
+visible = false
+collision_layer = 0
 armor_tint = Color(1.05, 0.95, 0.88, 1)
 
-[node name="PitGuardRing" parent="Guards" unique_id=2046797791 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.3, -26, -9)
+[node name="PitGuardRing" parent="Guards" unique_id=870790107 instance=ExtResource("78_4gtt1")]
+transform = Transform3D(0.99895996, 0, -0.045595564, 0, 1, 0, 0.045595564, 0, 0.99895996, 31.3, -26, -9)
 route_path = NodePath("../../Routes/PitsRing")
 carries_torch = true
 armor_tint = Color(0.95, 0.85, 0.78, 1)
 
-[node name="PitGuardYard" parent="Guards" unique_id=1714687781 instance=ExtResource("78_4gtt1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, -26, -1)
+[node name="PitGuardYard" parent="Guards" unique_id=1103306761 instance=ExtResource("78_4gtt1")]
+transform = Transform3D(0.9955251, 0, -0.09449753, 0, 1, 0, 0.09449753, 0, 0.9955251, 64, -26, -1)
 route_path = NodePath("../../Routes/PitsYard")
 armor_tint = Color(1.1, 0.92, 0.72, 1)
 
@@ -5939,38 +5961,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.1686225, 16.3)
 metadata/wait = 3.0
 metadata/look = true
 
-[node name="PitsRing" type="Node3D" parent="Routes" unique_id=1496122624]
+[node name="PitsRing" type="Node3D" parent="Routes" unique_id=1859229512]
 script = ExtResource("80_2em4r")
 
-[node name="P00" type="Marker3D" parent="Routes/PitsRing" unique_id=1779076186]
+[node name="P00" type="Marker3D" parent="Routes/PitsRing" unique_id=174427799]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.3, -26, -9)
 metadata/wait = 2.5
 metadata/look = true
 
-[node name="P01" type="Marker3D" parent="Routes/PitsRing" unique_id=1541058464]
+[node name="P01" type="Marker3D" parent="Routes/PitsRing" unique_id=1811677570]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, -26, -9)
 metadata/wait = 2.0
 metadata/look = true
 
-[node name="P02" type="Marker3D" parent="Routes/PitsRing" unique_id=1376976487]
+[node name="P02" type="Marker3D" parent="Routes/PitsRing" unique_id=1247171871]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, -26, 27)
 metadata/wait = 1.0
 metadata/look = false
 
-[node name="P03" type="Marker3D" parent="Routes/PitsRing" unique_id=1886732554]
+[node name="P03" type="Marker3D" parent="Routes/PitsRing" unique_id=1393918710]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.3, -26, 27)
 metadata/wait = 2.5
 metadata/look = true
 
-[node name="PitsYard" type="Node3D" parent="Routes" unique_id=1912574883]
+[node name="PitsYard" type="Node3D" parent="Routes" unique_id=543528661]
 script = ExtResource("80_2em4r")
 
-[node name="P00" type="Marker3D" parent="Routes/PitsYard" unique_id=981928488]
+[node name="P00" type="Marker3D" parent="Routes/PitsYard" unique_id=1418736907]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, -26, -1)
 metadata/wait = 4.0
 metadata/look = true
 
-[node name="P01" type="Marker3D" parent="Routes/PitsYard" unique_id=1747708736]
+[node name="P01" type="Marker3D" parent="Routes/PitsYard" unique_id=319608207]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63.6, -26, 15)
 metadata/wait = 3.0
 metadata/look = true
@@ -6266,7 +6288,7 @@ collision_mask = 0
 metadata/usables = []
 
 [node name="Shape" type="CollisionShape3D" parent="MercuryHall/FillPoint1/UseBody" unique_id=1090475660]
-shape = SubResource("BoxShape3D_oxgd7")
+shape = SubResource("BoxShape3D_iej82")
 
 [node name="Usable" type="Node" parent="MercuryHall/FillPoint1/UseBody" unique_id=39739104]
 script = ExtResource("5_hp6sp")
@@ -6275,65 +6297,50 @@ highlight = false
 
 [node name="Miniatures" type="Node3D" parent="MercuryHall" unique_id=1837378493]
 
-[node name="City0" type="Node3D" parent="MercuryHall/Miniatures" unique_id=897843855 instance=ExtResource("103_am6l4")]
+[node name="City0" parent="MercuryHall/Miniatures" unique_id=741531779 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-6.556708e-08, 0, 1.5, 0, 1.5, 0, -1.5, 0, -6.556708e-08, -78.11738, -0.055679835, 67.77968)
-script = ExtResource("105_aw20t")
 
-[node name="Palace1" type="Node3D" parent="MercuryHall/Miniatures" unique_id=936822090 instance=ExtResource("105_5r7ot")]
+[node name="Palace1" parent="MercuryHall/Miniatures" unique_id=939133703 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -67.31738, -0.2550011, 59.679676)
-script = ExtResource("105_aw20t")
 
-[node name="Tower2" type="Node3D" parent="MercuryHall/Miniatures" unique_id=2089232038 instance=ExtResource("106_uixjv")]
+[node name="Tower2" parent="MercuryHall/Miniatures" unique_id=590042719 instance=ExtResource("106_uixjv")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -70.01738, -0.40756276, 56.079674)
-script = ExtResource("105_aw20t")
 
-[node name="Palace3" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1011726337 instance=ExtResource("105_5r7ot")]
+[node name="Palace3" parent="MercuryHall/Miniatures" unique_id=1610776674 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -75.41738, -0.25500062, 50.679676)
-script = ExtResource("105_aw20t")
 
-[node name="City4" type="Node3D" parent="MercuryHall/Miniatures" unique_id=512872419 instance=ExtResource("103_am6l4")]
+[node name="City4" parent="MercuryHall/Miniatures" unique_id=1569461893 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -54.71738, -0.14928392, 72.27968)
-script = ExtResource("105_aw20t")
 
-[node name="Tower5" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1828887747 instance=ExtResource("106_uixjv")]
+[node name="Tower5" parent="MercuryHall/Miniatures" unique_id=238325759 instance=ExtResource("106_uixjv")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -73.61738, 0.11358496, 65.07967)
-script = ExtResource("105_aw20t")
 
-[node name="Palace6" type="Node3D" parent="MercuryHall/Miniatures" unique_id=9790049 instance=ExtResource("105_5r7ot")]
+[node name="Palace6" parent="MercuryHall/Miniatures" unique_id=1846734826 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -86.217384, -0.18046716, 68.67967)
-script = ExtResource("105_aw20t")
 
-[node name="Palace7" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1762066540 instance=ExtResource("105_5r7ot")]
+[node name="Palace7" parent="MercuryHall/Miniatures" unique_id=1520299023 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, -0.4358745, 69.57967)
-script = ExtResource("105_aw20t")
 
-[node name="Tower8" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1379285400 instance=ExtResource("106_uixjv")]
+[node name="Tower8" parent="MercuryHall/Miniatures" unique_id=1021743947 instance=ExtResource("106_uixjv")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -82.61738, -0.29491332, 55.179676)
-script = ExtResource("105_aw20t")
 
-[node name="City9" type="Node3D" parent="MercuryHall/Miniatures" unique_id=234085443 instance=ExtResource("103_am6l4")]
+[node name="City9" parent="MercuryHall/Miniatures" unique_id=336214071 instance=ExtResource("103_am6l4")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -81.717384, -0.22955707, 65.07967)
-script = ExtResource("105_aw20t")
 
-[node name="Palace10" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1456530008 instance=ExtResource("105_5r7ot")]
+[node name="Palace10" parent="MercuryHall/Miniatures" unique_id=189174276 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -60.117382, -0.28264907, 74.979675)
-script = ExtResource("105_aw20t")
 
-[node name="Tower11" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1284116908 instance=ExtResource("106_uixjv")]
+[node name="Tower11" parent="MercuryHall/Miniatures" unique_id=899176723 instance=ExtResource("106_uixjv")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -79.91738, -0.31634143, 58.779675)
-script = ExtResource("105_aw20t")
 
-[node name="Palace12" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1116146992 instance=ExtResource("105_5r7ot")]
+[node name="Palace12" parent="MercuryHall/Miniatures" unique_id=1559708148 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -58.317383, 0.2006068, 63.279675)
-script = ExtResource("105_aw20t")
 
-[node name="Tower13" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1631167743 instance=ExtResource("106_uixjv")]
+[node name="Tower13" parent="MercuryHall/Miniatures" unique_id=1897616177 instance=ExtResource("106_uixjv")]
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -82.61738, -0.33299592, 47.979675)
-script = ExtResource("105_aw20t")
 
-[node name="Palace14" type="Node3D" parent="MercuryHall/Miniatures" unique_id=1538136008 instance=ExtResource("105_5r7ot")]
+[node name="Palace14" parent="MercuryHall/Miniatures" unique_id=743599921 instance=ExtResource("105_5r7ot")]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -66.41738, -0.553752, 70.479675)
-script = ExtResource("105_aw20t")
 
 [node name="WallLamps" type="Node3D" parent="." unique_id=165276794]
 
@@ -6870,11 +6877,12 @@ ambient_mode = 0
 
 [node name="DaylightExit" parent="." unique_id=1722781042 instance=ExtResource("103_irxgl")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 7.45, 185.65)
+visible = false
 
 [node name="EscapeFloor" type="MeshInstance3D" parent="." unique_id=1121202535]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 7.17, 158.5)
 material_override = ExtResource("104_irxgl")
-mesh = SubResource("BoxMesh_74mq3")
+mesh = SubResource("BoxMesh_8mokf")
 
 [node name="GraveGoods" type="Node3D" parent="." unique_id=549402694]
 
@@ -6971,159 +6979,52 @@ transform = Transform3D(-0.9999946, -4.0928545e-09, 0.00329883, -0.00015444474, 
 
 [node name="TunnelTimbers" type="Node3D" parent="." unique_id=918395245]
 
-[node name="Frame0" type="Node3D" parent="TunnelTimbers" unique_id=1113979754]
+[node name="Frame0" type="Node3D" parent="TunnelTimbers" unique_id=2124589292]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -42)
 script = ExtResource("120_yempy")
 width = 3.5
 height = 3.4300003
 
-[node name="Frame1" type="Node3D" parent="TunnelTimbers" unique_id=352450959]
+[node name="Frame1" type="Node3D" parent="TunnelTimbers" unique_id=988962803]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -36)
 script = ExtResource("120_yempy")
 width = 3.5
 height = 3.4300003
 with_lamp = true
 
-[node name="Frame2" type="Node3D" parent="TunnelTimbers" unique_id=280010854]
+[node name="Frame2" type="Node3D" parent="TunnelTimbers" unique_id=1358973954]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -30)
 script = ExtResource("120_yempy")
 width = 3.5
 height = 3.4300003
 
-[node name="Frame3" type="Node3D" parent="TunnelTimbers" unique_id=1056885642]
+[node name="Frame3" type="Node3D" parent="TunnelTimbers" unique_id=1824688763]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -24)
 script = ExtResource("120_yempy")
 width = 3.5
 height = 3.4300003
 
-[node name="Frame4" type="Node3D" parent="TunnelTimbers" unique_id=831227510]
+[node name="Frame4" type="Node3D" parent="TunnelTimbers" unique_id=250461715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -18)
 script = ExtResource("120_yempy")
 width = 3.5
 height = 3.4300003
 with_lamp = true
 
-[node name="Frame5" type="Node3D" parent="TunnelTimbers" unique_id=1431190498]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -12)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-
-[node name="Frame6" type="Node3D" parent="TunnelTimbers" unique_id=1303867071]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -6)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-
-[node name="Frame7" type="Node3D" parent="TunnelTimbers" unique_id=1639767616]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, 0)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-with_lamp = true
-
-[node name="Frame8" type="Node3D" parent="TunnelTimbers" unique_id=1563628939]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, 6)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-
-[node name="Frame9" type="Node3D" parent="TunnelTimbers" unique_id=1299353921]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, 12)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-
-[node name="Frame10" type="Node3D" parent="TunnelTimbers" unique_id=1899326126]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, 18)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-with_lamp = true
-
-[node name="Frame11" type="Node3D" parent="TunnelTimbers" unique_id=926967851]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, 24)
-script = ExtResource("120_yempy")
-width = 3.5
-height = 3.4300003
-
-[node name="Frame12" type="Node3D" parent="TunnelTimbers" unique_id=1097943090]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, -8.58, -33.95)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-
-[node name="Frame13" type="Node3D" parent="TunnelTimbers" unique_id=647474615]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, -8.58, -33.95)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-with_lamp = true
-
-[node name="Frame14" type="Node3D" parent="TunnelTimbers" unique_id=1674551791]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, -8.58, -33.95)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-
-[node name="Frame15" type="Node3D" parent="TunnelTimbers" unique_id=113061012]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6, -8.58, -33.95)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-
-[node name="Frame16" type="Node3D" parent="TunnelTimbers" unique_id=780339041]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, -8.58, -33.95)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-with_lamp = true
-
-[node name="Frame17" type="Node3D" parent="TunnelTimbers" unique_id=1894906621]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 18, -8.58, -33.950005)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.63
-
-[node name="Frame18" type="Node3D" parent="TunnelTimbers" unique_id=911420064]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 4, -8.63, 30.150002)
-script = ExtResource("120_yempy")
-width = 3.9000015
-height = 3.4300003
-
-[node name="Frame19" type="Node3D" parent="TunnelTimbers" unique_id=1978211767]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, -8.63, 30.149998)
-script = ExtResource("120_yempy")
-width = 3.8999996
-height = 3.4300003
-with_lamp = true
-
-[node name="Frame20" type="Node3D" parent="TunnelTimbers" unique_id=1046180057]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16, -8.63, 30.149998)
-script = ExtResource("120_yempy")
-width = 3.8999996
-height = 3.4300003
-
-[node name="Frame21" type="Node3D" parent="TunnelTimbers" unique_id=273380349]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 22, -8.63, 30.149998)
-script = ExtResource("120_yempy")
-width = 3.8999996
-height = 3.4300003
-
-[node name="Frame22" type="Node3D" parent="TunnelTimbers" unique_id=69039406]
+[node name="Frame22" type="Node3D" parent="TunnelTimbers" unique_id=222073143]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 32, -8.55, -46.68)
 script = ExtResource("120_yempy")
 width = 2.8999977
 height = 3.2200003
 with_lamp = true
 
-[node name="Frame23" type="Node3D" parent="TunnelTimbers" unique_id=363884157]
+[node name="Frame23" type="Node3D" parent="TunnelTimbers" unique_id=1195220200]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 37, -8.55, -46.68)
 script = ExtResource("120_yempy")
 width = 2.8999977
 height = 3.2200003
 
-[node name="Frame24" type="Node3D" parent="TunnelTimbers" unique_id=257749765]
+[node name="Frame24" type="Node3D" parent="TunnelTimbers" unique_id=841581347]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 42, -8.55, -46.68)
 script = ExtResource("120_yempy")
 width = 2.8999977
@@ -7131,95 +7032,95 @@ height = 3.2200003
 
 [node name="MakersNames" type="Node3D" parent="." unique_id=267110564]
 
-[node name="GongJiang" type="Node3D" parent="MakersNames" unique_id=982352367]
+[node name="GongJiang" type="Node3D" parent="MakersNames" unique_id=888959171]
 transform = Transform3D(0.3643385, 0, 0.9312666, 0, 1, 0, -0.9312666, 0, 0.3643385, -70.870926, 1.9, -27.796356)
 script = ExtResource("122_uixjv")
 name_id = &"gong_jiang"
 
-[node name="XianyangYi" type="Node3D" parent="MakersNames" unique_id=932487137]
+[node name="XianyangYi" type="Node3D" parent="MakersNames" unique_id=1684364942]
 transform = Transform3D(0.6521204, 0, 0.7581154, 0, 1, 0, -0.7581154, 0, 0.6521204, -63.202568, 1.8, -33.531998)
 script = ExtResource("122_uixjv")
 name_id = &"xianyang_yi"
 
-[node name="GongDe" type="Node3D" parent="MakersNames" unique_id=1409999279]
+[node name="GongDe" type="Node3D" parent="MakersNames" unique_id=1306873487]
 transform = Transform3D(0.99984133, 0, 0.017814338, 0, 1, 0, -0.017814338, 0, 0.99984133, -46.09982, 1.2, -34.693798)
 script = ExtResource("122_uixjv")
 name_id = &"gong_de"
 
-[node name="XianyangCi" type="Node3D" parent="MakersNames" unique_id=1871665436]
+[node name="XianyangCi" type="Node3D" parent="MakersNames" unique_id=1935675318]
 transform = Transform3D(0.87825996, 0, -0.47818348, 0, 1, 0, 0.47818348, 0, 0.87825996, -25.090605, 1.2, -25.442598)
 script = ExtResource("122_uixjv")
 name_id = &"xianyang_ci"
 
-[node name="XianyangYe" type="Node3D" parent="MakersNames" unique_id=1372833525]
+[node name="XianyangYe" type="Node3D" parent="MakersNames" unique_id=1234584887]
 transform = Transform3D(0.9999987, 0, -0.0016211312, 0, 1, 0, 0.0016211312, 0, 0.9999987, -20.700016, 1.25, -39.91891)
 script = ExtResource("122_uixjv")
 name_id = &"xianyang_ye"
 
-[node name="GongCang" type="Node3D" parent="MakersNames" unique_id=690187767]
+[node name="GongCang" type="Node3D" parent="MakersNames" unique_id=735869644]
 transform = Transform3D(0.34476694, 0, -0.93868834, 0, 1.0000001, 0, 0.93868834, 0, 0.34476694, 55.57446, 1.2, -11.907019)
 script = ExtResource("122_uixjv")
 name_id = &"gong_cang"
 
-[node name="XianyangQing" type="Node3D" parent="MakersNames" unique_id=1096972551]
+[node name="XianyangQing" type="Node3D" parent="MakersNames" unique_id=1992472014]
 transform = Transform3D(0.99838924, 0, -0.05673515, 0, 1, 0, 0.05673515, 0, 0.99838924, 52.199432, 1.2, -56.073235)
 script = ExtResource("122_uixjv")
 name_id = &"xianyang_qing"
 
-[node name="GongShui" type="Node3D" parent="MakersNames" unique_id=1331594243]
+[node name="GongShui" type="Node3D" parent="MakersNames" unique_id=1933882843]
 transform = Transform3D(0.83341324, 0, -0.5526504, 0, 1.0000001, 0, 0.5526504, 0, 0.83341324, 33.056446, 1.2, -35.258434)
 script = ExtResource("122_uixjv")
 name_id = &"gong_shui"
 
 [node name="ServiceTunnels" type="Node3D" parent="." unique_id=603265868]
 
-[node name="NorthSouth" type="Node3D" parent="ServiceTunnels" unique_id=1370864389]
+[node name="NorthSouth" type="Node3D" parent="ServiceTunnels" unique_id=1708955157]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -8.015)
 script = ExtResource("123_s5as7")
 size = Vector3(3.5, 3.43, 80.23)
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_j2dg5"), SubResource("Resource_detgy"), SubResource("Resource_sjrkc"), SubResource("Resource_iej82")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_87ind"), SubResource("Resource_mxltb"), SubResource("Resource_1p581"), SubResource("Resource_deopr")])
 
-[node name="TopBranch" type="Node3D" parent="ServiceTunnels" unique_id=376631063]
+[node name="TopBranch" type="Node3D" parent="ServiceTunnels" unique_id=2094109005]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 39.355, -8.55, -46.68)
 script = ExtResource("123_s5as7")
 size = Vector3(2.9, 3.22, 20.11)
 open_faces = 16
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_8mokf")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_lf22v")])
 
-[node name="ShaftToLiang" type="Node3D" parent="ServiceTunnels" unique_id=988519389]
+[node name="ShaftToLiang" type="Node3D" parent="ServiceTunnels" unique_id=1069012420]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.125, -5.33, -46.495)
 script = ExtResource("123_s5as7")
 size = Vector3(4.57, 4.83, 2.91)
 open_faces = 3
 
-[node name="WestBranch" type="Node3D" parent="ServiceTunnels" unique_id=680168365]
+[node name="WestBranch" type="Node3D" parent="ServiceTunnels" unique_id=30038260]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.53, -8.58, -33.95)
 script = ExtResource("123_s5as7")
 size = Vector3(3.9, 3.63, 44.54)
 open_faces = 32
 
-[node name="South" type="Node3D" parent="ServiceTunnels" unique_id=688041555]
+[node name="South" type="Node3D" parent="ServiceTunnels" unique_id=237870584]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 13.81, -8.63, 30.15)
 script = ExtResource("123_s5as7")
 size = Vector3(3.9, 3.43, 23.98)
 open_faces = 48
 
-[node name="ToMechanism" type="Node3D" parent="ServiceTunnels" unique_id=1893763860]
+[node name="ToMechanism" type="Node3D" parent="ServiceTunnels" unique_id=401592928]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255, -8.54, 35.505)
 script = ExtResource("123_s5as7")
 size = Vector3(3.13, 3.25, 14.61)
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_87ind"), SubResource("Resource_mxltb"), SubResource("Resource_1p581")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_aju81"), SubResource("Resource_tt78p"), SubResource("Resource_ckcug")])
 
-[node name="ShaftToMechanism" type="Node3D" parent="ServiceTunnels" unique_id=903663012]
+[node name="ShaftToMechanism" type="Node3D" parent="ServiceTunnels" unique_id=1648212954]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.285, -5.29, 41.205)
 script = ExtResource("123_s5as7")
 size = Vector3(3.11, 16.69, 3.21)
 open_faces = 1
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_deopr")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_ojd4u")])
 
 [node name="UnderTheMountain" type="Node3D" parent="." unique_id=527999041]
 
-[node name="ShaftPassage" type="Node3D" parent="UnderTheMountain" unique_id=211658344]
+[node name="ShaftPassage" type="Node3D" parent="UnderTheMountain" unique_id=1535415232]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 32.65, -8.63, -20)
 script = ExtResource("123_s5as7")
 size = Vector3(3.5, 3.43, 6.7)
@@ -7230,18 +7131,18 @@ open_faces = 48
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="WorkersShaft" type="Node3D" parent="UnderTheMountain" unique_id=594039816]
+[node name="WorkersShaft" type="Node3D" parent="UnderTheMountain" unique_id=1697727734]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, -26, -20.5)
 script = ExtResource("123_s5as7")
 size = Vector3(16, 24, 13)
 wall_material = ExtResource("22_ielbb")
 floor_material = ExtResource("23_s5as7")
 ceiling_material = ExtResource("126_aw20t")
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_lf22v"), SubResource("Resource_aju81")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_2p3qn"), SubResource("Resource_d2pjw")])
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="ShaftLanding" type="Node3D" parent="UnderTheMountain" unique_id=1432422437]
+[node name="ShaftLanding" type="Node3D" parent="UnderTheMountain" unique_id=601135790]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.25, -26, -20.5)
 script = ExtResource("125_kcdtl")
 size = Vector3(4.5, 17.37, 13)
@@ -7250,25 +7151,25 @@ masonry = true
 dressed_sides = 8
 top_material = ExtResource("23_s5as7")
 
-[node name="LandingRailNorth" type="Node3D" parent="UnderTheMountain" unique_id=2109843553]
+[node name="LandingRailNorth" type="Node3D" parent="UnderTheMountain" unique_id=890233587]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.42, -8.63, -24.7)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.15, 1.1, 4.6)
 material = ExtResource("126_aw20t")
 
-[node name="LandingRailSouth" type="Node3D" parent="UnderTheMountain" unique_id=198870766]
+[node name="LandingRailSouth" type="Node3D" parent="UnderTheMountain" unique_id=628781195]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.42, -8.63, -15.8)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.15, 1.1, 3.6)
 material = ExtResource("126_aw20t")
 
-[node name="ShaftLift" type="Node3D" parent="UnderTheMountain" unique_id=1109937488]
+[node name="ShaftLift" type="Node3D" parent="UnderTheMountain" unique_id=1388752732]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.8, -8.63, -20)
 script = ExtResource("127_t2d0y")
 travel = 17.369999999999997
 basket_offset = 5.4
 
-[node name="ShaftToPits" type="Node3D" parent="UnderTheMountain" unique_id=1742285322]
+[node name="ShaftToPits" type="Node3D" parent="UnderTheMountain" unique_id=1948489769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, -26, -13)
 script = ExtResource("123_s5as7")
 size = Vector3(6, 4.5, 2)
@@ -7279,162 +7180,162 @@ open_faces = 48
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="Ballast0_0" type="Node3D" parent="UnderTheMountain" unique_id=454250970]
+[node name="Ballast0_0" type="Node3D" parent="UnderTheMountain" unique_id=1806917767]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.800003, -8.63, -17.550001)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast0_1" type="Node3D" parent="UnderTheMountain" unique_id=1375642996]
+[node name="Ballast0_1" type="Node3D" parent="UnderTheMountain" unique_id=550194029]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.420002, -8.63, -17.550001)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast0_2" type="Node3D" parent="UnderTheMountain" unique_id=1435967135]
+[node name="Ballast0_2" type="Node3D" parent="UnderTheMountain" unique_id=2033362756]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.04, -8.63, -17.550001)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast0_3" type="Node3D" parent="UnderTheMountain" unique_id=151421410]
+[node name="Ballast0_3" type="Node3D" parent="UnderTheMountain" unique_id=1536829059]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.800003, -8.63, -16.85)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast0_4" type="Node3D" parent="UnderTheMountain" unique_id=2099294985]
+[node name="Ballast0_4" type="Node3D" parent="UnderTheMountain" unique_id=1003974426]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.420002, -8.63, -16.85)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="BallastTop0" type="Node3D" parent="UnderTheMountain" unique_id=1383192260]
+[node name="BallastTop0" type="Node3D" parent="UnderTheMountain" unique_id=1415561533]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.4, -8.21, -17.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.4, 0.55)
 
-[node name="Ballast1_0" type="Node3D" parent="UnderTheMountain" unique_id=1555518495]
+[node name="Ballast1_0" type="Node3D" parent="UnderTheMountain" unique_id=1345070605]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.4, -26, -15.35)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast1_1" type="Node3D" parent="UnderTheMountain" unique_id=134488434]
+[node name="Ballast1_1" type="Node3D" parent="UnderTheMountain" unique_id=402677698]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.02, -26, -15.35)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast1_2" type="Node3D" parent="UnderTheMountain" unique_id=856188776]
+[node name="Ballast1_2" type="Node3D" parent="UnderTheMountain" unique_id=1507400435]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.64, -26, -15.35)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast1_3" type="Node3D" parent="UnderTheMountain" unique_id=1048871204]
+[node name="Ballast1_3" type="Node3D" parent="UnderTheMountain" unique_id=960795666]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.4, -26, -14.65)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="Ballast1_4" type="Node3D" parent="UnderTheMountain" unique_id=2117000372]
+[node name="Ballast1_4" type="Node3D" parent="UnderTheMountain" unique_id=1797781032]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.02, -26, -14.65)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.42, 0.55)
 
-[node name="BallastTop1" type="Node3D" parent="UnderTheMountain" unique_id=93331752]
+[node name="BallastTop1" type="Node3D" parent="UnderTheMountain" unique_id=449543173]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, -25.58, -15)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.55, 0.4, 0.55)
 
-[node name="TimberStack" type="Node3D" parent="UnderTheMountain" unique_id=1316987614]
+[node name="TimberStack" type="Node3D" parent="UnderTheMountain" unique_id=1684701848]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.6, -26, -25.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(4.2, 1.3, 1.6)
 material = ExtResource("126_aw20t")
 
-[node name="TimberStackTop" type="Node3D" parent="UnderTheMountain" unique_id=1993635780]
+[node name="TimberStackTop" type="Node3D" parent="UnderTheMountain" unique_id=1459008779]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.3, -24.7, -25.4)
 script = ExtResource("125_kcdtl")
 size = Vector3(3.6, 0.5, 1.1)
 material = ExtResource("126_aw20t")
 
-[node name="SpareBlockA" type="Node3D" parent="UnderTheMountain" unique_id=782966122]
+[node name="SpareBlockA" type="Node3D" parent="UnderTheMountain" unique_id=794609863]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.6, -26, -19)
 script = ExtResource("125_kcdtl")
 size = Vector3(1.6, 1.3, 1.6)
 material = ExtResource("22_ielbb")
 
-[node name="SpareBlockB" type="Node3D" parent="UnderTheMountain" unique_id=2005100311]
+[node name="SpareBlockB" type="Node3D" parent="UnderTheMountain" unique_id=438531090]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.8, -26, -16.9)
 script = ExtResource("125_kcdtl")
 size = Vector3(1.4, 1.1, 1.4)
 material = ExtResource("22_ielbb")
 
-[node name="ArmyPits" type="Node3D" parent="UnderTheMountain" unique_id=805871153]
+[node name="ArmyPits" type="Node3D" parent="UnderTheMountain" unique_id=1733673889]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -26, 9)
 script = ExtResource("123_s5as7")
 size = Vector3(40, 7, 42)
 wall_material = ExtResource("22_ielbb")
 floor_material = ExtResource("23_s5as7")
 ceiling_material = ExtResource("126_aw20t")
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_tt78p"), SubResource("Resource_ckcug")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_ptkif"), SubResource("Resource_bjoy1")])
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="RoofBeam0" type="Node3D" parent="UnderTheMountain" unique_id=514866023]
+[node name="RoofBeam0" type="Node3D" parent="UnderTheMountain" unique_id=246085364]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, -10)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam1" type="Node3D" parent="UnderTheMountain" unique_id=1660712525]
+[node name="RoofBeam1" type="Node3D" parent="UnderTheMountain" unique_id=744925343]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, -5.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam2" type="Node3D" parent="UnderTheMountain" unique_id=162585429]
+[node name="RoofBeam2" type="Node3D" parent="UnderTheMountain" unique_id=724997858]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, -1.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam3" type="Node3D" parent="UnderTheMountain" unique_id=2065227567]
+[node name="RoofBeam3" type="Node3D" parent="UnderTheMountain" unique_id=1785055483]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 3.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam4" type="Node3D" parent="UnderTheMountain" unique_id=1153099907]
+[node name="RoofBeam4" type="Node3D" parent="UnderTheMountain" unique_id=1709691571]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 7.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam5" type="Node3D" parent="UnderTheMountain" unique_id=2092979175]
+[node name="RoofBeam5" type="Node3D" parent="UnderTheMountain" unique_id=1153172751]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 12)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam6" type="Node3D" parent="UnderTheMountain" unique_id=1212778223]
+[node name="RoofBeam6" type="Node3D" parent="UnderTheMountain" unique_id=1343593630]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 16.4)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam7" type="Node3D" parent="UnderTheMountain" unique_id=1123474869]
+[node name="RoofBeam7" type="Node3D" parent="UnderTheMountain" unique_id=902297912]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 20.8)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam8" type="Node3D" parent="UnderTheMountain" unique_id=209159789]
+[node name="RoofBeam8" type="Node3D" parent="UnderTheMountain" unique_id=1557127192]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 25.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="RoofBeam9" type="Node3D" parent="UnderTheMountain" unique_id=485900148]
+[node name="RoofBeam9" type="Node3D" parent="UnderTheMountain" unique_id=121923529]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -19.45, 29.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(40, 0.45, 0.5)
 material = ExtResource("126_aw20t")
 
-[node name="TrenchWall0" type="Node3D" parent="UnderTheMountain" unique_id=69761647]
+[node name="TrenchWall0" type="Node3D" parent="UnderTheMountain" unique_id=226640443]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -26, 9)
 script = ExtResource("125_kcdtl")
 size = Vector3(1.4, 3, 30)
@@ -7445,43 +7346,43 @@ block_length = Vector2(2.5, 5)
 stones = false
 top_material = ExtResource("42_mxltb")
 
-[node name="Post0_1" type="Node3D" parent="UnderTheMountain" unique_id=673801521]
+[node name="Post0_1" type="Node3D" parent="UnderTheMountain" unique_id=1781995224]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, -5.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post0_2" type="Node3D" parent="UnderTheMountain" unique_id=355822483]
+[node name="Post0_2" type="Node3D" parent="UnderTheMountain" unique_id=1652290957]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, -1.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post0_3" type="Node3D" parent="UnderTheMountain" unique_id=1655116623]
+[node name="Post0_3" type="Node3D" parent="UnderTheMountain" unique_id=1328665661]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, 3.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post0_4" type="Node3D" parent="UnderTheMountain" unique_id=807600054]
+[node name="Post0_4" type="Node3D" parent="UnderTheMountain" unique_id=274486900]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, 7.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post0_5" type="Node3D" parent="UnderTheMountain" unique_id=878731934]
+[node name="Post0_5" type="Node3D" parent="UnderTheMountain" unique_id=1627079906]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, 12)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post0_6" type="Node3D" parent="UnderTheMountain" unique_id=136106314]
+[node name="Post0_6" type="Node3D" parent="UnderTheMountain" unique_id=73381013]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.2, -23, 16.4)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Ranks0" type="Node3D" parent="UnderTheMountain" unique_id=1972874700]
+[node name="Ranks0" type="Node3D" parent="UnderTheMountain" unique_id=2069163845]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, -26, 9)
 script = ExtResource("128_64a3o")
 rows = 12
@@ -7489,7 +7390,7 @@ spacing = Vector2(1.7, 2.4)
 gaps = PackedVector2Array(1, 2, 0, 7, 2, 5, 1, 10)
 variation_seed = 3
 
-[node name="TrenchWall1" type="Node3D" parent="UnderTheMountain" unique_id=234966901]
+[node name="TrenchWall1" type="Node3D" parent="UnderTheMountain" unique_id=479453798]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -26, 9)
 script = ExtResource("125_kcdtl")
 size = Vector3(1.4, 3, 30)
@@ -7500,43 +7401,43 @@ block_length = Vector2(2.5, 5)
 stones = false
 top_material = ExtResource("42_mxltb")
 
-[node name="Post1_1" type="Node3D" parent="UnderTheMountain" unique_id=414700660]
+[node name="Post1_1" type="Node3D" parent="UnderTheMountain" unique_id=1553970755]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, -5.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post1_2" type="Node3D" parent="UnderTheMountain" unique_id=365008655]
+[node name="Post1_2" type="Node3D" parent="UnderTheMountain" unique_id=1953711586]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, -1.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post1_3" type="Node3D" parent="UnderTheMountain" unique_id=2065032502]
+[node name="Post1_3" type="Node3D" parent="UnderTheMountain" unique_id=1324318960]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, 3.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post1_4" type="Node3D" parent="UnderTheMountain" unique_id=1833847833]
+[node name="Post1_4" type="Node3D" parent="UnderTheMountain" unique_id=1688098942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, 7.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post1_5" type="Node3D" parent="UnderTheMountain" unique_id=1952887762]
+[node name="Post1_5" type="Node3D" parent="UnderTheMountain" unique_id=1077451601]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, 12)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post1_6" type="Node3D" parent="UnderTheMountain" unique_id=1432740475]
+[node name="Post1_6" type="Node3D" parent="UnderTheMountain" unique_id=1050166338]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.6, -23, 16.4)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Ranks1" type="Node3D" parent="UnderTheMountain" unique_id=1923490479]
+[node name="Ranks1" type="Node3D" parent="UnderTheMountain" unique_id=926647083]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.9, -26, 9)
 script = ExtResource("128_64a3o")
 rows = 12
@@ -7544,7 +7445,7 @@ spacing = Vector2(1.7, 2.4)
 gaps = PackedVector2Array(1, 3, 0, 6, 2, 6, 1, 9)
 variation_seed = 4
 
-[node name="TrenchWall2" type="Node3D" parent="UnderTheMountain" unique_id=1821822076]
+[node name="TrenchWall2" type="Node3D" parent="UnderTheMountain" unique_id=707954675]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -26, 9)
 script = ExtResource("125_kcdtl")
 size = Vector3(1.4, 3, 30)
@@ -7555,43 +7456,43 @@ block_length = Vector2(2.5, 5)
 stones = false
 top_material = ExtResource("42_mxltb")
 
-[node name="Post2_1" type="Node3D" parent="UnderTheMountain" unique_id=406336191]
+[node name="Post2_1" type="Node3D" parent="UnderTheMountain" unique_id=174107391]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, -5.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post2_2" type="Node3D" parent="UnderTheMountain" unique_id=180699899]
+[node name="Post2_2" type="Node3D" parent="UnderTheMountain" unique_id=615206697]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, -1.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post2_3" type="Node3D" parent="UnderTheMountain" unique_id=963745865]
+[node name="Post2_3" type="Node3D" parent="UnderTheMountain" unique_id=1547412753]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, 3.2)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post2_4" type="Node3D" parent="UnderTheMountain" unique_id=213344602]
+[node name="Post2_4" type="Node3D" parent="UnderTheMountain" unique_id=1188427128]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, 7.6)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post2_5" type="Node3D" parent="UnderTheMountain" unique_id=1147453207]
+[node name="Post2_5" type="Node3D" parent="UnderTheMountain" unique_id=1670733521]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, 12)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Post2_6" type="Node3D" parent="UnderTheMountain" unique_id=716313381]
+[node name="Post2_6" type="Node3D" parent="UnderTheMountain" unique_id=999733637]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, -23, 16.4)
 script = ExtResource("125_kcdtl")
 size = Vector3(0.4, 3.55, 0.4)
 material = ExtResource("126_aw20t")
 
-[node name="Ranks2" type="Node3D" parent="UnderTheMountain" unique_id=365043720]
+[node name="Ranks2" type="Node3D" parent="UnderTheMountain" unique_id=754332236]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.3, -26, 9)
 script = ExtResource("128_64a3o")
 rows = 12
@@ -7599,7 +7500,7 @@ spacing = Vector2(1.7, 2.4)
 gaps = PackedVector2Array(1, 4, 0, 5, 2, 7, 1, 10)
 variation_seed = 5
 
-[node name="Ranks3" type="Node3D" parent="UnderTheMountain" unique_id=766622215]
+[node name="Ranks3" type="Node3D" parent="UnderTheMountain" unique_id=531734246]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.7, -26, 9)
 script = ExtResource("128_64a3o")
 rows = 12
@@ -7607,37 +7508,37 @@ spacing = Vector2(1.7, 2.4)
 gaps = PackedVector2Array(1, 5, 0, 4, 2, 5, 1, 9)
 variation_seed = 6
 
-[node name="PenLever" type="Marker3D" parent="UnderTheMountain" unique_id=293396363]
+[node name="PenLever" type="Marker3D" parent="UnderTheMountain" unique_id=962939337]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 69.3, -26, 22)
 
-[node name="PenWayOut" type="Node3D" parent="UnderTheMountain" unique_id=1584273468]
+[node name="PenWayOut" type="Node3D" parent="UnderTheMountain" unique_id=1381331647]
 
-[node name="@Marker3D@2617" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=668529292]
+[node name="@Marker3D@2644" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1784457949]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, -26, -8.5)
 
-[node name="@Marker3D@2618" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1774545199]
+[node name="@Marker3D@2645" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=708963301]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.3, -26, -8.5)
 
-[node name="@Marker3D@2619" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=219457431]
+[node name="@Marker3D@2646" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1117298883]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.3, -26, 27)
 
-[node name="@Marker3D@2620" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1125650136]
+[node name="@Marker3D@2647" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1573685346]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, -26, 32)
 
-[node name="@Marker3D@2621" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1626594921]
+[node name="@Marker3D@2648" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=71030641]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, -26, 44.5)
 
-[node name="@Marker3D@2622" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=657662864]
+[node name="@Marker3D@2649" type="Marker3D" parent="UnderTheMountain/PenWayOut" unique_id=1603990225]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, -26, 44.5)
 
-[node name="WorkersPen" type="Node3D" parent="UnderTheMountain" unique_id=2135716752]
+[node name="WorkersPen" type="Node3D" parent="UnderTheMountain" unique_id=966354693]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.25, -26, 5.5)
 script = ExtResource("129_lhc30")
 size = Vector2(4.5, 7)
 lever_path = NodePath("../PenLever")
 flee_path = NodePath("../PenWayOut")
 
-[node name="PitsExitSouth" type="Node3D" parent="UnderTheMountain" unique_id=793836559]
+[node name="PitsExitSouth" type="Node3D" parent="UnderTheMountain" unique_id=48372191]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, -26, 38.5)
 script = ExtResource("123_s5as7")
 size = Vector3(3.5, 3.43, 17)
@@ -7645,11 +7546,11 @@ wall_material = ExtResource("22_ielbb")
 floor_material = ExtResource("23_s5as7")
 ceiling_material = ExtResource("22_ielbb")
 open_faces = 16
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_ojd4u")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_yghf2")])
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="PitsExitWest" type="Node3D" parent="UnderTheMountain" unique_id=135629482]
+[node name="PitsExitWest" type="Node3D" parent="UnderTheMountain" unique_id=870633436]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 21.135, -26, 44.5)
 script = ExtResource("123_s5as7")
 size = Vector3(3.5, 3.43, 20.23)
@@ -7660,18 +7561,18 @@ open_faces = 48
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="StairWell" type="Node3D" parent="UnderTheMountain" unique_id=1409129474]
+[node name="StairWell" type="Node3D" parent="UnderTheMountain" unique_id=1324535570]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.02, -26, 40.3)
 script = ExtResource("123_s5as7")
 size = Vector3(8, 22, 14)
 wall_material = ExtResource("22_ielbb")
 floor_material = ExtResource("23_s5as7")
 ceiling_material = ExtResource("22_ielbb")
-openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_2p3qn"), SubResource("Resource_d2pjw")])
+openings = Array[ExtResource("124_g05mq")]([SubResource("Resource_mk5fp"), SubResource("Resource_y6ncg")])
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="StairDoor" type="Node3D" parent="UnderTheMountain" unique_id=1978688737]
+[node name="StairDoor" type="Node3D" parent="UnderTheMountain" unique_id=1763837021]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.42, -8.54, 35)
 script = ExtResource("123_s5as7")
 size = Vector3(2, 3.25, 1.2)
@@ -7682,7 +7583,7 @@ open_faces = 48
 masonry = true
 floor_variants = Array[Material]([ExtResource("24_g05mq"), ExtResource("25_1u3h2")])
 
-[node name="StairCore" type="Node3D" parent="UnderTheMountain" unique_id=1415948207]
+[node name="StairCore" type="Node3D" parent="UnderTheMountain" unique_id=734702187]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.02, -26, 40.3)
 script = ExtResource("125_kcdtl")
 size = Vector3(1, 18.46, 7.9)
@@ -7690,7 +7591,7 @@ material = ExtResource("22_ielbb")
 masonry = true
 top_material = ExtResource("23_s5as7")
 
-[node name="Flight1" type="Node3D" parent="UnderTheMountain" unique_id=984436819]
+[node name="Flight1" type="Node3D" parent="UnderTheMountain" unique_id=62721694]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.77, -26, 44.25)
 script = ExtResource("130_oxgd7")
 width = 3.4
@@ -7700,7 +7601,7 @@ steps = 14
 material = ExtResource("24_g05mq")
 masonry = true
 
-[node name="Flight2" type="Node3D" parent="UnderTheMountain" unique_id=1804189123]
+[node name="Flight2" type="Node3D" parent="UnderTheMountain" unique_id=738655622]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 9.27, -20.18, 36.35)
 script = ExtResource("130_oxgd7")
 width = 3.4
@@ -7710,7 +7611,7 @@ steps = 14
 material = ExtResource("24_g05mq")
 masonry = true
 
-[node name="Flight3" type="Node3D" parent="UnderTheMountain" unique_id=850328293]
+[node name="Flight3" type="Node3D" parent="UnderTheMountain" unique_id=656402471]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.77, -14.36, 44.25)
 script = ExtResource("130_oxgd7")
 width = 3.4
@@ -7720,7 +7621,7 @@ steps = 14
 material = ExtResource("24_g05mq")
 masonry = true
 
-[node name="LandingA" type="Node3D" parent="UnderTheMountain" unique_id=1188304272]
+[node name="LandingA" type="Node3D" parent="UnderTheMountain" unique_id=1214669600]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.02, -20.68, 34.825)
 script = ExtResource("125_kcdtl")
 size = Vector3(8, 0.5, 3.05)
@@ -7729,7 +7630,7 @@ masonry = true
 dressed_sides = 2
 top_material = ExtResource("23_s5as7")
 
-[node name="LandingB" type="Node3D" parent="UnderTheMountain" unique_id=1676478227]
+[node name="LandingB" type="Node3D" parent="UnderTheMountain" unique_id=1158653613]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.02, -14.86, 45.775)
 script = ExtResource("125_kcdtl")
 size = Vector3(8, 0.5, 3.05)
@@ -7738,7 +7639,7 @@ masonry = true
 dressed_sides = 1
 top_material = ExtResource("23_s5as7")
 
-[node name="LandingC" type="Node3D" parent="UnderTheMountain" unique_id=1837988106]
+[node name="LandingC" type="Node3D" parent="UnderTheMountain" unique_id=1626370400]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.02, -9.04, 34.825)
 script = ExtResource("125_kcdtl")
 size = Vector3(8, 0.5, 3.05)
@@ -7747,13 +7648,13 @@ masonry = true
 dressed_sides = 2
 top_material = ExtResource("23_s5as7")
 
-[node name="LandingCRail" type="Node3D" parent="UnderTheMountain" unique_id=1369276110]
+[node name="LandingCRail" type="Node3D" parent="UnderTheMountain" unique_id=1771502413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.27, -8.54, 36.225)
 script = ExtResource("125_kcdtl")
 size = Vector3(3.5, 1.1, 0.25)
 material = ExtResource("126_aw20t")
 
-[node name="PitsEnter" type="Area3D" parent="UnderTheMountain" unique_id=14808762]
+[node name="PitsEnter" type="Area3D" parent="UnderTheMountain" unique_id=15715894]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, -26, 9)
 collision_layer = 0
 collision_mask = 2
@@ -7761,66 +7662,95 @@ monitorable = false
 script = ExtResource("75_th3aq")
 quest_from = &"talk_liang"
 dialogue = &"pits_enter"
+checkpoint = true
 
-[node name="@CollisionShape3D@2758" type="CollisionShape3D" parent="UnderTheMountain/PitsEnter" unique_id=1104206438]
+[node name="@CollisionShape3D@2785" type="CollisionShape3D" parent="UnderTheMountain/PitsEnter" unique_id=1611346143]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -19)
-shape = SubResource("BoxShape3D_ptkif")
+shape = SubResource("BoxShape3D_i376l")
 
-[node name="@CollisionShape3D@2759" type="CollisionShape3D" parent="UnderTheMountain/PitsEnter" unique_id=473581552]
+[node name="@CollisionShape3D@2786" type="CollisionShape3D" parent="UnderTheMountain/PitsEnter" unique_id=224517296]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2, 19)
-shape = SubResource("BoxShape3D_bjoy1")
+shape = SubResource("BoxShape3D_wu2k1")
 
-[node name="WallLamp" parent="UnderTheMountain" unique_id=417541238 instance=ExtResource("99_pk17x")]
+[node name="WallLamp" parent="UnderTheMountain" unique_id=1252720129 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 36.4, -6.23, -24.5)
 
-[node name="@Node3D@2760" parent="UnderTheMountain" unique_id=1481476834 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2787" parent="UnderTheMountain" unique_id=2097637475 instance=ExtResource("99_pk17x")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, -23.4, -14.4)
 start_lit = false
 
-[node name="@Node3D@2761" parent="UnderTheMountain" unique_id=933087569 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2788" parent="UnderTheMountain" unique_id=1579749888 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 36, -23.4, -11.6)
 
-[node name="@Node3D@2762" parent="UnderTheMountain" unique_id=1826756368 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2789" parent="UnderTheMountain" unique_id=1170178511 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 30.4, -23.4, 2)
 
-[node name="@Node3D@2763" parent="UnderTheMountain" unique_id=1559732627 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2790" parent="UnderTheMountain" unique_id=1517841956 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 30.4, -23.4, 20)
 
-[node name="@Node3D@2764" parent="UnderTheMountain" unique_id=167965179 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2791" parent="UnderTheMountain" unique_id=761149927 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 69.6, -23.4, 18.5)
 
-[node name="@Node3D@2765" parent="UnderTheMountain" unique_id=767075449 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2792" parent="UnderTheMountain" unique_id=1643328966 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 34.35, -23.6, 40)
 
-[node name="@Node3D@2766" parent="UnderTheMountain" unique_id=1150861218 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2793" parent="UnderTheMountain" unique_id=1875551930 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.62, -17.98, 34.5)
 
-[node name="@Node3D@2767" parent="UnderTheMountain" unique_id=1176067796 instance=ExtResource("99_pk17x")]
+[node name="@Node3D@2794" parent="UnderTheMountain" unique_id=1033103113 instance=ExtResource("99_pk17x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.42, -12.16, 45.5)
 
-[node name="WorkshopCeiling" type="Node3D" parent="." unique_id=1060783048]
+[node name="TunnelFalls" type="Node3D" parent="." unique_id=136492186]
+
+[node name="WestBranch" type="Node3D" parent="TunnelFalls" unique_id=1782312508]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 22, -8.58, -33.95)
+script = ExtResource("133_lhc30")
+size = Vector3(3.9, 3.63, 2.5)
+spill = 2.6
+pattern_seed = 31
+
+[node name="PastTheShaft" type="Node3D" parent="TunnelFalls" unique_id=179153236]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.55, -8.63, -12)
+script = ExtResource("133_lhc30")
+size = Vector3(3.5, 3.43, 2.5)
+pattern_seed = 32
+
+[node name="SouthRun" type="Node3D" parent="TunnelFalls" unique_id=1147768419]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.5, -8.63, 30.15)
+script = ExtResource("133_lhc30")
+size = Vector3(3.9, 3.43, 2.5)
+spill = 2.6
+pattern_seed = 33
+
+[node name="WorkshopCeiling" type="Node3D" parent="." unique_id=1923071134]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -87, 6.391452, -45)
 script = ExtResource("131_t2d0y")
 cells = Vector2i(74, 55)
 cover = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAAEBAAEBAAEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQAAAAAAAAEBAQEBAQEBAAEBAQEAAQEAAQEAAQEBAQABAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQABAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAAEBAAEBAAEBAAEBAQEAAQEAAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQABAQEBAQABAQEBAQEBAAEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAAABAQEBAAEBAQABAQAAAQEBAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 
-[node name="HallwayCeiling" type="Node3D" parent="." unique_id=1316624266]
+[node name="HallwayCeiling" type="Node3D" parent="." unique_id=2136378089]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 6.3271985, 1)
 script = ExtResource("131_t2d0y")
 cells = Vector2i(146, 31)
 cover = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAABAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 
-[node name="SecondWorkshopCeiling" type="Node3D" parent="." unique_id=1008994179]
+[node name="SecondWorkshopCeiling" type="Node3D" parent="." unique_id=1254879956]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6.4268003, -62)
 script = ExtResource("131_t2d0y")
 cells = Vector2i(32, 72)
 cover = PackedByteArray("AAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAABAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEAAAAAAAAAAAAAAAAA")
 
-[node name="ArchivesCeiling" type="Node3D" parent="." unique_id=1579839225]
+[node name="ArchivesCeiling" type="Node3D" parent="." unique_id=473697724]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 11.6376295, -67)
 script = ExtResource("131_t2d0y")
 cells = Vector2i(42, 70)
 cover = PackedByteArray("AAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+[node name="CorridorShards" parent="." unique_id=2094318766 instance=ExtResource("8_ugvnn")]
+transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, -60.6, 0.21425475, 7)
+item_id = &"ceramic"
+count = 3
+metadata/usables = []
 
 [editable path="MapWithoutTreasure"]
 [editable path="MapWithoutTreasure/tripo_node_738d7477-4130-4789-b50a-1568b58469f2_003/FurnaceFire"]

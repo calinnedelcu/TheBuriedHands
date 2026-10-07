@@ -93,9 +93,9 @@ OBJ_APPLY_SLIP,Bind the soldier's legs with slip.,Leagă picioarele soldatului c
 OBJ_FIND_CHISEL,Find the chisel that fell under the workbench.,Găsește dalta căzută sub masa de lucru.
 OBJ_FINISH_STATUE,Set the joint with the chisel.,Fixează îmbinarea cu dalta.
 OBJ_ANSWER_APPRENTICE,Speak to your apprentice.,Vorbește cu ucenicul.
-OBJ_FIND_LIANG,Slip through the archives to Liang's workshop.,Strecoară-te prin arhive până la atelierul lui Liang.
+OBJ_FIND_LIANG,Cross the great corridor and slip through the archives to Liang's workshop.,Traversează marele coridor și strecoară-te prin arhive până la atelierul lui Liang.
 OBJ_TALK_LIANG,Talk to Liang.,Vorbește cu Liang.
-OBJ_REACH_MECHANISM,"Reach the mechanism chamber — through the service tunnels, or the crossbow corridor.",Ajunge în camera mecanismelor — prin tunelurile de serviciu sau pe coridorul arbaletelor.
+OBJ_REACH_MECHANISM,Reach the mechanism chamber: down the workers' shaft and across the army pits.,Ajunge în camera mecanismelor: pe puțul lucrătorilor în jos și prin gropile armatei.
 OBJ_INSPECT_BALANCE,Examine the great counterweight.,Cercetează marea contragreutate.
 OBJ_GET_VASE,Take the clay jar and the cloth.,Ia ulciorul de lut și cârpa.
 OBJ_FILL_VASE,Fill the jar with mercury in the Mercury Hall.,Umple ulciorul cu mercur în Sala Mercurului.
@@ -111,6 +111,7 @@ HINT_CROUCH,{crouch} crouch  ·  {crawl} crawl,{crouch} ghemuit  ·  {crawl} tâ
 HINT_HIDE,{crouch} crouch out of sight,"{crouch} ghemuiește-te, să nu te vadă"
 HINT_STEALTH,Light gives you away. Snuff your lamp with {toggle_lamp} and keep to the shadows.,Lumina te trădează. Stinge-ți lampa cu {toggle_lamp} și ține-te în umbră.
 HINT_THROW,{throw} throw the selected item to distract,{throw} aruncă obiectul selectat ca să distragi
+HINT_PLATES,{throw} throw the selected item: a shard on a plate makes its crossbow shoot at nothing,{throw} aruncă obiectul selectat: un ciob pe o placă face arbaleta să tragă în gol
 HINT_BREATH,Hold {hold_breath} to hold your breath in the fumes,Ține {hold_breath} ca să-ți ții respirația în vapori
 HINT_REFILL,Hold {interact} at a wall lamp to refill your oil,Ține {interact} la o lampă de perete ca să-ți reumpli uleiul
 HINT_CRAWL,{crawl} crawl  ·  {interact} push forward,{crawl} târâș  ·  {interact} împinge-te înainte
@@ -224,13 +225,16 @@ DLG_LIANG_6,A counterweight there raises the causeway to the treasury. It needs 
 DLG_LIANG_7,South of the treasury runs a drainage channel. Narrow — but it comes out in the forest.,La sud de tezaur e un canal de drenaj. Îngust — dar iese în pădure.
 DLG_LIANG_8,Come with me.,Vino cu mine.
 DLG_LIANG_9,On these knees? I'd bury us both. A stone blocks the shaft — split it with a wedge and a mallet.,Cu genunchii ăștia? Ne-aș îngropa pe amândoi. O piatră blochează puțul — despic-o cu pana și ciocanul.
-DLG_LIANG_10,Or chance the great corridor. But I armed those crossbows myself. They don't forgive.,Sau încearcă marele coridor. Dar arbaletele alea le-am armat eu. Nu iartă.
+DLG_LIANG_10,But the tunnel fell in when the gate shut. I felt it through the floor.,Dar tunelul s-a surpat când s-a închis poarta. L-am simțit prin podea.
+DLG_LIANG_ROUTE,"Go down the workers' shaft instead, east off the tunnel, to the army pits. From there, their stairs climb back up to the mechanism.","Coboară în schimb pe puțul lucrătorilor, la est de tunel, până în gropile armatei. De acolo, scara lor urcă înapoi la mecanism."
 DLG_LIANG_11,And beware the Mercury Hall. The air there kills slowly.,Și ferește-te de Sala Mercurului. Aerul de acolo omoară încet.
 DLG_LIANG_12,"Thank you, old friend.","Mulțumesc, prietene."
 DLG_LIANG_13,Get out. And tell them who built this place.,Ieși de aici. Și spune-le cine a construit locul ăsta.
 DLG_STONE_BROKEN,The way is open.,Drumul e liber.
 DLG_TUNNELS_ENTER,The service tunnels. Guards never come down here... and neither does light.,Tunelurile de serviciu. Gărzile nu coboară niciodată aici... și nici lumina.
-DLG_CORRIDOR_ENTER,Pressure plates — I know this work. Spot them in time and I can step around them. Or jam them.,"Plăci de presiune — știu lucrătura asta. Dacă le văd la timp, le pot ocoli. Sau le pot bloca."
+DLG_TUNNEL_FALLEN,"Fallen in, as Liang said. Only the workers' shaft is left.","Surpat, cum zicea Liang. A rămas doar puțul lucrătorilor."
+DLG_CORRIDOR_ENTER,Pressure plates — I know this work. Spot them in time and I can step around them. Or throw a shard and let them waste their shot.,"Plăci de presiune — știu lucrătura asta. Dacă le văd la timp, le pot ocoli. Sau arunc un ciob și le las să tragă degeaba."
+DLG_BARRED_DOOR,Nailed shut. The Mercury Hall is on the other side.,Bătută în cuie. Dincolo e Sala Mercurului.
 DLG_MECH_ENTER,Liang's counterweight. A clay jar... and a cloth. For the air.,Contragreutatea lui Liang. Un ulcior de lut... și o cârpă. Pentru aer.
 DLG_BALANCE_1,Something heavy...,Ceva greu...
 DLG_BALANCE_2,Mercury. Nothing under heaven is heavier than mercury.,Mercur. Nimic de sub cer nu e mai greu decât mercurul.
@@ -366,13 +370,13 @@ PROMPT_PEN_LEVER,Raise the pen's gate,Ridică poarta țarcului
 HINT_RANKS,"Among the clay soldiers, stand still with no flame: to a guard you are one more statue.","Printre soldații de lut, stai nemișcat și fără flacără: pentru un paznic ești încă o statuie."
 DLG_LIANG_PITS_1,"One more thing. Wei, the overseer, sends his men through the workshops with a list. Whoever they find goes down to the army pits, penned beside the clay soldiers, to be sealed in with them.","Încă ceva. Wei, supraveghetorul, își trimite oamenii prin ateliere cu o listă. Pe cine găsesc îl coboară în gropile armatei, într-un țarc lângă soldații de lut, să fie zidit odată cu ei."
 DLG_LIANG_PITS_2,My apprentice. I left him hiding in the cold kiln.,Ucenicul meu. L-am lăsat ascuns în cuptorul rece.
-DLG_LIANG_PITS_3,"Then he's in the pits by now. The workers' shaft opens off the service tunnel, to the east. Its lift runs on a counterweight: one man alone is too light to go down. Load it with stones.","Atunci e deja în gropi. Puțul lucrătorilor se deschide din tunelul de serviciu, spre est. Liftul lui merge pe contragreutate: un om singur e prea ușor ca să coboare. Încarcă-l cu pietre."
-DLG_LIANG_PITS_COOP,"If the tunnels are watched, take the workers' shaft, east off the service tunnel. Its lift runs on a counterweight: one man is too light for it, two will do.","Dacă tunelurile sunt păzite, luați puțul lucrătorilor, spre est din tunelul de serviciu. Liftul merge pe contragreutate: un om e prea ușor pentru el, doi ajung."
+DLG_LIANG_PITS_3,"Then he's in the pits by now, on your way. The lift runs on a counterweight: one man alone is too light to go down. Load it with stones.","Atunci e deja în gropi, chiar în drumul tău. Liftul merge pe contragreutate: un om singur e prea ușor ca să coboare. Încarcă-l cu pietre."
+DLG_LIANG_PITS_COOP,The lift runs on a counterweight: one man is too light for it. The two of you will do.,Liftul merge pe contragreutate: un om singur e prea ușor pentru el. Voi doi ajungeți.
 DLG_PITS_ENTER_1,"The Emperor's army. Thousands of them, and not two faces alike.","Armata Împăratului. Mii de soldați, și nici două chipuri la fel."
 DLG_PITS_ENTER_2,Wei's men keep the ones they catch somewhere down here.,"Oamenii lui Wei îi țin pe cei prinși undeva aici, jos."
 DLG_FREED_1,Master! I knew you'd come...,Maestre! Știam că o să veniți...
 DLG_FREED_2,"Run with the others. Keep to the dark, I'll find you outside.","Fugi cu ceilalți. Ține-te în întuneric, te găsesc afară."
-OBJ_REACH_MECHANISM_SOLO,"Reach the mechanism chamber: through the tunnels or the crossbow corridor. Your apprentice is in the army pits, down the workers' shaft.","Ajunge în camera mecanismelor: prin tunele sau pe coridorul arbaletelor. Ucenicul tău e în gropile armatei, la capătul puțului lucrătorilor."
+OBJ_REACH_MECHANISM_SOLO,"Reach the mechanism chamber: down the workers' shaft and across the army pits, where your apprentice is held.","Ajunge în camera mecanismelor: pe puțul lucrătorilor în jos și prin gropile armatei, unde e ținut ucenicul tău."
 END_APPRENTICE_LAMP,He still had your lamp.,Încă avea lampa ta.
 SPK_WEI,Overseer Wei,Supraveghetorul Wei
 DLG_TAKEN_1,Lamps. Someone's coming. Down.,Lămpi. Vine cineva. Jos.

@@ -13,6 +13,10 @@ signal triggered
 @export var sets_flag: StringName = &""
 ## Opens this chapter (its title card) when fired; 0 = none.
 @export var chapter := 0
+## A hint (a string key) shown once as a note on screen, if hints are on.
+@export var hint := ""
+## Saves a checkpoint where it fires (mid-step: the start of a hard stretch).
+@export var checkpoint := false
 @export var once := true
 
 var fired := false
@@ -41,6 +45,13 @@ func net_fire() -> void:
 	if chapter > 0:
 		Game.start_chapter(chapter)
 	Story.fire(completes_step, dialogue, sets_flag)
+	if hint != "" and Settings.get_value(&"show_hints"):
+		var player := get_tree().get_first_node_in_group(&"player") as Player
+		var hud := player.get_node_or_null("HUD") if player != null else null
+		if hud != null and hud.has_method(&"toast"):
+			hud.call(&"toast", InputHint.format(tr(hint)))
+	if checkpoint:
+		Game.request_checkpoint(Quest.current())
 
 func persist_save() -> Dictionary:
 	return {"fired": fired}

@@ -19,7 +19,7 @@ const STEPS := [
 	# Act II — the archives
 	{"id": &"find_liang", "text": "OBJ_FIND_LIANG", "hint": "HINT_STEALTH", "checkpoint": true},
 	{"id": &"talk_liang", "text": "OBJ_TALK_LIANG", "checkpoint": true},
-	# Act III — tunnels or corridor
+	# Act III — under the mountain: the workers' shaft and the army pits
 	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "solo_text": "OBJ_REACH_MECHANISM_SOLO", "checkpoint": true},
 	# Act IV — the counterweight
 	{"id": &"inspect_balance", "text": "OBJ_INSPECT_BALANCE", "checkpoint": true},

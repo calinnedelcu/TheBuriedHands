@@ -93,6 +93,14 @@ const SEQUENCES := {
 		[&"craftsman", "DLG_TOGETHER_2"],
 	],
 	# --- Act II: the archives and Liang ---------------------------------------
+	# Out of the workshop into the great corridor and its traps; at its west
+	# end, the door to the Mercury Hall, nailed shut.
+	&"corridor_enter": [
+		[&"craftsman", "DLG_CORRIDOR_ENTER"],
+	],
+	&"barred_door": [
+		[&"craftsman", "DLG_BARRED_DOOR"],
+	],
 	&"archives_enter": [
 		[&"craftsman", "DLG_ARCHIVES_ENTER"],
 	],
@@ -110,11 +118,14 @@ const SEQUENCES := {
 		[&"liang", "DLG_LIANG_7", {"anim": &"talk"}],
 		[&"craftsman", "DLG_LIANG_8"],
 		[&"liang", "DLG_LIANG_9", {"anim": &"frustrated"}],
+		# The tunnel to the mechanism came down with the gate: the way on is
+		# the workers' shaft, through the army pits.
 		[&"liang", "DLG_LIANG_10", {"anim": &"talk"}],
+		[&"liang", "DLG_LIANG_ROUTE", {"anim": &"talk"}],
 		[&"liang", "DLG_LIANG_11", {"anim": &"talk"}],
 		# Alone, the craftsman tells what he saw (or learns) of his apprentice
 		# and where Wei's men took him; together, the two of them hear of the
-		# way down that needs both their weights.
+		# lift that needs both their weights.
 		[&"craftsman", "DLG_LIANG_TAKEN_1", {"only": &"solo", "if": &"saw_apprentice_taken"}],
 		[&"liang", "DLG_LIANG_TAKEN_2", {"anim": &"talk", "only": &"solo", "if": &"saw_apprentice_taken"}],
 		[&"liang", "DLG_LIANG_PITS_1", {"anim": &"talk", "only": &"solo", "unless": &"saw_apprentice_taken"}],
@@ -124,15 +135,15 @@ const SEQUENCES := {
 		[&"craftsman", "DLG_LIANG_12"],
 		[&"liang", "DLG_LIANG_13", {"anim": &"sit"}],
 	],
-	# --- Act III: the two routes ----------------------------------------------
+	# --- Act III: under the mountain ------------------------------------------
 	&"stone_broken": [
 		[&"craftsman", "DLG_STONE_BROKEN"],
 	],
 	&"tunnels_enter": [
 		[&"craftsman", "DLG_TUNNELS_ENTER"],
 	],
-	&"corridor_enter": [
-		[&"craftsman", "DLG_CORRIDOR_ENTER"],
+	&"tunnel_fallen": [
+		[&"craftsman", "DLG_TUNNEL_FALLEN"],
 	],
 	&"pits_enter": [
 		[&"craftsman", "DLG_PITS_ENTER_1"],
