@@ -16,7 +16,9 @@ func _hook() -> void:
 	if not player.is_node_ready():
 		await player.ready
 	player.inventory.changed.connect(_check.bind(player))
-	Quest.step_changed.connect(func(_s): _check(player))
+	# Deferred: completing the step from inside the step change would let the
+	# outer change announce its (stale) objective after the new one.
+	Quest.step_changed.connect(func(_s): _check.call_deferred(player))
 
 func _check(player: Player) -> void:
 	if not Quest.is_at(step):

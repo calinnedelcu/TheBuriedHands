@@ -46,6 +46,7 @@ func _run() -> void:
 	_liang_seated()
 	_the_coffin()
 	_one_crossbow_per_trap()
+	_jar_and_cloth_any_time()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -921,3 +922,15 @@ func _one_crossbow_per_trap() -> void:
 		if mi != null:
 			mi.visible = false
 	_log.append("corridor: the jam's decorative crossbows hidden")
+
+## The jar and the cloth could only be taken after examining the
+## counterweight upstairs, and looking at them before that showed nothing:
+## players stood over the cloth not knowing why. They can be taken as soon
+## as you're in the mechanism room (RequireItems still moves the story on
+## once you have examined the counterweight and carry both).
+func _jar_and_cloth_any_time() -> void:
+	for n in ["Mechanism/Jar", "Mechanism/Cloth"]:
+		var p := root.get_node_or_null(n) as Pickup
+		if p != null:
+			p.quest_from = &"reach_mechanism"
+	_log.append("mechanism: jar and cloth can be taken any time")

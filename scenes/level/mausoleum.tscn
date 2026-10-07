@@ -5888,13 +5888,13 @@ transform = Transform3D(2.6177912e-07, 1.6011098e-08, -2, -0.20756504, 3.3936582
 [node name="Jar" parent="Mechanism" unique_id=1756571558 instance=ExtResource("8_ugvnn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4679177, 7.961558, 46.49567)
 item_id = &"vase"
-quest_from = &"get_vase"
+quest_from = &"reach_mechanism"
 metadata/usables = []
 
 [node name="Cloth" parent="Mechanism" unique_id=2109807197 instance=ExtResource("8_ugvnn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.728448, 7.491364, 48.622326)
 item_id = &"cloth"
-quest_from = &"get_vase"
+quest_from = &"reach_mechanism"
 metadata/usables = []
 
 [node name="Counterweight" parent="Mechanism" unique_id=715278369 instance=ExtResource("95_fn86e")]
