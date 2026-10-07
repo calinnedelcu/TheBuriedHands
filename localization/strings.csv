@@ -309,3 +309,36 @@ LOAD_TIP_2,"Crouched, you make little noise. Running, you can be heard from far 
 LOAD_TIP_3,"A guard who loses sight of you goes to where he saw you last, and searches.",O gardă care te pierde din ochi merge unde te-a văzut ultima oară și caută.
 LOAD_TIP_4,Hold {hold_breath} to hold your breath in the fumes. A cloth over your face helps.,Ține {hold_breath} ca să-ți ții respirația în vapori. O cârpă la gură ajută.
 LOAD_TIP_5,"Thrown, a shard of pottery draws the guards away from you.","Aruncat, un ciob îi atrage pe gardieni departe de tine."
+MENU_COOP,Together (online),Împreună (online)
+COOP_TITLE,Together,Împreună
+COOP_INTRO,"Two can go down into the tomb. Whoever hosts plays the master craftsman; whoever joins plays his apprentice — a head shorter, quicker, quieter. You will need each other.","În mormânt pot coborî doi. Cine găzduiește îl joacă pe meșter; cine se alătură, pe ucenicul lui — mai scund, mai iute, mai tăcut. O să aveți nevoie unul de altul."
+COOP_HOST,Host — play the Master,Găzduiește — joacă Meșterul
+COOP_JOIN,Join — play the Apprentice,Alătură-te — joacă Ucenicul
+COOP_ADDRESS,The master's address,Adresa meșterului
+COOP_BEGIN,Go down together,Coborâți împreună
+COOP_NOTE,"On the same network, join the address the host shows. Over the internet, the host opens UDP port 7735 on their router — or you both join the same Tailscale or ZeroTier network.","În aceeași rețea, conectează-te la adresa afișată de gazdă. Pe internet, gazda deschide portul UDP 7735 în router — sau intrați amândoi în aceeași rețea Tailscale ori ZeroTier."
+COOP_WAITING,Waiting for your apprentice… Your address: %s (UDP port %d).,Se așteaptă ucenicul… Adresa ta: %s (port UDP %d).
+COOP_CONNECTING,Knocking at %s…,Se bate la ușa lui %s…
+COOP_PARTNER_IN,Your apprentice is here.,Ucenicul tău a sosit.
+COOP_JOINED,You're at your master's side. Wait for them to lead the way down.,Ești lângă meșterul tău. Așteaptă să coborâți.
+COOP_JOIN_FAILED,Couldn't reach %s.,Nu s-a putut ajunge la %s.
+COOP_HOST_FAILED,Couldn't open port %d — is the game already hosting?,Portul %d nu s-a putut deschide — găzduiește deja jocul?
+COOP_VERSION,Your games are different versions.,Aveți versiuni diferite ale jocului.
+COOP_PARTNER_LEFT,Your partner left the tomb.,Tovarășul tău a părăsit mormântul.
+COOP_LOST_HOST,The master's game is gone.,Jocul meșterului s-a închis.
+COOP_MASTER,The Master,Meșterul
+COOP_APPRENTICE,The Apprentice,Ucenicul
+COOP_WAIT_HOST_RETRY,The master decides when you both go back…,Meșterul hotărăște când vă întoarceți…
+COOP_WAIT_PARTNER,Waiting for your partner…,Se așteaptă tovarășul…
+PROMPT_GIVE_ITEM,Hand over: {item},Dă-i: {item}
+PROMPT_GIVE_LAMP,Hand over the lamp,Dă-i lampa
+HINT_PING,{ping} or the middle mouse button: point something out to your partner.,{ping} sau butonul din mijloc al mouse-ului: arată-i ceva tovarășului.
+OBJ_TALK_APPRENTICE_APP,Talk to your master.,Vorbește cu meșterul.
+OBJ_ANSWER_APPRENTICE_APP,Stay by your master.,Rămâi lângă meșter.
+DLG_TOGETHER_1,Master... they're walling us in. What do we do?,Maestre... ne zidesc de vii. Ce facem?
+DLG_TOGETHER_2,Liang knows this tomb better than anyone. We find him. Stay close to my light.,Liang cunoaște mormântul ăsta mai bine ca oricine. Îl găsim. Stai aproape de lumina mea.
+END_TOGETHER,"Two came out of the mountain that morning: a craftsman and his apprentice, blinking at the sun. Neither would have seen it alone.","Doi au ieșit din munte în dimineața aceea: un meșter și ucenicul lui, mijind ochii în soare. Niciunul n-ar fi văzut-o singur."
+PROMPT_REVIVE,Help up,Ridică-l
+COOP_DOWNED,You're down. Your partner can still help you up ( %d ),Ai căzut. Tovarășul te mai poate ridica ( %d )
+COOP_PARTNER_DOWN,%s is down! Hold {interact} on him to help him up.,%s a căzut! Ține {interact} apăsat pe el ca să-l ridici.
+COOP_WAIT_AT_EXIT,"Not without your partner. Wait for them here, in the light.","Nu fără tovarășul tău. Așteaptă-l aici, în lumină."

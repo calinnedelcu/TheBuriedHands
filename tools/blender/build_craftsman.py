@@ -6,6 +6,8 @@
 #   sculpt   - standing at a clay figure: the left hand steadies it, the
 #              right scrapes and shapes with the tool
 #   knead    - leaning over a table, pressing clay with both hands
+#   crouch_idle, crouch_walk, crawl_idle, crawl - the master as his co-op
+#              partner sees him low to the ground (locomotion.py)
 #
 #   blender -b --python tools/blender/build_craftsman.py
 
@@ -15,6 +17,7 @@ from mathutils import Vector, Matrix
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from rig_tools import Rig, rot_from, rot_world, material
+from locomotion import Locomotion
 
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SRC = os.path.join(ROOT, "TripoModels", "mester-mestesugar-real.glb")
@@ -146,6 +149,8 @@ def knead():
 made = [bpy.data.actions[n] for n in ("idle", "walk", "work_seated", "kneel", "collapse")]
 made.append(sculpt())
 made.append(knead())
+# The player's own scale and speeds (Scripts/player/player.gd).
+made += Locomotion(rig, 3.1, 1.8, 0.95).build()
 os.makedirs(os.path.dirname(DST), exist_ok=True)
 rig.export(DST, made)
 print("built", DST, "with", sorted(a.name for a in made))

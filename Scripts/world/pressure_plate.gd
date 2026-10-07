@@ -31,11 +31,18 @@ func _ready() -> void:
 	_wedge.visible = jammed
 
 func _on_body_entered(body: Node3D) -> void:
-	if jammed or _pressed:
+	# Co-op: the host feels the weight; the apprentice's machine is told.
+	if jammed or _pressed or Net.is_client():
 		return
 	if body is RigidBody3D and (body as RigidBody3D).mass < min_mass:
 		return
 	if not (body is Player or body is RigidBody3D):
+		return
+	Net.mirror(self, &"net_press")
+	net_press()
+
+func net_press() -> void:
+	if _pressed:
 		return
 	_pressed = true
 	var tween := create_tween()
@@ -48,9 +55,15 @@ func _on_body_entered(body: Node3D) -> void:
 			cb.call(&"fire")
 
 func _on_body_exited(_body: Node3D) -> void:
+	if Net.is_client():
+		return
 	if _area.get_overlapping_bodies().is_empty():
-		_pressed = false
-		create_tween().tween_property(_plate, "position:y", _rest_y, 0.3)
+		Net.mirror(self, &"net_release")
+		net_release()
+
+func net_release() -> void:
+	_pressed = false
+	create_tween().tween_property(_plate, "position:y", _rest_y, 0.3)
 
 # --- Usable delegate: jam it --------------------------------------------------------
 

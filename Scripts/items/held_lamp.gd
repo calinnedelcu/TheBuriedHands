@@ -51,7 +51,15 @@ func _ready() -> void:
 	_noise.seed = randi()
 	_noise.frequency = 0.6
 	_flame_scale = _flame.scale
-	var cam := get_viewport().get_camera_3d()
+	# Co-op: the partner's lamp, seen in their hand, lights from where it is.
+	var holder := _holder as Player
+	var cam: Camera3D = null
+	if holder == null:
+		cam = get_viewport().get_camera_3d()
+	elif holder.is_local:
+		cam = holder.camera
+	else:
+		_hand_light.visible = false
 	if cam != null:
 		_anchor = Node3D.new()
 		_anchor.name = "LampLightAnchor"
@@ -126,6 +134,10 @@ func _process(delta: float) -> void:
 		_anchor.position = light_anchor_offset + Vector3.UP * raised_anchor_lift * _raise_blend
 	if not is_lit:
 		return
+	# The partner's lamp burns on their machine; this copy only shows it.
+	if not _is_own():
+		_apply_flicker()
+		return
 	var drain := base_drain * _movement_multiplier() * lerpf(1.0, raised_drain_boost, _raise_blend)
 	oil = maxf(0.0, oil - drain * delta)
 	oil_changed.emit(oil, max_oil)
@@ -133,6 +145,9 @@ func _process(delta: float) -> void:
 		snuff()
 		return
 	_apply_flicker()
+
+func _is_own() -> bool:
+	return not (_holder is Player) or (_holder as Player).is_local
 
 func _movement_multiplier() -> float:
 	if _holder == null or not (_holder is Player):
@@ -167,7 +182,7 @@ func _apply_flicker() -> void:
 	_flame.scale = _flame_scale * Vector3(1.0, s, 1.0) * lerpf(0.5, 1.0, low)
 
 func _refresh_visibility() -> void:
-	_hand_light.visible = is_lit
+	_hand_light.visible = is_lit and _is_own()
 	_light.visible = is_lit
 	_spot.visible = is_lit
 	_flame.visible = is_lit

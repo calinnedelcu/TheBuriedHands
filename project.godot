@@ -23,6 +23,7 @@ buses/default_bus_layout="res://audio/default_bus_layout.tres"
 [autoload]
 
 Settings="*res://Scripts/core/settings.gd"
+Net="*res://Scripts/core/net.gd"
 Sfx="*res://Scripts/core/sfx.gd"
 Dialogue="*res://Scripts/core/dialogue.gd"
 Quest="*res://Scripts/core/quest.gd"

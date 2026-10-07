@@ -49,23 +49,26 @@ func get_flag(flag: StringName, default: Variant = false) -> Variant:
 	return flags.get(flag, default)
 
 func set_flag(flag: StringName, value: Variant = true) -> void:
-	if flags.get(flag) == value:
+	if flags.get(flag) == value or not Net.story_allowed():
 		return
 	flags[flag] = value
+	Net.send_flag(flag, value)
 	flag_changed.emit(flag, value)
 
 ## Shows a chapter's title card the first time the story gets there.
 func start_chapter(number: int) -> void:
 	var flag := StringName("chapter_%d" % number)
-	if get_flag(flag):
+	if get_flag(flag) or not Net.story_allowed():
 		return
+	Net.send_chapter(number)
 	set_flag(flag)
 	chapter_started.emit(number)
 
 func advance_sealing(stage: int) -> void:
-	if stage <= sealing_stage:
+	if stage <= sealing_stage or not Net.story_allowed():
 		return
 	sealing_stage = stage
+	Net.send_sealing(stage)
 	sealing_advanced.emit(stage)
 
 # --- Session flow ---------------------------------------------------------------
@@ -90,6 +93,10 @@ func continue_game() -> void:
 	await _change_scene(LEVEL_SCENE)
 
 func retry_from_checkpoint() -> void:
+	# Co-op: the host decides, and the apprentice's machine follows.
+	if Net.is_client():
+		return
+	Net.reload_together()
 	if _checkpoint.is_empty():
 		await new_game()
 		return
@@ -100,7 +107,16 @@ func retry_from_checkpoint() -> void:
 
 func return_to_menu() -> void:
 	Dialogue.stop()
+	if Net.active:
+		Net.leave()
 	await _change_scene(MENU_SCENE)
+
+## Co-op, on the apprentice's machine: the host reloaded the level (a retry);
+## the world comes over from the host once this side has loaded it.
+func reload_with_host() -> void:
+	_reset_session()
+	_has_pending_restore = false
+	await _change_scene(LEVEL_SCENE)
 
 func quit_game() -> void:
 	await _fade_to(1.0, 0.4)
@@ -111,13 +127,23 @@ func register_level(level_root: Node) -> void:
 	level = level_root
 	_is_dead = false
 	_finished = false
-	if _has_pending_restore:
+	if Net.active:
+		# Co-op: the host waits for the apprentice to have the level; the
+		# apprentice takes the world as the host has it.
+		await Net.prepare_level()
+		if level != level_root:
+			return
+	if Net.is_client():
+		_has_pending_restore = false
+		_pending_restore = {}
+	elif _has_pending_restore:
 		_has_pending_restore = false
 		_apply_snapshot(_pending_restore)
 		_pending_restore = {}
 	elif Quest.current() == &"":
 		# Fresh start (also when running the level scene directly from the editor).
 		Quest.start_at(QuestDB.STEPS[0]["id"])
+	Net.level_started()
 	level_ready.emit(level_root)
 
 func is_dead() -> bool:
@@ -131,7 +157,12 @@ func is_over() -> bool:
 func fail(reason_key: String) -> void:
 	if _is_dead:
 		return
+	if not Net.story_allowed():
+		# Co-op: the apprentice's death ends the run for both, through the host.
+		Net.report_death(reason_key)
+		return
 	_is_dead = true
+	Net.send_fail(reason_key)
 	Dialogue.stop()
 	failed.emit(reason_key)
 
@@ -140,21 +171,37 @@ func finish() -> void:
 		"evidence": bool(get_flag(&"has_evidence")),
 		"apprentice": bool(get_flag(&"gave_lamp")),
 		"names": NamesDB.found(),
+		"together": Net.active,
 	}
 	_finished = true
-	_delete_save()
+	# A co-op run never touches the single-player save.
+	if not Net.active:
+		_delete_save()
 	finished.emit(ending)
 
 # --- Checkpoints ----------------------------------------------------------------
 
 func request_checkpoint(step_id: StringName) -> void:
-	if level == null or _is_dead:
+	if level == null or _is_dead or Net.is_client():
 		return
 	# Let the frame that triggered the step settle (pickups freed, doors moved).
 	await get_tree().process_frame
 	_checkpoint = _take_snapshot(step_id)
-	_write_save(_checkpoint)
+	# Co-op checkpoints live only as long as the session.
+	if not Net.active:
+		_write_save(_checkpoint)
 	checkpoint_saved.emit(step_id)
+
+## Co-op: the world as the host has it, for the apprentice's machine.
+func partner_state() -> Dictionary:
+	return _take_snapshot(Quest.current())
+
+func apply_partner_state(data: Dictionary) -> void:
+	if level != null:
+		_apply_snapshot(data)
+
+func encoded_flags() -> Dictionary:
+	return _encode_flags()
 
 func _take_snapshot(step_id: StringName) -> Dictionary:
 	var nodes := {}

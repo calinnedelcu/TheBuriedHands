@@ -37,6 +37,9 @@ func current_sequence() -> StringName:
 ## A request with lower priority than the running sequence is dropped; equal or
 ## higher priority interrupts it. Returns true if the sequence played to the end.
 func play(sequence_id: StringName, priority := Priority.STORY) -> bool:
+	# Co-op: the host tells the story; the apprentice's machine shows its lines.
+	if not Net.story_allowed():
+		return false
 	var lines: Array = DialogueDB.sequence(sequence_id)
 	if lines.is_empty():
 		push_warning("Dialogue sequence '%s' is empty or missing" % sequence_id)
@@ -45,10 +48,15 @@ func play(sequence_id: StringName, priority := Priority.STORY) -> bool:
 
 ## Plays one line as its own tiny sequence.
 func say(speaker_id: StringName, text_key: String, priority := Priority.HINT) -> bool:
+	if not Net.story_allowed():
+		return false
 	return await _run(StringName("line:" + text_key), [[speaker_id, text_key]], priority)
 
 ## Skips the line currently on screen; the rest of the sequence continues.
 func skip_line() -> void:
+	if Net.is_client():
+		Net.request_skip_line()
+		return
 	if _line_active:
 		_line_token += 1
 		_line_done.emit()
@@ -62,6 +70,7 @@ func stop() -> void:
 	var id := _running_id
 	_running_id = &""
 	_running_priority = -1
+	Net.send_dialogue(&"stop", [id])
 	if _line_active:
 		_line_active = false
 		line_ended.emit()
@@ -92,6 +101,7 @@ func _run(id: StringName, lines: Array, priority: int) -> bool:
 	var token := _run_token
 	_running_id = id
 	_running_priority = priority
+	Net.send_dialogue(&"start", [id, priority])
 	sequence_started.emit(id)
 	for entry in lines:
 		var speaker_id: StringName = entry[0]
@@ -101,20 +111,54 @@ func _run(id: StringName, lines: Array, priority: int) -> bool:
 		_line_token += 1
 		var line_token := _line_token
 		_line_active = true
+		Net.send_dialogue(&"line", [speaker_id, String(entry[1]), duration, extras])
 		line_started.emit(speaker_id, DialogueDB.speaker_name(speaker_id), text, duration, extras)
 		get_tree().create_timer(duration, false).timeout.connect(_on_line_timeout.bind(line_token), CONNECT_ONE_SHOT)
 		await _line_done
 		if token != _run_token:
 			return false
 		_line_active = false
+		Net.send_dialogue(&"line_end")
 		line_ended.emit()
 		await get_tree().create_timer(GAP_SECONDS, false).timeout
 		if token != _run_token:
 			return false
 	_running_id = &""
 	_running_priority = -1
+	Net.send_dialogue(&"end", [id])
 	sequence_finished.emit(id)
 	return true
+
+## Co-op, on the apprentice's machine: the host's dialogue as it plays there
+## (sequence start and end, each line with its own timing).
+func apply_remote(kind: StringName, data: Array) -> void:
+	match kind:
+		&"start":
+			if _running_id != &"":
+				_end_shown_sequence()
+			_running_id = data[0]
+			_running_priority = int(data[1])
+			sequence_started.emit(_running_id)
+		&"line":
+			var speaker_id: StringName = data[0]
+			_line_active = true
+			line_started.emit(speaker_id, DialogueDB.speaker_name(speaker_id), tr(String(data[1])), float(data[2]), data[3])
+		&"line_end":
+			if _line_active:
+				_line_active = false
+				line_ended.emit()
+		&"end", &"stop":
+			_end_shown_sequence()
+
+func _end_shown_sequence() -> void:
+	var id := _running_id
+	_running_id = &""
+	_running_priority = -1
+	if _line_active:
+		_line_active = false
+		line_ended.emit()
+	if id != &"":
+		sequence_finished.emit(id)
 
 func _on_line_timeout(line_token: int) -> void:
 	if line_token == _line_token and _line_active:

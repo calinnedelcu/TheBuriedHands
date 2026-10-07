@@ -25,6 +25,8 @@ const STONES := preload("res://audio/sfx/tunnel/stones_falling.mp3")
 var pushes := 0
 var opened := false
 var collapsed := false
+## Co-op: who has made it past the bend (it holds until both have).
+var _through: Array[StringName] = []
 
 func _ready() -> void:
 	add_to_group(&"persistent")
@@ -61,12 +63,25 @@ func usable_use(user: Node) -> void:
 		Sfx.play_at(GRAVEL, global_position, 0.0)
 
 func _on_behind(body: Node3D) -> void:
-	if collapsed or not opened or not (body is Player):
+	if collapsed or not opened or not (body is Player) or Net.is_client():
+		return
+	# Co-op: the channel holds until both of you are through.
+	if not _through.has(body.name):
+		_through.append(body.name)
+	for p in Net.players():
+		if not _through.has(p.name):
+			return
+	Net.mirror(self, &"net_collapse")
+	net_collapse()
+
+func net_collapse() -> void:
+	if collapsed:
 		return
 	collapsed = true
-	var p := body as Player
 	Sfx.play_at(RUMBLE, global_position, 6.0, 0.0, &"Tomb", 60.0)
-	p.add_shake(1.0)
+	var p := get_tree().get_first_node_in_group(&"player") as Player
+	if p != null:
+		p.add_shake(1.0)
 	await get_tree().create_timer(0.35, false).timeout
 	Sfx.play_at(STONES, global_position, 4.0)
 	_rubble.visible = true

@@ -25,12 +25,17 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node3D) -> void:
-	if not (body is Player) or (once and fired):
+	# Co-op: the host's story; the apprentice's machine hears it has fired.
+	if not (body is Player) or (once and fired) or Net.is_client():
 		return
 	if quest_step != &"" and not Quest.is_at(quest_step):
 		return
 	if quest_from != &"" and not Quest.has_reached(quest_from):
 		return
+	Net.mirror(self, &"net_fire")
+	net_fire()
+
+func net_fire() -> void:
 	fired = true
 	triggered.emit()
 	if chapter > 0:

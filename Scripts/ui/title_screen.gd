@@ -36,12 +36,20 @@ var _overlay: Control
 var _options: OptionsMenu
 var _credits: Control
 var _confirm: Control
+var _coop: Control
+var _coop_host: Button
+var _coop_join: Button
+var _coop_begin: Button
+var _coop_address: LineEdit
+var _coop_status: Label
 var _fade: ColorRect
 var _busy := false
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
+	if Net.active:
+		Net.leave()
 	_build_environment()
 	_build_aisle()
 	_build_camera()
@@ -360,6 +368,7 @@ func _build_ui() -> void:
 	if Game.has_save():
 		_button("MENU_CONTINUE", _on_continue)
 	_button("MENU_NEW_GAME", _on_new_game)
+	_button("MENU_COOP", _show_coop)
 	_button("MENU_OPTIONS", _show_options)
 	_button("MENU_CREDITS", _show_credits)
 	_button("MENU_QUIT", func(): Game.quit_game())
@@ -399,6 +408,9 @@ func _build_ui() -> void:
 	_confirm = _build_confirm()
 	_confirm.visible = false
 	center.add_child(_confirm)
+	_coop = _build_coop()
+	_coop.visible = false
+	center.add_child(_coop)
 
 	_fade = ColorRect.new()
 	_fade.color = Color.BLACK
@@ -515,7 +527,7 @@ func _build_confirm() -> Control:
 
 func _open_overlay(which: Control) -> void:
 	_overlay.visible = true
-	for c in [_options, _credits, _confirm]:
+	for c in [_options, _credits, _confirm, _coop]:
 		(c as Control).visible = c == which
 	var first := which.find_children("*", "Button", true, false)
 	if not first.is_empty():
@@ -523,13 +535,113 @@ func _open_overlay(which: Control) -> void:
 
 func _close_overlay() -> void:
 	Sfx.play_ui(BACK, -10.0)
+	if _coop.visible and Net.phase != Net.Phase.PLAYING:
+		Net.leave()
 	_overlay.visible = false
-	for c in [_options, _credits, _confirm]:
+	for c in [_options, _credits, _confirm, _coop]:
 		(c as Control).visible = false
 	(_menu.get_child(0) as Button).grab_focus.call_deferred()
 
 func _show_options() -> void:
 	_open_overlay(_options)
+
+# --- Together (online co-op) ---------------------------------------------------------------
+
+func _build_coop() -> Control:
+	var panel := _panel(Vector2(780, 0))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 14)
+	panel.add_child(box)
+	var title := Label.new()
+	title.theme_type_variation = &"HeaderLabel"
+	title.text = "COOP_TITLE"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+	var intro := Label.new()
+	intro.theme_type_variation = &"BodyText"
+	intro.text = "COOP_INTRO"
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.custom_minimum_size = Vector2(720, 0)
+	box.add_child(intro)
+	_coop_host = _button("COOP_HOST", _on_coop_host, box)
+	var join_row := HBoxContainer.new()
+	join_row.add_theme_constant_override(&"separation", 16)
+	box.add_child(join_row)
+	_coop_address = LineEdit.new()
+	_coop_address.placeholder_text = "COOP_ADDRESS"
+	_coop_address.custom_minimum_size = Vector2(300, 0)
+	_coop_address.text = String(Settings.get_value(&"coop_address"))
+	_coop_address.text_submitted.connect(func(_t: String): _on_coop_join())
+	join_row.add_child(_coop_address)
+	_coop_join = _button("COOP_JOIN", _on_coop_join, join_row)
+	_coop_status = Label.new()
+	_coop_status.theme_type_variation = &"QuoteText"
+	_coop_status.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_coop_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_coop_status.custom_minimum_size = Vector2(720, 0)
+	box.add_child(_coop_status)
+	var note := Label.new()
+	note.theme_type_variation = &"SmallLabel"
+	note.text = "COOP_NOTE"
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size = Vector2(720, 0)
+	note.modulate.a = 0.7
+	box.add_child(note)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override(&"separation", 40)
+	box.add_child(row)
+	_coop_begin = _button("COOP_BEGIN", _on_coop_begin, row, true)
+	_coop_begin.disabled = true
+	_button("MENU_BACK", _close_overlay, row, true)
+	Net.status_changed.connect(_on_coop_status)
+	Net.partner_changed.connect(_on_coop_partner)
+	Net.starting.connect(_on_coop_starting)
+	return panel
+
+func _show_coop() -> void:
+	_coop_status.text = ""
+	_coop_buttons()
+	_open_overlay(_coop)
+
+func _on_coop_host() -> void:
+	Net.host()
+	_coop_buttons()
+
+func _on_coop_join() -> void:
+	if Net.active:
+		return
+	Settings.set_value(&"coop_address", _coop_address.text.strip_edges())
+	Net.join(_coop_address.text)
+	_coop_buttons()
+
+func _on_coop_begin() -> void:
+	if Net.is_host and Net.has_partner():
+		Net.begin()
+
+func _on_coop_status(text: String) -> void:
+	if is_instance_valid(_coop_status):
+		_coop_status.text = text
+		_coop_buttons()
+
+func _on_coop_partner(_connected: bool) -> void:
+	if is_instance_valid(_coop_begin):
+		_coop_buttons()
+
+## Both machines are about to go down: the menu bows out, as for a new game.
+func _on_coop_starting() -> void:
+	if _busy:
+		return
+	_busy = true
+	Sfx.play_ui(CONFIRM, -6.0)
+	Music.stop(1.2)
+
+func _coop_buttons() -> void:
+	var idle := not Net.active
+	_coop_host.disabled = not idle
+	_coop_join.disabled = not idle
+	_coop_address.editable = idle
+	_coop_begin.disabled = not (Net.is_host and Net.has_partner())
 
 func _show_credits() -> void:
 	_open_overlay(_credits)

@@ -19,10 +19,24 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node3D) -> void:
-	if _done or not (body is Player):
+	if _done or not (body is Player) or Net.is_client():
+		return
+	# Co-op: out into the light together, or not at all.
+	for other in Net.players():
+		if not overlaps_body(other):
+			(body as Player).notice("COOP_WAIT_AT_EXIT")
+			return
+	Net.mirror(self, &"net_walk_out")
+	net_walk_out()
+
+## The walk out, for this machine's own player (both, in co-op).
+func net_walk_out() -> void:
+	if _done:
 		return
 	_done = true
-	var p := body as Player
+	var p := get_tree().get_first_node_in_group(&"player") as Player
+	if p == null:
+		return
 	p.lock_controls(&"ending")
 	p.force_stand()
 	var hud := p.get_node_or_null("HUD") as CanvasLayer

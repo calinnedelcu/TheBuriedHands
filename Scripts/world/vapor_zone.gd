@@ -22,7 +22,8 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is Player:
+	# Each co-op machine looks after its own player's breath.
+	if body is Player and (body as Player).is_local:
 		_player = body
 
 func _on_body_exited(body: Node3D) -> void:

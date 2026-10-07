@@ -9,6 +9,8 @@ const DEATH_SCREEN := preload("res://scenes/ui/death_screen.tscn")
 func _ready() -> void:
 	add_child(PAUSE_MENU.instantiate())
 	add_child(DEATH_SCREEN.instantiate())
+	# Co-op: the apprentice joins the level.
+	Net.setup_level(self)
 	Game.register_level.call_deferred(self)
 
 func player() -> Player:

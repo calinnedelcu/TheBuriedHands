@@ -1,5 +1,6 @@
 extends Node
-## Dev runner: screenshots of the title screen (menu, credits, options, RO).
+## Dev runner: screenshots of the title screen (menu, credits, options, RO,
+## the co-op panel).
 ## godot --path . --resolution 1600x900 -s res://tools/dev/run.gd -- --runner=res://tools/dev/title_shots_runner.gd --out=/abs/dir
 
 func _ready() -> void:
@@ -34,5 +35,13 @@ func _run() -> void:
 	Settings.set_value(&"language", "ro", false)
 	await get_tree().create_timer(0.5).timeout
 	await _shot(out, "t5_ro")
+	# Together (online co-op): the panel, then hosting.
+	title.call(&"_show_coop")
+	await get_tree().create_timer(0.4).timeout
+	await _shot(out, "t6_coop")
+	title.call(&"_on_coop_host")
+	await get_tree().create_timer(0.4).timeout
+	await _shot(out, "t7_coop_hosting")
+	title.call(&"_close_overlay")
 	Settings.set_value(&"language", "auto", false)
 	get_tree().quit()

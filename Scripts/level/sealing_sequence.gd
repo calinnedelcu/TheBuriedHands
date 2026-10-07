@@ -34,23 +34,14 @@ func _ready() -> void:
 				g.set_scripted.call_deferred(true)
 
 func _on_step(step: StringName) -> void:
-	if step == &"sealing":
+	# Co-op: the host runs the scene; the apprentice's machine is shown it.
+	if step == &"sealing" and not Net.is_client():
 		_run()
 
 func _run() -> void:
-	var player := get_tree().get_first_node_in_group(&"player") as Player
 	await get_tree().create_timer(1.4, false).timeout
-	# The gate. The workshop's music dies with it.
-	Music.stop(0.4)
-	Sfx.play_ui(BOOM, 4.0)
-	if player != null:
-		player.add_shake(1.0)
-	var dust := get_node_or_null(dust_path) as GPUParticles3D
-	if dust != null:
-		dust.restart()
-		dust.emitting = true
-	for lamp in get_tree().get_nodes_in_group(&"wall_lamps"):
-		lamp.call(&"gust")
+	Net.mirror(self, &"net_gate_slams")
+	net_gate_slams()
 	Game.advance_sealing(1)
 	await get_tree().create_timer(1.6, false).timeout
 	await Dialogue.play(&"sealing_first")
@@ -60,20 +51,35 @@ func _run() -> void:
 	if _guard_a != null and _guard_b != null and spot_a != null and spot_b != null:
 		# Turn to the door as they come in.
 		var door := get_node_or_null(door_look_path) as Node3D
-		if player != null and door != null:
-			player.look_at_point(door.global_position, 1.4)
+		if door != null:
+			for player in Net.players():
+				player.look_at_point(door.global_position, 1.4)
 		_guard_a.scripted_walk_to(spot_a.global_position)
 		await get_tree().create_timer(0.6, false).timeout
 		await _guard_b.scripted_walk_to(spot_b.global_position)
 		_guard_a.scripted_face(spot_b.global_position)
 		_guard_b.scripted_face(spot_a.global_position)
-		if player != null:
+		for player in Net.players():
 			player.look_at_point((spot_a.global_position + spot_b.global_position) * 0.5 + Vector3.UP * 2.4, 1.0)
 	await Dialogue.play(&"guards_talk")
 	Game.set_flag(&"guards_hostile")
 	_leave()
 	await Dialogue.play(&"guards_aftermath")
 	Quest.complete(&"sealing")
+
+## The gate, deep in the mountain. The workshop's music dies with it.
+func net_gate_slams() -> void:
+	Music.stop(0.4)
+	Sfx.play_ui(BOOM, 4.0)
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player != null:
+		player.add_shake(1.0)
+	var dust := get_node_or_null(dust_path) as GPUParticles3D
+	if dust != null:
+		dust.restart()
+		dust.emitting = true
+	for lamp in get_tree().get_nodes_in_group(&"wall_lamps"):
+		lamp.call(&"gust")
 
 func _leave() -> void:
 	var exit := get_node_or_null(exit_path)

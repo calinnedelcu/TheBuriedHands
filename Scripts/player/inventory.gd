@@ -23,6 +23,9 @@ var key_items: Dictionary = {}
 var selected := -1
 
 var _lamp: HeldLamp = null
+## Things this inventory put into the world (drops, throws), for their names:
+## both co-op machines must call them the same.
+var _spawned := 0
 @onready var _player: Player = get_parent() as Player
 @onready var _lamp_socket: Node3D = get_node_or_null(lamp_socket_path)
 
@@ -143,13 +146,20 @@ func cycle(direction: int) -> void:
 	var pos := options.find(selected)
 	select(options[wrapi(pos + direction, 0, options.size())])
 
+## Co-op: the other player's lamp hangs from their model's hand instead.
+func set_lamp_socket(socket: Node3D) -> void:
+	_lamp_socket = socket
+	if _lamp != null:
+		_lamp.reparent(socket, false)
+
 ## Equips a lamp with the given oil (from a stand, a sconce, or a save).
 func take_lamp(oil: float, lit := true) -> void:
 	if _lamp == null:
 		_lamp = LAMP_SCENE.instantiate() as HeldLamp
-		_lamp_socket.add_child(_lamp)
-		ViewmodelMaterial.apply(_lamp)
 		_lamp.set_holder(_player)
+		_lamp_socket.add_child(_lamp)
+		if _player.is_local:
+			ViewmodelMaterial.apply(_lamp)
 	_lamp.set_state(oil, lit)
 	lamp_changed.emit(_lamp)
 	changed.emit()
@@ -170,28 +180,63 @@ func drop_selected() -> void:
 	if item == null or not item.droppable:
 		return
 	var origin := _player.global_position + (-_player.global_basis.z * 1.2) + Vector3.UP * 0.4
-	var floor := _floor_below(origin)
-	remove(item.id, 1)
-	var pickup := PICKUP_SCENE.instantiate()
-	pickup.set(&"item_id", item.id)
-	_player.get_parent().add_child(pickup)
-	pickup.global_position = floor
-	pickup.rotation.y = randf() * TAU
-	Stealth.make_noise(floor, 4.0, _player)
+	_drop(item.id, _floor_below(origin), randf() * TAU, _next_spawn_name("Drop"))
 
 func throw_selected() -> void:
 	var item := selected_item()
 	if item == null or not item.throwable:
 		return
-	remove(item.id, 1)
-	var body := RigidBody3D.new()
-	body.set_script(THROWN_SCRIPT)
-	body.set(&"item_id", item.id)
-	_player.get_parent().add_child(body)
 	var cam := _player.camera
-	body.global_position = cam.global_position + (-cam.global_basis.z * 0.6) + Vector3.DOWN * 0.15
-	body.linear_velocity = -cam.global_basis.z * throw_speed + Vector3.UP * 2.2 + _player.velocity * 0.5
-	body.angular_velocity = Vector3(randf_range(-6, 6), randf_range(-6, 6), randf_range(-6, 6))
+	var from := cam.global_position + (-cam.global_basis.z * 0.6) + Vector3.DOWN * 0.15
+	var velocity := -cam.global_basis.z * throw_speed + Vector3.UP * 2.2 + _player.velocity * 0.5
+	var spin := Vector3(randf_range(-6, 6), randf_range(-6, 6), randf_range(-6, 6))
+	_throw(item.id, from, velocity, spin, _next_spawn_name("Throw"))
+
+func _drop(id: StringName, at: Vector3, yaw: float, node_name: String) -> void:
+	if not remove(id, 1):
+		return
+	Net.inventory_action(_player, &"drop", [id, at, yaw, node_name])
+	var pickup := PICKUP_SCENE.instantiate()
+	pickup.name = node_name
+	pickup.set(&"item_id", id)
+	_player.get_parent().add_child(pickup)
+	pickup.global_position = at
+	pickup.rotation.y = yaw
+	Stealth.make_noise(at, 4.0, _player)
+
+func _throw(id: StringName, from: Vector3, velocity: Vector3, spin: Vector3, node_name: String) -> void:
+	if not remove(id, 1):
+		return
+	Net.inventory_action(_player, &"throw", [id, from, velocity, spin, node_name])
+	var body := RigidBody3D.new()
+	body.name = node_name
+	body.set_script(THROWN_SCRIPT)
+	body.set(&"item_id", id)
+	_player.get_parent().add_child(body)
+	body.global_position = from
+	body.linear_velocity = velocity
+	body.angular_velocity = spin
+
+func _next_spawn_name(kind: String) -> String:
+	_spawned += 1
+	return "%s%s%d" % [_player.name, kind, _spawned]
+
+## Co-op: what the other player did with their inventory, done to the copy of
+## them on this machine (see Net.inventory_action).
+func apply_action(action: StringName, args: Array) -> void:
+	match action:
+		&"select":
+			select(int(args[0]))
+		&"drop":
+			_drop(args[0], args[1], float(args[2]), args[3])
+		&"throw":
+			_throw(args[0], args[1], args[2], args[3], args[4])
+		&"lamp_toggle":
+			if _lamp != null:
+				_lamp.toggle()
+		&"lamp_raise":
+			if _lamp != null:
+				_lamp.is_raised = bool(args[0])
 
 func _after_add(item: ItemData, count: int) -> void:
 	changed.emit()
@@ -207,9 +252,11 @@ func _floor_below(from: Vector3) -> Vector3:
 func _unhandled_input(event: InputEvent) -> void:
 	if _player.controls_locked():
 		return
+	var before := selected
 	for i in SLOTS:
 		if event.is_action_pressed(StringName("slot_%d" % (i + 1))):
 			select(i if selected != i else -1)
+			_share_selection(before)
 			return
 	if event.is_action_pressed(&"holster"):
 		select(-1)
@@ -223,10 +270,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		throw_selected()
 	elif event.is_action_pressed(&"toggle_lamp") and _lamp != null:
 		_lamp.toggle()
+		Net.inventory_action(_player, &"lamp_toggle")
 	elif event.is_action_pressed(&"raise_lamp") and _lamp != null:
 		_lamp.is_raised = true
+		Net.inventory_action(_player, &"lamp_raise", [true])
 	elif event.is_action_released(&"raise_lamp") and _lamp != null:
 		_lamp.is_raised = false
+		Net.inventory_action(_player, &"lamp_raise", [false])
+	_share_selection(before)
+
+## Co-op: the partner's machine shows what this player holds.
+func _share_selection(before: int) -> void:
+	if selected != before:
+		Net.inventory_action(_player, &"select", [selected])
 
 # --- Persistence ------------------------------------------------------------------------
 

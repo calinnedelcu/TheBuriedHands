@@ -64,10 +64,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _options.visible:
 		_hide_options()
 	else:
-		set_paused(not get_tree().paused)
+		set_paused(not _root.visible)
 
 func set_paused(value: bool) -> void:
-	get_tree().paused = value
+	# Co-op: the tomb doesn't stop for one of you; only your hands do.
+	if Net.active:
+		var me := Net.local_body()
+		if me != null:
+			if value:
+				me.lock_controls(&"pause")
+			else:
+				me.unlock_controls(&"pause")
+	else:
+		get_tree().paused = value
 	_root.visible = value
 	if value:
 		_was_captured = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED

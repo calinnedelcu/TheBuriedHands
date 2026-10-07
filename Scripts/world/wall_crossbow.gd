@@ -59,8 +59,11 @@ func _fly(bolt: Node3D) -> void:
 		if not hit.is_empty():
 			bolt.global_position = hit.position - dir * 0.15
 			if hit.collider is Player:
-				(hit.collider as Player).apply_damage(damage, self, "DEATH_CROSSBOW")
-				(hit.collider as Player).add_shake(0.6)
+				# Co-op: the bolt flies on both machines; each hurts its own player.
+				var p := hit.collider as Player
+				if p.is_local:
+					p.apply_damage(damage, self, "DEATH_CROSSBOW")
+					p.add_shake(0.6)
 				bolt.queue_free()
 			else:
 				Sfx.play_random_at(HIT_WALL, hit.position, 0.0, 0.08, &"Tomb", 30.0)

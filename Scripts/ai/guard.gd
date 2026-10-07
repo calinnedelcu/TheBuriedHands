@@ -5,6 +5,9 @@ extends CharacterBody3D
 ##   PATROL -> SUSPICIOUS (stops, looks) -> INVESTIGATE (walks to the stimulus)
 ##   -> CHASE (runs, calls others) -> ATTACK, and back via SEARCH / RETURN.
 ## Before the sealing (flag `guards_hostile`) guards only go about their beat.
+##
+## Co-op: guards think on the host and watch both players, chasing whichever
+## they saw; on the apprentice's machine they only follow what the host sends.
 
 signal state_changed(state: State)
 signal scripted_arrived
@@ -100,6 +103,9 @@ var _desired_yaw := 0.0
 var _bark_cooldown := 0.0
 var _scripted_target := Vector3.INF
 var _scripted_run := false
+var _anim_key: StringName = &""
+var _net_pos := Vector3.INF
+var _net_yaw := 0.0
 
 func _ready() -> void:
 	add_to_group(&"guards")
@@ -203,6 +209,9 @@ func hear_alarm(position: Vector3) -> void:
 # --- Main loop ---------------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
+	if Net.is_client():
+		_net_tick(delta)
+		return
 	if _player == null:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
 	_cooldown = maxf(0.0, _cooldown - delta)
@@ -243,7 +252,16 @@ func _perceive(dt: float) -> void:
 	if not is_hostile() or _player == null or Game.is_dead():
 		awareness = move_toward(awareness, 0.0, dt * 0.5)
 		return
-	var seen := _sight_factor()
+	# Whoever shows more: in co-op the guard turns on the one he sees best.
+	var seen := 0.0
+	for p in Net.players():
+		# Co-op: a man on the floor is left for dead.
+		if p.downed:
+			continue
+		var f := _sight_factor(p)
+		if f > seen:
+			seen = f
+			_player = p
 	if seen > 0.0:
 		awareness = minf(awareness + dt * sight_gain * seen, 1.25)
 		_last_seen = _player.global_position
@@ -255,10 +273,10 @@ func _perceive(dt: float) -> void:
 		awareness = maxf(0.0, awareness - dt * decay)
 	_react()
 
-## How clearly the guard sees the player right now (0 = not at all).
-func _sight_factor() -> float:
+## How clearly the guard sees player `p` right now (0 = not at all).
+func _sight_factor(p: Player) -> float:
 	var eyes := global_position + Vector3.UP * eye_height
-	var target := _player.chest_position()
+	var target := p.chest_position()
 	var to := target - eyes
 	var dist := to.length()
 	if dist > sight_range:
@@ -269,11 +287,11 @@ func _sight_factor() -> float:
 	var cone := 1.0 if angle <= sight_angle else (0.45 if angle <= peripheral_angle else 0.0)
 	if cone == 0.0:
 		return 0.0
-	if not _has_line_of_sight(eyes, target) and not _has_line_of_sight(eyes, _player.eye_position()):
+	if not _has_line_of_sight(eyes, target) and not _has_line_of_sight(eyes, p.eye_position()):
 		return 0.0
-	var light_term := Stealth.player_exposure * sqrt(1.0 - dist / sight_range)
+	var light_term := p.exposure * sqrt(1.0 - dist / sight_range)
 	# Up close, a guard makes out a shape even in the dark.
-	var stance_size := 0.45 if _player.is_crawling() else (0.7 if _player.is_crouching() else 1.0)
+	var stance_size := 0.45 if p.is_crawling() else (0.7 if p.is_crouching() else 1.0)
 	var near_term := clampf(1.0 - dist / 4.5, 0.0, 1.0) * 0.9 * stance_size
 	var f := maxf(light_term, near_term) * cone
 	return f if f > 0.05 else 0.0
@@ -284,7 +302,7 @@ func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(params).is_empty()
 
 func _on_noise(position: Vector3, radius: float, source: Node) -> void:
-	if not is_hostile() or source == self or source is Guard:
+	if Net.is_client() or not is_hostile() or source == self or source is Guard:
 		return
 	if state == State.CHASE or state == State.ATTACK:
 		return
@@ -299,7 +317,7 @@ func _on_noise(position: Vector3, radius: float, source: Node) -> void:
 	var strength := 1.0 - d / eff
 	awareness = minf(awareness + 0.25 + strength * 0.55, 0.95)
 	_stimulus = position
-	if source != _player and _bark_cooldown <= 0.0:
+	if not (source is Player) and _bark_cooldown <= 0.0:
 		_bark(&"noise")
 	_react()
 
@@ -402,6 +420,8 @@ func _tick_investigate(delta: float) -> void:
 		_set_state(State.SEARCH)
 
 func _tick_chase(delta: float) -> void:
+	if _target_down():
+		return
 	if _seen_timer < 0.15:
 		_agent.target_position = _last_seen
 		_lost_timer = 0.0
@@ -430,6 +450,8 @@ func _tick_chase(delta: float) -> void:
 ## A thrust of the ji: wind up (still turning to follow), strike, recover.
 func _tick_attack(delta: float) -> void:
 	_stop()
+	if _target_down():
+		return
 	_attack_timer -= delta
 	if not _struck:
 		_face(_player.global_position)
@@ -441,12 +463,20 @@ func _tick_attack(delta: float) -> void:
 		var in_front := (-global_basis.z).dot(Vector3(to.x, 0, to.z).normalized()) > 0.4
 		if to.length() <= attack_range + 0.5 and in_front and not Game.is_dead():
 			_player.apply_damage(attack_damage, self, "DEATH_GUARD")
-			_player.velocity += Vector3(to.x, 0, to.z).normalized() * 6.0
+			_player.push(Vector3(to.x, 0, to.z).normalized() * 6.0)
 			Sfx.play_at(preload("res://audio/sfx/impacts/impactPunch_medium_000.ogg"), _player.global_position, 2.0)
 		return
 	if _attack_timer <= 0.0:
 		_cooldown = attack_cooldown
 		_set_state(State.CHASE)
+
+## Co-op: the one he was after went down; he looks about him for the other.
+func _target_down() -> bool:
+	if _player == null or not _player.downed:
+		return false
+	_stimulus = _player.global_position
+	_set_state(State.SEARCH)
+	return true
 
 func _tick_search(delta: float) -> void:
 	if _look_timer > 0.0:
@@ -545,6 +575,7 @@ func _play(key: StringName, restart := false) -> void:
 		anim_name = StringName("torch_" + String(anim_name))
 	if (anim_name == _current_anim and not restart) or not _anim.has_animation(anim_name):
 		return
+	_anim_key = key
 	_current_anim = anim_name
 	if restart:
 		_anim.stop()
@@ -575,12 +606,49 @@ func _update_icon() -> void:
 func _bark(kind: StringName, force := false) -> void:
 	if _bark_cooldown > 0.0 and not force:
 		return
-	if _player == null or global_position.distance_to(_player.global_position) > 26.0:
+	var near := false
+	for p in Net.players():
+		near = near or global_position.distance_to(p.global_position) <= 26.0
+	if not near:
 		return
 	_bark_cooldown = 6.0
 	var key := DialogueDB.random_bark(kind)
 	if key != "":
 		Dialogue.say(&"guard", key, Dialogue.Priority.AMBIENT)
+
+# --- Co-op ---------------------------------------------------------------------------
+
+## What the apprentice's machine needs to show this guard.
+func net_state() -> Array:
+	return [global_position, rotation.y, _anim_key, awareness, int(state)]
+
+func net_apply(data: Array) -> void:
+	_net_pos = data[0]
+	_net_yaw = float(data[1])
+	awareness = float(data[3])
+	var s := int(data[4])
+	if s != int(state):
+		state = s as State
+		if state == State.ATTACK:
+			_play(&"attack", true)
+			Sfx.play_at(THRUST, global_position + Vector3.UP * 1.5, -2.0, 0.1)
+		state_changed.emit(state)
+	if state != State.ATTACK:
+		_play(data[2])
+
+func _net_tick(delta: float) -> void:
+	if _net_pos == Vector3.INF:
+		return
+	var before := global_position
+	var to := _net_pos - global_position
+	if to.length() > 6.0:
+		global_position = _net_pos
+	else:
+		global_position += to * clampf(delta * 10.0, 0.0, 1.0)
+	rotation.y = lerp_angle(rotation.y, _net_yaw, clampf(delta * 10.0, 0.0, 1.0))
+	velocity = (global_position - before) / maxf(delta, 0.001)
+	_update_footsteps(delta)
+	_update_icon()
 
 # --- Persistence ---------------------------------------------------------------------
 

@@ -28,6 +28,8 @@ class Rig:
 		self.rest_pose()
 		self.upper_len = {s: (self._head(s + "_Forearm") - self._head(s + "_Upperarm")).length for s in "RL"}
 		self.fore_len = {s: (self._head(s + "_Hand") - self._head(s + "_Forearm")).length for s in "RL"}
+		self.thigh_len = {s: (self._head(s + "_Calf") - self._head(s + "_Thigh")).length for s in "RL"}
+		self.calf_len = {s: (self._head(s + "_Foot") - self._head(s + "_Calf")).length for s in "RL"}
 		self.chest_rest = self.bones["Spine02"].matrix_local.copy()
 		self.grip = {s: self._fist(s) for s in "RL"}
 
@@ -112,6 +114,36 @@ class Rig:
 		self.swing(upper, elbow - s)
 		self.swing(fore, (s + to_n * dist) - elbow)
 		self.set_rotation(hand, rot)
+
+	def solve_leg(self, side, ankle, pole, foot_dir=None):
+		"""Two-bone IK putting the ankle (the foot bone's head) at `ankle`, the
+		knee bending toward `pole`; the foot then points along foot_dir."""
+		thigh = self.pose[side + "_Thigh"]
+		calf = self.pose[side + "_Calf"]
+		foot = self.pose[side + "_Foot"]
+		for n in ("ThighTwist01", "ThighTwist02", "CalfTwist01", "CalfTwist02"):
+			self.pose[side + "_" + n].matrix_basis = Matrix.Identity(4)
+		self.update()
+		s = thigh.matrix.translation.copy()
+		a, b = self.thigh_len[side], self.calf_len[side]
+		to = ankle - s
+		dist = min(to.length, (a + b) * 0.999)
+		to_n = to.normalized()
+		cos_a = max(-1.0, min(1.0, (a * a + dist * dist - b * b) / (2 * a * dist)))
+		side_dir = (pole - s) - to_n * (pole - s).dot(to_n)
+		side_dir = side_dir.normalized() if side_dir.length > 1e-6 else Vector((1, 0, 0))
+		knee = s + to_n * (a * cos_a) + side_dir * (a * math.sqrt(max(0.0, 1 - cos_a * cos_a)))
+		self.swing(thigh, knee - s)
+		self.swing(calf, (s + to_n * dist) - knee)
+		if foot_dir is not None:
+			self.swing(foot, foot_dir)
+
+	def place_hip(self, offset, rot3=Matrix.Identity(3)):
+		"""Moves the whole body (the Hip bone and all above and below it) by
+		`offset` and turns it by rot3 about the hip, in model space."""
+		pb = self.pose["Hip"]
+		head = pb.matrix.translation.copy()
+		self.set_rotation(pb, rot3 @ pb.matrix.to_3x3(), at=head + offset)
 
 	def key(self, frame, bone_names):
 		for n in bone_names:

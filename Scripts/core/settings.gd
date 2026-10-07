@@ -30,6 +30,8 @@ const DEFAULTS := {
 	&"render_scale": 1.0,         # 0.5 .. 1.0 (FSR 2 when < 1)
 	&"quality": 2,                # 0 low, 1 medium, 2 high, 3 ultra
 	&"brightness": 1.0,           # 0.6 .. 1.6, exposure multiplier
+	# Co-op: the last address joined.
+	&"coop_address": "",
 }
 
 ## Volume sliders map onto these buses; the base offsets keep the jam-era mix.

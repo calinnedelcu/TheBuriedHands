@@ -4,6 +4,8 @@
 #   talk, point, bow, work, hands_on_hips, walk   - the originals, renamed
 #   scared   - standing hunched, arms wrapped round himself, glancing about
 #   cower    - sitting curled up, arms round his knees, rocking a little
+#   idle, crouch_idle, crouch_walk, crawl_idle, crawl - the apprentice as the
+#              master sees him in co-op (locomotion.py)
 #
 #   blender -b --python tools/blender/build_apprentice.py
 
@@ -13,6 +15,7 @@ from mathutils import Vector, Matrix
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from rig_tools import Rig, rot_from, rot_world
+from locomotion import Locomotion
 
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SRC = os.path.join(ROOT, "TripoModels", "ucenic.glb")
@@ -101,6 +104,8 @@ def cower():
 made = [bpy.data.actions[n] for n in RENAME.values()]
 made.append(scared())
 made.append(cower())
+# The player's own scale and speeds (Scripts/player/player.gd, the apprentice's).
+made += Locomotion(rig, 2.75, 2.05, 1.1).build(idle=True)
 os.makedirs(os.path.dirname(DST), exist_ok=True)
 rig.export(DST, made)
 print("built", DST, "with", sorted(a.name for a in made))

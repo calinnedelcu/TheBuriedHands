@@ -77,7 +77,10 @@ func _on_finished(ending: Dictionary) -> void:
 	await _epilogue_card()
 	await _card("END_BASE")
 	await _card("END_EVIDENCE" if ending.get("evidence", false) else "END_NO_EVIDENCE")
-	await _card("END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE")
+	var apprentice := "END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE"
+	if ending.get("together", false):
+		apprentice = "END_TOGETHER"
+	await _card(apprentice)
 	var names: Array = ending.get("names", [])
 	_names = names
 	if names.is_empty():

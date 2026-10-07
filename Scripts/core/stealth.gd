@@ -7,7 +7,8 @@ extends Node
 signal noise_made(position: Vector3, radius: float, source: Node)
 signal alert_changed(level: float)
 
-## 0 = invisible in darkness, 1 = standing in full light. Written by the player.
+## 0 = invisible in darkness, 1 = standing in full light. Written by the
+## (local) player; in co-op each body also keeps its own `exposure`.
 var player_visibility := 0.0
 ## How exposed the player is overall, for the HUD (visibility * movement/stance).
 var player_exposure := 0.0
@@ -20,6 +21,9 @@ var _lights: Array[Light3D] = []
 func make_noise(position: Vector3, radius: float, source: Node = null) -> void:
 	if radius <= 0.0:
 		return
+	# Co-op: the guards live on the host, so the apprentice's own sounds go there.
+	if source is Player and (source as Player).is_local and Net.is_client():
+		Net.forward_noise(position, radius)
 	noise_made.emit(position, radius, source)
 
 func register_guard(guard: Node) -> void:

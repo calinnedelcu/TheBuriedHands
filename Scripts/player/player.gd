@@ -5,6 +5,12 @@ extends CharacterBody3D
 ##
 ## Owns movement, stances, the camera rig, health, breath and mercury
 ## toxicity, footstep noise and the light-based visibility used by guards.
+##
+## Co-op: the same scene is the master (the level's "Player") and his
+## apprentice ("Apprentice", smaller, quicker, lighter on his feet). The body
+## played on this machine is local; the other is a puppet that follows the
+## network, wears its character's model and passes what happens to it (a
+## guard's blow, the story turning its head) on to its owner's machine.
 
 signal stance_changed(stance: Stance)
 signal health_changed(current: float, maximum: float)
@@ -15,6 +21,23 @@ signal breath_changed(value: float, holding: bool)
 enum Stance { STAND, CROUCH, CRAWL }
 
 const FOOTSTEP_SURFACES := ["stone", "wood", "clay"]
+## The characters as the other player sees them (tools/blender builds both).
+const PUPPET_MODELS := {
+	&"master": ["res://assets/models/characters/craftsman.glb", 3.1],
+	&"apprentice": ["res://assets/models/characters/apprentice.glb", 2.75],
+}
+## Clips for each pose, best first (the first one the model has is played).
+const PUPPET_CLIPS := {
+	&"idle": [&"idle", &"hands_on_hips"],
+	&"walk": [&"walk"],
+	&"run": [&"run", &"walk"],
+	&"crouch": [&"crouch_idle", &"kneel", &"cower"],
+	&"crouch_walk": [&"crouch_walk", &"walk"],
+	&"crawl": [&"crawl", &"crouch_walk", &"walk"],
+	&"crawl_idle": [&"crawl_idle", &"crouch_idle", &"kneel", &"cower"],
+	&"climb": [&"climb", &"walk"],
+	&"down": [&"downed", &"collapse", &"cower"],
+}
 
 @export_group("Movement")
 @export var walk_speed := 3.3
@@ -109,9 +132,46 @@ var _jump_sounds: Array = []
 var _land_sounds: Array = []
 var _hurt_sounds: Array = []
 
+## Co-op: &"master" or &"apprentice" (from the body's name).
+var role: StringName = &"master"
+## Played on this machine (always, alone).
+var is_local := true
+## How exposed this body is to guards: light on it, stance, movement (0..1).
+var exposure := 0.0
+
+var _net_seen := false
+var _net_pos := Vector3.ZERO
+var _net_yaw := 0.0
+var _net_pitch := 0.0
+var _net_vel := Vector3.ZERO
+var _net_bits := 0
+var _puppet_model: Node3D
+var _puppet_anim: AnimationPlayer
+var _puppet_clip: StringName = &""
+var _puppet_steps: AudioStreamPlayer3D
+var _puppet_step_distance := 0.0
+var _puppet_tag: Label3D
+var _use_body: StaticBody3D
+var _use_usable: DelegateUsable
+var _inventory_dirty := false
+var _talking := false
+
+## Co-op: knocked down rather than killed. The partner can help you up before
+## you bleed out; if you both go down, it's over.
+var downed := false
+const BLEED_OUT_SECONDS := 40.0
+const REVIVE_HOLD := 2.4
+var _bleed := 0.0
+var _down_reason := ""
+var _notice_second := -1
+
 func _ready() -> void:
-	add_to_group(&"player")
+	role = &"apprentice" if name == Net.APPRENTICE_BODY else &"master"
+	is_local = Net.is_local_body(self)
+	add_to_group(&"players")
 	add_to_group(&"persistent")
+	if role == &"apprentice":
+		_apprentice_build()
 	_capsule = (collision.shape as CapsuleShape3D).duplicate()
 	collision.shape = _capsule
 	health = max_health
@@ -120,20 +180,46 @@ func _ready() -> void:
 	_apply_shape(stand_height)
 	head.position.y = _eye_height
 	camera.fov = float(Settings.get_value(&"fov"))
+	_load_sounds()
+	_build_use_body()
+	if not is_local:
+		_become_puppet()
+		return
+	add_to_group(&"player")
+	camera.make_current()
 	Settings.changed.connect(_on_setting_changed)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_load_sounds()
+	inventory.changed.connect(_on_inventory_changed)
 	health_changed.emit(health, max_health)
+
+## The apprentice: a head shorter, quicker, and lighter on his feet; he takes
+## a beating less well.
+func _apprentice_build() -> void:
+	stand_height = 2.55
+	stand_eye = 2.3
+	crouch_height = 1.55
+	crouch_eye = 1.32
+	walk_speed = 3.6
+	sprint_speed = 6.7
+	crouch_speed = 2.05
+	crawl_speed = 1.1
+	for key in [&"noise_walk", &"noise_sprint", &"noise_crouch", &"noise_crawl", &"noise_land"]:
+		set(key, float(get(key)) * 0.7)
+	max_health = 5.0
 
 # --- Public API ---------------------------------------------------------------
 
 ## Blocks movement (and optionally look) until the matching unlock.
 func lock_controls(reason: StringName, lock_look := true) -> void:
+	if _for_owner(&"lock_controls", [reason, lock_look]):
+		return
 	_locks[reason] = true
 	if lock_look:
 		_look_locks[reason] = true
 
 func unlock_controls(reason: StringName) -> void:
+	if _for_owner(&"unlock_controls", [reason]):
+		return
 	_locks.erase(reason)
 	_look_locks.erase(reason)
 
@@ -147,6 +233,8 @@ func is_crawling() -> bool:
 	return stance == Stance.CRAWL
 
 func is_sprinting() -> bool:
+	if not is_local:
+		return _net_bits & 4 != 0
 	return stance == Stance.STAND and is_on_floor() and _wants_sprint() and _horizontal_speed() > walk_speed * 0.8
 
 func is_moving() -> bool:
@@ -163,7 +251,9 @@ func has_lamp_lit() -> bool:
 	return lamp != null and lamp.is_lit
 
 func apply_damage(amount: float, source: Node = null, death_reason := "DEATH_GENERIC") -> void:
-	if Game.is_dead() or amount <= 0.0:
+	if _for_owner(&"hurt", [amount, death_reason]):
+		return
+	if Game.is_dead() or amount <= 0.0 or downed:
 		return
 	var now := Time.get_ticks_msec() / 1000.0
 	if now - _last_damage_time < invulnerability:
@@ -179,25 +269,55 @@ func apply_damage(amount: float, source: Node = null, death_reason := "DEATH_GEN
 		_body_player.pitch_scale = randf_range(0.9, 1.1)
 		_body_player.play()
 	if health <= 0.0:
-		_die(death_reason)
+		# Co-op: a blow knocks you down; your partner can still help you up.
+		if Net.active:
+			_go_down(death_reason)
+		else:
+			_die(death_reason)
+
+## A line at the top of this player's screen (co-op: the host's story may
+## have something to tell the apprentice).
+func notice(text_key: String) -> void:
+	if _for_owner(&"notice", [text_key]):
+		return
+	Net.show_notice(InputHint.format(tr(text_key)), 4.0)
+
+## A blow that landed on this body on the host's machine (co-op).
+func hurt(amount: float, death_reason: String) -> void:
+	apply_damage(amount, null, death_reason)
+
+## A shove (a guard's thrust): added to the body's velocity.
+func push(impulse: Vector3) -> void:
+	if _for_owner(&"push", [impulse]):
+		return
+	velocity += impulse
 
 func kill(death_reason: String) -> void:
+	if _for_owner(&"kill", [death_reason]):
+		return
 	health = 0.0
 	health_changed.emit(health, max_health)
 	_die(death_reason)
 
 ## Mercury vapour exposure for this physics frame (0..1 intensity).
 func add_vapor(intensity: float) -> void:
-	_vapor_intake = maxf(_vapor_intake, intensity)
+	if is_local:
+		_vapor_intake = maxf(_vapor_intake, intensity)
 
 func add_shake(amount: float) -> void:
+	if _for_owner(&"add_shake", [amount]):
+		return
 	_shake = clampf(_shake + amount, 0.0, 1.0)
 
 func force_stand() -> void:
+	if _for_owner(&"force_stand"):
+		return
 	_set_stance(Stance.STAND, true)
 
 ## Smoothly turns the view toward `target`, optionally holding controls.
 func look_at_point(target: Vector3, duration := 0.6, fov := -1.0) -> void:
+	if _for_owner(&"look_at_point", [target, duration, fov]):
+		return
 	var to := target - camera.global_position
 	if to.length_squared() < 0.0001:
 		return
@@ -217,13 +337,19 @@ func look_at_point(target: Vector3, duration := 0.6, fov := -1.0) -> void:
 ## Walks the body to `target` on its own (for cutscenes, with the controls
 ## locked), at `speed` m/s; the view stays wherever it is turned.
 func walk_to(target: Vector3, speed := 1.2) -> void:
+	if _for_owner(&"walk_to", [target, speed]):
+		return
 	_walk_target = target
 	_walk_speed = speed
 
 func stop_walking() -> void:
+	if _for_owner(&"stop_walking"):
+		return
 	_walk_target = Vector3.INF
 
 func reset_fov(duration := 0.5) -> void:
+	if _for_owner(&"reset_fov", [duration]):
+		return
 	var tween := create_tween().set_trans(Tween.TRANS_SINE)
 	tween.tween_property(camera, "fov", float(Settings.get_value(&"fov")), duration)
 
@@ -255,6 +381,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"skip_line"):
 		Dialogue.skip_line()
+	elif event.is_action_pressed(&"ping") and Net.active:
+		_ping()
 	elif event.is_action_pressed(&"crouch"):
 		_auto_ducked = false
 		if Settings.get_value(&"crouch_toggle"):
@@ -275,6 +403,9 @@ func _set_pitch(value: float) -> void:
 # --- Simulation ----------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
+	if not is_local:
+		_puppet_tick(delta)
+		return
 	if Game.is_dead():
 		velocity = Vector3.ZERO
 		return
@@ -286,6 +417,9 @@ func _physics_process(delta: float) -> void:
 	_update_camera(delta)
 	_update_breath_and_toxicity(delta)
 	_update_health(delta)
+	if downed:
+		_bleed_out(delta)
+	_use_usable.hold_time = REVIVE_HOLD if downed else 0.0
 	_visibility_timer -= delta
 	if _visibility_timer <= 0.0:
 		_visibility_timer = 0.1
@@ -593,6 +727,8 @@ func _update_breath_and_toxicity(delta: float) -> void:
 		kill("DEATH_MERCURY")
 
 func _update_health(delta: float) -> void:
+	if downed:
+		return
 	var now := Time.get_ticks_msec() / 1000.0
 	if health < max_health * regen_cap and now - _last_damage_time > regen_delay:
 		health = minf(max_health * regen_cap, health + regen_per_second * delta)
@@ -614,6 +750,14 @@ func _update_visibility() -> void:
 	var lamp := inventory.lamp()
 	if lamp != null and lamp.is_lit:
 		light += 0.55 + (0.3 if lamp.is_raised else 0.0)
+	# Co-op: standing in your partner's lamplight shows you as well.
+	for other in Net.players():
+		if other == self or not other.has_lamp_lit():
+			continue
+		var reach := 13.0 if not other.inventory.lamp().is_raised else 17.0
+		var d := other.chest_position().distance_to(chest)
+		if d < reach:
+			light += pow(1.0 - d / reach, 2.0) * 0.8
 	for l in Stealth.lights():
 		if not is_instance_valid(l) or not l.is_visible_in_tree() or l.light_energy <= 0.05:
 			continue
@@ -628,8 +772,9 @@ func _update_visibility() -> void:
 	var visibility := clampf(light, 0.0, 1.0)
 	var stance_factor: float = {Stance.STAND: 1.0, Stance.CROUCH: 0.62, Stance.CRAWL: 0.38}[stance]
 	var motion_factor := 1.0 + (0.45 if is_sprinting() else (0.15 if is_moving() else 0.0))
+	exposure = clampf(visibility * stance_factor * motion_factor, 0.0, 1.0)
 	Stealth.player_visibility = visibility
-	Stealth.player_exposure = clampf(visibility * stance_factor * motion_factor, 0.0, 1.0)
+	Stealth.player_exposure = exposure
 
 func _light_occluded(l: Light3D, chest: Vector3) -> bool:
 	# Raycasts are cached per light for a few updates; lights rarely move.
@@ -691,6 +836,395 @@ func _play_land(impact: float) -> void:
 		_footstep_player.volume_db = -12.0 + impact * 8.0
 		_footstep_player.play()
 
+# --- Co-op ------------------------------------------------------------------------------------
+
+## A call meant for this body's own machine: on the host, a puppet passes it
+## on (the story turning the apprentice's head, a guard's blow); on the
+## apprentice's machine, the master's puppet leaves it to the host. True when
+## the call was handled that way.
+func _for_owner(method: StringName, args: Array = []) -> bool:
+	if is_local:
+		return false
+	Net.to_owner(self, method, args)
+	return true
+
+## The other player's body on this machine: no input, no HUD, no first-person
+## arms; it follows the network and wears its character's model.
+func _become_puppet() -> void:
+	camera.current = false
+	set_process_unhandled_input(false)
+	interactor.enabled = false
+	interactor.set_physics_process(false)
+	interactor.set_process_unhandled_input(false)
+	inventory.set_process_unhandled_input(false)
+	viewmodel.visible = false
+	viewmodel.process_mode = Node.PROCESS_MODE_DISABLED
+	var hud := get_node_or_null("HUD") as CanvasLayer
+	if hud != null:
+		hud.visible = false
+		hud.queue_free()
+	_build_puppet_model()
+	_puppet_steps = AudioStreamPlayer3D.new()
+	_puppet_steps.name = "PuppetSteps"
+	_puppet_steps.bus = &"Tomb"
+	_puppet_steps.unit_size = 5.0
+	_puppet_steps.max_distance = 45.0
+	add_child(_puppet_steps)
+	_puppet_tag = Label3D.new()
+	_puppet_tag.name = "Tag"
+	_puppet_tag.text = tr("COOP_MASTER" if role == &"master" else "COOP_APPRENTICE")
+	_puppet_tag.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_puppet_tag.font = load("res://assets/ui/fonts/title.tres") as Font
+	_puppet_tag.font_size = 48
+	_puppet_tag.outline_size = 10
+	_puppet_tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_puppet_tag.fixed_size = true
+	_puppet_tag.pixel_size = 0.001
+	_puppet_tag.no_depth_test = true
+	_puppet_tag.modulate = Color(0.95, 0.84, 0.62, 0.6)
+	_puppet_tag.outline_modulate = Color(0, 0, 0, 0.55)
+	_puppet_tag.position = Vector3(0, stand_height + 0.5, 0)
+	add_child(_puppet_tag)
+
+func _build_puppet_model() -> void:
+	var entry: Array = PUPPET_MODELS[role]
+	var scene := load(entry[0]) as PackedScene
+	if scene == null:
+		return
+	_puppet_model = scene.instantiate() as Node3D
+	_puppet_model.name = "PuppetModel"
+	_puppet_model.scale = Vector3.ONE * float(entry[1])
+	# Tripo characters face +x; the player looks down -z.
+	_puppet_model.rotation.y = PI * 0.5
+	add_child(_puppet_model)
+	for n in _puppet_model.find_children("*", "GeometryInstance3D", true, false):
+		(n as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	var found := _puppet_model.find_children("*", "AnimationPlayer", true, false)
+	_puppet_anim = found[0] as AnimationPlayer if not found.is_empty() else null
+	if _puppet_anim != null:
+		for clip in _puppet_anim.get_animation_list():
+			# A fall plays once and stays down.
+			var once := clip == &"collapse"
+			_puppet_anim.get_animation(clip).loop_mode = Animation.LOOP_NONE if once else Animation.LOOP_LINEAR
+	# The craftsman model's modelling tool stays at his bench.
+	var tool := _puppet_model.find_child("Tool", true, false) as Node3D
+	if tool != null:
+		tool.visible = false
+	inventory.set_lamp_socket(_lamp_hand())
+
+## Where the puppet's lamp hangs: from the left hand's bone (kept upright in
+## `_puppet_tick`), or at the hip if the model has no such bone.
+func _lamp_hand() -> Node3D:
+	var socket := Node3D.new()
+	socket.name = "LampHand"
+	var skeletons := _puppet_model.find_children("*", "Skeleton3D", true, false)
+	var skeleton := skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
+	if skeleton == null or skeleton.find_bone("L_Hand") < 0:
+		socket.position = Vector3(-0.4, stand_height * 0.5, -0.35)
+		add_child(socket)
+		return socket
+	var attach := BoneAttachment3D.new()
+	attach.name = "LeftHand"
+	attach.bone_name = "L_Hand"
+	skeleton.add_child(attach)
+	attach.add_child(socket)
+	return socket
+
+## Lets the other player use this body (talk to it, hand it things). Built on
+## both bodies so a use has the same path on both machines; only a puppet's
+## can be aimed at.
+func _build_use_body() -> void:
+	_use_body = StaticBody3D.new()
+	_use_body.name = "UseBody"
+	_use_body.collision_layer = 0 if is_local else 16
+	_use_body.collision_mask = 0
+	add_child(_use_body)
+	var shape := CollisionShape3D.new()
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.45
+	cap.height = stand_height
+	shape.shape = cap
+	shape.position.y = stand_height * 0.5
+	_use_body.add_child(shape)
+	_use_usable = DelegateUsable.new()
+	_use_usable.name = "Usable"
+	_use_usable.delegate_path = ^"../.."
+	_use_usable.highlight = false
+	_use_body.add_child(_use_usable)
+
+func _puppet_tick(delta: float) -> void:
+	if not _net_seen:
+		return
+	var follow := clampf(delta * 14.0, 0.0, 1.0)
+	var to := _net_pos - global_position
+	if to.length() > 5.0:
+		global_position = _net_pos
+	else:
+		global_position += to * follow
+	rotation.y = lerp_angle(rotation.y, _net_yaw, follow)
+	_set_pitch(lerpf(_pitch, _net_pitch, follow))
+	velocity = _net_vel
+	_update_stance_shape(delta)
+	head.position.y = _eye_height
+	_use_body.get_child(0).position.y = _capsule.height * 0.5
+	var lamp := inventory.lamp()
+	if lamp != null:
+		var lit := _net_bits & 8 != 0
+		if lamp.is_lit != lit and not lamp.relighting:
+			lamp.set_state(maxf(lamp.oil, 1.0), lit)
+		lamp.is_raised = _net_bits & 16 != 0
+		# Upright in the swinging hand, a little higher when held up.
+		var socket := lamp.get_parent() as Node3D
+		if socket != null:
+			socket.global_basis = global_basis
+			socket.position = Vector3(0, -0.02 + (0.08 if lamp.is_raised else 0.0), 0)
+	_animate_puppet()
+	_puppet_footsteps(delta)
+
+func _animate_puppet() -> void:
+	if _puppet_anim == null:
+		return
+	var speed := Vector2(_net_vel.x, _net_vel.z).length()
+	var pose := &"idle"
+	if downed:
+		pose = &"down"
+	else:
+		pose = _pose_for(speed)
+	var clip := _clip_for(pose)
+	if clip != _puppet_clip and clip != &"":
+		_puppet_clip = clip
+		_puppet_anim.play(clip, 0.25)
+	var pace := 1.0
+	if pose in [&"walk", &"run"]:
+		pace = clampf(speed / walk_speed, 0.6, 1.9)
+	elif pose == &"crouch_walk":
+		pace = clampf(speed / crouch_speed, 0.5, 1.6)
+	elif pose == &"crawl":
+		pace = clampf(speed / crawl_speed, 0.5, 1.6)
+	_puppet_anim.speed_scale = pace
+	# Without crouching or crawling clips the figure sinks instead.
+	var sink := 0.0
+	if not downed and stance != Stance.STAND and not String(clip).begins_with("crouch") and not String(clip).begins_with("crawl") \
+			and clip not in [&"kneel", &"cower"]:
+		sink = stand_height - _capsule.height
+	_puppet_model.position.y = lerpf(_puppet_model.position.y, -sink * 0.55, 0.2)
+
+func _pose_for(speed: float) -> StringName:
+	var pose := &"idle"
+	match stance:
+		Stance.CRAWL:
+			pose = &"crawl" if speed > 0.2 else &"crawl_idle"
+		Stance.CROUCH:
+			pose = &"crouch_walk" if speed > 0.3 else &"crouch"
+		_:
+			if _net_bits & 2 != 0:
+				pose = &"climb"
+			elif speed > walk_speed * 1.3:
+				pose = &"run"
+			elif speed > 0.3:
+				pose = &"walk"
+	return pose
+
+func _clip_for(pose: StringName) -> StringName:
+	for clip in PUPPET_CLIPS.get(pose, [pose]):
+		if _puppet_anim.has_animation(clip):
+			return clip
+	return _puppet_clip
+
+func _puppet_footsteps(delta: float) -> void:
+	var speed := Vector2(_net_vel.x, _net_vel.z).length()
+	if speed < 0.3 or _net_bits & 1 == 0:
+		return
+	_puppet_step_distance += speed * delta
+	var stride := step_distance * (0.75 if _net_bits & 4 != 0 else 1.0) * (0.7 if stance == Stance.CRAWL else 1.0)
+	if _puppet_step_distance < stride:
+		return
+	_puppet_step_distance = 0.0
+	var options: Array = _footsteps.get(_surface_under(), [])
+	if options.is_empty():
+		return
+	_puppet_steps.stream = options.pick_random()
+	_puppet_steps.pitch_scale = randf_range(0.92, 1.08)
+	match stance:
+		Stance.CRAWL:
+			_puppet_steps.volume_db = -16.0
+		Stance.CROUCH:
+			_puppet_steps.volume_db = -12.0
+		_:
+			_puppet_steps.volume_db = -3.0 if _net_bits & 4 != 0 else -7.0
+	_puppet_steps.play()
+
+## What the other machine needs to show this body (sent ~20 times a second).
+func net_state() -> Array:
+	var bits := 0
+	if is_on_floor():
+		bits |= 1
+	if _ladder != null:
+		bits |= 2
+	if is_sprinting():
+		bits |= 4
+	var lamp := inventory.lamp()
+	if lamp != null and lamp.is_lit:
+		bits |= 8
+	if lamp != null and lamp.is_raised:
+		bits |= 16
+	if downed:
+		bits |= 32
+	return [global_position, rotation.y, _pitch, int(stance), velocity, bits, exposure, health]
+
+func net_apply(state: Array) -> void:
+	if state.size() < 8:
+		return
+	_net_pos = state[0]
+	_net_yaw = float(state[1])
+	_net_pitch = float(state[2])
+	var s := int(state[3])
+	if s != int(stance):
+		stance = s as Stance
+		stance_changed.emit(stance)
+	_net_vel = state[4]
+	_net_bits = int(state[5])
+	var was_down := downed
+	downed = _net_bits & 32 != 0
+	if downed != was_down:
+		_on_partner_down_changed()
+	exposure = float(state[6])
+	health = float(state[7])
+	if not _net_seen:
+		_net_seen = true
+		global_position = _net_pos
+		rotation.y = _net_yaw
+
+func _on_inventory_changed() -> void:
+	if not Net.has_partner() or _inventory_dirty:
+		return
+	# Several changes in one moment go over as one.
+	_inventory_dirty = true
+	await get_tree().create_timer(0.25).timeout
+	_inventory_dirty = false
+	Net.send_inventory(self)
+
+## Marks the spot (or the guard) under the crosshair for the partner.
+func _ping() -> void:
+	var from := camera.global_position
+	var q := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * 80.0, 1 | 4)
+	q.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return
+	var guard: Node = null
+	var n := hit.collider as Node
+	while n != null:
+		if n is Guard:
+			guard = n
+			break
+		n = n.get_parent()
+	Net.ping(hit.position, guard)
+
+# --- Usable delegate: the partner's body -------------------------------------------------------
+
+func usable_prompt(user: Node) -> String:
+	var other := user as Player
+	if other == null or other == self or other.downed:
+		return ""
+	if downed:
+		return tr("PROMPT_REVIVE")
+	if Quest.is_at(&"talk_apprentice"):
+		return "" if _talking else tr("PROMPT_TALK")
+	var item := other.inventory.selected_item()
+	if item != null and inventory.has_room_for(item.id):
+		return tr("PROMPT_GIVE_ITEM").format({"item": item.display_name()})
+	if other.inventory.lamp() != null and inventory.lamp() == null:
+		return tr("PROMPT_GIVE_LAMP")
+	return ""
+
+func usable_can_use(user: Node) -> bool:
+	return usable_prompt(user) != ""
+
+func usable_hold_done(user: Node) -> void:
+	if downed and user != self:
+		revive()
+
+func usable_use(user: Node) -> void:
+	var other := user as Player
+	if other == null or downed:
+		return
+	if Quest.is_at(&"talk_apprentice"):
+		_talk_task()
+		return
+	var item := other.inventory.selected_item()
+	if item != null and inventory.has_room_for(item.id):
+		other.inventory.remove(item.id, 1)
+		inventory.add(item.id, 1)
+		Sfx.play_at(preload("res://audio/sfx/impacts/cloth2.ogg"), global_position + Vector3.UP * 1.4, -8.0)
+		return
+	if other.inventory.lamp() != null and inventory.lamp() == null:
+		var lamp_state := other.inventory.give_lamp()
+		inventory.take_lamp(float(lamp_state.get("oil", 50.0)), bool(lamp_state.get("lit", true)))
+		Sfx.play_at(preload("res://audio/sfx/impacts/handleSmallLeather.ogg"), global_position + Vector3.UP * 1.4, -6.0)
+
+## Co-op: down, not dead: controls go (you can still look about), the view
+## sinks to the floor, and the partner has BLEED_OUT_SECONDS to help you up.
+func _go_down(reason: String) -> void:
+	if downed:
+		return
+	downed = true
+	_down_reason = reason
+	_bleed = BLEED_OUT_SECONDS
+	_notice_second = -1
+	health = 0.0
+	health_changed.emit(health, max_health)
+	lock_controls(&"downed", false)
+	_set_stance(Stance.CRAWL, true)
+	velocity = Vector3.ZERO
+	Net.player_downed(self)
+
+func down_reason() -> String:
+	return _down_reason if _down_reason != "" else "DEATH_GUARD"
+
+func _bleed_out(delta: float) -> void:
+	_bleed -= delta
+	var second := ceili(_bleed)
+	if second != _notice_second:
+		_notice_second = second
+		Net.show_notice(tr("COOP_DOWNED") % maxi(second, 0), 1.2)
+	if _bleed <= 0.0:
+		downed = false
+		_die(_down_reason)
+
+## Helped up by the partner (both machines run this; only the owner's counts).
+func revive() -> void:
+	if not downed:
+		return
+	downed = false
+	Sfx.play_at(preload("res://audio/sfx/impacts/handleSmallLeather.ogg"), global_position + Vector3.UP, -4.0)
+	if not is_local:
+		return
+	health = max_health * 0.5
+	health_changed.emit(health, max_health)
+	unlock_controls(&"downed")
+	_set_stance(Stance.CROUCH, true)
+	Net.hide_notice()
+	_last_damage_time = Time.get_ticks_msec() / 1000.0
+
+func _on_partner_down_changed() -> void:
+	_use_usable.hold_time = REVIVE_HOLD if downed else 0.0
+	if _puppet_tag != null:
+		_puppet_tag.modulate = Color(0.95, 0.3, 0.2, 0.95) if downed else Color(0.95, 0.84, 0.62, 0.6)
+	if downed:
+		Net.show_notice(InputHint.format(tr("COOP_PARTNER_DOWN") % _puppet_tag.text), 6.0)
+		Net.player_downed(self)
+
+## Co-op's first step: the apprentice tells his master about the cracked
+## legs, as the apprentice at his bench does alone.
+func _talk_task() -> void:
+	if _talking:
+		return
+	_talking = true
+	await Dialogue.play(&"apprentice_task")
+	_talking = false
+	Quest.complete(&"talk_apprentice")
+
 # --- Settings & persistence ----------------------------------------------------------------
 
 func _on_setting_changed(key: StringName, value: Variant) -> void:
@@ -713,3 +1247,5 @@ func persist_load(data: Dictionary) -> void:
 	_set_pitch(float(data.get("pitch", 0.0)))
 	health = maxf(float(data.get("health", max_health)), max_health * 0.5)
 	health_changed.emit(health, max_health)
+	_net_pos = global_position
+	_net_yaw = rotation.y

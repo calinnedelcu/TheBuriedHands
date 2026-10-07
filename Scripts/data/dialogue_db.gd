@@ -69,6 +69,11 @@ const SEQUENCES := {
 		# He bows to his master all the same.
 		[&"apprentice", "DLG_KEPT_1", {"anim": &"bow"}],
 	],
+	# Co-op: the apprentice is the second player, and he comes along.
+	&"coop_together": [
+		[&"apprentice", "DLG_TOGETHER_1"],
+		[&"craftsman", "DLG_TOGETHER_2"],
+	],
 	# --- Act II: the archives and Liang ---------------------------------------
 	&"archives_enter": [
 		[&"craftsman", "DLG_ARCHIVES_ENTER"],

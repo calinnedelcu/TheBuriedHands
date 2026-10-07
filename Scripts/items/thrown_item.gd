@@ -75,6 +75,8 @@ func _shatter() -> void:
 func _settle() -> void:
 	set_physics_process(false)
 	var pickup := preload("res://scenes/items/pickup.tscn").instantiate()
+	# Named after the throw, the same on both co-op machines.
+	pickup.name = String(name) + "Item"
 	pickup.set(&"item_id", item_id)
 	get_parent().add_child(pickup)
 	pickup.global_position = global_position + Vector3.DOWN * 0.08

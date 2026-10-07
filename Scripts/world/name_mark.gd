@@ -29,6 +29,7 @@ func _ready() -> void:
 	_label.position = Vector3(0, 0, 0.05)
 	add_child(_label)
 	var body := StaticBody3D.new()
+	body.name = "Body"
 	body.collision_layer = 16
 	body.collision_mask = 0
 	add_child(body)

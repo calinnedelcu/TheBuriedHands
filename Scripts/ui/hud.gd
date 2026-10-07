@@ -381,6 +381,7 @@ func _process(delta: float) -> void:
 # --- Signal handlers ------------------------------------------------------------------
 
 func _on_objective_changed(text_key: String, hint_key: String) -> void:
+	text_key = Net.objective_for(text_key)
 	if text_key == "":
 		_objective_timer = 0.0
 		return

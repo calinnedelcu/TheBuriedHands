@@ -7,6 +7,8 @@ const STING := preload("res://audio/sfx/impacts/impactPunch_medium_001.ogg")
 
 var _root: Control
 var _reason: Label
+var _retry: Button
+var _waiting: Label
 
 func _ready() -> void:
 	layer = 60
@@ -48,10 +50,17 @@ func _ready() -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 30)
 	v.add_child(spacer)
-	var retry := Button.new()
-	retry.text = "MENU_RETRY"
-	retry.pressed.connect(func(): Game.retry_from_checkpoint())
-	v.add_child(retry)
+	_retry = Button.new()
+	_retry.text = "MENU_RETRY"
+	_retry.pressed.connect(func(): Game.retry_from_checkpoint())
+	v.add_child(_retry)
+	# Co-op: the master decides when you both go back.
+	_waiting = Label.new()
+	_waiting.theme_type_variation = &"BodyText"
+	_waiting.text = "COOP_WAIT_HOST_RETRY"
+	_waiting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_waiting.visible = false
+	v.add_child(_waiting)
 	var menu := Button.new()
 	menu.text = "MENU_MAIN_MENU"
 	menu.pressed.connect(func(): Game.return_to_menu())
@@ -65,8 +74,13 @@ func _on_failed(reason_key: String) -> void:
 	Sfx.play_ui(STING, -4.0)
 	_root.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_retry.visible = not Net.is_client()
+	_waiting.visible = Net.is_client()
 	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(_root, "modulate:a", 1.0, 1.2)
 	await tween.finished
-	get_tree().paused = true
-	(_root.get_child(1).get_child(0).get_child(4) as Button).grab_focus()
+	if not Net.active:
+		get_tree().paused = true
+	var buttons := _root.find_children("*", "Button", true, false)
+	var first: Button = _retry if _retry.visible else buttons.back()
+	first.grab_focus()

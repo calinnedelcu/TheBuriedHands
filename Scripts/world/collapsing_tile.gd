@@ -23,9 +23,16 @@ func _ready() -> void:
 	_area.body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node3D) -> void:
-	if broken or _triggered:
+	# Co-op: the host feels the weight; the apprentice's machine is told.
+	if broken or _triggered or Net.is_client():
 		return
 	if body is RigidBody3D and (body as RigidBody3D).mass < 1.0:
+		return
+	Net.mirror(self, &"net_crack")
+	net_crack()
+
+func net_crack() -> void:
+	if broken or _triggered:
 		return
 	_triggered = true
 	Sfx.play_at(CRACK, global_position, 0.0, 0.05, &"Tomb", 25.0)

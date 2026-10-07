@@ -21,7 +21,7 @@ func _ready() -> void:
 		usable.hold_time = 2.6
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is Player:
+	if body is Player and (body as Player).is_local:
 		_player = body
 
 func _on_body_exited(body: Node3D) -> void:

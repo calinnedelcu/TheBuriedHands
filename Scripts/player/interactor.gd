@@ -46,14 +46,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			_holding = true
 			_hold_elapsed = 0.0
 		else:
-			target.use(_user)
+			# Through Net: in co-op the host checks the use and both run it.
+			Net.use(target, _user, &"use")
 			_refresh_prompt(true)
 	elif event.is_action_released(&"interact") and _holding:
 		var was_tap := _hold_elapsed < TAP_SECONDS and target != null and target.tap_enabled
 		var tapped := target
 		_cancel_hold()
 		if was_tap:
-			tapped.tap(_user)
+			Net.use(tapped, _user, &"tap")
 			_refresh_prompt(true)
 
 func _find_usable() -> Usable:
@@ -132,7 +133,7 @@ func _update_hold(delta: float) -> void:
 	if progress >= 1.0:
 		_holding = false
 		hold_progress_changed.emit(0.0)
-		target.complete_hold(_user)
+		Net.use(target, _user, &"hold")
 		_refresh_prompt(true)
 
 func _cancel_hold() -> void:
