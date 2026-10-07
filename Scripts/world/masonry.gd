@@ -1,15 +1,18 @@
 class_name Masonry
 extends RefCounted
 ## Dressed stone and timber for the level kit, laid the way the workshop is
-## built: courses of blocks with bevelled edges and dark joints on walls, big
-## flagstones on floors, boards under timber ceilings. Every piece is the same
-## bevelled box in a MultiMesh, scaled to its size and tinted a shade lighter
-## or darker than its neighbours; the plain face behind shows dark in the
+## built, with the workshop's own stones: its wall blocks in courses, its
+## flagstones on floors (tools/blender/build_workshop_stones.py takes them
+## out of the map), boards under timber ceilings. Pieces are multimeshes,
+## one per stone, each scaled to its place and tinted a shade lighter or
+## darker than its neighbours; the plain face behind shows dark in the
 ## joints. Only for looks: the kit keeps its plain box colliders.
 
 const TINTED_SHADER := preload("res://assets/shaders/surface_triplanar_tinted.gdshader")
+const STONES := preload("res://assets/models/level/workshop_stones.glb")
 
 static var _box: ArrayMesh = null
+static var _stones := {}
 static var _tinted := {}
 static var _joints := {}
 
@@ -78,6 +81,23 @@ static func _poly(st: SurfaceTool, pts: Array, n: Vector3) -> void:
 		for p in [a, b, c]:
 			st.set_normal(n)
 			st.add_vertex(p)
+
+## The workshop's stones of a kind, "wall" or "floor": [mesh, size] each,
+## centred on their origins. Wall stones lie along x, stand along y and show
+## their worked face to +z; floor stones lie along x with their tops up.
+static func stones(kind: String) -> Array:
+	if _stones.is_empty():
+		_stones = {"wall": [], "floor": []}
+		var scene := STONES.instantiate()
+		for node in scene.find_children("*", "MeshInstance3D", true, false):
+			var mi := node as MeshInstance3D
+			var entry := [mi.mesh, mi.mesh.get_aabb().size]
+			if String(mi.name).begins_with("Wall"):
+				_stones["wall"].append(entry)
+			elif String(mi.name).begins_with("Floor"):
+				_stones["floor"].append(entry)
+		scene.free()
+	return _stones.get(kind, [])
 
 ## `mat` drawn with each piece's own tint (one copy per material).
 static func tinted(mat: Material) -> Material:
@@ -174,6 +194,42 @@ static func courses(rng: RandomNumberGenerator, w: float, v0: float, v1: float, 
 			l = rng.randf_range(lengths.x, lengths.y)
 	return out
 
+## Courses of the workshop's wall stones over the band v0..v1 of a wall w
+## long: each stone at its own proportions, scaled to its course's height,
+## a part-stone to start every other course, the last of a course stretched
+## to the edge rather than a sliver left. [u, v, length, height, stone].
+static func stone_courses(rng: RandomNumberGenerator, w: float, v0: float, v1: float, lines: PackedFloat32Array, wall_stones: Array) -> Array:
+	var cuts: Array[float] = [v0]
+	for line in lines:
+		if line > v0 + 0.001 and line < v1 - 0.001:
+			cuts.append(line)
+	cuts.append(v1)
+	var k := 1
+	while k < cuts.size() - 1:
+		if cuts[k] - cuts[k - 1] < 0.2 or cuts[k + 1] - cuts[k] < 0.2:
+			cuts.remove_at(k)
+		else:
+			k += 1
+	var out := []
+	for r in cuts.size() - 1:
+		var v := cuts[r]
+		var ch := cuts[r + 1] - v
+		var u := 0.0
+		var first := roundi(v * 7.0) % 2 == 1
+		while u < w - 0.001:
+			var pick := rng.randi() % wall_stones.size()
+			var native: Vector3 = wall_stones[pick][1]
+			var l := clampf(native.x * ch / native.y, 0.35, 2.4)
+			if first:
+				l *= rng.randf_range(0.45, 0.75)
+				first = false
+			if w - (u + l) < l * 0.4:
+				l = w - u
+			l = minf(l, w - u)
+			out.append([u, v, l, ch, pick])
+			u += l
+	return out
+
 ## Rows of slabs over a w × d rectangle (rows across d, slabs along w):
 ## flagstones on a floor, boards under a ceiling. [u, v, length, width].
 static func rows(rng: RandomNumberGenerator, w: float, d: float, widths: Vector2, lengths: Vector2) -> Array:
@@ -195,13 +251,14 @@ static func rows(rng: RandomNumberGenerator, w: float, d: float, widths: Vector2
 		v += rw
 	return out
 
-## A piece `size` (along a, along b, along c) centred on `centre`, a little
-## turned about c and, by `wobble`, about a and b (hand-cut, hand-set);
-## a, b, c are unit axes of either handedness.
+## A piece scaled by `size` along a, b and c (a unit box: its size; a stone:
+## its size over the stone's own) centred on `centre`, a little turned about
+## c and, by `wobble`, about a and b (hand-cut, hand-set). a, b, c are unit
+## axes of either handedness; the piece's +y and +z stay along b and c.
 static func piece(centre: Vector3, a: Vector3, b: Vector3, c: Vector3, size: Vector3, twist := 0.0, wobble := Vector2.ZERO) -> Transform3D:
 	var basis := Basis(a * size.x, b * size.y, c * size.z)
 	if basis.determinant() < 0.0:
-		basis = Basis(a * size.x, b * size.y, -c * size.z)
+		basis = Basis(-a * size.x, b * size.y, c * size.z)
 	if twist != 0.0:
 		basis = Basis(c.normalized(), twist) * basis
 	if wobble != Vector2.ZERO:
@@ -212,28 +269,32 @@ static func piece(centre: Vector3, a: Vector3, b: Vector3, c: Vector3, size: Vec
 static func wobble(rng: RandomNumberGenerator, degrees: float) -> Vector2:
 	return Vector2(deg_to_rad(rng.randf_range(-degrees, degrees)), deg_to_rad(rng.randf_range(-degrees, degrees)))
 
-## Pieces gathered by material, then built as one MultiMesh each.
+## Pieces gathered by material and mesh (the bevelled box by default), then
+## built as one MultiMesh each.
 class Batch:
 	var _parts := {}
 
-	func add(mat: Material, xf: Transform3D, shade: float) -> void:
-		if not _parts.has(mat):
-			_parts[mat] = [[], PackedColorArray()]
-		_parts[mat][0].append(xf)
-		_parts[mat][1].append(Color(shade, shade, shade))
+	func add(mat: Material, xf: Transform3D, shade: float, mesh: Mesh = null) -> void:
+		var m: Mesh = mesh if mesh != null else Masonry.box()
+		var key := "%d:%d" % [mat.get_instance_id(), m.get_instance_id()]
+		if not _parts.has(key):
+			_parts[key] = [mat, m, [], PackedColorArray()]
+		_parts[key][2].append(xf)
+		_parts[key][3].append(Color(shade, shade, shade))
 
 	func is_empty() -> bool:
 		return _parts.is_empty()
 
 	## Adds the multimeshes under `parent`, marked as generated.
 	func build(parent: Node3D) -> void:
-		for mat in _parts:
-			var xfs: Array = _parts[mat][0]
-			var colors: PackedColorArray = _parts[mat][1]
+		for key in _parts:
+			var mat: Material = _parts[key][0]
+			var xfs: Array = _parts[key][2]
+			var colors: PackedColorArray = _parts[key][3]
 			var mm := MultiMesh.new()
 			mm.transform_format = MultiMesh.TRANSFORM_3D
 			mm.use_colors = true
-			mm.mesh = Masonry.box()
+			mm.mesh = _parts[key][1]
 			mm.instance_count = xfs.size()
 			for k in xfs.size():
 				mm.set_instance_transform(k, xfs[k])
@@ -243,5 +304,9 @@ class Batch:
 			mmi.multimesh = mm
 			mmi.material_override = Masonry.tinted(mat)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# Far off, in the dark of the tomb, the plain faces behind will do.
+			mmi.visibility_range_end = 70.0
+			mmi.visibility_range_end_margin = 8.0
+			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			mmi.set_meta(&"generated", true)
 			parent.add_child(mmi)

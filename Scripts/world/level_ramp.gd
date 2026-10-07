@@ -5,7 +5,7 @@ extends Node3D
 ## its foot; it climbs `rise` over `run` toward -z. Steps are only how it
 ## looks: the collider is a smooth slope, so walking up and down is even.
 ## Rebuilt from its settings; nothing generated is saved. With `masonry`
-## every step is dressed stone, two or three to a step, on a dark core.
+## every step is two or three of the workshop's flagstones, on a dark core.
 
 const ROCK := preload("res://assets/materials/level/tunnel_rock.tres")
 
@@ -104,6 +104,7 @@ func _dress(mat: Material) -> void:
 	var riser := rise / steps
 	var hw := width * 0.5
 	var core := Masonry.joints(mat)
+	var slabs := Masonry.stones("floor")
 	for i in steps:
 		var top := riser * (i + 1)
 		var z := -tread * (i + 0.5)
@@ -116,14 +117,22 @@ func _dress(mat: Material) -> void:
 			mi.position = Vector3(0, (top - riser) * 0.5, z)
 			mi.set_meta(&"generated", true)
 			add_child(mi)
-		# Two or three stones across, their joints not in line with the last.
+		# Two or three of the workshop's flagstones across, their joints not
+		# in line with the last step's.
 		var x := -hw
 		while x < hw - 0.001:
 			var l := minf(rng.randf_range(1.0, 1.9), hw - x)
 			if hw - (x + l) < 0.5:
 				l = hw - x
 			var centre := Vector3(x + l * 0.5, top - riser * 0.5 + 0.01, z + 0.01)
-			batch.add(mat, Masonry.piece(centre, Vector3.RIGHT, Vector3.UP, Vector3.BACK, Vector3(l - 0.04, riser + 0.02, tread + 0.02), rng.randf_range(-0.006, 0.006)), rng.randf_range(0.84, 1.1))
+			var size := Vector3(l - 0.04, riser + 0.02, tread + 0.02)
+			var shade := rng.randf_range(0.84, 1.1)
+			if slabs.is_empty():
+				batch.add(mat, Masonry.piece(centre, Vector3.RIGHT, Vector3.UP, Vector3.BACK, size, rng.randf_range(-0.006, 0.006)), shade)
+			else:
+				var pick: Array = slabs[rng.randi() % slabs.size()]
+				var turn := 1.0 if rng.randf() < 0.5 else -1.0
+				batch.add(mat, Masonry.piece(centre, Vector3.RIGHT * turn, Vector3.UP, Vector3.BACK * turn, size / (pick[1] as Vector3), rng.randf_range(-0.006, 0.006)), shade, pick[0])
 			x += l
 	batch.build(self)
 

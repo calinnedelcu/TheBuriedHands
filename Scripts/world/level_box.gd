@@ -72,7 +72,7 @@ const BACKING := 0.08
 		masonry = v
 		_queue_build()
 ## Height of a course of blocks (rounded so a wall holds whole courses).
-@export var course_height := 0.72:
+@export var course_height := 0.85:
 	set(v):
 		course_height = maxf(v, 0.1)
 		_queue_build()
@@ -80,6 +80,11 @@ const BACKING := 0.08
 @export var block_length := Vector2(0.9, 1.6):
 	set(v):
 		block_length = v
+		_queue_build()
+## The workshop's own stones (else plain bevelled blocks, e.g. rammed earth).
+@export var stones := true:
+	set(v):
+		stones = v
 		_queue_build()
 ## More stones for the floor, picked among with floor_material.
 @export var floor_variants: Array[Material] = []:
@@ -207,15 +212,23 @@ func _dress(batch: Masonry.Batch, rng: RandomNumberGenerator, f: int, fr: Dictio
 	var v: Vector3 = fr.v
 	var n: Vector3 = fr.n
 	if f == LevelOpening.Face.FLOOR or (f == LevelOpening.Face.CEILING and not Masonry.is_timber(mat)):
-		# Flagstones, a little uneven; under a stone ceiling, slabs.
-		var stones: Array[Material] = [mat]
+		# The workshop's flagstones, turned this way and that, a little
+		# uneven; under a stone ceiling, the same slabs face down.
+		var mats: Array[Material] = [mat]
 		if f == LevelOpening.Face.FLOOR:
-			stones.append_array(floor_variants)
-		for s in Masonry.rows(rng, r.size.x, r.size.y, Vector2(1.3, 2.1), Vector2(1.6, 2.8)):
-			var proud := rng.randf_range(0.0, 0.025)
-			var centre := _point(fr, r.position.x + s[0] + s[2] * 0.5, r.position.y + s[1] + s[3] * 0.5) + n * (proud - 0.1)
-			var xf := Masonry.piece(centre, u, n, v, Vector3(s[2] - 0.035, 0.2, s[3] - 0.035), rng.randf_range(-0.01, 0.01), Masonry.wobble(rng, 0.3))
-			batch.add(stones[rng.randi() % stones.size()], xf, rng.randf_range(0.84, 1.1))
+			mats.append_array(floor_variants)
+		var slabs := Masonry.stones("floor")
+		for s in Masonry.rows(rng, r.size.x, r.size.y, Vector2(1.7, 2.4), Vector2(2.2, 3.8)):
+			var centre := _point(fr, r.position.x + s[0] + s[2] * 0.5, r.position.y + s[1] + s[3] * 0.5) + n * (rng.randf_range(0.0, 0.02) - 0.18)
+			var size := Vector3(s[2] - 0.03, 0.36, s[3] - 0.03)
+			var turn := 1.0 if rng.randf() < 0.5 else -1.0
+			var shade := rng.randf_range(0.86, 1.1)
+			var stone := mats[rng.randi() % mats.size()]
+			if slabs.is_empty():
+				batch.add(stone, Masonry.piece(centre, u, n, v, size, rng.randf_range(-0.01, 0.01), Masonry.wobble(rng, 0.3)), shade)
+			else:
+				var pick: Array = slabs[rng.randi() % slabs.size()]
+				batch.add(stone, Masonry.piece(centre, u * turn, n, v * turn, size / (pick[1] as Vector3), rng.randf_range(-0.01, 0.01), Masonry.wobble(rng, 0.3)), shade, pick[0])
 	elif f == LevelOpening.Face.CEILING:
 		# Boards along the longer side, hung a little unevenly.
 		var along_u := r.size.x >= r.size.y
@@ -230,11 +243,24 @@ func _dress(batch: Masonry.Batch, rng: RandomNumberGenerator, f: int, fr: Dictio
 			var centre := at + n * (rng.randf_range(0.02, 0.06) - 0.06)
 			batch.add(mat, Masonry.piece(centre, lu, n, lv, Vector3(b[2] - 0.03, 0.12, b[3] - 0.035), rng.randf_range(-0.006, 0.006)), rng.randf_range(0.8, 1.12))
 	else:
-		# Dressed blocks in courses, each standing a little proud of the wall.
-		for b in Masonry.courses(rng, r.size.x, r.position.y, r.end.y, _lines, block_length):
-			var proud := rng.randf_range(0.01, 0.07)
-			var centre := _point(fr, r.position.x + b[0] + b[2] * 0.5, b[1] + b[3] * 0.5) + n * (proud - 0.2)
-			batch.add(mat, Masonry.piece(centre, u, v, n, Vector3(b[2] - 0.025, b[3] - 0.025, 0.4), rng.randf_range(-0.008, 0.008), Masonry.wobble(rng, 0.8)), rng.randf_range(0.82, 1.1))
+		var blocks := Masonry.stones("wall") if stones else []
+		if blocks.is_empty():
+			# Plain blocks in courses (rammed earth, or no stones to hand).
+			for b in Masonry.courses(rng, r.size.x, r.position.y, r.end.y, _lines, block_length):
+				var proud := rng.randf_range(0.01, 0.07)
+				var centre := _point(fr, r.position.x + b[0] + b[2] * 0.5, b[1] + b[3] * 0.5) + n * (proud - 0.2)
+				batch.add(mat, Masonry.piece(centre, u, v, n, Vector3(b[2] - 0.025, b[3] - 0.025, 0.4), rng.randf_range(-0.008, 0.008), Masonry.wobble(rng, 0.8)), rng.randf_range(0.82, 1.1))
+			return
+		# The workshop's wall stones, each at its own proportions, its worked
+		# face to the room, standing a little proud of the wall.
+		for b in Masonry.stone_courses(rng, r.size.x, r.position.y, r.end.y, _lines, blocks):
+			var pick: Array = blocks[b[4]]
+			var native: Vector3 = pick[1]
+			var depth: float = native.z * b[3] / native.y
+			var proud := rng.randf_range(0.0, 0.05)
+			var centre := _point(fr, r.position.x + b[0] + b[2] * 0.5, b[1] + b[3] * 0.5) + n * (proud - depth * 0.5)
+			var size := Vector3(b[2] - 0.02, b[3] - 0.02, depth) / native
+			batch.add(mat, Masonry.piece(centre, u, v, n, size, rng.randf_range(-0.01, 0.01), Masonry.wobble(rng, 0.6)), rng.randf_range(0.84, 1.1), pick[0])
 
 func _hole_rect(o: LevelOpening, fr: Dictionary) -> Rect2:
 	var f := o.face

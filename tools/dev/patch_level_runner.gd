@@ -686,7 +686,9 @@ func _workers_shaft_and_pits() -> void:
 		LevelOpening.make(F.WEST, Vector2(0.5, rise), Vector2(3.5, 3.43), false),
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 0.0), Vector2(6.0, 4.5), false),
 	]), timber)
-	_masonry(_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), stone), flag)
+	var ledge := _masonry(_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), stone), flag)
+	# Its other sides are against the shaft's walls.
+	ledge.dressed_sides = 8
 	_kit_solid(group, "LandingRailNorth", Vector3(40.42, tunnel_floor, -24.7), Vector3(0.15, 1.1, 4.6), timber)
 	_kit_solid(group, "LandingRailSouth", Vector3(40.42, tunnel_floor, -15.8), Vector3(0.15, 1.1, 3.6), timber)
 	var lift := CounterweightLift.new()
@@ -728,6 +730,7 @@ func _workers_shaft_and_pits() -> void:
 			var earth := _masonry(_kit_solid(group, "TrenchWall%d" % k, Vector3(wall_x, pit_floor, 9.0), Vector3(1.4, 3.0, 30.0), dirt), dirt)
 			earth.course_height = 0.3
 			earth.block_length = Vector2(2.5, 5.0)
+			earth.stones = false
 			# Posts on the earthen walls carry the roof beams.
 			for b in range(1, 7):
 				var z := -10.0 + b * 4.4
@@ -791,9 +794,10 @@ func _workers_shaft_and_pits() -> void:
 			_kit_ramp(group, "Flight3", Vector3(4.77, pit_floor + step * 2.0, 44.25), 0.0, step, 7.9)]:
 		flight.masonry = true
 		flight.material = step_stone
-	_masonry(_kit_solid(group, "LandingA", Vector3(7.02, pit_floor + step - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag)
-	_masonry(_kit_solid(group, "LandingB", Vector3(7.02, pit_floor + step * 2.0 - 0.5, 45.775), Vector3(8.0, 0.5, 3.05), stone), flag)
-	_masonry(_kit_solid(group, "LandingC", Vector3(7.02, top - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag)
+	# The landings span the well: only the edge toward the flights shows.
+	_masonry(_kit_solid(group, "LandingA", Vector3(7.02, pit_floor + step - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag).dressed_sides = 2
+	_masonry(_kit_solid(group, "LandingB", Vector3(7.02, pit_floor + step * 2.0 - 0.5, 45.775), Vector3(8.0, 0.5, 3.05), stone), flag).dressed_sides = 1
+	_masonry(_kit_solid(group, "LandingC", Vector3(7.02, top - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag).dressed_sides = 2
 	_kit_solid(group, "LandingCRail", Vector3(9.27, top, 36.225), Vector3(3.5, 1.1, 0.25), timber)
 	# A word on first seeing the army, from whichever side he comes in.
 	var seen := StoryTrigger.new()
