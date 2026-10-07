@@ -2,6 +2,10 @@ class_name BreakableStone
 extends Node3D
 ## A boulder blocking a passage. With a wedge and a mallet you split it, but
 ## every blow rings through the halls: guards nearby will come to look.
+##
+## Co-op: a two-man job. The apprentice holds the wedge in the crack (use to
+## take hold, again to let go) and the master swings the mallet; a blow with
+## nobody holding the wedge does nothing.
 
 const BLOWS := [
 	preload("res://audio/sfx/impacts/impactMining_001.ogg"),
@@ -25,6 +29,8 @@ const SPLIT := preload("res://audio/sfx/tunnel/stones_falling.mp3")
 
 var blows := 0
 var broken := false
+## Co-op: whoever holds the wedge in the crack.
+var _brace: Player = null
 
 func _ready() -> void:
 	add_to_group(&"persistent")
@@ -34,9 +40,23 @@ func _ready() -> void:
 		_blocker.disabled = true
 	_apply()
 
+func _process(_delta: float) -> void:
+	if not Net.active:
+		return
+	# A blow is a hold for the master; taking hold of the wedge is a press.
+	var me := Net.local_body()
+	_usable.hold_time = 1.1 if me != null and me.role == &"master" else 0.0
+	if _brace != null and (not is_instance_valid(_brace) or _brace.downed or broken):
+		_let_go(_brace if is_instance_valid(_brace) else null)
+
+func brace_usable() -> Usable:
+	return _usable
+
 func usable_prompt(user: Node) -> String:
 	if broken:
 		return ""
+	if Net.active:
+		return _coop_prompt(user as Player)
 	var p := user as Player
 	if p != null and p.inventory.has_item(&"wedge") and p.inventory.has_item(&"hammer"):
 		return "%s  (%d/%d)" % [tr("PROMPT_BREAK_STONE"), blows, blows_needed]
@@ -44,12 +64,52 @@ func usable_prompt(user: Node) -> String:
 
 func usable_can_use(user: Node) -> bool:
 	var p := user as Player
+	if Net.active and p != null and not broken:
+		if _brace == p:
+			return true
+		if p.role == &"apprentice":
+			return _brace == null and p.inventory.has_item(&"wedge")
+		return _brace != null and p.inventory.has_item(&"hammer")
 	return not broken and p != null and p.inventory.has_item(&"wedge") and p.inventory.has_item(&"hammer")
+
+func _coop_prompt(p: Player) -> String:
+	if p == null:
+		return ""
+	if _brace == p:
+		return tr("PROMPT_LET_GO")
+	if p.role == &"apprentice":
+		if _brace != null:
+			return ""
+		return tr("PROMPT_HOLD_WEDGE") if p.inventory.has_item(&"wedge") else tr("PROMPT_NEED_WEDGE")
+	if not p.inventory.has_item(&"hammer"):
+		return tr("PROMPT_NEED_HAMMER")
+	if _brace == null:
+		return tr("PROMPT_NEED_WEDGE_HELD")
+	return "%s  (%d/%d)" % [tr("PROMPT_BREAK_STONE"), blows, blows_needed]
+
+## Co-op: the apprentice takes hold of the wedge, or lets go.
+func usable_use(user: Node) -> void:
+	var p := user as Player
+	if not Net.active or p == null:
+		return
+	if _brace == p:
+		_let_go(p)
+	elif _brace == null and p.role == &"apprentice":
+		_brace = p
+		p.brace(self)
+		Sfx.play_at(BLOWS[0], global_position + Vector3.UP, -14.0, 0.1)
+
+func _let_go(p: Player) -> void:
+	_brace = null
+	if p != null:
+		p.unbrace()
 
 func usable_show_blocked(_user: Node) -> bool:
 	return not broken
 
 func usable_hold_done(user: Node) -> void:
+	if Net.active and _brace == null:
+		return
 	blows += 1
 	var p := user as Player
 	if p != null:

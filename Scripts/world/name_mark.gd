@@ -47,11 +47,18 @@ func _ready() -> void:
 	body.add_child(usable)
 	_refresh()
 
-func usable_prompt(_user: Node) -> String:
-	return tr("PROMPT_READ_NAME")
+## Co-op: only the master reads seal script; the apprentice can point it out.
+func _cant_read(user: Node) -> bool:
+	return Net.active and user is Player and (user as Player).role != &"master"
 
-func usable_can_use(_user: Node) -> bool:
-	return not read
+func usable_prompt(user: Node) -> String:
+	return tr("PROMPT_NAME_CANT_READ") if _cant_read(user) else tr("PROMPT_READ_NAME")
+
+func usable_can_use(user: Node) -> bool:
+	return not read and not _cant_read(user)
+
+func usable_show_blocked(user: Node) -> bool:
+	return not read and _cant_read(user)
 
 func usable_use(user: Node) -> void:
 	read = true

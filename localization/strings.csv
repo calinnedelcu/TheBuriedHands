@@ -342,3 +342,17 @@ PROMPT_REVIVE,Help up,Ridică-l
 COOP_DOWNED,You're down. Your partner can still help you up ( %d ),Ai căzut. Tovarășul te mai poate ridica ( %d )
 COOP_PARTNER_DOWN,%s is down! Hold {interact} on him to help him up.,%s a căzut! Ține {interact} apăsat pe el ca să-l ridici.
 COOP_WAIT_AT_EXIT,"Not without your partner. Wait for them here, in the light.","Nu fără tovarășul tău. Așteaptă-l aici, în lumină."
+PROMPT_LET_GO,Let go,Dă drumul
+PROMPT_HOLD_WEDGE,Hold the wedge in the crack,Ține pana în crăpătură
+PROMPT_NEED_WEDGE,You need the wedge,Îți trebuie pana
+PROMPT_NEED_HAMMER,You need the mallet,Îți trebuie ciocanul
+PROMPT_NEED_WEDGE_HELD,Someone must hold the wedge in the crack,Cineva trebuie să țină pana în crăpătură
+PROMPT_HOLD_BRAKE,Bear on the brake,Apasă frâna
+PROMPT_BRAKE_TOO_LIGHT,Too light to hold it — it needs your master's weight,Ești prea ușor ca s-o ții — trebuie greutatea meșterului
+PROMPT_DROP_PIN,Drop the pin,Bagă știftul
+PROMPT_PIN_WAIT,The causeway must be all the way up,Podul trebuie să fie sus de tot
+PROMPT_CLAY_MASTER,The clay is your master's work — bring him what he needs,Lutul e treaba meșterului — adu-i ce-i trebuie
+PROMPT_DRAIN_TOO_TIGHT,Too tight for your shoulders — your apprentice could squeeze through,Prea strâmt pentru umerii tăi — ucenicul s-ar strecura
+PROMPT_NAME_CANT_READ,Seal script — your master can read it,Scriere de sigiliu — meșterul o poate citi
+COOP_HINT_BRAKE,The causeway is sinking back. Someone must bear on the brake by the counterweight.,Podul se lasă înapoi. Cineva trebuie să apese frâna de lângă contragreutate.
+COOP_JAR_BOTH_HANDS,The full jar takes both hands — no lamp now.,Vasul plin îți ia ambele mâini — fără lampă acum.

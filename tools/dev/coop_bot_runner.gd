@@ -1,26 +1,37 @@
 extends Node
-## Dev test: two copies of the game play Act I together over the network,
-## one hosting (the master), one joined (the apprentice), each driving its own
-## player and checking that the other side sees the same world: uses go
-## through the host and run on both, inventories and the quest stay in step,
-## guards move on the apprentice's machine, his noises reach the host's
-## guards, a death ends the run for both and the retry brings both back.
-## Run the two at once:
+## Dev test: two copies of the game play the whole story together over the
+## network, one hosting (the master), one joined (the apprentice), each driving
+## its own player by teleport and use, the way the quest bot does alone, and
+## checking that the other side sees the same world. Covers: uses through the
+## host on both machines, inventories and the quest in step, guards moving on
+## the apprentice's machine, his noises reaching the host's guards, the
+## co-op jobs (the apprentice fetches and hands over, the master works the
+## clay; the wedge held while the master strikes; the full jar taking both
+## hands; the brake held while the apprentice pins the causeway; the drain's
+## bend only the apprentice fits), a knock-down and a revive, a shared death
+## and retry, and both walking out into the light.
+## Run the two at once (add --from=causeway to both to start at the pour):
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=host
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=client
 
 const WS := "Rooms/01_TerracottaWorkshop/"
+## On the counterweight's platform; its default +x+z side hangs over the pit.
+const COUNTERWEIGHT_STAND := Vector3(-1.5, -1.5, -1.0)
 
 var role := "host"
+var from := ""
 var me: Player
 var level: Node
 var failures := 0
 var _noises_from_apprentice := 0
+var _lines_seen := 0
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--role="):
 			role = arg.substr(7)
+		elif arg.begins_with("--from="):
+			from = arg.substr(7)
 	_run.call_deferred()
 
 func _run() -> void:
@@ -31,7 +42,7 @@ func _run() -> void:
 	print("[%s] RESULT: %d failure(s)" % [role, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
-# --- The master ---------------------------------------------------------------------------
+# --- The master -------------------------------------------------------------------------------
 
 func _host() -> void:
 	_check("hosting", Net.host())
@@ -48,25 +59,25 @@ func _host() -> void:
 	_check("the apprentice at his bench is gone", level.get_node_or_null(WS + "Apprentice") == null)
 	Stealth.noise_made.connect(_on_noise)
 	_expect(&"talk_apprentice")
+	if from == "causeway":
+		await _host_causeway(apprentice)
+		return
 
-	# The master talks to the apprentice (the second player).
+	# Act I. The master talks to the apprentice (the second player).
 	await _wait(1.0)
 	await _use("Apprentice/UseBody/Usable", &"use")
 	await _wait_dialogue()
 	_expect(&"take_lamp")
-
-	# The apprentice takes a lamp, fetches the slip and sets the bowl.
 	_check("apprentice took a lamp (seen on the host)", await _until(func(): return Quest.has_reached(&"fetch_slip"), 30.0))
 	_check("the apprentice's puppet holds the lamp", apprentice.inventory.lamp() != null)
 	await _use(WS + "LampStand_E/Body/Usable", &"tap")
 	_check("master has his own lamp", me.inventory.lamp() != null)
-	_check("apprentice set the bowl", await _until(func(): return Quest.has_reached(&"apply_slip"), 40.0))
-
-	# The master binds the legs with slip.
+	# The apprentice fetches the bowl and hands it over; the clay is the master's.
+	_check("the apprentice handed over the bowl", await _until(func(): return me.inventory.has_item(&"clay_bowl"), 40.0))
+	await _use(WS + "ClayStatue/Body/Usable", &"use")
+	_expect(&"apply_slip")
 	await _use(WS + "ClayStatue/Body/Usable", &"hold")
-	# (The apprentice may have found the chisel already.)
 	_check("slip applied", Quest.has_reached(&"find_chisel"))
-	# The apprentice finds the chisel and hands it over.
 	_check("master was handed the chisel", await _until(func(): return me.inventory.has_item(&"chisel"), 40.0))
 	for i in 3:
 		await _use(WS + "ClayStatue/Body/Usable", &"use")
@@ -80,12 +91,11 @@ func _host() -> void:
 
 	# The apprentice makes some noise, is knocked down and helped up, then dies.
 	_check("the apprentice's noise reached the host", await _until(func(): return _noises_from_apprentice > 0, 30.0))
-	var apprentice_now := Net.body(Net.APPRENTICE_BODY)
-	_check("the apprentice went down (seen on the host)", await _until(func(): return apprentice_now.downed, 30.0))
+	_check("the apprentice went down (seen on the host)", await _until(func(): return apprentice.downed, 30.0))
 	_check("still playing while one is down", not Game.is_dead())
 	await _wait(1.0)
 	await _use("Apprentice/UseBody/Usable", &"hold")
-	_check("helped him up", await _until(func(): return not apprentice_now.downed, 5.0))
+	_check("helped him up", await _until(func(): return not apprentice.downed, 5.0))
 	var died := [false]
 	Game.failed.connect(func(_r): died[0] = true, CONNECT_ONE_SHOT)
 	_check("the apprentice's death ended the run", await _until(func(): return died[0], 30.0))
@@ -93,15 +103,91 @@ func _host() -> void:
 	Game.retry_from_checkpoint()
 	await Game.level_ready
 	await _settle_level()
+	apprentice = Net.body(Net.APPRENTICE_BODY)
 	_check("retry: back at find_liang", Quest.has_reached(&"find_liang"))
-	_check("retry: the apprentice is back", Net.has_partner() and Net.body(Net.APPRENTICE_BODY) != null)
+	_check("retry: the apprentice is back", Net.has_partner() and apprentice != null)
+
+	# Act II. Guards stand down so the bots can walk where they please.
+	Game.set_flag(&"guards_hostile", false)
+	await _wait(2.0)
+	await _enter("Story/LiangRoomEnter")
+	_expect(&"talk_liang")
+	await _use("Liang/TalkBody/Usable", &"use")
+	await _wait_dialogue()
+	_expect(&"reach_mechanism")
+
+	# Act III, the tunnels: the apprentice holds the wedge, the master strikes.
+	await _use("Tool_Workbench_Hammer_W/Usable", &"use")
+	_check("master has the mallet", me.inventory.has_item(&"hammer"))
+	var stone := level.get_node("ShaftStone")
+	var u := level.get_node("ShaftStone/Body/Usable") as Usable
+	_check("no blow without the wedge held", not u.can_use(me))
+	_check("the apprentice holds the wedge (seen here)", await _until(func(): return apprentice.bracing != null, 40.0))
+	for i in 4:
+		await _use("ShaftStone/Body/Usable", &"hold")
+	_check("the stone split", bool(stone.get("broken")))
+	_check("the apprentice let go of the wedge", await _until(func(): return apprentice.bracing == null, 5.0))
+
+	# Act IV, the balance.
+	await _enter("Story/MechanismEnter")
+	_expect(&"inspect_balance")
+	await _use("Mechanism/Counterweight/Body/Usable", &"use", COUNTERWEIGHT_STAND)
+	await _wait_dialogue()
+	_expect(&"get_vase")
+	await _use("Mechanism/Cloth/Usable", &"use")
+	_check("the jar and the cloth between the two of us", await _until(func(): return Quest.has_reached(&"fill_vase"), 30.0))
+	_check("the jar was filled and poured", await _until(func(): return Quest.has_reached(&"find_drain"), 60.0))
+	await _host_causeway(apprentice)
+
+## From the pour on: the brake and the pin, the drain, the light.
+func _host_causeway(apprentice: Player) -> void:
+	if from == "causeway":
+		Game.set_flag(&"guards_hostile", false)
+		Quest.start_at(&"find_drain")
+		Net.mirror(level.get_node("Mechanism/Causeway"), &"net_open")
+		(level.get_node("Mechanism/Causeway") as Causeway).net_open()
+	var causeway := level.get_node("Mechanism/Causeway") as Causeway
+	_check("the causeway rose", causeway.raised)
+	_check("and sinks back with nobody on the brake", await _until(func(): return causeway.is_sinking(), 20.0))
+	# Let it go well down, so the brake has something to bring back.
+	await _until(func(): return float(causeway.get("_level")) < 0.5, 10.0)
+	# On the counterweight's platform, behind the lever (not over the pit).
+	await _use("Mechanism/CoopBrake/Body/Usable", &"use", Vector3(0, 0, -1.3))
+	# (The apprentice may pin it as soon as it's up, which frees the brake.)
+	_check("bearing on the brake", (me.bracing != null and causeway.held) or causeway.pinned)
+	_check("the causeway comes back up", await _until(func(): return causeway.is_up(), 15.0))
+	_check("the apprentice pinned it", await _until(func(): return causeway.pinned, 30.0))
+	_check("let go of the brake by itself", await _until(func(): return me.bracing == null and not me.controls_locked(), 5.0))
+
+	# Act V. The drain's bend is the apprentice's to squeeze through.
+	var drain := level.get_node("Drain") as Node3D
+	me.global_position = _drain_mouth()
+	me._set_stance(Player.Stance.CRAWL, true)
+	await _wait(0.6)
+	_check("too tight for the master", not (level.get_node("Drain/EntryBody/Usable") as Usable).can_use(me))
+	_check("the apprentice pushed through", await _until(func(): return bool(drain.get("opened")), 40.0))
+	_check("the channel holds while only one is through", not bool(drain.get("collapsed")))
+	await _enter("Drain/ExitTrigger")
+	_check("it caves in once both are through", await _until(func(): return bool(drain.get("collapsed")), 30.0))
+	_check("out of the drain", await _until(func():
+		Dialogue.skip_line()
+		return Quest.has_reached(&"escape"), 30.0, 0.3))
+	await _enter("Story/ExitLight")
+	var ok := await _until(func(): return Game.is_over() and not Game.is_dead(), 30.0)
+	if not ok:
+		var exit := level.get_node("Story/ExitLight") as Area3D
+		_log("exit: arrived=%s done=%s overlapping=%s" % [exit.get("_arrived"), exit.get("_done"), exit.get_overlapping_bodies()])
+		for p in Net.players():
+			_log("  %s at %s local=%s" % [p.name, p.global_position, p.is_local])
+		_log("  game: over=%s dead=%s finished=%s quest=%s player_group=%s" % [Game.is_over(), Game.is_dead(), Game.get("_finished"), Quest.current(), get_tree().get_nodes_in_group(&"player")])
+	_check("out into the light together", ok)
 	# Give the apprentice time to check his side, then leave.
-	await _until(func(): return false, 8.0)
+	await _until(func(): return false, 6.0)
 	_log("leaving")
 	Net.leave()
 	await _wait(1.0)
 
-# --- The apprentice -----------------------------------------------------------------------
+# --- The apprentice ---------------------------------------------------------------------------
 
 func _client() -> void:
 	await _wait(1.0)
@@ -117,8 +203,13 @@ func _client() -> void:
 	var master := Net.body(Net.MASTER_BODY)
 	_check("master body is a puppet here", master != null and not master.is_local)
 	_check("quest came from the host", Quest.current() != &"")
-	_expect(&"talk_apprentice")
+	if from != "causeway":
+		_expect(&"talk_apprentice")
+	if from == "causeway":
+		await _client_causeway(master)
+		return
 
+	# Act I.
 	_check("the master talked to us", await _until(func(): return Quest.has_reached(&"take_lamp"), 40.0))
 	_check("the talk's lines were shown here", _lines_seen > 0)
 	await _use(WS + "LampStand_W/Body/Usable", &"tap")
@@ -127,25 +218,18 @@ func _client() -> void:
 	await _use(WS + "SlipBowl/Usable", &"use")
 	_check("we carry the bowl", await _until(func(): return me.inventory.has_item(&"clay_bowl"), 5.0))
 	_expect(&"place_bowl")
-	await _use(WS + "ClayStatue/Body/Usable", &"use")
-	_check("bowl set", await _until(func(): return Quest.has_reached(&"apply_slip"), 5.0))
 	var statue := level.get_node(WS + "ClayStatue")
+	_check("the clay is not ours to work", not (level.get_node(WS + "ClayStatue/Body/Usable") as Usable).can_use(me))
+	# (The master sets the bowl down at once, so only our side is checked.)
+	await _hand_over(&"clay_bowl", null)
+	_check("the master set the bowl", await _until(func(): return Quest.has_reached(&"apply_slip"), 30.0))
 	_check("the bowl shows on the bench here", bool(statue.get("bowl_placed")))
-
 	_check("the master applied the slip", await _until(func(): return Quest.has_reached(&"find_chisel"), 40.0))
 	_check("the slip shows here", bool(statue.get("slip_applied")))
 	_check("the master's lamp shows here", master.inventory.lamp() != null)
 	await _use(WS + "FallenChisel/Usable", &"use")
 	_check("we found the chisel", await _until(func(): return me.inventory.has_item(&"chisel"), 5.0))
-	for i in me.inventory.SLOTS:
-		if me.inventory.slot_item(i) != null and me.inventory.slot_item(i).id == &"chisel":
-			me.inventory.select(i)
-			Net.inventory_action(me, &"select", [i])
-	await _wait(0.5)
-	await _use("Player/UseBody/Usable", &"use")
-	_check("chisel handed over", await _until(func(): return not me.inventory.has_item(&"chisel"), 5.0))
-	_check("the master has it here too", await _until(func(): return master.inventory.has_item(&"chisel"), 5.0))
-
+	await _hand_over(&"chisel", master)
 	_check("the statue was finished", await _until(func(): return Quest.has_reached(&"sealing"), 40.0))
 	_check("the guards come in (seen here)", await _guards_move(25.0))
 	_check("sealing done together", await _until(func(): return Quest.has_reached(&"find_liang"), 150.0))
@@ -167,27 +251,98 @@ func _client() -> void:
 	_check("our death ended the run here too", await _until(func(): return died[0], 15.0))
 	await Game.level_ready
 	await _settle_level()
+	master = Net.body(Net.MASTER_BODY)
 	_check("retry: back at find_liang here", Quest.has_reached(&"find_liang"))
 	_check("retry: our body is ours again", me.is_local and me.name == Net.APPRENTICE_BODY)
-	_check("the master leaves: back to the menu", await _until(func(): return not Net.active, 30.0))
 
-# --- Helpers -------------------------------------------------------------------------------
+	# Act III: we hold the wedge while the master strikes.
+	_check("the master talked to Liang", await _until(func(): return Quest.has_reached(&"reach_mechanism"), 60.0))
+	await _use("Tool_Workbench_Wedge_W2/Usable", &"use")
+	_check("we have the wedge", me.inventory.has_item(&"wedge"))
+	await _use("ShaftStone/Body/Usable", &"use")
+	_check("holding the wedge in the crack", me.bracing != null and me.controls_locked())
+	_check("the master split the stone", await _until(func(): return bool(level.get_node("ShaftStone").get("broken")), 40.0))
+	_check("free to move again", await _until(func(): return me.bracing == null and not me.controls_locked(), 5.0))
 
-var _lines_seen := 0
+	# Act IV: we take the jar, fill it (both hands: no lamp), and pour it.
+	_check("the master examined the balance", await _until(func(): return Quest.has_reached(&"get_vase"), 60.0))
+	await _use("Mechanism/Jar/Usable", &"use")
+	_check("the jar and the cloth between the two of us", await _until(func(): return Quest.has_reached(&"fill_vase"), 30.0))
+	await _use("MercuryHall/FillPoint1/UseBody/Usable", &"hold")
+	_check("the jar is full", await _until(func(): return me.inventory.has_item(&"vase_full"), 5.0))
+	await _wait(0.5)
+	_check("the full jar takes both hands: the lamp is out", me.inventory.lamp() == null or not me.inventory.lamp().is_lit)
+	_check("and it is heavy going", me.carries_heavy())
+	await _use("Mechanism/Counterweight/Body/Usable", &"hold", COUNTERWEIGHT_STAND)
+	_check("poured", await _until(func(): return Quest.has_reached(&"find_drain"), 20.0))
+	await _client_causeway(master)
+
+func _client_causeway(master: Player) -> void:
+	if from == "causeway":
+		_check("the host poured (skipped to)", await _until(func(): return Quest.has_reached(&"find_drain"), 30.0))
+	var causeway := level.get_node("Mechanism/Causeway") as Causeway
+	_check("we're too light for the brake", await _until(func():
+		var brake := level.get_node("Mechanism/CoopBrake/Body/Usable") as Usable
+		return causeway.raised and not brake.can_use(me), 20.0))
+	_check("the master holds the brake (seen here)", await _until(func(): return master.bracing != null and causeway.held, 40.0))
+	_check("the causeway is up", await _until(func(): return causeway.is_up(), 15.0))
+	await _use("Mechanism/CoopPin/Body/Usable", &"use", Vector3(-0.6, 0, -0.6))
+	_check("pinned", causeway.pinned)
+
+	# Act V: we squeeze through the drain's bend.
+	var drain := level.get_node("Drain") as Node3D
+	me.global_position = _drain_mouth()
+	me._set_stance(Player.Stance.CRAWL, true)
+	await _wait(0.6)
+	for i in 6:
+		await _use("Drain/EntryBody/Usable", &"use")
+	_check("the bend is open", bool(drain.get("opened")))
+	await _enter("Drain/ExitTrigger")
+	_check("it caved in behind us both", await _until(func(): return bool(drain.get("collapsed")), 30.0))
+	_check("out of the drain", await _until(func(): return Quest.has_reached(&"escape"), 30.0))
+	await _enter("Story/ExitLight")
+	_check("out into the light together", await _until(func(): return Game.is_over() and not Game.is_dead(), 30.0))
+	_check("the master leaves; the ending plays on", await _until(func(): return not Net.active, 40.0))
+	await _wait(1.0)
+	_check("still in the ending, not thrown to the menu", Game.is_over() and Game.level != null)
+
+# --- Helpers ------------------------------------------------------------------------------------
+
+func _settle_level() -> void:
+	level = Game.level
+	me = Net.local_body()
+	if not Game.failed.is_connected(_on_failed):
+		Game.failed.connect(_on_failed)
+	if not Dialogue.line_started.is_connected(_on_line):
+		Dialogue.line_started.connect(_on_line)
+	await _wait(1.0)
+
+func _on_failed(reason: String) -> void:
+	_log("run failed: %s (quest %s, me at %s, health %.1f, tox %.1f)" % [reason, Quest.current(), me.global_position if is_instance_valid(me) else Vector3.ZERO, me.health if is_instance_valid(me) else -1.0, me.toxicity if is_instance_valid(me) else -1.0])
+
+func _on_line(_s, _n, _t, _d, _e) -> void:
+	_lines_seen += 1
 
 func _on_noise(_position: Vector3, _radius: float, source: Node) -> void:
 	if is_instance_valid(source) and source.name == Net.APPRENTICE_BODY and source is Player and not (source as Player).is_local:
 		_noises_from_apprentice += 1
 
-func _settle_level() -> void:
-	level = Game.level
-	me = Net.local_body()
-	if not Dialogue.line_started.is_connected(_on_line):
-		Dialogue.line_started.connect(_on_line)
-	await _wait(1.0)
+## Selects `item` and hands it to `partner` (the apprentice's side).
+func _hand_over(item: StringName, partner: Player) -> void:
+	for i in me.inventory.SLOTS:
+		if me.inventory.slot_item(i) != null and me.inventory.slot_item(i).id == item:
+			me.inventory.select(i)
+			Net.inventory_action(me, &"select", [i])
+	await _wait(0.5)
+	await _use("Player/UseBody/Usable", &"use")
+	_check("%s handed over" % item, await _until(func(): return not me.inventory.has_item(item), 5.0))
+	if partner != null:
+		_check("the master has the %s here too" % item, await _until(func(): return partner.inventory.has_item(item), 5.0))
 
-func _on_line(_s, _n, _t, _d, _e) -> void:
-	_lines_seen += 1
+## In the channel, before the bend (the drain runs along its local -z).
+func _drain_mouth() -> Vector3:
+	var entry := level.get_node("Drain/EntryBody") as Node3D
+	return entry.global_position + entry.global_basis.z * 2.2
 
 func _guards_move(seconds: float) -> bool:
 	var start := {}
@@ -202,20 +357,37 @@ func _guards_move(seconds: float) -> bool:
 				return true
 	return false
 
-func _use(path: String, mode: StringName) -> void:
+## Uses the usable at `path`, standing first at its body + `stand` (most
+## things), or where the player is (on the partner, at the drain, braced).
+func _use(path: String, mode: StringName, stand := Vector3(1.2, 0.0, 1.2)) -> void:
 	var u := level.get_node_or_null(path) as Usable
 	if u == null:
 		_check("usable exists: " + path, false)
 		return
 	var body := u.get_node(u.body_path) as Node3D
-	if not path.begins_with("Player/") and not path.begins_with("Apprentice/"):
-		me.global_position = body.global_position + Vector3(1.2, 0.0, 1.2)
+	var on_body := path.begins_with("Player/") or path.begins_with("Apprentice/")
+	if not on_body and me.bracing == null and not path.begins_with("Drain/"):
+		me.global_position = body.global_position + stand
 		me.velocity = Vector3.ZERO
 		await _wait(0.3)
 	if not u.can_use(me):
 		_check("can use %s (prompt '%s')" % [path, u.get_prompt(me)], false)
 		return
 	Net.use(u, me, mode)
+	await _wait(0.6)
+
+func _enter(path: String) -> void:
+	var area := level.get_node_or_null(path) as Area3D
+	if area == null:
+		_check("trigger exists: " + path, false)
+		return
+	var at := area.global_position
+	for c in area.get_children():
+		if c is CollisionShape3D:
+			at = (c as CollisionShape3D).global_position
+			break
+	me.global_position = at - Vector3.UP * 0.4
+	me.velocity = Vector3.ZERO
 	await _wait(0.6)
 
 func _wait_dialogue() -> void:

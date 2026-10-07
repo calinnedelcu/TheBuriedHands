@@ -27,6 +27,16 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 - **Numele meșteșugarilor:** ca pe soldații reali de teracotă, unele statui poartă numele celor care le-au făcut, apăsate în lut. Citește-le pe drum: epilogul spune câte nume ai scos din munte.
 - **Checkpoint-uri:** la momentele importante; după moarte reîncepi de acolo, iar „Continuă" din meniu încarcă ultimul.
 
+## Împreună (co-op online)
+
+Din meniu, **Împreună (online)**: unul găzduiește și joacă **Meșterul**, celălalt se alătură cu adresa gazdei și joacă **Ucenicul** — mai scund, mai iute, mai tăcut, dar mai firav. Conexiunea e directă (UDP 7735): în aceeași rețea merge din prima; pe internet gazda deschide portul în router sau intrați amândoi în aceeași rețea Tailscale / ZeroTier.
+
+- Fiecare își joacă personajul; gazda ține povestea, gardienii și capcanele, ca amândoi să vadă aceeași lume.
+- Vă vedeți unul pe altul, cu lampa și uneltele în mână (lumina lui te arată și pe tine gardienilor). Îi dai obiectul din mână sau lampa cu **E** pe el; cu **V** sau rotița mouse-ului pui un semn (此) unde te uiți sau deasupra unui gardian.
+- O lovitură de gardian te doboară, nu te omoară: tovarășul are 40 de secunde să te ridice (ține **E** pe tine). Dacă cădeți amândoi, s-a terminat.
+- Treburi pentru doi: meșterul lucrează lutul, ucenicul aduce; ucenicul ține pana în crăpătură cât meșterul lovește cu ciocanul; vasul plin cu mercur îți ia ambele mâini (fără lampă); după ce balanța se înclină, podul se lasă înapoi dacă meșterul nu apasă frâna cât ucenicul trece și bagă știftul; doar ucenicul se strecoară prin cotul canalului; doar meșterul citește sigiliile.
+- Moartea și reîncercarea sunt comune (hotărăște gazda); pauza nu oprește lumea; un joc co-op nu atinge salvarea de single-player.
+
 ## Controale (implicite, se pot schimba din Opțiuni)
 
 | Acțiune | Tastă |
@@ -45,6 +55,7 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 | Jurnal (obiectiv) | Tab |
 | Pauză | Esc |
 | Treci peste replică | Enter |
+| Semn pentru tovarăș (co-op) | V sau rotița mouse-ului |
 
 ## Rulare
 
@@ -54,7 +65,7 @@ Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 
 ## Structura proiectului
 
-- `Scripts/core/` — autoload-uri: `Settings`, `Sfx`, `Dialogue`, `Quest`, `Stealth`, `Game` (salvări, checkpoint-uri, moarte, final), `Music`.
+- `Scripts/core/` — autoload-uri: `Settings`, `Net` (co-op online), `Sfx`, `Dialogue`, `Quest`, `Stealth`, `Game` (salvări, checkpoint-uri, moarte, final), `Music`.
 - `Scripts/data/` — povestea ca date: pașii questului (`quest_db.gd`), dialogurile (`dialogue_db.gd`), creditele.
 - `Scripts/player/`, `Scripts/ai/` (gardieni, NPC-uri), `Scripts/world/` (lămpi, capcane, mercur, atmosferă), `Scripts/level/` (momentele de poveste), `Scripts/ui/`.
 - `scenes/level/mausoleum.tscn` — nivelul; `scenes/menu/title.tscn` — meniul; `scenes/dev/test_room.tscn` — camera de test.
@@ -75,6 +86,7 @@ godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/
 - `checkpoint_test_runner` — salvare, moarte, reîncercare, „Continuă".
 - `test_player_runner`, `test_guard_runner` — mișcare, poziții, lampă; vedere, auz și atac la gardieni (au nevoie de fereastră: fără `--headless`, cu `--out=/folder`).
 - `music_test_runner` — muzica și ambianța pe zone.
+- `coop_bot_runner` — două instanțe (`--role=host` și `--role=client`, pornite în același timp) joacă toată povestea în co-op și verifică ce vede fiecare; `--from=causeway` sare direct la pod. `coop_shots_runner` face capturi din ambele perspective.
 - `level_tour_runner`, `map_render_runner`, `title_shots_runner`, `look_runner`, `sequence_shots_runner` (`--seq=opening|sealing|chase|climb|causeway|ending`), `anim_sheet_runner` — capturi pentru verificare vizuală.
 - `patch_level_runner` — modificări automate în nivel, fără să piardă ce s-a editat în editor.
 - `tools/dev/check_scripts.gd` — compilează toate scripturile.

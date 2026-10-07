@@ -12,6 +12,8 @@ const ENDING_SCREEN := preload("res://scenes/ui/ending_screen.tscn")
 @export var walk_speed := 1.15
 
 var _done := false
+## Co-op: who has reached the light (they may step about while they wait).
+var _arrived: Array[StringName] = []
 
 func _ready() -> void:
 	collision_layer = 0
@@ -22,8 +24,10 @@ func _on_body_entered(body: Node3D) -> void:
 	if _done or not (body is Player) or Net.is_client():
 		return
 	# Co-op: out into the light together, or not at all.
+	if not _arrived.has(body.name):
+		_arrived.append(body.name)
 	for other in Net.players():
-		if not overlaps_body(other):
+		if not _arrived.has(other.name):
 			(body as Player).notice("COOP_WAIT_AT_EXIT")
 			return
 	Net.mirror(self, &"net_walk_out")

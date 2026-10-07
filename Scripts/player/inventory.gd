@@ -234,6 +234,9 @@ func apply_action(action: StringName, args: Array) -> void:
 		&"lamp_toggle":
 			if _lamp != null:
 				_lamp.toggle()
+		&"lamp_snuff":
+			if _lamp != null:
+				_lamp.snuff()
 		&"lamp_raise":
 			if _lamp != null:
 				_lamp.is_raised = bool(args[0])
@@ -269,6 +272,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"throw"):
 		throw_selected()
 	elif event.is_action_pressed(&"toggle_lamp") and _lamp != null:
+		# Co-op: no hand free for the lamp while carrying the full jar.
+		if _player.carries_heavy() and not _lamp.is_lit:
+			message.emit("COOP_JAR_BOTH_HANDS")
+			return
 		_lamp.toggle()
 		Net.inventory_action(_player, &"lamp_toggle")
 	elif event.is_action_pressed(&"raise_lamp") and _lamp != null:

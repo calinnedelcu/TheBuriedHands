@@ -39,12 +39,17 @@ func usable_prompt(user: Node) -> String:
 	if opened:
 		return ""
 	var p := user as Player
+	# Co-op: the bend is too tight for the master's shoulders.
+	if Net.active and p != null and p.role == &"master":
+		return tr("PROMPT_DRAIN_TOO_TIGHT")
 	if p != null and not p.is_crawling():
 		return tr("PROMPT_MUST_CRAWL")
 	return "%s  (%d)" % [tr("PROMPT_PUSH"), pushes_needed - pushes]
 
 func usable_can_use(user: Node) -> bool:
 	var p := user as Player
+	if Net.active and p != null and p.role == &"master":
+		return false
 	return not opened and p != null and p.is_crawling()
 
 func usable_show_blocked(_user: Node) -> bool:
@@ -61,13 +66,20 @@ func usable_use(user: Node) -> void:
 		opened = true
 		_gap_blocker.set_deferred(&"disabled", true)
 		Sfx.play_at(GRAVEL, global_position, 0.0)
+		_try_collapse()
 
 func _on_behind(body: Node3D) -> void:
-	if collapsed or not opened or not (body is Player) or Net.is_client():
+	if collapsed or not (body is Player) or Net.is_client():
 		return
-	# Co-op: the channel holds until both of you are through.
+	# Co-op: the channel holds until both of you are through. (Who got here
+	# is remembered: the partner's news of the open bend can come after him.)
 	if not _through.has(body.name):
 		_through.append(body.name)
+	_try_collapse()
+
+func _try_collapse() -> void:
+	if collapsed or not opened or Net.is_client():
+		return
 	for p in Net.players():
 		if not _through.has(p.name):
 			return

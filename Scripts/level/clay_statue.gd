@@ -76,8 +76,15 @@ func _refresh() -> void:
 
 # --- Usable delegate (the statue itself) -----------------------------------------------
 
+## Co-op: the clay is the master's work; the apprentice fetches and hands over.
+func _not_his_work(p: Player) -> bool:
+	return Net.active and p != null and p.role != &"master" \
+		and (Quest.is_at(&"place_bowl") or Quest.is_at(&"apply_slip") or Quest.is_at(&"finish_statue"))
+
 func usable_prompt(user: Node) -> String:
 	var p := user as Player
+	if _not_his_work(p):
+		return tr("PROMPT_CLAY_MASTER")
 	if Quest.is_at(&"place_bowl"):
 		return tr("PROMPT_PLACE_BOWL") if p != null and p.inventory.has_item(&"clay_bowl") else ""
 	if Quest.is_at(&"apply_slip"):
@@ -88,7 +95,7 @@ func usable_prompt(user: Node) -> String:
 
 func usable_can_use(user: Node) -> bool:
 	var p := user as Player
-	if p == null:
+	if p == null or _not_his_work(p):
 		return false
 	if Quest.is_at(&"place_bowl"):
 		return p.inventory.has_item(&"clay_bowl")
@@ -98,8 +105,8 @@ func usable_can_use(user: Node) -> bool:
 		return p.inventory.has_item(&"chisel")
 	return false
 
-func usable_show_blocked(_user: Node) -> bool:
-	return Quest.is_at(&"finish_statue")
+func usable_show_blocked(user: Node) -> bool:
+	return Quest.is_at(&"finish_statue") or _not_his_work(user as Player)
 
 func usable_use(user: Node) -> void:
 	var p := user as Player

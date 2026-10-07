@@ -151,6 +151,9 @@ var _puppet_clip: StringName = &""
 var _puppet_steps: AudioStreamPlayer3D
 var _puppet_step_distance := 0.0
 var _puppet_tag: Label3D
+var _held_socket: Node3D
+var _held_visual: Node3D
+var _held_id: StringName = &""
 var _use_body: StaticBody3D
 var _use_usable: DelegateUsable
 var _inventory_dirty := false
@@ -164,6 +167,10 @@ const REVIVE_HOLD := 2.4
 var _bleed := 0.0
 var _down_reason := ""
 var _notice_second := -1
+## Co-op: what this player is holding in place (a wedge in a crack, the brake
+## by the counterweight); rooted there until they let go.
+var bracing: Node = null
+var _heavy_told := false
 
 func _ready() -> void:
 	role = &"apprentice" if name == Net.APPRENTICE_BODY else &"master"
@@ -376,7 +383,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_pitch(_pitch - motion.y * sens * invert)
 		return
 	if not _locks.is_empty():
-		if event.is_action_pressed(&"skip_line") or (event.is_action_pressed(&"interact") and Dialogue.is_busy()):
+		if bracing != null and (event.is_action_pressed(&"interact") or event.is_action_pressed(&"jump") or event.is_action_pressed(&"crouch")):
+			_let_go()
+		elif event.is_action_pressed(&"skip_line") or (event.is_action_pressed(&"interact") and Dialogue.is_busy()):
 			Dialogue.skip_line()
 		return
 	if event.is_action_pressed(&"skip_line"):
@@ -417,6 +426,8 @@ func _physics_process(delta: float) -> void:
 	_update_camera(delta)
 	_update_breath_and_toxicity(delta)
 	_update_health(delta)
+	if Net.active:
+		_check_heavy()
 	if downed:
 		_bleed_out(delta)
 	_use_usable.hold_time = REVIVE_HOLD if downed else 0.0
@@ -470,14 +481,16 @@ func _move(delta: float) -> void:
 	_update_footsteps(delta)
 
 func _target_speed() -> float:
+	# Co-op: the full jar is heavy going.
+	var load_factor := 0.7 if carries_heavy() else 1.0
 	match stance:
 		Stance.CRAWL:
-			return crawl_speed
+			return crawl_speed * load_factor
 		Stance.CROUCH:
-			return crouch_speed
-	if _wants_sprint():
+			return crouch_speed * load_factor
+	if _wants_sprint() and not carries_heavy():
 		return sprint_speed
-	return walk_speed
+	return walk_speed * load_factor
 
 func _wants_sprint() -> bool:
 	return _locks.is_empty() and Input.is_action_pressed(&"sprint") and Input.is_action_pressed(&"move_forward")
@@ -910,25 +923,44 @@ func _build_puppet_model() -> void:
 	var tool := _puppet_model.find_child("Tool", true, false) as Node3D
 	if tool != null:
 		tool.visible = false
-	inventory.set_lamp_socket(_lamp_hand())
+	inventory.set_lamp_socket(_hand("L_Hand", "LampHand", -1.0))
+	# What they hold in the right hand shows there too.
+	_held_socket = _hand("R_Hand", "ItemHand", 1.0)
+	inventory.selection_changed.connect(func(_i: int): _show_held())
+	inventory.changed.connect(_show_held)
 
-## Where the puppet's lamp hangs: from the left hand's bone (kept upright in
+## A socket at one of the puppet's hands, following the bone (kept upright in
 ## `_puppet_tick`), or at the hip if the model has no such bone.
-func _lamp_hand() -> Node3D:
+func _hand(bone: String, socket_name: String, side: float) -> Node3D:
 	var socket := Node3D.new()
-	socket.name = "LampHand"
+	socket.name = socket_name
 	var skeletons := _puppet_model.find_children("*", "Skeleton3D", true, false)
 	var skeleton := skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
-	if skeleton == null or skeleton.find_bone("L_Hand") < 0:
-		socket.position = Vector3(-0.4, stand_height * 0.5, -0.35)
+	if skeleton == null or skeleton.find_bone(bone) < 0:
+		socket.position = Vector3(0.4 * side, stand_height * 0.5, -0.35)
 		add_child(socket)
 		return socket
 	var attach := BoneAttachment3D.new()
-	attach.name = "LeftHand"
-	attach.bone_name = "L_Hand"
+	attach.name = socket_name + "Bone"
+	attach.bone_name = bone
 	skeleton.add_child(attach)
 	attach.add_child(socket)
 	return socket
+
+## The item the partner holds, in their model's right hand.
+func _show_held() -> void:
+	var item := inventory.selected_item()
+	var id: StringName = item.id if item != null else &""
+	if id == _held_id:
+		return
+	_held_id = id
+	if _held_visual != null:
+		_held_visual.queue_free()
+		_held_visual = null
+	if item == null or item.world_scene == null:
+		return
+	_held_visual = item.world_scene.instantiate() as Node3D
+	_held_socket.add_child(_held_visual)
 
 ## Lets the other player use this body (talk to it, hand it things). Built on
 ## both bodies so a use has the same path on both machines; only a puppet's
@@ -978,6 +1010,8 @@ func _puppet_tick(delta: float) -> void:
 		if socket != null:
 			socket.global_basis = global_basis
 			socket.position = Vector3(0, -0.02 + (0.08 if lamp.is_raised else 0.0), 0)
+	if _held_socket != null:
+		_held_socket.global_basis = global_basis
 	_animate_puppet()
 	_puppet_footsteps(delta)
 
@@ -1174,10 +1208,51 @@ func _go_down(reason: String) -> void:
 	_notice_second = -1
 	health = 0.0
 	health_changed.emit(health, max_health)
+	if bracing != null:
+		_let_go()
 	lock_controls(&"downed", false)
 	_set_stance(Stance.CRAWL, true)
 	velocity = Vector3.ZERO
 	Net.player_downed(self)
+
+## Co-op: takes hold of `spot` (both machines run this through the spot's
+## use), down on one knee for low work or standing to bear on a lever.
+func brace(spot: Node, low := true) -> void:
+	bracing = spot
+	if is_local:
+		velocity = Vector3.ZERO
+		_set_stance(Stance.CROUCH if low else Stance.STAND, true)
+		lock_controls(&"brace", false)
+
+func unbrace() -> void:
+	bracing = null
+	if is_local:
+		unlock_controls(&"brace")
+
+## Lets go of what this player holds, through the same use that took hold.
+func _let_go() -> void:
+	if bracing == null or not bracing.has_method(&"brace_usable"):
+		bracing = null
+		unlock_controls(&"brace")
+		return
+	Net.use(bracing.call(&"brace_usable") as Usable, self, &"use")
+
+## Co-op: the full jar of mercury takes both hands, so no lamp while carried.
+func carries_heavy() -> bool:
+	return Net.active and inventory.has_item(&"vase_full")
+
+func _check_heavy() -> void:
+	if not carries_heavy():
+		_heavy_told = false
+		return
+	if has_lamp_lit():
+		inventory.lamp().snuff()
+		Net.inventory_action(self, &"lamp_snuff")
+	if not _heavy_told:
+		_heavy_told = true
+		var hud := get_node_or_null("HUD")
+		if hud != null and hud.has_method(&"toast"):
+			hud.call(&"toast", tr("COOP_JAR_BOTH_HANDS"))
 
 func down_reason() -> String:
 	return _down_reason if _down_reason != "" else "DEATH_GUARD"
