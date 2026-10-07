@@ -77,10 +77,16 @@ func _on_finished(ending: Dictionary) -> void:
 	await _epilogue_card()
 	await _card("END_BASE")
 	await _card("END_EVIDENCE" if ending.get("evidence", false) else "END_NO_EVIDENCE")
-	var apprentice := "END_APPRENTICE" if ending.get("apprentice", false) else "END_NO_APPRENTICE"
 	if ending.get("together", false):
-		apprentice = "END_TOGETHER"
-	await _card(apprentice)
+		await _card("END_TOGETHER")
+	elif ending.get("apprentice", false):
+		# Freed from the pen; and the lamp you left him, if you did.
+		var line := tr("END_APPRENTICE")
+		if ending.get("lamp", false):
+			line += " " + tr("END_APPRENTICE_LAMP")
+		await _card_text(line)
+	else:
+		await _card("END_NO_APPRENTICE")
 	var names: Array = ending.get("names", [])
 	_names = names
 	if names.is_empty():

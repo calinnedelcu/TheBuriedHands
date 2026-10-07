@@ -52,6 +52,9 @@ func _run() -> void:
 	_the_coffin()
 	_one_crossbow_per_trap()
 	_jar_and_cloth_any_time()
+	# Last: its lamps and guards draw on the shared random numbers, which
+	# would reshuffle what the patches above scatter.
+	_workers_shaft_and_pits()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -487,11 +490,14 @@ func _kit_service_tunnels() -> void:
 	_editable_up_to(old)
 	old.visible = false
 	old.set_meta(&"no_collision", true)
-	var old_col := root.get_node_or_null("MapWithoutTreasure/Cube_266/Cube_266_col") as StaticBody3D
-	if old_col != null:
-		_editable_up_to(old_col)
-		old_col.collision_layer = 0
-		old_col.collision_mask = 0
+	# Its import-time collider and the map's copy of it would wall up any
+	# new opening in the tunnels.
+	for path in ["Tunele/Cube_266/Cube_266_col", "MapWithoutTreasure/Cube_266/Cube_266_col"]:
+		var old_col := root.get_node_or_null(path) as StaticBody3D
+		if old_col != null:
+			_editable_up_to(old_col)
+			old_col.collision_layer = 0
+			old_col.collision_mask = 0
 	var group := root.get_node_or_null("ServiceTunnels") as Node3D
 	if group == null:
 		group = Node3D.new()
@@ -507,6 +513,8 @@ func _kit_service_tunnels() -> void:
 		LevelOpening.make(F.EAST, Vector2(-38.665, 0.0), Vector2(2.9, 3.3)),
 		LevelOpening.make(F.WEST, Vector2(-25.935, 0.0), Vector2(3.9, 3.43)),
 		LevelOpening.make(F.WEST, Vector2(38.165, 0.0), Vector2(3.9, 3.43)),
+		# The passage east to the workers' shaft.
+		LevelOpening.make(F.EAST, Vector2(-11.985, 0.0), Vector2(3.5, 3.43), false),
 	])
 	# East to the foot of Liang's ladder, with the shaft up through its roof.
 	_kit_box(group, "TopBranch", Vector3(39.355, -8.55, -46.68), Vector3(2.9, 3.22, 20.11), true, 1 << F.NORTH, [
@@ -520,11 +528,245 @@ func _kit_service_tunnels() -> void:
 	_kit_box(group, "ToMechanism", Vector3(0.255, -8.54, 35.505), Vector3(3.13, 3.25, 14.61), false, 0, [
 		LevelOpening.make(F.EAST, Vector2(-5.355, 0.0), Vector2(3.9, 3.25)),
 		LevelOpening.make(F.CEILING, Vector2(0.03, 5.7), Vector2(3.11, 3.21)),
+		# The top of the stairs up from the army pits.
+		LevelOpening.make(F.EAST, Vector2(-0.505, 0.0), Vector2(2.0, 3.25), false),
 	])
 	_kit_box(group, "ShaftToMechanism", Vector3(0.285, -5.29, 41.205), Vector3(3.11, 16.69, 3.21), false, 1 << F.FLOOR, [
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 12.79), Vector2(3.11, 3.9)),
 	])
 	_log.append("tunnels: rebuilt from %d LevelBox pieces" % group.get_child_count())
+
+## Act III's new way down (the first piece of the restructure): from the
+## service tunnel a passage east to the workers' shaft, a lift on a
+## counterweight down to the army pits (four trenches of clay soldiers, the
+## yard with the pen where the guards keep the craftsmen they caught, two
+## guards), and a way out south and up a stair well into the tunnel by the
+## mechanism's ladder. LevelBox walls are thick outward and floors stop at
+## the inner faces, so spaces meet through a passage from one inner face to
+## the other, its floor bridging the walls, the size of the holes it goes
+## through (which then draw no edges of their own).
+func _workers_shaft_and_pits() -> void:
+	var group := root.get_node_or_null("UnderTheMountain") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "UnderTheMountain"
+		root.add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	for path in ["Guards/PitGuardRing", "Guards/PitGuardYard", "Routes/PitsRing", "Routes/PitsYard"]:
+		var old := root.get_node_or_null(path)
+		if old != null:
+			old.get_parent().remove_child(old)
+			old.free()
+	const F := LevelOpening.Face
+	var dirt := load("res://assets/materials/level/dirt.tres") as Material
+	var timber := load("res://assets/materials/level/timber.tres") as Material
+	var pit_floor := -26.0
+	var tunnel_floor := -8.63
+	var rise := tunnel_floor - pit_floor
+	# The shaft (x 36..52, z -27..-14), its top landing a ledge of rock level
+	# with the tunnel, the lift beside it.
+	_kit_box(group, "ShaftPassage", Vector3(32.65, tunnel_floor, -20.0), Vector3(3.5, 3.43, 6.7), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	var shaft := _kit_box(group, "WorkersShaft", Vector3(44.0, pit_floor, -20.5), Vector3(16.0, 24.0, 13.0), false, 0, [
+		LevelOpening.make(F.WEST, Vector2(0.5, rise), Vector2(3.5, 3.43), false),
+		LevelOpening.make(F.SOUTH, Vector2(0.0, 0.0), Vector2(6.0, 4.5), false),
+	])
+	shaft.floor_material = dirt
+	_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), null)
+	_kit_solid(group, "LandingRailNorth", Vector3(40.42, tunnel_floor, -24.7), Vector3(0.15, 1.1, 4.6), timber)
+	_kit_solid(group, "LandingRailSouth", Vector3(40.42, tunnel_floor, -15.8), Vector3(0.15, 1.1, 3.6), timber)
+	var lift := CounterweightLift.new()
+	lift.name = "ShaftLift"
+	lift.travel = rise
+	lift.basket_offset = 5.4
+	group.add_child(lift)
+	lift.owner = root
+	lift.global_position = Vector3(42.8, tunnel_floor, -20.0)
+	_kit_box(group, "ShaftToPits", Vector3(44.0, pit_floor, -13.0), Vector3(6.0, 4.5, 2.0), false, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	# Stones for the ballast in a heap by each stop; at the bottom, timber
+	# and spare blocks to crouch behind while a guard comes to see what
+	# creaked.
+	var heaps := [[Vector3(39.4, tunnel_floor, -17.2), 0], [Vector3(41.0, pit_floor, -15.0), 1]]
+	for h in heaps:
+		for k in 5:
+			var off := Vector3((k % 3) * 0.62 - 0.6, 0.0, (k / 3) * 0.7 - 0.35)
+			_kit_solid(group, "Ballast%d_%d" % [h[1], k], h[0] + off, Vector3(0.55, 0.42, 0.55), null)
+		_kit_solid(group, "BallastTop%d" % h[1], h[0] + Vector3(0.0, 0.42, 0.0), Vector3(0.55, 0.4, 0.55), null)
+	_kit_solid(group, "TimberStack", Vector3(49.6, pit_floor, -25.6), Vector3(4.2, 1.3, 1.6), timber)
+	_kit_solid(group, "TimberStackTop", Vector3(49.3, pit_floor + 1.3, -25.4), Vector3(3.6, 0.5, 1.1), timber)
+	_kit_solid(group, "SpareBlockA", Vector3(50.6, pit_floor, -19.0), Vector3(1.6, 1.3, 1.6), null)
+	_kit_solid(group, "SpareBlockB", Vector3(50.8, pit_floor, -16.9), Vector3(1.4, 1.1, 1.4), null)
+	# The pits (x 30..70, z -12..30): rammed earth, a timber roof on beams,
+	# a walkway along the west wall, four trenches of soldiers between
+	# earthen walls, and the yard to the east with the pen.
+	var pits := _kit_box(group, "ArmyPits", Vector3(50.0, pit_floor, 9.0), Vector3(40.0, 7.0, 42.0), false, 0, [
+		LevelOpening.make(F.NORTH, Vector2(-6.0, 0.0), Vector2(6.0, 4.5), false),
+		LevelOpening.make(F.SOUTH, Vector2(-17.0, 0.0), Vector2(3.5, 3.43), false),
+	])
+	pits.floor_material = dirt
+	pits.wall_material = dirt
+	pits.ceiling_material = timber
+	for k in 10:
+		_kit_solid(group, "RoofBeam%d" % k, Vector3(50.0, pit_floor + 6.55, -10.0 + k * 4.4), Vector3(40.0, 0.45, 0.5), timber)
+	var trench_x := [35.5, 42.9, 50.3, 57.7]
+	for k in 4:
+		if k < 3:
+			var wall_x: float = trench_x[k] + 3.7
+			_kit_solid(group, "TrenchWall%d" % k, Vector3(wall_x, pit_floor, 9.0), Vector3(1.4, 3.0, 30.0), dirt)
+			# Posts on the earthen walls carry the roof beams.
+			for b in range(1, 7):
+				var z := -10.0 + b * 4.4
+				_kit_solid(group, "Post%d_%d" % [k, b], Vector3(wall_x, pit_floor + 3.0, z), Vector3(0.4, 3.55, 0.4), timber)
+		var ranks := StatueRanks.new()
+		ranks.name = "Ranks%d" % k
+		ranks.columns = 3
+		ranks.rows = 12
+		ranks.spacing = Vector2(1.7, 2.4)
+		ranks.variation_seed = 3 + k
+		var gaps := PackedVector2Array()
+		for g in [[1, 2 + k], [0, 7 - k], [2, 5 + (k % 3)], [1, 10 - (k % 2)]]:
+			gaps.append(Vector2(g[0], g[1]))
+		ranks.gaps = gaps
+		group.add_child(ranks)
+		ranks.owner = root
+		ranks.global_position = Vector3(trench_x[k], pit_floor, 9.0)
+	# The pen in the yard, the lever by the east wall, the way the freed run.
+	var lever_spot := Marker3D.new()
+	lever_spot.name = "PenLever"
+	group.add_child(lever_spot)
+	lever_spot.owner = root
+	lever_spot.global_position = Vector3(69.3, pit_floor, 22.0)
+	lever_spot.rotation.y = PI * 0.5
+	var flee := Node3D.new()
+	flee.name = "PenWayOut"
+	group.add_child(flee)
+	flee.owner = root
+	for p in [Vector3(64.0, pit_floor, -8.5), Vector3(31.3, pit_floor, -8.5), Vector3(31.3, pit_floor, 27.0), Vector3(33.0, pit_floor, 32.0), Vector3(33.0, pit_floor, 44.5), Vector3(21.0, pit_floor, 44.5)]:
+		var m := Marker3D.new()
+		flee.add_child(m)
+		m.owner = root
+		m.global_position = p
+	var pen := WorkersPen.new()
+	pen.name = "WorkersPen"
+	pen.size = Vector2(4.5, 7.0)
+	group.add_child(pen)
+	pen.owner = root
+	pen.global_position = Vector3(67.25, pit_floor, 5.5)
+	pen.lever_path = pen.get_path_to(lever_spot)
+	pen.flee_path = pen.get_path_to(flee)
+	# The way out: south, west, and up the stair well into the tunnel by the
+	# mechanism's ladder.
+	_kit_box(group, "PitsExitSouth", Vector3(33.0, pit_floor, 38.5), Vector3(3.5, 3.43, 17.0), false, 1 << F.NORTH, [
+		LevelOpening.make(F.WEST, Vector2(6.0, 0.0), Vector2(3.5, 3.43), false),
+	])
+	_kit_box(group, "PitsExitWest", Vector3(21.135, pit_floor, 44.5), Vector3(3.5, 3.43, 20.23), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	var top := -8.54
+	var well := _kit_box(group, "StairWell", Vector3(7.02, pit_floor, 40.3), Vector3(8.0, 22.0, 14.0), false, 0, [
+		LevelOpening.make(F.EAST, Vector2(4.2, 0.0), Vector2(3.5, 3.43), false),
+		LevelOpening.make(F.WEST, Vector2(-5.3, top - pit_floor), Vector2(2.0, 3.25), false),
+	])
+	well.floor_material = dirt
+	_kit_box(group, "StairDoor", Vector3(2.42, top, 35.0), Vector3(2.0, 3.25, 1.2), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	# Three flights round a core wall: north up the west side, south up the
+	# east side, north up the west side again to the landing by the door.
+	var step := (top - pit_floor) / 3.0
+	_kit_solid(group, "StairCore", Vector3(7.02, pit_floor, 40.3), Vector3(1.0, top - pit_floor + 1.0, 7.9), null)
+	_kit_ramp(group, "Flight1", Vector3(4.77, pit_floor, 44.25), 0.0, step, 7.9)
+	_kit_solid(group, "LandingA", Vector3(7.02, pit_floor + step - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), timber)
+	_kit_ramp(group, "Flight2", Vector3(9.27, pit_floor + step, 36.35), PI, step, 7.9)
+	_kit_solid(group, "LandingB", Vector3(7.02, pit_floor + step * 2.0 - 0.5, 45.775), Vector3(8.0, 0.5, 3.05), timber)
+	_kit_ramp(group, "Flight3", Vector3(4.77, pit_floor + step * 2.0, 44.25), 0.0, step, 7.9)
+	_kit_solid(group, "LandingC", Vector3(7.02, top - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), timber)
+	_kit_solid(group, "LandingCRail", Vector3(9.27, top, 36.225), Vector3(3.5, 1.1, 0.25), timber)
+	# A word on first seeing the army, from whichever side he comes in.
+	var seen := StoryTrigger.new()
+	seen.name = "PitsEnter"
+	seen.dialogue = &"pits_enter"
+	seen.quest_from = &"talk_liang"
+	group.add_child(seen)
+	seen.owner = root
+	seen.global_position = Vector3(44.0, pit_floor, 9.0)
+	for spot in [[Vector3(44.0, pit_floor + 2.0, -10.0), Vector3(6.0, 4.0, 2.0)], [Vector3(33.0, pit_floor + 2.0, 28.0), Vector3(3.5, 4.0, 2.0)]]:
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = spot[1]
+		shape.shape = box
+		seen.add_child(shape)
+		shape.owner = root
+		shape.global_position = spot[0]
+	# Light. A wall lamp's back (+z) goes against the wall.
+	var lamp_scene := load("res://scenes/world/wall_lamp.tscn") as PackedScene
+	for spot in [
+			[Vector3(36.4, tunnel_floor + 2.4, -24.5), -PI * 0.5], [Vector3(49.5, pit_floor + 2.6, -14.4), 0.0, false],
+			[Vector3(36.0, pit_floor + 2.6, -11.6), PI], [Vector3(30.4, pit_floor + 2.6, 2.0), -PI * 0.5],
+			[Vector3(30.4, pit_floor + 2.6, 20.0), -PI * 0.5], [Vector3(69.6, pit_floor + 2.6, 18.5), PI * 0.5],
+			[Vector3(34.35, pit_floor + 2.4, 40.0), PI * 0.5], [Vector3(10.62, pit_floor + step + 2.2, 34.5), PI * 0.5],
+			[Vector3(3.42, pit_floor + step * 2.0 + 2.2, 45.5), -PI * 0.5]]:
+		var lamp := lamp_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+		group.add_child(lamp)
+		lamp.owner = root
+		lamp.global_position = spot[0]
+		lamp.rotation.y = spot[1]
+		# The shaft's foot is dark until someone lights it.
+		if spot.size() > 2:
+			lamp.set(&"start_lit", spot[2])
+	# Two guards: one walks the ring of the hall with a torch, the other
+	# keeps the yard in front of the pen.
+	var guard_scene := load("res://scenes/ai/guard.tscn") as PackedScene
+	_pit_guard(guard_scene, "PitGuardRing", "PitsRing", true, Color(0.95, 0.85, 0.78), [
+		[Vector3(31.3, pit_floor, -9.0), 2.5, true], [Vector3(62.2, pit_floor, -9.0), 2.0, true],
+		[Vector3(62.2, pit_floor, 27.0), 1.0, false], [Vector3(31.3, pit_floor, 27.0), 2.5, true]])
+	_pit_guard(guard_scene, "PitGuardYard", "PitsYard", false, Color(1.1, 0.92, 0.72), [
+		[Vector3(64.0, pit_floor, -1.0), 4.0, true], [Vector3(63.6, pit_floor, 15.0), 3.0, true]])
+	_log.append("under the mountain: the workers' shaft and lift, the army pits (%d trenches), the pen, the stair well" % trench_x.size())
+
+func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torch: bool, tint: Color, points: Array) -> void:
+	var route := PatrolRoute.new()
+	route.name = route_name
+	root.get_node("Routes").add_child(route)
+	route.owner = root
+	for i in points.size():
+		var m := Marker3D.new()
+		m.name = "P%02d" % i
+		route.add_child(m)
+		m.owner = root
+		m.global_position = points[i][0]
+		m.set_meta(&"wait", points[i][1])
+		m.set_meta(&"look", points[i][2])
+	var guard := scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+	guard.name = guard_name
+	root.get_node("Guards").add_child(guard)
+	guard.owner = root
+	guard.global_position = points[0][0]
+	guard.set(&"route_path", guard.get_path_to(route))
+	guard.set(&"carries_torch", torch)
+	guard.set(&"armor_tint", tint)
+
+func _kit_solid(parent: Node3D, solid_name: String, bottom_centre: Vector3, solid_size: Vector3, mat: Material) -> LevelSolid:
+	var s := LevelSolid.new()
+	s.name = solid_name
+	s.size = solid_size
+	if mat != null:
+		s.material = mat
+	parent.add_child(s)
+	s.owner = root
+	s.global_position = bottom_centre
+	return s
+
+func _kit_ramp(parent: Node3D, ramp_name: String, foot: Vector3, yaw: float, ramp_rise: float, ramp_run: float) -> LevelRamp:
+	var r := LevelRamp.new()
+	r.name = ramp_name
+	r.width = 3.4
+	r.rise = ramp_rise
+	r.run = ramp_run
+	r.steps = 14
+	parent.add_child(r)
+	r.owner = root
+	r.global_position = foot
+	r.rotation.y = yaw
+	return r
 
 ## A LevelBox on `floor_centre`, its length along world z, or along x.
 func _kit_box(parent: Node3D, box_name: String, floor_centre: Vector3, box_size: Vector3, along_x: bool, open: int, holes: Array) -> LevelBox:

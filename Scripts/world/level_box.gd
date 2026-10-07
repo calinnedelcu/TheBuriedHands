@@ -120,12 +120,15 @@ func _build() -> void:
 		var fr := _face(f)
 		var face_rect := Rect2(0, 0, fr.w, fr.h)
 		var holes: Array[Rect2] = []
+		var lined: Array[Rect2] = []
 		for o in openings:
 			if o != null and o.face == f:
 				var r := _hole_rect(o, fr)
 				r = r.intersection(face_rect)
 				if r.has_area():
 					holes.append(r)
+					if o.jambs:
+						lined.append(r)
 		var mat := _material_for(f)
 		if not tools.has(mat):
 			var st := SurfaceTool.new()
@@ -136,7 +139,7 @@ func _build() -> void:
 			_quad(st, fr, r)
 			if body != null:
 				_collider(body, fr, r)
-		for h in holes:
+		for h in lined:
 			_jambs(st, fr, h)
 	var mesh := ArrayMesh.new()
 	for mat in tools:

@@ -40,11 +40,17 @@ func play(sequence_id: StringName, priority := Priority.STORY) -> bool:
 	# Co-op: the host tells the story; the apprentice's machine shows its lines.
 	if not Net.story_allowed():
 		return false
-	var lines: Array = DialogueDB.sequence(sequence_id)
+	var lines: Array = DialogueDB.sequence(sequence_id).filter(_for_this_game)
 	if lines.is_empty():
 		push_warning("Dialogue sequence '%s' is empty or missing" % sequence_id)
 		return false
 	return await _run(sequence_id, lines, priority)
+
+## Lines marked {"only": &"solo"} or {"only": &"coop"} play only in that kind
+## of game.
+func _for_this_game(entry: Array) -> bool:
+	var only: StringName = (entry[2] as Dictionary).get("only", &"") if entry.size() > 2 else &""
+	return only == &"" or only == (&"coop" if Net.active else &"solo")
 
 ## Plays one line as its own tiny sequence.
 func say(speaker_id: StringName, text_key: String, priority := Priority.HINT) -> bool:

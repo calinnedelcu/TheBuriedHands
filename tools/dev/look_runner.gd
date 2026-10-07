@@ -1,7 +1,8 @@
 extends Node
 ## Dev runner: free-camera shots of the level, to check placements. A small
 ## warm light rides with the camera, like the player's lamp. The HUD is hidden.
-## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...] [--tipped] [--quest=step_id] [--nolamp]
+## --bright swaps the lamp for a strong light that shows the shape of a space.
+## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/look_runner.gd --out=/abs/dir --shot="name;fx,fy,fz;tx,ty,tz" [--shot=...] [--tipped] [--quest=step_id] [--nolamp] [--bright]
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -16,6 +17,7 @@ func _run() -> void:
 	var tipped := false
 	var quest := &""
 	var with_lamp := true
+	var bright := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.substr(6)
@@ -28,6 +30,8 @@ func _run() -> void:
 			quest = StringName(arg.substr(8))
 		elif arg == "--nolamp":
 			with_lamp = false
+		elif arg == "--bright":
+			bright = true
 	DirAccess.make_dir_recursive_absolute(out)
 	get_tree().change_scene_to_file("res://scenes/level/mausoleum.tscn")
 	await Game.level_ready
@@ -52,6 +56,11 @@ func _run() -> void:
 	lamp.shadow_enabled = true
 	lamp.position = Vector3(-0.25, -0.2, -0.3)
 	lamp.visible = with_lamp
+	if bright:
+		lamp.light_energy = 5.0
+		lamp.omni_range = 40.0
+		lamp.omni_attenuation = 0.6
+		lamp.shadow_enabled = false
 	cam.add_child(lamp)
 	cam.make_current()
 	for s in shots:

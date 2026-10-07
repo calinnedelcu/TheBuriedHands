@@ -293,6 +293,10 @@ func _sight_factor(p: Player) -> float:
 	# Up close, a guard makes out a shape even in the dark.
 	var stance_size := 0.45 if p.is_crawling() else (0.7 if p.is_crouching() else 1.0)
 	var near_term := clampf(1.0 - dist / 4.5, 0.0, 1.0) * 0.9 * stance_size
+	# A still man among the clay ranks is one more figure, unless the guard
+	# is close enough to touch him.
+	if p.camouflaged() and dist > 1.8:
+		near_term = 0.0
 	var f := maxf(light_term, near_term) * cone
 	return f if f > 0.05 else 0.0
 

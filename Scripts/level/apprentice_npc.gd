@@ -1,8 +1,10 @@
 class_name ApprenticeNpc
 extends Npc
 ## The apprentice. Gives the opening task, and after the sealing asks for
-## help: the player can leave him their lamp (an ending changes) or keep it.
-## Either way he hides in the mouth of the cold kiln once you look away.
+## help: the player can leave him their lamp or keep it. Either way he hides
+## in the mouth of the cold kiln once you look away; and while his master is
+## with Liang, Wei's men find him there and take him down to the pen in the
+## army pits (alone; together, the apprentice is the other player).
 
 @export var lamp_prop_path: NodePath
 @export var hide_spot_path: NodePath
@@ -14,6 +16,20 @@ func _ready() -> void:
 	add_to_group(&"persistent")
 	if _lamp_prop != null:
 		_lamp_prop.visible = false
+	Quest.step_changed.connect(_on_step_changed)
+
+func _on_step_changed(step_id: StringName) -> void:
+	if step_id == &"talk_liang" and not Net.active:
+		Game.set_flag(&"apprentice_taken")
+		_taken()
+
+## Gone from the kiln, with the lamp if he had it (WorkersPen shows him).
+func _taken() -> void:
+	visible = false
+	process_mode = Node.PROCESS_MODE_DISABLED
+	for body in find_children("*", "CollisionObject3D", true, false):
+		(body as CollisionObject3D).collision_layer = 0
+	_set_has_lamp(false)
 
 func usable_can_use(_user: Node) -> bool:
 	return not _talking and (Quest.is_at(&"talk_apprentice") or Quest.is_at(&"answer_apprentice"))
@@ -91,3 +107,5 @@ func persist_load(data: Dictionary) -> void:
 	_set_has_lamp(bool(data.get("lamp", false)))
 	if Quest.has_reached(&"find_liang"):
 		_snap_to_hide_spot()
+	if Quest.has_reached(&"talk_liang") and not Net.active:
+		_taken()

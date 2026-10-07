@@ -171,6 +171,9 @@ var _notice_second := -1
 ## by the counterweight); rooted there until they let go.
 var bracing: Node = null
 var _heavy_told := false
+## How many ranks of clay soldiers this body stands among (StatueRanks).
+var ranks := 0
+var _ranks_told := false
 
 func _ready() -> void:
 	role = &"apprentice" if name == Net.APPRENTICE_BODY else &"master"
@@ -428,6 +431,11 @@ func _physics_process(delta: float) -> void:
 	_update_health(delta)
 	if Net.active:
 		_check_heavy()
+	if ranks > 0 and not _ranks_told:
+		_ranks_told = true
+		var hud := get_node_or_null("HUD")
+		if hud != null and hud.has_method(&"toast"):
+			hud.call(&"toast", InputHint.format(tr("HINT_RANKS")))
 	if downed:
 		_bleed_out(delta)
 	_use_usable.hold_time = REVIVE_HOLD if downed else 0.0
@@ -786,6 +794,9 @@ func _update_visibility() -> void:
 	var stance_factor: float = {Stance.STAND: 1.0, Stance.CROUCH: 0.62, Stance.CRAWL: 0.38}[stance]
 	var motion_factor := 1.0 + (0.45 if is_sprinting() else (0.15 if is_moving() else 0.0))
 	exposure = clampf(visibility * stance_factor * motion_factor, 0.0, 1.0)
+	# Among the clay soldiers, standing still with no flame, he is one of them.
+	if camouflaged():
+		exposure *= 0.15
 	Stealth.player_visibility = visibility
 	Stealth.player_exposure = exposure
 
@@ -1104,6 +1115,8 @@ func net_state() -> Array:
 		bits |= 16
 	if downed:
 		bits |= 32
+	if camouflaged():
+		bits |= 64
 	return [global_position, rotation.y, _pitch, int(stance), velocity, bits, exposure, health]
 
 func net_apply(state: Array) -> void:
@@ -1214,6 +1227,13 @@ func _go_down(reason: String) -> void:
 	_set_stance(Stance.CRAWL, true)
 	velocity = Vector3.ZERO
 	Net.player_downed(self)
+
+## Standing still among clay soldiers with no flame: to a guard, one more
+## figure in the ranks (unless he comes close enough to touch).
+func camouflaged() -> bool:
+	if not is_local:
+		return _net_bits & 64 != 0
+	return ranks > 0 and not is_moving() and not has_lamp_lit() and stance != Stance.CRAWL
 
 ## Co-op: takes hold of `spot` (both machines run this through the spot's
 ## use), down on one knee for low work or standing to bear on a lever.

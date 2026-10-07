@@ -22,7 +22,10 @@ func has_reached(step_id: StringName) -> bool:
 	return idx >= 0 and _index >= idx
 
 func objective_key() -> String:
-	return QuestDB.step(_index).get("text", "")
+	var step := QuestDB.step(_index)
+	if not Net.active and step.has("solo_text"):
+		return step["solo_text"]
+	return step.get("text", "")
 
 func hint_key() -> String:
 	return QuestDB.step(_index).get("hint", "")

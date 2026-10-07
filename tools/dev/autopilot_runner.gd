@@ -4,7 +4,9 @@ extends Node
 ## ladders, crawls, answers the apprentice. Catches what teleporting bots
 ## can't: blocked paths, unreachable or untargetable objects, prompts.
 ## Guards are made harmless from Act II on (this tests the route, not stealth).
-## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--out=/abs/dir for frames, needs a window]
+## Act III goes through the service tunnels, or with --route=pits down the
+## workers' shaft and through the army pits (the lift, the pen, the stairs).
+## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--route=pits] [--out=/abs/dir for frames, needs a window]
 
 const WS := "Rooms/01_TerracottaWorkshop/"
 
@@ -15,6 +17,7 @@ var failures := 0
 var _shot_timer := 0.0
 var _shots := 0
 var _from := "act1"
+var _route := "tunnels"
 var _nav_map: RID
 var _verbose := false
 
@@ -24,6 +27,8 @@ func _ready() -> void:
 			out = arg.substr(6)
 		elif arg.begins_with("--from="):
 			_from = arg.substr(7)
+		elif arg.begins_with("--route="):
+			_route = arg.substr(8)
 		elif arg == "--verbose":
 			_verbose = true
 	if out != "":
@@ -73,6 +78,8 @@ func _setup(act: String) -> void:
 			player.global_position = Vector3(6.0, 0.2, -6.0)
 		"act3":
 			Quest.start_at(&"reach_mechanism")
+			# Wei's men took the apprentice while his master was with Liang.
+			Game.set_flag(&"apprentice_taken")
 			player.inventory.add(&"wedge")
 			player.inventory.add(&"hammer")
 			player.global_position = Vector3(37.8, 0.4, -27.5)
@@ -150,6 +157,9 @@ func _act2() -> bool:
 	return Quest.is_at(&"reach_mechanism")
 
 func _act3() -> bool:
+	for g in get_tree().get_nodes_in_group(&"guards"):
+		(g as Guard).sight_range = 0.0
+		(g as Guard).hearing_scale = 0.0
 	if not player.inventory.has_item(&"wedge"):
 		await _use("Tool_Workbench_Wedge_W2")
 	if not player.inventory.has_item(&"hammer"):
@@ -161,7 +171,11 @@ func _act3() -> bool:
 	_check("stone broken", bool(level.get_node("ShaftStone").get("broken")))
 	await _skip_dialogue()
 	await _climb("Mechanism/Ladder1", false)
-	await _walk_to(Vector3(31.8, -8.4, -40.0), 1.5)
+	if _route == "pits":
+		if not await _pits():
+			return false
+	else:
+		await _walk_to(Vector3(31.8, -8.4, -40.0), 1.5)
 	await _walk_to(Vector3(0.5, -7.4, 41.0), 1.2)
 	await _climb("Mechanism/Ladder3", true)
 	await _walk_to(Vector3(0.0, 7.7, 45.6), 1.0)
@@ -231,6 +245,66 @@ func _act5() -> bool:
 	await _wait(3.0)
 	_check("walking out on his own (%.1f m)" % from.distance_to(player.global_position), from.distance_to(player.global_position) > 1.5)
 	return true
+
+## Act III the long way: the workers' shaft and its lift (too light alone,
+## down with a stone in the ballast box), the ranks of clay soldiers, the
+## pen's lever across the yard, and the stairs up to the mechanism's tunnel.
+func _pits() -> bool:
+	const LIFT := "UnderTheMountain/ShaftLift/"
+	var lift := level.get_node(LIFT) as CounterweightLift
+	var pen := level.get_node("UnderTheMountain/WorkersPen") as WorkersPen
+	await _walk_to(Vector3(32.65, -8.6, -20.0), 1.5)
+	var on := await _walk_to(Vector3(42.8, -8.6, -20.0), 0.6)
+	await _wait(0.3)
+	_check("on the lift (%s, load %.1f)" % [player.global_position.snapped(Vector3.ONE * 0.1), lift.load_weight()], on and lift.load_weight() >= 0.99)
+	await _use(LIFT + "Platform/BrakeBody")
+	await _wait(0.6)
+	_check("alone he is too light: it stays", lift.moving == 0 and lift.level == 0.0)
+	await _use(LIFT + "Platform/BallastBody", "hold")
+	_check("a stone in the ballast box (%d)" % lift.ballast, lift.ballast == 1)
+	await _use(LIFT + "Platform/BrakeBody")
+	await _wait(0.6)
+	_check("going down", lift.moving == 1)
+	var t := 0.0
+	while lift.level < 1.0 and t < 25.0:
+		await _wait(0.5)
+		t += 0.5
+	await _wait(0.6)
+	_check("down in the pits after %.1f s (at %s)" % [t, player.global_position.snapped(Vector3.ONE * 0.1)], lift.level >= 1.0 and absf(player.global_position.y + 26.0) < 0.7)
+	await _skip_dialogue()
+	# The guards' beats down here are on their navmesh, end to end.
+	var guard_map := level.get_world_3d().navigation_map
+	for route in ["Routes/PitsRing", "Routes/PitsYard"]:
+		var points := (level.get_node(route) as PatrolRoute).points()
+		for i in points.size():
+			var a := points[i].global_position
+			var b := points[(i + 1) % points.size()].global_position
+			var path := NavigationServer3D.map_get_path(guard_map, a, b, true)
+			var end := path[path.size() - 1] if not path.is_empty() else a
+			_check("%s %d->%d walkable (ends %.1f m off)" % [route.get_file(), i, (i + 1) % points.size(), end.distance_to(b)], end.distance_to(b) < 1.0)
+	await _bake_player_nav()
+	# Among the ranks, standing still with no flame, he is one of them.
+	var back := player.global_position
+	player.global_position = Vector3(43.75, -26.0, 9.0)
+	player.velocity = Vector3.ZERO
+	await _wait(0.8)
+	_check("in the ranks (%d)" % player.ranks, player.ranks > 0)
+	_check("a lit lamp gives him away", player.has_lamp_lit() and not player.camouflaged())
+	player.inventory.lamp().snuff()
+	await _wait(0.3)
+	_check("dark and still: one more statue (exposure %.2f)" % player.exposure, player.camouflaged())
+	player.inventory.lamp().toggle()
+	player.global_position = back
+	await _wait(1.5)
+	await _use("UnderTheMountain/PenLever/Lever/Body")
+	_check("the pen's gate is up", pen.opened)
+	_check("the apprentice is free", Game.get_flag(&"apprentice_freed"))
+	await _skip_dialogue()
+	await _walk_to(Vector3(33.0, -26.0, 38.0), 1.5)
+	var up := await _walk_to(Vector3(4.8, -8.5, 35.0), 1.2)
+	_check("up the stairs (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), up and player.global_position.y > -9.0)
+	await _walk_to(Vector3(0.3, -8.5, 35.0), 1.0)
+	return player.global_position.y > -9.0
 
 # --- Ladders ---------------------------------------------------------------------------------
 

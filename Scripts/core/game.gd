@@ -169,7 +169,8 @@ func fail(reason_key: String) -> void:
 func finish() -> void:
 	var ending := {
 		"evidence": bool(get_flag(&"has_evidence")),
-		"apprentice": bool(get_flag(&"gave_lamp")),
+		"apprentice": bool(get_flag(&"apprentice_freed")),
+		"lamp": bool(get_flag(&"gave_lamp")),
 		"names": NamesDB.found(),
 		"together": Net.active,
 	}

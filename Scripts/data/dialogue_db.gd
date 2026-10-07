@@ -3,7 +3,8 @@ extends RefCounted
 ## Every scripted line in the game. Entries are [speaker_id, text_key] or
 ## [speaker_id, text_key, extras]; the text itself lives in
 ## localization/strings.csv. Extras are forwarded to listeners (e.g. an NPC
-## animation for that line: {"anim": &"..."}).
+## animation for that line: {"anim": &"..."}); {"only": &"solo"} or
+## {"only": &"coop"} keeps a line to that kind of game.
 
 const SPEAKERS := {
 	&"craftsman": "SPK_CRAFTSMAN",
@@ -94,6 +95,12 @@ const SEQUENCES := {
 		[&"liang", "DLG_LIANG_9", {"anim": &"frustrated"}],
 		[&"liang", "DLG_LIANG_10", {"anim": &"talk"}],
 		[&"liang", "DLG_LIANG_11", {"anim": &"talk"}],
+		# Alone, the craftsman learns where his apprentice was taken; together,
+		# the two of them hear of the way down that needs both their weights.
+		[&"liang", "DLG_LIANG_PITS_1", {"anim": &"talk", "only": &"solo"}],
+		[&"craftsman", "DLG_LIANG_PITS_2", {"only": &"solo"}],
+		[&"liang", "DLG_LIANG_PITS_3", {"anim": &"talk", "only": &"solo"}],
+		[&"liang", "DLG_LIANG_PITS_COOP", {"anim": &"talk", "only": &"coop"}],
 		[&"craftsman", "DLG_LIANG_12"],
 		[&"liang", "DLG_LIANG_13", {"anim": &"sit"}],
 	],
@@ -106,6 +113,14 @@ const SEQUENCES := {
 	],
 	&"corridor_enter": [
 		[&"craftsman", "DLG_CORRIDOR_ENTER"],
+	],
+	&"pits_enter": [
+		[&"craftsman", "DLG_PITS_ENTER_1"],
+		[&"craftsman", "DLG_PITS_ENTER_2"],
+	],
+	&"apprentice_freed": [
+		[&"apprentice", "DLG_FREED_1"],
+		[&"craftsman", "DLG_FREED_2"],
 	],
 	# --- Act IV: mechanism chamber and the Mercury Hall -----------------------
 	&"mechanism_enter": [

@@ -72,6 +72,8 @@ func _run() -> void:
 	_check("evidence flag", Game.get_flag(&"has_evidence"))
 	await _enter("Story/LiangRoomEnter")
 	_expect(&"talk_liang")
+	var apprentice := level.get_node("Rooms/01_TerracottaWorkshop/Apprentice") as Node3D
+	_check("Wei's men took the apprentice from the kiln", Game.get_flag(&"apprentice_taken") and not apprentice.visible)
 	await _use("Liang/TalkBody/Usable")
 	await _wait_dialogue()
 	_expect(&"reach_mechanism")

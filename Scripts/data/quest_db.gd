@@ -2,7 +2,8 @@ class_name QuestDB
 extends RefCounted
 ## The main quest as an ordered list of steps. Gameplay nodes refer to steps by
 ## id ("this pickup completes `fetch_slip`"); the order and the objective text
-## live only here. `checkpoint` steps save the game when they start.
+## live only here. `checkpoint` steps save the game when they start; a
+## `solo_text` replaces the objective when playing alone.
 
 const STEPS := [
 	# Act I — the workshop
@@ -19,7 +20,7 @@ const STEPS := [
 	{"id": &"find_liang", "text": "OBJ_FIND_LIANG", "hint": "HINT_STEALTH", "checkpoint": true},
 	{"id": &"talk_liang", "text": "OBJ_TALK_LIANG", "checkpoint": true},
 	# Act III — tunnels or corridor
-	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "checkpoint": true},
+	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "solo_text": "OBJ_REACH_MECHANISM_SOLO", "checkpoint": true},
 	# Act IV — the counterweight
 	{"id": &"inspect_balance", "text": "OBJ_INSPECT_BALANCE", "checkpoint": true},
 	{"id": &"get_vase", "text": "OBJ_GET_VASE"},

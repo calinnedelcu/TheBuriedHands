@@ -276,7 +276,7 @@ END_PLACE,"Mount Li, the next morning","Muntele Li, a doua zi dimineața"
 END_BASE,The First Emperor's tomb was sealed with its builders inside. You are one of the few who saw the sky again.,Mormântul Primului Împărat a fost sigilat cu constructorii lui înăuntru. Tu ești unul dintre puținii care au mai văzut cerul.
 END_EVIDENCE,The register came out with you. Their names will not be forgotten.,Registrul a ieșit odată cu tine. Numele lor nu vor fi uitate.
 END_NO_EVIDENCE,No one will ever write of those left beneath the mountain.,"Despre cei rămași sub munte nu va scrie nimeni, niciodată."
-END_APPRENTICE,"The lamp you left your apprentice burned until dawn. Days later, a thin boy stumbled out of the forest at the foot of Mount Li.","Lampa lăsată ucenicului a ars până în zori. Câteva zile mai târziu, un băiat slăbit a ieșit din pădurea de la poalele muntelui Li."
+END_APPRENTICE,"You opened the pen under the mountain. Days later, a thin boy came out of the forest at the foot of Mount Li, asking after his master.","Ai deschis țarcul de sub munte. Câteva zile mai târziu, un băiat slăbit a ieșit din pădurea de la poalele muntelui Li și a întrebat de maestrul lui."
 END_NO_APPRENTICE,You often thought of your apprentice. You never learned what became of him.,Te-ai gândit des la ucenic. N-ai aflat niciodată ce s-a ales de el.
 END_HISTORY,"""The artisans who had built the machinery and knew of the treasures were sealed inside; none came out."" — after Sima Qian, Records of the Grand Historian","„Meșteșugarii care făcuseră mecanismele și știau de comori au fost închiși înăuntru; niciunul n-a mai ieșit.” — după Sima Qian, Însemnările marelui istoric"
 END_THANKS,Thank you for playing.,Mulțumim că ai jucat.
@@ -356,3 +356,21 @@ PROMPT_DRAIN_TOO_TIGHT,Too tight for your shoulders — your apprentice could sq
 PROMPT_NAME_CANT_READ,Seal script — your master can read it,Scriere de sigiliu — meșterul o poate citi
 COOP_HINT_BRAKE,The causeway is sinking back. Someone must bear on the brake by the counterweight.,Podul se lasă înapoi. Cineva trebuie să apese frâna de lângă contragreutate.
 COOP_JAR_BOTH_HANDS,The full jar takes both hands — no lamp now.,Vasul plin îți ia ambele mâini — fără lampă acum.
+PROMPT_LIFT_RELEASE,Release the brake,Slăbește frâna
+PROMPT_LIFT_CALL,Pull the brake rope,Trage de funia frânei
+PROMPT_LIFT_ADD_STONE,Load a stone,Pune o piatră
+PROMPT_LIFT_REMOVE_STONE,Take a stone off,Scoate o piatră
+LIFT_TOO_LIGHT,"The lift creaks against the brake and stays put. Too light: load stones, or bring company.",Liftul scârțâie în frână și nu se clintește. Prea ușor: pune pietre sau adu pe cineva cu tine.
+LIFT_TOO_HEAVY,Too heavy to go back up. Take some stones off.,Prea greu ca să urce înapoi. Mai scoate din pietre.
+PROMPT_PEN_LEVER,Raise the pen's gate,Ridică poarta țarcului
+HINT_RANKS,"Among the clay soldiers, stand still with no flame: to a guard you are one more statue.","Printre soldații de lut, stai nemișcat și fără flacără: pentru un paznic ești încă o statuie."
+DLG_LIANG_PITS_1,"One more thing. Wei, the overseer, sends his men through the workshops with a list. Whoever they find goes down to the army pits, penned beside the clay soldiers, to be sealed in with them.","Încă ceva. Wei, supraveghetorul, își trimite oamenii prin ateliere cu o listă. Pe cine găsesc îl coboară în gropile armatei, într-un țarc lângă soldații de lut, să fie zidit odată cu ei."
+DLG_LIANG_PITS_2,My apprentice. I left him hiding in the cold kiln.,Ucenicul meu. L-am lăsat ascuns în cuptorul rece.
+DLG_LIANG_PITS_3,"Then he's in the pits by now. The workers' shaft opens off the service tunnel, to the east. Its lift runs on a counterweight: one man alone is too light to go down. Load it with stones.","Atunci e deja în gropi. Puțul lucrătorilor se deschide din tunelul de serviciu, spre est. Liftul lui merge pe contragreutate: un om singur e prea ușor ca să coboare. Încarcă-l cu pietre."
+DLG_LIANG_PITS_COOP,"If the tunnels are watched, take the workers' shaft, east off the service tunnel. Its lift runs on a counterweight: one man is too light for it, two will do.","Dacă tunelurile sunt păzite, luați puțul lucrătorilor, spre est din tunelul de serviciu. Liftul merge pe contragreutate: un om e prea ușor pentru el, doi ajung."
+DLG_PITS_ENTER_1,"The Emperor's army. Thousands of them, and not two faces alike.","Armata Împăratului. Mii de soldați, și nici două chipuri la fel."
+DLG_PITS_ENTER_2,Wei's men keep the ones they catch somewhere down here.,"Oamenii lui Wei îi țin pe cei prinși undeva aici, jos."
+DLG_FREED_1,Master! I knew you'd come...,Maestre! Știam că o să veniți...
+DLG_FREED_2,"Run with the others. Keep to the dark, I'll find you outside.","Fugi cu ceilalți. Ține-te în întuneric, te găsesc afară."
+OBJ_REACH_MECHANISM_SOLO,"Reach the mechanism chamber: through the tunnels or the crossbow corridor. Your apprentice is in the army pits, down the workers' shaft.","Ajunge în camera mecanismelor: prin tunele sau pe coridorul arbaletelor. Ucenicul tău e în gropile armatei, la capătul puțului lucrătorilor."
+END_APPRENTICE_LAMP,He still had your lamp.,Încă avea lampa ta.
