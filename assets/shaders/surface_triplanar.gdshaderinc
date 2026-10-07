@@ -1,5 +1,6 @@
-// Body of the triplanar surface shaders (surface_triplanar.gdshader and its
-// double-sided twin): uniforms, vertex and fragment.
+// Body of the triplanar surface shaders (surface_triplanar.gdshader, its
+// double-sided twin and the tinted one): uniforms, vertex and fragment.
+// INSTANCE_TINT multiplies the colour by the vertex/instance colour.
 
 uniform vec4 base_color : source_color = vec4(0.5, 0.5, 0.5, 1.0);
 uniform sampler2D detail_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -26,10 +27,20 @@ uniform bool geometric_normals = false;
 
 varying vec3 v_world_pos;
 varying vec3 v_world_nrm;
+#ifdef INSTANCE_TINT
+varying vec3 v_tint;
+#endif
 
 void vertex() {
 	v_world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+#ifdef INSTANCE_TINT
+	// Instances are scaled unevenly (a block is longer than it is tall):
+	// normals go through the inverse transpose, or bevels light wrong.
+	v_world_nrm = normalize(transpose(inverse(mat3(MODEL_MATRIX))) * NORMAL);
+	v_tint = COLOR.rgb;
+#else
 	v_world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+#endif
 }
 
 vec3 tri_weights(vec3 n) {
@@ -71,6 +82,9 @@ void fragment() {
 	macro /= max(albedo_mean, 0.05);
 
 	vec3 col = base_color.rgb * mix(vec3(1.0), d, detail_strength) * mix(1.0, macro, macro_strength);
+#ifdef INSTANCE_TINT
+	col *= v_tint;
+#endif
 	ALBEDO = clamp(col, vec3(0.0), vec3(1.0));
 
 	float r = texture(detail_roughness, uv_x).r * w.x + texture(detail_roughness, uv_y).r * w.y + texture(detail_roughness, uv_z).r * w.z;

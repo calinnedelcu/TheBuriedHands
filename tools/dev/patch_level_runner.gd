@@ -52,6 +52,8 @@ func _run() -> void:
 	_the_coffin()
 	_one_crossbow_per_trap()
 	_jar_and_cloth_any_time()
+	_tunnels_trigger_in_the_middle()
+	_timber_ceilings()
 	# Last: its lamps and guards draw on the shared random numbers, which
 	# would reshuffle what the patches above scatter.
 	_workers_shaft_and_pits()
@@ -536,6 +538,113 @@ func _kit_service_tunnels() -> void:
 	])
 	_log.append("tunnels: rebuilt from %d LevelBox pieces" % group.get_child_count())
 
+## The trigger that opens the tunnels' chapter sat mostly in the rock east of
+## the long tunnel, touching it along one wall only: walking down the middle
+## missed it.
+func _tunnels_trigger_in_the_middle() -> void:
+	var trigger := root.get_node("Story/TunnelsEnter") as Node3D
+	trigger.global_position.x = 27.55
+	_log.append("tunnels: the chapter trigger across the whole tunnel")
+
+## The jam's roofs: over the workshop, planks tilted every which way, their
+## normals wrong (the wood grain smears into streaks) and the gaps between
+## them showing the void; over the hall, the second workshop and the
+## archives, faces turned to the sky, so from inside there was no ceiling at
+## all. Now boards on beams (TimberCeiling) over the same ground, found by
+## rays up through each old roof's collider (which stays); the old meshes
+## are hidden.
+func _timber_ceilings() -> void:
+	for pair in [["FirstTerracottaRoomRoof", "WorkshopCeiling"], ["HallwayRoof", "HallwayCeiling"],
+			["SecondTerracottaRoomRoof", "SecondWorkshopCeiling"], ["SecretaryRoof", "ArchivesCeiling"]]:
+		_timber_ceiling(pair[0], pair[1])
+
+func _timber_ceiling(roof_name: String, ceiling_name: String) -> void:
+	var old := root.get_node("MapWithoutTreasure/" + roof_name) as MeshInstance3D
+	_editable_up_to(old)
+	var col: CollisionObject3D = null
+	for c in old.get_children():
+		if c is CollisionObject3D:
+			col = c
+	var aabb := old.global_transform * old.get_aabb()
+	var origin := Vector3(floorf(aabb.position.x), 0.0, floorf(aabb.position.z))
+	var nx := int(ceilf(aabb.end.x - origin.x))
+	var nz := int(ceilf(aabb.end.z - origin.z))
+	var space := root.get_world_3d().direct_space_state
+	var cover := PackedByteArray()
+	cover.resize(nx * nz)
+	var heights: Array[float] = []
+	for iz in nz:
+		for ix in nx:
+			var hit := false
+			for off in [Vector2(0.5, 0.5), Vector2(0.2, 0.2), Vector2(0.8, 0.2), Vector2(0.2, 0.8), Vector2(0.8, 0.8)]:
+				var from := Vector3(origin.x + ix + off.x, aabb.position.y - 2.0, origin.z + iz + off.y)
+				var y := _ray_height(space, from, Vector3(from.x, aabb.end.y + 2.0, from.z), col)
+				if not is_nan(y):
+					hit = true
+					heights.append(y)
+					break
+			cover[iz * nx + ix] = 1 if hit else 0
+	# Close the gaps the old planks left between them: a cell with roof on
+	# both sides of it, along its row and along its column, has roof.
+	var row_span: Array[Vector2i] = []
+	for iz in nz:
+		var first := -1
+		var last := -1
+		for ix in nx:
+			if cover[iz * nx + ix] != 0:
+				last = ix
+				if first < 0:
+					first = ix
+		row_span.append(Vector2i(first, last))
+	var col_span: Array[Vector2i] = []
+	for ix in nx:
+		var first := -1
+		var last := -1
+		for iz in nz:
+			if cover[iz * nx + ix] != 0:
+				last = iz
+				if first < 0:
+					first = iz
+		col_span.append(Vector2i(first, last))
+	for iz in nz:
+		for ix in nx:
+			if row_span[iz].x >= 0 and ix > row_span[iz].x and ix < row_span[iz].y and iz > col_span[ix].x and iz < col_span[ix].y:
+				cover[iz * nx + ix] = 1
+	old.visible = false
+	var existing := root.get_node_or_null(ceiling_name)
+	if existing != null:
+		root.remove_child(existing)
+		existing.free()
+	# The boards' undersides where most of the old roof was.
+	heights.sort()
+	var y := heights[heights.size() / 2] - 0.03 if not heights.is_empty() else aabb.position.y
+	var ceiling := TimberCeiling.new()
+	ceiling.name = ceiling_name
+	ceiling.cells = Vector2i(nx, nz)
+	ceiling.cover = cover
+	root.add_child(ceiling)
+	ceiling.owner = root
+	ceiling.global_position = Vector3(origin.x, y, origin.z)
+	var n := 0
+	for b in cover:
+		n += b
+	_log.append("%s: boards on beams over %d m² at y %.2f (old roof hidden)" % [ceiling_name, n, y])
+
+## Where a ray from `from` to `to` meets `target` (going through anything
+## else): its height, or NAN.
+func _ray_height(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3, target: CollisionObject3D) -> float:
+	var q := PhysicsRayQueryParameters3D.create(from, to, 0xFFFFFFFF)
+	var skip: Array[RID] = []
+	for k in 8:
+		q.exclude = skip
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return NAN
+		if hit.collider == target:
+			return (hit.position as Vector3).y
+		skip.append(hit.rid)
+	return NAN
+
 ## Act III's new way down (the first piece of the restructure): from the
 ## service tunnel a passage east to the workers' shaft, a lift on a
 ## counterweight down to the army pits (four trenches of clay soldiers, the
@@ -563,18 +672,21 @@ func _workers_shaft_and_pits() -> void:
 	const F := LevelOpening.Face
 	var dirt := load("res://assets/materials/level/dirt.tres") as Material
 	var timber := load("res://assets/materials/level/timber.tres") as Material
+	# Built like the workshop: its dressed stone and its flagstones.
+	var stone := load("res://assets/materials/level/walls.tres") as Material
+	var flag := load("res://assets/materials/level/floortiles1.tres") as Material
+	var step_stone := load("res://assets/materials/level/floortiles2.tres") as Material
 	var pit_floor := -26.0
 	var tunnel_floor := -8.63
 	var rise := tunnel_floor - pit_floor
 	# The shaft (x 36..52, z -27..-14), its top landing a ledge of rock level
 	# with the tunnel, the lift beside it.
-	_kit_box(group, "ShaftPassage", Vector3(32.65, tunnel_floor, -20.0), Vector3(3.5, 3.43, 6.7), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
-	var shaft := _kit_box(group, "WorkersShaft", Vector3(44.0, pit_floor, -20.5), Vector3(16.0, 24.0, 13.0), false, 0, [
+	_dressed(_kit_box(group, "ShaftPassage", Vector3(32.65, tunnel_floor, -20.0), Vector3(3.5, 3.43, 6.7), true, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
+	_dressed(_kit_box(group, "WorkersShaft", Vector3(44.0, pit_floor, -20.5), Vector3(16.0, 24.0, 13.0), false, 0, [
 		LevelOpening.make(F.WEST, Vector2(0.5, rise), Vector2(3.5, 3.43), false),
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 0.0), Vector2(6.0, 4.5), false),
-	])
-	shaft.floor_material = dirt
-	_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), null)
+	]), timber)
+	_masonry(_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), stone), flag)
 	_kit_solid(group, "LandingRailNorth", Vector3(40.42, tunnel_floor, -24.7), Vector3(0.15, 1.1, 4.6), timber)
 	_kit_solid(group, "LandingRailSouth", Vector3(40.42, tunnel_floor, -15.8), Vector3(0.15, 1.1, 3.6), timber)
 	var lift := CounterweightLift.new()
@@ -584,7 +696,7 @@ func _workers_shaft_and_pits() -> void:
 	group.add_child(lift)
 	lift.owner = root
 	lift.global_position = Vector3(42.8, tunnel_floor, -20.0)
-	_kit_box(group, "ShaftToPits", Vector3(44.0, pit_floor, -13.0), Vector3(6.0, 4.5, 2.0), false, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	_dressed(_kit_box(group, "ShaftToPits", Vector3(44.0, pit_floor, -13.0), Vector3(6.0, 4.5, 2.0), false, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
 	# Stones for the ballast in a heap by each stop; at the bottom, timber
 	# and spare blocks to crouch behind while a guard comes to see what
 	# creaked.
@@ -596,8 +708,8 @@ func _workers_shaft_and_pits() -> void:
 		_kit_solid(group, "BallastTop%d" % h[1], h[0] + Vector3(0.0, 0.42, 0.0), Vector3(0.55, 0.4, 0.55), null)
 	_kit_solid(group, "TimberStack", Vector3(49.6, pit_floor, -25.6), Vector3(4.2, 1.3, 1.6), timber)
 	_kit_solid(group, "TimberStackTop", Vector3(49.3, pit_floor + 1.3, -25.4), Vector3(3.6, 0.5, 1.1), timber)
-	_kit_solid(group, "SpareBlockA", Vector3(50.6, pit_floor, -19.0), Vector3(1.6, 1.3, 1.6), null)
-	_kit_solid(group, "SpareBlockB", Vector3(50.8, pit_floor, -16.9), Vector3(1.4, 1.1, 1.4), null)
+	_kit_solid(group, "SpareBlockA", Vector3(50.6, pit_floor, -19.0), Vector3(1.6, 1.3, 1.6), stone)
+	_kit_solid(group, "SpareBlockB", Vector3(50.8, pit_floor, -16.9), Vector3(1.4, 1.1, 1.4), stone)
 	# The pits (x 30..70, z -12..30): rammed earth, a timber roof on beams,
 	# a walkway along the west wall, four trenches of soldiers between
 	# earthen walls, and the yard to the east with the pen.
@@ -605,16 +717,17 @@ func _workers_shaft_and_pits() -> void:
 		LevelOpening.make(F.NORTH, Vector2(-6.0, 0.0), Vector2(6.0, 4.5), false),
 		LevelOpening.make(F.SOUTH, Vector2(-17.0, 0.0), Vector2(3.5, 3.43), false),
 	])
-	pits.floor_material = dirt
-	pits.wall_material = dirt
-	pits.ceiling_material = timber
+	_dressed(pits, timber)
 	for k in 10:
 		_kit_solid(group, "RoofBeam%d" % k, Vector3(50.0, pit_floor + 6.55, -10.0 + k * 4.4), Vector3(40.0, 0.45, 0.5), timber)
 	var trench_x := [35.5, 42.9, 50.3, 57.7]
 	for k in 4:
 		if k < 3:
 			var wall_x: float = trench_x[k] + 3.7
-			_kit_solid(group, "TrenchWall%d" % k, Vector3(wall_x, pit_floor, 9.0), Vector3(1.4, 3.0, 30.0), dirt)
+			# Rammed earth, laid in thin layers.
+			var earth := _masonry(_kit_solid(group, "TrenchWall%d" % k, Vector3(wall_x, pit_floor, 9.0), Vector3(1.4, 3.0, 30.0), dirt), dirt)
+			earth.course_height = 0.3
+			earth.block_length = Vector2(2.5, 5.0)
 			# Posts on the earthen walls carry the roof beams.
 			for b in range(1, 7):
 				var z := -10.0 + b * 4.4
@@ -658,27 +771,29 @@ func _workers_shaft_and_pits() -> void:
 	pen.flee_path = pen.get_path_to(flee)
 	# The way out: south, west, and up the stair well into the tunnel by the
 	# mechanism's ladder.
-	_kit_box(group, "PitsExitSouth", Vector3(33.0, pit_floor, 38.5), Vector3(3.5, 3.43, 17.0), false, 1 << F.NORTH, [
+	_dressed(_kit_box(group, "PitsExitSouth", Vector3(33.0, pit_floor, 38.5), Vector3(3.5, 3.43, 17.0), false, 1 << F.NORTH, [
 		LevelOpening.make(F.WEST, Vector2(6.0, 0.0), Vector2(3.5, 3.43), false),
-	])
-	_kit_box(group, "PitsExitWest", Vector3(21.135, pit_floor, 44.5), Vector3(3.5, 3.43, 20.23), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	]), stone)
+	_dressed(_kit_box(group, "PitsExitWest", Vector3(21.135, pit_floor, 44.5), Vector3(3.5, 3.43, 20.23), true, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
 	var top := -8.54
 	var well := _kit_box(group, "StairWell", Vector3(7.02, pit_floor, 40.3), Vector3(8.0, 22.0, 14.0), false, 0, [
 		LevelOpening.make(F.EAST, Vector2(4.2, 0.0), Vector2(3.5, 3.43), false),
 		LevelOpening.make(F.WEST, Vector2(-5.3, top - pit_floor), Vector2(2.0, 3.25), false),
 	])
-	well.floor_material = dirt
-	_kit_box(group, "StairDoor", Vector3(2.42, top, 35.0), Vector3(2.0, 3.25, 1.2), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	_dressed(well, stone)
+	_dressed(_kit_box(group, "StairDoor", Vector3(2.42, top, 35.0), Vector3(2.0, 3.25, 1.2), true, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
 	# Three flights round a core wall: north up the west side, south up the
 	# east side, north up the west side again to the landing by the door.
 	var step := (top - pit_floor) / 3.0
-	_kit_solid(group, "StairCore", Vector3(7.02, pit_floor, 40.3), Vector3(1.0, top - pit_floor + 1.0, 7.9), null)
-	_kit_ramp(group, "Flight1", Vector3(4.77, pit_floor, 44.25), 0.0, step, 7.9)
-	_kit_solid(group, "LandingA", Vector3(7.02, pit_floor + step - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), timber)
-	_kit_ramp(group, "Flight2", Vector3(9.27, pit_floor + step, 36.35), PI, step, 7.9)
-	_kit_solid(group, "LandingB", Vector3(7.02, pit_floor + step * 2.0 - 0.5, 45.775), Vector3(8.0, 0.5, 3.05), timber)
-	_kit_ramp(group, "Flight3", Vector3(4.77, pit_floor + step * 2.0, 44.25), 0.0, step, 7.9)
-	_kit_solid(group, "LandingC", Vector3(7.02, top - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), timber)
+	_masonry(_kit_solid(group, "StairCore", Vector3(7.02, pit_floor, 40.3), Vector3(1.0, top - pit_floor + 1.0, 7.9), stone), flag)
+	for flight in [_kit_ramp(group, "Flight1", Vector3(4.77, pit_floor, 44.25), 0.0, step, 7.9),
+			_kit_ramp(group, "Flight2", Vector3(9.27, pit_floor + step, 36.35), PI, step, 7.9),
+			_kit_ramp(group, "Flight3", Vector3(4.77, pit_floor + step * 2.0, 44.25), 0.0, step, 7.9)]:
+		flight.masonry = true
+		flight.material = step_stone
+	_masonry(_kit_solid(group, "LandingA", Vector3(7.02, pit_floor + step - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag)
+	_masonry(_kit_solid(group, "LandingB", Vector3(7.02, pit_floor + step * 2.0 - 0.5, 45.775), Vector3(8.0, 0.5, 3.05), stone), flag)
+	_masonry(_kit_solid(group, "LandingC", Vector3(7.02, top - 0.5, 34.825), Vector3(8.0, 0.5, 3.05), stone), flag)
 	_kit_solid(group, "LandingCRail", Vector3(9.27, top, 36.225), Vector3(3.5, 1.1, 0.25), timber)
 	# A word on first seeing the army, from whichever side he comes in.
 	var seen := StoryTrigger.new()
@@ -743,6 +858,23 @@ func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torc
 	guard.set(&"route_path", guard.get_path_to(route))
 	guard.set(&"carries_torch", torch)
 	guard.set(&"armor_tint", tint)
+
+## A LevelBox built like the workshop: stone blocks, flagstones, and boards
+## or slabs overhead (by the ceiling's material).
+func _dressed(box: LevelBox, ceiling: Material) -> LevelBox:
+	box.masonry = true
+	box.wall_material = load("res://assets/materials/level/walls.tres")
+	box.floor_material = load("res://assets/materials/level/floortiles1.tres")
+	var variants: Array[Material] = [load("res://assets/materials/level/floortiles2.tres"), load("res://assets/materials/level/floottiles3.tres")]
+	box.floor_variants = variants
+	box.ceiling_material = ceiling
+	return box
+
+## A LevelSolid in courses of blocks, flagstones on top if `top` is given.
+func _masonry(solid: LevelSolid, top: Material) -> LevelSolid:
+	solid.masonry = true
+	solid.top_material = top
+	return solid
 
 func _kit_solid(parent: Node3D, solid_name: String, bottom_centre: Vector3, solid_size: Vector3, mat: Material) -> LevelSolid:
 	var s := LevelSolid.new()

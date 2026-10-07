@@ -11,8 +11,14 @@ extends Node3D
 ## The origin is the middle of the floor. Inside, x runs across
 ## (-size.x/2..size.x/2), y up (0..size.y) and z along (-size.z/2..size.z/2).
 ## Faces: WEST at -x, EAST at +x, NORTH at -z, SOUTH at +z.
+##
+## With `masonry` it is built like the workshop: dressed blocks in courses on
+## the walls, flagstones on the floor, boards under a timber ceiling (slabs
+## under a stone one), the plain faces behind them dark in the joints.
 
 const ROCK := preload("res://assets/materials/level/tunnel_rock.tres")
+## How far the plain face sits behind dressed stone.
+const BACKING := 0.08
 
 @export var size := Vector3(3.5, 3.3, 12.0):
 	set(v):
@@ -60,7 +66,34 @@ const ROCK := preload("res://assets/materials/level/tunnel_rock.tres")
 		collision_layer = v
 		_queue_build()
 
+@export_group("Masonry")
+@export var masonry := false:
+	set(v):
+		masonry = v
+		_queue_build()
+## Height of a course of blocks (rounded so a wall holds whole courses).
+@export var course_height := 0.72:
+	set(v):
+		course_height = maxf(v, 0.1)
+		_queue_build()
+## Shortest and longest block in a course.
+@export var block_length := Vector2(0.9, 1.6):
+	set(v):
+		block_length = v
+		_queue_build()
+## More stones for the floor, picked among with floor_material.
+@export var floor_variants: Array[Material] = []:
+	set(v):
+		floor_variants = v
+		_queue_build()
+## Changes the pattern without moving anything.
+@export var pattern_seed := 0:
+	set(v):
+		pattern_seed = v
+		_queue_build()
+
 var _queued := false
+var _lines := PackedFloat32Array()
 
 func _ready() -> void:
 	_build()
@@ -114,6 +147,10 @@ func _build() -> void:
 		body.collision_mask = 0
 		body.set_meta(&"generated", true)
 		add_child(body)
+	var batch: Masonry.Batch = Masonry.Batch.new() if masonry else null
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(String(name)) ^ hash(Vector3i(position.round())) ^ pattern_seed
+	_lines = Masonry.course_lines(rng, size.y, course_height)
 	for f in 6:
 		if open_faces & (1 << f):
 			continue
@@ -130,17 +167,19 @@ func _build() -> void:
 					if o.jambs:
 						lined.append(r)
 		var mat := _material_for(f)
-		if not tools.has(mat):
-			var st := SurfaceTool.new()
-			st.begin(Mesh.PRIMITIVE_TRIANGLES)
-			tools[mat] = st
-		var st: SurfaceTool = tools[mat]
+		# Under masonry the plain face is the dark of the joints.
+		var st := _tool(tools, Masonry.joints(mat) if batch != null else mat)
 		for r in _subtract(face_rect, holes):
-			_quad(st, fr, r)
+			# Behind dressed stone the face sits back, so the joints are deep.
+			_quad(st, fr, r, BACKING if batch != null else 0.0)
 			if body != null:
 				_collider(body, fr, r)
-		for h in lined:
-			_jambs(st, fr, h)
+			if batch != null:
+				_dress(batch, rng, f, fr, r, mat)
+		if not lined.is_empty():
+			var edges := _tool(tools, mat)
+			for h in lined:
+				_jambs(edges, fr, h)
 	var mesh := ArrayMesh.new()
 	for mat in tools:
 		var st: SurfaceTool = tools[mat]
@@ -152,6 +191,50 @@ func _build() -> void:
 	mi.mesh = mesh
 	mi.set_meta(&"generated", true)
 	add_child(mi)
+	if batch != null:
+		batch.build(self)
+
+func _tool(tools: Dictionary, mat: Material) -> SurfaceTool:
+	if not tools.has(mat):
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		tools[mat] = st
+	return tools[mat]
+
+## Lays the stones (or boards) over rectangle `r` of face `f`.
+func _dress(batch: Masonry.Batch, rng: RandomNumberGenerator, f: int, fr: Dictionary, r: Rect2, mat: Material) -> void:
+	var u: Vector3 = fr.u
+	var v: Vector3 = fr.v
+	var n: Vector3 = fr.n
+	if f == LevelOpening.Face.FLOOR or (f == LevelOpening.Face.CEILING and not Masonry.is_timber(mat)):
+		# Flagstones, a little uneven; under a stone ceiling, slabs.
+		var stones: Array[Material] = [mat]
+		if f == LevelOpening.Face.FLOOR:
+			stones.append_array(floor_variants)
+		for s in Masonry.rows(rng, r.size.x, r.size.y, Vector2(1.3, 2.1), Vector2(1.6, 2.8)):
+			var proud := rng.randf_range(0.0, 0.025)
+			var centre := _point(fr, r.position.x + s[0] + s[2] * 0.5, r.position.y + s[1] + s[3] * 0.5) + n * (proud - 0.1)
+			var xf := Masonry.piece(centre, u, n, v, Vector3(s[2] - 0.035, 0.2, s[3] - 0.035), rng.randf_range(-0.01, 0.01), Masonry.wobble(rng, 0.3))
+			batch.add(stones[rng.randi() % stones.size()], xf, rng.randf_range(0.84, 1.1))
+	elif f == LevelOpening.Face.CEILING:
+		# Boards along the longer side, hung a little unevenly.
+		var along_u := r.size.x >= r.size.y
+		var lu := u if along_u else v
+		var lv := v if along_u else u
+		var w := r.size.x if along_u else r.size.y
+		var d := r.size.y if along_u else r.size.x
+		for b in Masonry.rows(rng, w, d, Vector2(0.45, 0.7), Vector2(2.6, 4.6)):
+			var cu: float = b[0] + b[2] * 0.5
+			var cv: float = b[1] + b[3] * 0.5
+			var at := _point(fr, r.position.x + (cu if along_u else cv), r.position.y + (cv if along_u else cu))
+			var centre := at + n * (rng.randf_range(0.02, 0.06) - 0.06)
+			batch.add(mat, Masonry.piece(centre, lu, n, lv, Vector3(b[2] - 0.03, 0.12, b[3] - 0.035), rng.randf_range(-0.006, 0.006)), rng.randf_range(0.8, 1.12))
+	else:
+		# Dressed blocks in courses, each standing a little proud of the wall.
+		for b in Masonry.courses(rng, r.size.x, r.position.y, r.end.y, _lines, block_length):
+			var proud := rng.randf_range(0.01, 0.07)
+			var centre := _point(fr, r.position.x + b[0] + b[2] * 0.5, b[1] + b[3] * 0.5) + n * (proud - 0.2)
+			batch.add(mat, Masonry.piece(centre, u, v, n, Vector3(b[2] - 0.025, b[3] - 0.025, 0.4), rng.randf_range(-0.008, 0.008), Masonry.wobble(rng, 0.8)), rng.randf_range(0.82, 1.1))
 
 func _hole_rect(o: LevelOpening, fr: Dictionary) -> Rect2:
 	var f := o.face
@@ -227,9 +310,10 @@ static func planar_uv(p: Vector3, n: Vector3) -> Vector2:
 		return Vector2(p.z, p.y) * 0.25
 	return Vector2(p.x, p.y) * 0.25
 
-func _quad(st: SurfaceTool, fr: Dictionary, r: Rect2) -> void:
-	_tri_quad(st, _point(fr, r.position.x, r.position.y), _point(fr, r.end.x, r.position.y),
-		_point(fr, r.end.x, r.end.y), _point(fr, r.position.x, r.end.y), fr.n)
+func _quad(st: SurfaceTool, fr: Dictionary, r: Rect2, inset := 0.0) -> void:
+	var back: Vector3 = -fr.n * inset
+	_tri_quad(st, _point(fr, r.position.x, r.position.y) + back, _point(fr, r.end.x, r.position.y) + back,
+		_point(fr, r.end.x, r.end.y) + back, _point(fr, r.position.x, r.end.y) + back, fr.n)
 
 ## The cut edges of a hole, as deep as the wall is thick.
 func _jambs(st: SurfaceTool, fr: Dictionary, h: Rect2) -> void:
