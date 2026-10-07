@@ -1,14 +1,16 @@
 class_name RuntimeCollision
 extends Node3D
 ## Gives every mesh below this node a trimesh collider at startup, unless it
-## already has a StaticBody3D child. For imported models that came without
-## collision.
+## already has a StaticBody3D child or is marked "no_collision". For imported
+## models that came without collision.
 
 func _ready() -> void:
 	_add_collisions_recursive(self)
 
 func _add_collisions_recursive(node: Node) -> void:
-	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+	# A mesh marked "no_collision" (replaced by something else in the level)
+	# gets none. Hidden meshes still do: some serve as invisible walls.
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null and not node.has_meta(&"no_collision"):
 		var mi := node as MeshInstance3D
 		var already_has := false
 		for c in mi.get_children():

@@ -12,6 +12,9 @@ func _ready() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	# Patches that scatter things pick the same spots every run, so re-running
+	# changes only what a new patch changes.
+	seed(20261007)
 	root = (load(LEVEL) as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_MAIN)
 	get_tree().root.add_child(root)
 	await get_tree().physics_frame
@@ -34,6 +37,8 @@ func _run() -> void:
 	_statue_parts()
 	_way_out()
 	_tunnel_rock()
+	_kit_service_tunnels()
+	await get_tree().physics_frame
 	_grave_goods()
 	_workshop_at_work()
 	_the_fallen()
@@ -471,6 +476,71 @@ func _tunnel_rock() -> void:
 		_editable_up_to(mi)
 		mi.material_override = rock
 	_log.append("tunnels: hewn rock")
+
+## The service tunnels were one jam mesh, closed at every end and stretched
+## thirty-fold along its length, so nothing could ever open off them. Now
+## they are LevelBox pieces on the same path, with the same floors, widths and
+## heights (measured from the old mesh), so new spaces can join them anywhere
+## by adding an opening. The old mesh and both of its colliders are off.
+func _kit_service_tunnels() -> void:
+	var old := root.get_node("Tunele/Cube_266") as MeshInstance3D
+	_editable_up_to(old)
+	old.visible = false
+	old.set_meta(&"no_collision", true)
+	var old_col := root.get_node_or_null("MapWithoutTreasure/Cube_266/Cube_266_col") as StaticBody3D
+	if old_col != null:
+		_editable_up_to(old_col)
+		old_col.collision_layer = 0
+		old_col.collision_mask = 0
+	var group := root.get_node_or_null("ServiceTunnels") as Node3D
+	if group == null:
+		group = Node3D.new()
+		group.name = "ServiceTunnels"
+		root.add_child(group)
+		group.owner = root
+	for c in group.get_children():
+		group.remove_child(c)
+		c.free()
+	const F := LevelOpening.Face
+	# The long run south from Liang's shaft, joined by the other three.
+	_kit_box(group, "NorthSouth", Vector3(27.55, -8.63, -8.015), Vector3(3.5, 3.43, 80.23), false, 0, [
+		LevelOpening.make(F.EAST, Vector2(-38.665, 0.0), Vector2(2.9, 3.3)),
+		LevelOpening.make(F.WEST, Vector2(-25.935, 0.0), Vector2(3.9, 3.43)),
+		LevelOpening.make(F.WEST, Vector2(38.165, 0.0), Vector2(3.9, 3.43)),
+	])
+	# East to the foot of Liang's ladder, with the shaft up through its roof.
+	_kit_box(group, "TopBranch", Vector3(39.355, -8.55, -46.68), Vector3(2.9, 3.22, 20.11), true, 1 << F.NORTH, [
+		LevelOpening.make(F.CEILING, Vector2(0.0, 7.77), Vector2(3.0, 4.57)),
+	])
+	_kit_box(group, "ShaftToLiang", Vector3(47.125, -5.33, -46.495), Vector3(4.57, 4.83, 2.91), false, (1 << F.FLOOR) | (1 << F.CEILING), [])
+	# West under the archives, a dead end.
+	_kit_box(group, "WestBranch", Vector3(3.53, -8.58, -33.95), Vector3(3.9, 3.63, 44.54), true, 1 << F.SOUTH, [])
+	# The southern run, then the turn to the mechanism and its ladder shaft.
+	_kit_box(group, "South", Vector3(13.81, -8.63, 30.15), Vector3(3.9, 3.43, 23.98), true, (1 << F.NORTH) | (1 << F.SOUTH), [])
+	_kit_box(group, "ToMechanism", Vector3(0.255, -8.54, 35.505), Vector3(3.13, 3.25, 14.61), false, 0, [
+		LevelOpening.make(F.EAST, Vector2(-5.355, 0.0), Vector2(3.9, 3.25)),
+		LevelOpening.make(F.CEILING, Vector2(0.03, 5.7), Vector2(3.11, 3.21)),
+	])
+	_kit_box(group, "ShaftToMechanism", Vector3(0.285, -5.29, 41.205), Vector3(3.11, 16.69, 3.21), false, 1 << F.FLOOR, [
+		LevelOpening.make(F.SOUTH, Vector2(0.0, 12.79), Vector2(3.11, 3.9)),
+	])
+	_log.append("tunnels: rebuilt from %d LevelBox pieces" % group.get_child_count())
+
+## A LevelBox on `floor_centre`, its length along world z, or along x.
+func _kit_box(parent: Node3D, box_name: String, floor_centre: Vector3, box_size: Vector3, along_x: bool, open: int, holes: Array) -> LevelBox:
+	var box := LevelBox.new()
+	box.name = box_name
+	box.size = box_size
+	box.open_faces = open
+	var typed: Array[LevelOpening] = []
+	for h in holes:
+		typed.append(h)
+	box.openings = typed
+	parent.add_child(box)
+	box.owner = root
+	box.global_position = floor_centre
+	box.rotation.y = PI * 0.5 if along_x else 0.0
+	return box
 
 ## The treasury held a single chest. Now the Emperor's grave goods
 ## (tools/blender/build_treasures.py): bronze ding and hu, gold, a heap of
