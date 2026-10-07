@@ -18,6 +18,9 @@ extends Area3D
 @export var pull_spot_path: NodePath
 ## The kiln's mouth, where he hides.
 @export var kiln_path: NodePath
+## The men come round to the kiln this way (Wei's spot is in a narrow place
+## between the cart and the benches, not to be passed).
+@export var approach_path: NodePath
 ## A Node3D whose Marker3D children are their way in from the annex, the
 ## first out of sight; they leave the same way, back to it.
 @export var way_path: NodePath
@@ -104,9 +107,10 @@ func _run(player: Player) -> void:
 	player.look_at_point(way[1] + Vector3.UP * 2.2, 1.4)
 	_walk(_wei, way.slice(1) + [_spot(stand_paths[0])])
 	await get_tree().create_timer(0.8, false).timeout
-	_walk(_men[0], way.slice(1) + [_spot(stand_paths[1])])
+	var approach := _spot(approach_path)
+	_walk(_men[0], way.slice(1) + [approach, _spot(stand_paths[1])])
 	await get_tree().create_timer(0.6, false).timeout
-	await _walk(_men[1], way.slice(1) + [_spot(stand_paths[2])])
+	await _walk(_men[1], way.slice(1) + [approach, _spot(stand_paths[2])])
 	var kiln := _spot(kiln_path)
 	for g in _actors():
 		g.scripted_face(kiln)
@@ -125,9 +129,11 @@ func _run(player: Player) -> void:
 	apprentice.call(&"play", &"scared")
 	_wei.scripted_face(pull)
 	await Dialogue.play(&"taken_plea")
-	# Away with him: the men either side, Wei ahead.
-	var out := way.duplicate()
-	out.reverse()
+	# Away with him: the men either side, Wei ahead; round the benches
+	# (east), then back the way they came.
+	var out: Array[Vector3] = [_spot(approach_path)]
+	for i in range(way.size() - 1, -1, -1):
+		out.append(way[i])
 	_escort(apprentice, out)
 	await Dialogue.play(&"taken_after")
 	Dialogue.line_started.disconnect(_on_line)
@@ -141,29 +147,36 @@ func _run(player: Player) -> void:
 ## through (a prop in the way) is set down where he was going: the scene
 ## must not hang with the player's controls held.
 func _walk(g: Guard, points: Array) -> void:
-	for p in points:
+	var map := g.get_world_3d().navigation_map
+	for target in points:
+		# Off the navmesh an agent can't arrive, or "arrives" without a step.
+		var p := NavigationServer3D.map_get_closest_point(map, target)
+		var arrived := [false]
+		var on_arrival := func() -> void: arrived[0] = true
+		g.scripted_arrived.connect(on_arrival, CONNECT_ONE_SHOT)
 		g.scripted_walk_to(p)
 		var limit := g.global_position.distance_to(p) / maxf(g.walk_speed, 0.5) * 2.0 + 3.0
 		var t := 0.0
-		while Vector2(g.global_position.x - p.x, g.global_position.z - p.z).length() > 0.8 and t < limit:
+		while not arrived[0] and t < limit:
 			await get_tree().physics_frame
 			t += get_physics_process_delta_time()
-		if t >= limit:
+		if not arrived[0]:
+			g.scripted_arrived.disconnect(on_arrival)
 			g.global_position = p
 
 func _escort(apprentice: Node3D, out: Array[Vector3]) -> void:
 	_walk(_wei, out.slice(1))
 	await get_tree().create_timer(0.9, false).timeout
-	_walk(_men[0], out.slice(1))
+	_walk(_men[0], out)
 	# He goes between them, at their pace.
 	var at := apprentice.global_position
 	apprentice.call(&"play", &"walk")
-	for p in out.slice(1):
+	for p in out:
 		apprentice.call(&"_turn_toward", p)
 		var tw := create_tween()
 		tw.tween_property(apprentice, "global_position", p, maxf(at.distance_to(p) / _men[0].walk_speed, 0.1))
-		if p == out[1]:
-			_walk(_men[1], out.slice(1))
+		if p == out[0]:
+			_walk(_men[1], out)
 		await tw.finished
 		at = p
 	# Gone once nobody sees them go.

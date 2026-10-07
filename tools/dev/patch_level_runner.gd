@@ -556,8 +556,8 @@ func _apprentice_taken() -> void:
 	marks.owner = root
 	# Wei waits in the open (seen from all the way across); his men go to the
 	# kiln's mouth and bring the boy to him.
-	var spots := {"WeiSpot": Vector3(-38.8, 0.2, -11.2), "ManASpot": Vector3(-35.9, 0.2, -8.4), "ManBSpot": Vector3(-37.2, 0.2, -12.4),
-		"PullSpot": Vector3(-37.6, 0.2, -9.8), "KilnMouth": Vector3(-34.6, 0.8, -7.0), "Watch": Vector3(-38.1, 1.7, -10.4)}
+	var spots := {"WeiSpot": Vector3(-38.8, 0.2, -11.2), "ManASpot": Vector3(-35.9, 0.2, -8.4), "ManBSpot": Vector3(-36.6, 0.2, -10.4), "Approach": Vector3(-34.0, 0.2, -12.5),
+		"PullSpot": Vector3(-39.6, 0.2, -10.6), "KilnMouth": Vector3(-34.6, 0.8, -7.0), "Watch": Vector3(-39.2, 1.6, -11.2)}
 	for k in spots:
 		var m := Marker3D.new()
 		m.name = k
@@ -573,7 +573,8 @@ func _apprentice_taken() -> void:
 		m.name = "W%d" % i
 		way.add_child(m)
 		m.owner = root
-		m.global_position = [Vector3(-20.0, 0.2, -26.0), Vector3(-26.5, 0.2, -24.0), Vector3(-31.0, 0.2, -16.0)][i]
+		# In the annex out of sight, its opening to the workshop, and on.
+		m.global_position = [Vector3(-21.5, 0.2, -30.0), Vector3(-28.5, 0.2, -29.5), Vector3(-33.5, 0.2, -23.0)][i]
 	var guard_scene := load("res://scenes/ai/guard.tscn") as PackedScene
 	var actors := {}
 	for actor in [["Wei", Color(0.42, 0.22, 0.2)], ["WeiManA", Color(0.95, 0.9, 0.85)], ["WeiManB", Color(1.05, 0.95, 0.88)]]:
@@ -581,7 +582,7 @@ func _apprentice_taken() -> void:
 		g.name = actor[0]
 		root.get_node("Guards").add_child(g)
 		g.owner = root
-		g.global_position = Vector3(-20.0, 0.2, -26.0)
+		g.global_position = Vector3(-21.5, 0.2, -30.0)
 		g.set(&"armor_tint", actor[1])
 		actors[actor[0]] = g
 	# The man in front lights their way: and the scene, for the one watching.
@@ -610,6 +611,7 @@ func _apprentice_taken() -> void:
 	scene.stand_paths = stands
 	scene.pull_spot_path = scene.get_path_to(marks.get_node("PullSpot"))
 	scene.kiln_path = scene.get_path_to(marks.get_node("KilnMouth"))
+	scene.approach_path = scene.get_path_to(marks.get_node("Approach"))
 	scene.way_path = scene.get_path_to(way)
 	scene.watch_path = scene.get_path_to(marks.get_node("Watch"))
 	_log.append("workshop: Wei and two men come for the apprentice when the craftsman crosses x -46")
