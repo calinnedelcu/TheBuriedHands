@@ -66,6 +66,13 @@ const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 ## Multiplies the armour's colour: lacquer and dye varied from man to man,
 ## and an officer's armour is red.
 @export var armor_tint := Color(1, 1, 1)
+## Without his ji: an officer, his hands for something else.
+@export var carries_ji := true
+## Held in the right hand (an overseer's register), in the hand bone's space:
+## offset in metres, turn in degrees.
+@export var held_scene: PackedScene
+@export var held_offset := Vector3.ZERO
+@export var held_rotation := Vector3.ZERO
 
 const TORCH := preload("res://scenes/ai/guard_torch.tscn")
 
@@ -127,6 +134,12 @@ func _ready() -> void:
 		_attach_torch()
 	if armor_tint != Color(1, 1, 1):
 		_tint_armor()
+	if not carries_ji:
+		var ji := _model.find_child("Ji", true, false) as Node3D
+		if ji != null:
+			ji.visible = false
+	if held_scene != null:
+		_attach_held()
 
 func _exit_tree() -> void:
 	Stealth.unregister_guard(self)
@@ -164,6 +177,22 @@ func _attach_torch() -> void:
 	# The skeleton is scaled with the model; the offset is in real metres.
 	var s := 1.0 / maxf((skeleton[0] as Node3D).global_transform.basis.get_scale().x, 0.001)
 	torch.set(&"grip_offset", torch_offset * s)
+
+func _attach_held() -> void:
+	var skeleton := _model.find_children("*", "Skeleton3D", true, false)
+	if skeleton.is_empty():
+		return
+	var hand := BoneAttachment3D.new()
+	hand.name = "HeldHand"
+	hand.bone_name = "R_Hand"
+	(skeleton[0] as Node).add_child(hand)
+	var held := held_scene.instantiate() as Node3D
+	hand.add_child(held)
+	# The skeleton is scaled with the model; the prop keeps its own size.
+	var s := 1.0 / maxf((skeleton[0] as Node3D).global_transform.basis.get_scale().x, 0.001)
+	held.scale = Vector3.ONE * s
+	held.position = held_offset * s
+	held.rotation_degrees = held_rotation
 
 func awareness_level() -> float:
 	return clampf(awareness, 0.0, 1.0) if state != State.SCRIPTED else 0.0

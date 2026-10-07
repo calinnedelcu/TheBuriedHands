@@ -8,7 +8,7 @@ Jocul e în **română și engleză** (se schimbă din meniu sau din Opțiuni).
 
 ## Povestea, pe scurt
 
-1. **Atelierul.** Termini un soldat de lut. Poarta de bronz se închide; doi gardieni discută ordinul. Ucenicul tău îți cere lampa — i-o dai sau nu. Cât ești plecat, oamenii supraveghetorului Wei îl găsesc ascuns în cuptor.
+1. **Atelierul.** Termini un soldat de lut. Poarta de bronz se închide; doi gardieni discută ordinul. Ucenicul tău îți cere lampa — i-o dai sau nu. În drum spre Liang, ghemuit în umbră, îl vezi pe supraveghetorul Wei venind cu lista și cu doi oameni: îl scot pe ucenic din cuptorul rece și îl duc în gropile armatei.
 2. **Arhivele.** Gardieni cu torțe patrulează printre mesele scribilor. Găsește-l pe Liang, inginerul mecanismelor; registrul lucrătorilor e o dovadă, dacă ai curaj să-l iei.
 3. **Sub munte.** Coridorul arbaletelor și tunelurile de serviciu: plăci de presiune, dale care se prăbușesc, o piatră de spart cu pana și ciocanul. Sau drumul lung: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut, unde oamenii lui Wei își țin prizonierii într-un țarc — printre ei, ucenicul tău.
 4. **Râuri de argint viu.** Sala Mercurului: harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești, înclină marea balanță și ridică podul de piatră.
@@ -92,7 +92,7 @@ godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/
 - `test_player_runner`, `test_guard_runner` — mișcare, poziții, lampă; vedere, auz și atac la gardieni (au nevoie de fereastră: fără `--headless`, cu `--out=/folder`).
 - `music_test_runner` — muzica și ambianța pe zone.
 - `coop_bot_runner` — două instanțe (`--role=host` și `--role=client`, pornite în același timp) joacă toată povestea în co-op și verifică ce vede fiecare; `--from=causeway` sare direct la pod. `coop_shots_runner` face capturi din ambele perspective.
-- `level_tour_runner`, `map_render_runner`, `title_shots_runner`, `look_runner`, `sequence_shots_runner` (`--seq=opening|sealing|chase|climb|causeway|ending`), `anim_sheet_runner` — capturi pentru verificare vizuală.
+- `level_tour_runner`, `map_render_runner`, `title_shots_runner`, `look_runner`, `sequence_shots_runner` (`--seq=opening|sealing|taken|chase|climb|causeway|ending`), `anim_sheet_runner` — capturi pentru verificare vizuală.
 - `patch_level_runner` — modificări automate în nivel, fără să piardă ce s-a editat în editor; apoi `bake_navmesh_runner --scene=res://scenes/level/mausoleum.tscn`.
 - `overlap_check_runner` — arată geometria veche care intră în spațiile făcute cu trusa de nivel (pereții lor sunt groși spre exterior și invizibili din afară).
 - `tools/dev/check_scripts.gd` — compilează toate scripturile.

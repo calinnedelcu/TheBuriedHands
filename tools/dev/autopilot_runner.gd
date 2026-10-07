@@ -138,6 +138,8 @@ func _act1() -> bool:
 	_check("took a second lamp", player.inventory.lamp() != null)
 	var walked := await _walk_to(Vector3(6.0, 0.0, -6.0), 1.5)
 	_check("walked to the archives (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), walked)
+	_check("on the way he saw Wei's men take the apprentice", Game.get_flag(&"saw_apprentice_taken") and Game.get_flag(&"apprentice_taken"))
+	_check("controls back after it", not player.controls_locked())
 	return Quest.is_at(&"find_liang")
 
 func _act2() -> bool:
@@ -490,6 +492,18 @@ func _follow(path: PackedVector3Array, target: Vector3, stop_dist: float, until:
 		if flat.length() < 0.6:
 			i += 1
 			best = INF
+			continue
+		# A scene has the controls (Wei's men at the kiln): wait it out, as a
+		# player would, skipping its lines.
+		if player.controls_locked():
+			Input.action_release(&"move_forward")
+			while player.controls_locked():
+				if Dialogue.is_busy():
+					_press(&"skip_line")
+				await _wait(0.4)
+			player._set_stance(Player.Stance.STAND)
+			best = INF
+			stuck_t = 0.0
 			continue
 		_face_flat(path[i])
 		Input.action_press(&"move_forward")

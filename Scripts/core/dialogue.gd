@@ -47,10 +47,20 @@ func play(sequence_id: StringName, priority := Priority.STORY) -> bool:
 	return await _run(sequence_id, lines, priority)
 
 ## Lines marked {"only": &"solo"} or {"only": &"coop"} play only in that kind
-## of game.
+## of game; {"if": &"flag"} / {"unless": &"flag"} only when the flag is set
+## or isn't.
 func _for_this_game(entry: Array) -> bool:
-	var only: StringName = (entry[2] as Dictionary).get("only", &"") if entry.size() > 2 else &""
-	return only == &"" or only == (&"coop" if Net.active else &"solo")
+	if entry.size() < 3:
+		return true
+	var extras := entry[2] as Dictionary
+	var only: StringName = extras.get("only", &"")
+	if only != &"" and only != (&"coop" if Net.active else &"solo"):
+		return false
+	if extras.has("if") and not Game.get_flag(extras["if"]):
+		return false
+	if extras.has("unless") and Game.get_flag(extras["unless"]):
+		return false
+	return true
 
 ## Plays one line as its own tiny sequence.
 func say(speaker_id: StringName, text_key: String, priority := Priority.HINT) -> bool:

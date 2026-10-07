@@ -174,6 +174,8 @@ var _heavy_told := false
 ## How many ranks of clay soldiers this body stands among (StatueRanks).
 var ranks := 0
 var _ranks_told := false
+## A cutscene's held field of view (0: the player's own).
+var _cinematic_fov := 0.0
 
 func _ready() -> void:
 	role = &"apprentice" if name == Net.APPRENTICE_BODY else &"master"
@@ -341,6 +343,8 @@ func look_at_point(target: Vector3, duration := 0.6, fov := -1.0) -> void:
 	_cinematic_tween.tween_property(self, "rotation:y", end_yaw, duration)
 	_cinematic_tween.tween_method(_set_pitch, _pitch, clampf(pitch, -deg_to_rad(max_pitch_deg), deg_to_rad(max_pitch_deg)), duration)
 	if fov > 0.0:
+		# Held until reset_fov(): a cutscene's close look.
+		_cinematic_fov = fov
 		_cinematic_tween.tween_property(camera, "fov", fov, duration)
 	await _cinematic_tween.finished
 
@@ -360,6 +364,7 @@ func stop_walking() -> void:
 func reset_fov(duration := 0.5) -> void:
 	if _for_owner(&"reset_fov", [duration]):
 		return
+	_cinematic_fov = 0.0
 	var tween := create_tween().set_trans(Tween.TRANS_SINE)
 	tween.tween_property(camera, "fov", float(Settings.get_value(&"fov")), duration)
 
@@ -659,6 +664,8 @@ func _update_camera(delta: float) -> void:
 	if _cinematic_tween == null or not _cinematic_tween.is_running():
 		var base_fov := float(Settings.get_value(&"fov"))
 		var target_fov := base_fov + (4.0 if is_sprinting() else 0.0)
+		if _cinematic_fov > 0.0:
+			target_fov = _cinematic_fov
 		camera.fov = lerpf(camera.fov, target_fov, clampf(delta * 5.0, 0.0, 1.0))
 
 func _on_landed(fall_speed: float) -> void:

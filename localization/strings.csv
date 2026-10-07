@@ -374,3 +374,12 @@ DLG_FREED_1,Master! I knew you'd come...,Maestre! Știam că o să veniți...
 DLG_FREED_2,"Run with the others. Keep to the dark, I'll find you outside.","Fugi cu ceilalți. Ține-te în întuneric, te găsesc afară."
 OBJ_REACH_MECHANISM_SOLO,"Reach the mechanism chamber: through the tunnels or the crossbow corridor. Your apprentice is in the army pits, down the workers' shaft.","Ajunge în camera mecanismelor: prin tunele sau pe coridorul arbaletelor. Ucenicul tău e în gropile armatei, la capătul puțului lucrătorilor."
 END_APPRENTICE_LAMP,He still had your lamp.,Încă avea lampa ta.
+SPK_WEI,Overseer Wei,Supraveghetorul Wei
+DLG_TAKEN_1,Lamps. Someone's coming. Down.,Lămpi. Vine cineva. Jos.
+DLG_TAKEN_2,Eleven names on my list for this workshop. Search every corner.,Unsprezece nume pe lista mea pentru atelierul ăsta. Căutați în fiecare colț.
+DLG_TAKEN_3,"Overseer, the cold kiln. There's someone inside.","Supraveghetorule, cuptorul rece. E cineva înăuntru."
+DLG_TAKEN_4,Please... I only mix the slip. I'm nobody.,Vă rog... Eu doar amestec lutul. Nu sunt nimeni.
+DLG_TAKEN_5,Then no one will miss you. Down to the pits with the others: you can stand among the clay men.,"Atunci nu-ți va simți nimeni lipsa. Jos, la gropi, cu ceilalți: o să stai printre oamenii de lut."
+DLG_TAKEN_6,Not now... not against three of them. Liang will know where they take them.,Nu acum... nu împotriva a trei. Liang o să știe unde-i duc.
+DLG_LIANG_TAKEN_1,"They took my apprentice. An overseer with a list. Wei, they called him.",Mi-au luat ucenicul. Un supraveghetor cu o listă. Wei îi spuneau.
+DLG_LIANG_TAKEN_2,"Wei is Zhao Gao's man. Whoever is on his list goes down to the army pits, penned beside the clay soldiers, to be sealed in with them.","Wei e omul lui Zhao Gao. Cine e pe lista lui coboară în gropile armatei, într-un țarc lângă soldații de lut, să fie zidit odată cu ei."

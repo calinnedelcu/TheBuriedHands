@@ -4,7 +4,8 @@ extends RefCounted
 ## [speaker_id, text_key, extras]; the text itself lives in
 ## localization/strings.csv. Extras are forwarded to listeners (e.g. an NPC
 ## animation for that line: {"anim": &"..."}); {"only": &"solo"} or
-## {"only": &"coop"} keeps a line to that kind of game.
+## {"only": &"coop"} keeps a line to that kind of game, {"if": &"flag"} or
+## {"unless": &"flag"} to a story that went one way or the other.
 
 const SPEAKERS := {
 	&"craftsman": "SPK_CRAFTSMAN",
@@ -13,6 +14,7 @@ const SPEAKERS := {
 	&"guard_a": "SPK_GUARD_CAPTAIN",
 	&"guard_b": "SPK_GUARD",
 	&"guard": "SPK_GUARD",
+	&"wei": "SPK_WEI",
 }
 
 const SEQUENCES := {
@@ -70,6 +72,21 @@ const SEQUENCES := {
 		# He bows to his master all the same.
 		[&"apprentice", "DLG_KEPT_1", {"anim": &"bow"}],
 	],
+	# Alone: on his way out, Wei's men take the apprentice (ApprenticeTaken).
+	&"taken_warning": [
+		[&"craftsman", "DLG_TAKEN_1"],
+	],
+	&"taken_list": [
+		[&"wei", "DLG_TAKEN_2"],
+		[&"guard_b", "DLG_TAKEN_3"],
+	],
+	&"taken_plea": [
+		[&"apprentice", "DLG_TAKEN_4", {"anim": &"scared"}],
+		[&"wei", "DLG_TAKEN_5"],
+	],
+	&"taken_after": [
+		[&"craftsman", "DLG_TAKEN_6"],
+	],
 	# Co-op: the apprentice is the second player, and he comes along.
 	&"coop_together": [
 		[&"apprentice", "DLG_TOGETHER_1"],
@@ -95,10 +112,13 @@ const SEQUENCES := {
 		[&"liang", "DLG_LIANG_9", {"anim": &"frustrated"}],
 		[&"liang", "DLG_LIANG_10", {"anim": &"talk"}],
 		[&"liang", "DLG_LIANG_11", {"anim": &"talk"}],
-		# Alone, the craftsman learns where his apprentice was taken; together,
-		# the two of them hear of the way down that needs both their weights.
-		[&"liang", "DLG_LIANG_PITS_1", {"anim": &"talk", "only": &"solo"}],
-		[&"craftsman", "DLG_LIANG_PITS_2", {"only": &"solo"}],
+		# Alone, the craftsman tells what he saw (or learns) of his apprentice
+		# and where Wei's men took him; together, the two of them hear of the
+		# way down that needs both their weights.
+		[&"craftsman", "DLG_LIANG_TAKEN_1", {"only": &"solo", "if": &"saw_apprentice_taken"}],
+		[&"liang", "DLG_LIANG_TAKEN_2", {"anim": &"talk", "only": &"solo", "if": &"saw_apprentice_taken"}],
+		[&"liang", "DLG_LIANG_PITS_1", {"anim": &"talk", "only": &"solo", "unless": &"saw_apprentice_taken"}],
+		[&"craftsman", "DLG_LIANG_PITS_2", {"only": &"solo", "unless": &"saw_apprentice_taken"}],
 		[&"liang", "DLG_LIANG_PITS_3", {"anim": &"talk", "only": &"solo"}],
 		[&"liang", "DLG_LIANG_PITS_COOP", {"anim": &"talk", "only": &"coop"}],
 		[&"craftsman", "DLG_LIANG_12"],

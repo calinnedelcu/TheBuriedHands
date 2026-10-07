@@ -4,6 +4,7 @@ extends Node
 ## --seq=sealing : the sealing cutscene, from the last chisel strike
 ## --seq=causeway : pouring the mercury, the causeway rising
 ## --seq=chase : an archive guard spots the lit lamp, levels his ji, attacks
+## --seq=taken : crossing the workshop, Wei's men take the apprentice
 ## --seq=ending : the walk down the last tunnel into the light, the epilogue
 ## (run it with --fixed-fps 30 so game time doesn't depend on the frame rate)
 ## godot --path . --resolution 1280x720 -s res://tools/dev/run.gd -- --runner=res://tools/dev/sequence_shots_runner.gd --seq=opening --out=/abs/dir
@@ -90,6 +91,24 @@ func _run() -> void:
 			player.global_position = guard.global_position + fwd.normalized() * 9.0 + Vector3.UP * 0.1
 			player.look_at_point(guard.global_position + Vector3.UP * 2.0, 0.01)
 			await _frames(9.0, 0.45, "chase")
+		"taken":
+			# On the way to Liang: Overseer Wei and his men at the cold kiln.
+			Game.new_game()
+			await Game.level_ready
+			Dialogue.stop()
+			var player := get_tree().get_first_node_in_group(&"player") as Player
+			Game.set_flag(&"guards_hostile")
+			Game.set_flag(&"gave_lamp")
+			Game.advance_sealing(1)
+			Quest.start_at(&"find_liang")
+			player.inventory.take_lamp(90.0, true)
+			player.global_position = Vector3(-44.5, 0.2, -21.0)
+			player.rotation.y = -PI * 0.5
+			await get_tree().create_timer(0.6).timeout
+			Input.action_press(&"move_forward")
+			await _frames(2.0, 0.5, "walk")
+			Input.action_release(&"move_forward")
+			await _frames(44.0, 1.4, "taken")
 		"climb":
 			# Hands on a ladder, then crawling along a passage.
 			Game.new_game()

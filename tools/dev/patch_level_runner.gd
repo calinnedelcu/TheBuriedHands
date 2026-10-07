@@ -54,6 +54,7 @@ func _run() -> void:
 	_jar_and_cloth_any_time()
 	_tunnels_trigger_in_the_middle()
 	_timber_ceilings()
+	_apprentice_taken()
 	# Last: its lamps and guards draw on the shared random numbers, which
 	# would reshuffle what the patches above scatter.
 	_workers_shaft_and_pits()
@@ -537,6 +538,81 @@ func _kit_service_tunnels() -> void:
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 12.79), Vector2(3.11, 3.9)),
 	])
 	_log.append("tunnels: rebuilt from %d LevelBox pieces" % group.get_child_count())
+
+## Act I's last turn (ApprenticeTaken): crossing the workshop to find Liang,
+## the craftsman watches Overseer Wei and two of his men come in from the
+## annex, pull the apprentice out of the cold kiln and take him away. Wei is a
+## guard officer in black lacquer, a register in his hand instead of a ji.
+func _apprentice_taken() -> void:
+	var ws := root.get_node("Rooms/01_TerracottaWorkshop") as Node3D
+	for path in ["Story/ApprenticeTaken", "Rooms/01_TerracottaWorkshop/TakenMarks", "Guards/Wei", "Guards/WeiManA", "Guards/WeiManB"]:
+		var old := root.get_node_or_null(path)
+		if old != null:
+			old.get_parent().remove_child(old)
+			old.free()
+	var marks := Node3D.new()
+	marks.name = "TakenMarks"
+	ws.add_child(marks)
+	marks.owner = root
+	# Wei waits in the open (seen from all the way across); his men go to the
+	# kiln's mouth and bring the boy to him.
+	var spots := {"WeiSpot": Vector3(-38.8, 0.2, -11.2), "ManASpot": Vector3(-35.9, 0.2, -8.4), "ManBSpot": Vector3(-37.2, 0.2, -12.4),
+		"PullSpot": Vector3(-37.6, 0.2, -9.8), "KilnMouth": Vector3(-34.6, 0.8, -7.0), "Watch": Vector3(-38.1, 1.7, -10.4)}
+	for k in spots:
+		var m := Marker3D.new()
+		m.name = k
+		marks.add_child(m)
+		m.owner = root
+		m.global_position = spots[k]
+	var way := Node3D.new()
+	way.name = "Way"
+	marks.add_child(way)
+	way.owner = root
+	for i in 3:
+		var m := Marker3D.new()
+		m.name = "W%d" % i
+		way.add_child(m)
+		m.owner = root
+		m.global_position = [Vector3(-20.0, 0.2, -26.0), Vector3(-26.5, 0.2, -24.0), Vector3(-31.0, 0.2, -16.0)][i]
+	var guard_scene := load("res://scenes/ai/guard.tscn") as PackedScene
+	var actors := {}
+	for actor in [["Wei", Color(0.42, 0.22, 0.2)], ["WeiManA", Color(0.95, 0.9, 0.85)], ["WeiManB", Color(1.05, 0.95, 0.88)]]:
+		var g := guard_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+		g.name = actor[0]
+		root.get_node("Guards").add_child(g)
+		g.owner = root
+		g.global_position = Vector3(-20.0, 0.2, -26.0)
+		g.set(&"armor_tint", actor[1])
+		actors[actor[0]] = g
+	# The man in front lights their way: and the scene, for the one watching.
+	actors["WeiManA"].set(&"carries_torch", true)
+	var wei: Node3D = actors["Wei"]
+	wei.set(&"carries_ji", false)
+	wei.set(&"held_scene", load("res://scenes/items/visuals/register.tscn"))
+	wei.set(&"held_offset", Vector3(0.0, 0.06, 0.04))
+	wei.set(&"held_rotation", Vector3(0.0, 0.0, 90.0))
+	var scene := ApprenticeTaken.new()
+	scene.name = "ApprenticeTaken"
+	root.get_node("Story").add_child(scene)
+	scene.owner = root
+	scene.global_position = Vector3(-43.5, 2.0, -17.2)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(5.0, 4.0, 31.6)
+	shape.shape = box
+	scene.add_child(shape)
+	shape.owner = root
+	scene.wei_path = scene.get_path_to(wei)
+	var men: Array[NodePath] = [scene.get_path_to(actors["WeiManA"]), scene.get_path_to(actors["WeiManB"])]
+	scene.men_paths = men
+	scene.apprentice_path = scene.get_path_to(ws.get_node("Apprentice"))
+	var stands: Array[NodePath] = [scene.get_path_to(marks.get_node("WeiSpot")), scene.get_path_to(marks.get_node("ManASpot")), scene.get_path_to(marks.get_node("ManBSpot"))]
+	scene.stand_paths = stands
+	scene.pull_spot_path = scene.get_path_to(marks.get_node("PullSpot"))
+	scene.kiln_path = scene.get_path_to(marks.get_node("KilnMouth"))
+	scene.way_path = scene.get_path_to(way)
+	scene.watch_path = scene.get_path_to(marks.get_node("Watch"))
+	_log.append("workshop: Wei and two men come for the apprentice when the craftsman crosses x -46")
 
 ## The trigger that opens the tunnels' chapter sat mostly in the rock east of
 ## the long tunnel, touching it along one wall only: walking down the middle
