@@ -9,7 +9,8 @@ extends Node
 ## clay; the wedge held while the master strikes; the full jar taking both
 ## hands; the brake held while the apprentice pins the causeway; the drain's
 ## bend only the apprentice fits), a knock-down and a revive, a shared death
-## and retry, and both walking out into the light.
+## and retry, and both walking out into the light. Losing each other while a
+## level loads fails the run, and so does a script error anywhere.
 ## Run the two at once (add --from=causeway to both to start at the pour):
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=host
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=client
@@ -25,6 +26,7 @@ var level: Node
 var failures := 0
 var _noises_from_apprentice := 0
 var _lines_seen := 0
+var _errors := ScriptErrors.new()
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -32,6 +34,7 @@ func _ready() -> void:
 			role = arg.substr(7)
 		elif arg.begins_with("--from="):
 			from = arg.substr(7)
+	OS.add_logger(_errors)
 	_run.call_deferred()
 
 func _run() -> void:
@@ -39,6 +42,9 @@ func _run() -> void:
 		await _host()
 	else:
 		await _client()
+	OS.remove_logger(_errors)
+	if _errors.count > 0:
+		_check("no script errors (%d, the first: %s)" % [_errors.count, _errors.first], false)
 	print("[%s] RESULT: %d failure(s)" % [role, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
@@ -52,7 +58,8 @@ func _host() -> void:
 	_log("apprentice joined")
 	Net.begin()
 	await Game.level_ready
-	await _settle_level()
+	if not await _settle_level():
+		return
 	_check("master is local", me.name == Net.MASTER_BODY and me.is_local)
 	var apprentice := Net.body(Net.APPRENTICE_BODY)
 	_check("apprentice body on the host is a puppet", apprentice != null and not apprentice.is_local)
@@ -102,7 +109,8 @@ func _host() -> void:
 	await _wait(2.0)
 	Game.retry_from_checkpoint()
 	await Game.level_ready
-	await _settle_level()
+	if not await _settle_level():
+		return
 	apprentice = Net.body(Net.APPRENTICE_BODY)
 	_check("retry: back at find_liang", Quest.has_reached(&"find_liang"))
 	_check("retry: the apprentice is back", Net.has_partner() and apprentice != null)
@@ -198,7 +206,8 @@ func _client() -> void:
 		return
 	_log("in the lobby")
 	await Game.level_ready
-	await _settle_level()
+	if not await _settle_level():
+		return
 	_check("apprentice is local", me.name == Net.APPRENTICE_BODY and me.is_local)
 	var master := Net.body(Net.MASTER_BODY)
 	_check("master body is a puppet here", master != null and not master.is_local)
@@ -250,7 +259,8 @@ func _client() -> void:
 	me.kill("DEATH_SPIKES")
 	_check("our death ended the run here too", await _until(func(): return died[0], 15.0))
 	await Game.level_ready
-	await _settle_level()
+	if not await _settle_level():
+		return
 	master = Net.body(Net.MASTER_BODY)
 	_check("retry: back at find_liang here", Quest.has_reached(&"find_liang"))
 	_check("retry: our body is ours again", me.is_local and me.name == Net.APPRENTICE_BODY)
@@ -308,7 +318,10 @@ func _client_causeway(master: Player) -> void:
 
 # --- Helpers ------------------------------------------------------------------------------------
 
-func _settle_level() -> void:
+## Takes the level that just loaded. False (a failed check) if the two of
+## us didn't come through the loading together: the level then goes back to
+## the menu, and our body with it.
+func _settle_level() -> bool:
 	level = Game.level
 	me = Net.local_body()
 	if not Game.failed.is_connected(_on_failed):
@@ -316,6 +329,9 @@ func _settle_level() -> void:
 	if not Dialogue.line_started.is_connected(_on_line):
 		Dialogue.line_started.connect(_on_line)
 	await _wait(1.0)
+	var together := Net.has_partner() and Game.level == level and is_instance_valid(me) and me.name == Net.local_body_name()
+	_check("still together once the level is in", together)
+	return together
 
 func _on_failed(reason: String) -> void:
 	_log("run failed: %s (quest %s, me at %s, health %.1f, tox %.1f)" % [reason, Quest.current(), me.global_position if is_instance_valid(me) else Vector3.ZERO, me.health if is_instance_valid(me) else -1.0, me.toxicity if is_instance_valid(me) else -1.0])
@@ -420,3 +436,20 @@ func _check(label: String, ok: bool) -> void:
 
 func _log(text: String) -> void:
 	print("[%s] %s" % [role, text])
+
+## Counts script errors. One ends the function it happens in, and the bot
+## would go on from where that was called as if nothing had gone wrong.
+class ScriptErrors extends Logger:
+	var count := 0
+	var first := ""
+	var _lock := Mutex.new()
+
+	func _log_error(_function: String, file: String, line: int, code: String, rationale: String,
+			_editor_notify: bool, error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		if error_type != ERROR_TYPE_SCRIPT:
+			return
+		_lock.lock()
+		count += 1
+		if first == "":
+			first = "%s (%s:%d)" % [rationale if rationale != "" else code, file.get_file(), line]
+		_lock.unlock()

@@ -31,6 +31,14 @@ const WORLD_SYNC_SECONDS := 4.0
 const CONNECT_TIMEOUT := 12.0
 ## How long the host waits for the apprentice's level before going on alone.
 const LEVEL_WAIT := 60.0
+## How long the partner may go without answering while a level loads. The
+## frame the level enters the tree stops the game for seconds while the
+## physics builds the level's colliders (up to 13 s with two games on one
+## Mac), and ENet on its own drops a peer that stays silent for 5.
+const LOAD_TIMEOUT := 60.0
+## Once both machines have the level, ENet's own timeout comes back after
+## this long (a new level's first frames can be slow too).
+const LOAD_SETTLE := 10.0
 ## Methods the host may run on a player's own machine (see `to_owner`).
 const OWNER_CALLS := [&"look_at_point", &"add_shake", &"hurt", &"kill", &"walk_to", &"stop_walking",
 	&"force_stand", &"lock_controls", &"unlock_controls", &"reset_fov", &"push", &"notice"]
@@ -59,6 +67,8 @@ var _world_timer := 0.0
 var _partner_level_ready := false
 var _start_state: Dictionary = {}
 var _have_start_state := false
+## Counts level loads, so a settle that comes too late leaves the next alone.
+var _load_serial := 0
 var _muted := false
 var _mismatch: Dictionary = {}
 var _notice_layer: CanvasLayer
@@ -245,6 +255,7 @@ func prepare_level() -> void:
 			applying = true
 			Game.apply_partner_state(_start_state)
 			applying = false
+			_loaded()
 
 ## The host has set up its world: the apprentice gets all of it at once.
 func level_started() -> void:
@@ -254,18 +265,43 @@ func level_started() -> void:
 	_partner_level_ready = false
 	if partner_id != 0:
 		_start_world.rpc_id(partner_id, Game.partner_state())
+		_loaded()
 
 ## The host reloads the level after a death: the apprentice follows.
 func reload_together() -> void:
 	if is_host and partner_id != 0:
+		_loading()
 		_reload.rpc_id(partner_id)
 
 func _start_game() -> void:
 	phase = Phase.PLAYING
 	_partner_level_ready = false
 	_have_start_state = false
+	_loading()
 	starting.emit()
 	Game.new_game()
+
+## A level is about to load on both machines: each may stop answering for as
+## long as its loading takes (see LOAD_TIMEOUT), so the partner gets that
+## long before ENet calls them gone.
+func _loading() -> void:
+	_load_serial += 1
+	_set_partner_timeout(LOAD_TIMEOUT, LOAD_TIMEOUT)
+
+## Both machines have the level: ENet's own timeout (5 s at the least, 30 s
+## at the most) once it has run for a while.
+func _loaded() -> void:
+	var serial := _load_serial
+	await get_tree().create_timer(LOAD_SETTLE, true, false, true).timeout
+	if serial == _load_serial:
+		_set_partner_timeout(5.0, 30.0)
+
+func _set_partner_timeout(least: float, most: float) -> void:
+	if _peer == null or partner_id == 0:
+		return
+	var partner := _peer.get_peer(partner_id)
+	if partner != null:
+		partner.set_timeout(32, int(least * 1000.0), int(most * 1000.0))
 
 ## Co-op: some objectives read differently for the apprentice ("Talk to your
 ## master" for "Talk to your apprentice"): a key with "_APP" added, if any.
@@ -517,6 +553,7 @@ func _begin() -> void:
 func _reload() -> void:
 	phase = Phase.PLAYING
 	_have_start_state = false
+	_loading()
 	Game.reload_with_host()
 
 @rpc("any_peer", "call_remote", "reliable")
