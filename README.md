@@ -12,9 +12,9 @@ Jocul e în **română și engleză** (se schimbă din meniu sau din Opțiuni).
 2. **Arhivele.** Din atelier ieși în marele coridor, cu plăci de presiune, arbalete și dale care se prăbușesc (un ciob aruncat pe o placă o face să tragă în gol). Apoi arhivele, unde gardieni cu torțe patrulează printre mesele scribilor. În capătul lor, la masa lui lăcuită, supraveghetorul Wei citește numele de pe listă și le taie; pe masă stau jumătatea lui din răbojul-tigru și registrul lucrătorilor. Îl atragi de la masă cu un zgomot și iei răbojul (registrul e o dovadă, dacă ai curaj). Apoi Liang, inginerul mecanismelor.
 3. **Sub munte.** O piatră de spart cu pana și ciocanul, apoi tunelurile de serviciu. Tunelul spre mecanism s-a surpat când s-a închis poarta, așa că singurul drum e în jos: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut. Oamenii lui Wei își țin acolo prizonierii într-un țarc (printre ei, ucenicul tău), iar comandantul gropilor își păzește, la postul lui din curte, cealaltă jumătate a răbojului. De acolo, două drumuri trec de zidul interior: scara lucrătorilor urcă din gropi la poarta de bronz, care se deschide doar unui tigru întreg; sau galeria arbaletelor, la vest de gropi, cu plăci, arbalete în ziduri și o armurărie de armuri de piatră, duce la o scară care iese printr-o trapă dincolo de zid. Galeria ocolește însă țarcul: dacă nu treci întâi pe la el, ucenicul rămâne acolo.
 4. **Râuri de argint viu.** Sala Mercurului: harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești, înclină marea balanță și ridică podul de piatră.
-5. **Tezaurul.** Canalul de scurgere, apoi lumina zilei.
+5. **Camera funerară.** Sicriul împăratului pe insula lui, într-o mare de mercur. La ultima ușă, spre canalul lui Liang, te așteaptă Wei, în timp ce oamenii lui o zidesc: toate numele de pe listă sunt tăiate, în afară de al tău. Ce ai luat pe drum îți dă răspunsurile. Registrul lui: ultima fâșie, sub sigiliul lui Zhao Gao, îl trece și pe el pe listă. Jumătatea lui de tigru: o arunci în mercur, unde bronzul plutește, și se reped după ea. Sau nimic, și fugi: oamenii lui te vânează printre statui, iar tu te strecori înapoi la ușă pe la spatele lor. Apoi canalul și lumina zilei.
 
-Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneală pe hârtie, sub sigiliul meșteșugarilor — depinde de ce ai făcut pe drum: registrul, ucenicul.
+Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneală pe hârtie, sub sigiliul meșteșugarilor — depinde de ce ai făcut pe drum: registrul, ucenicul, Wei.
 
 ## Mecanici
 
@@ -87,10 +87,11 @@ Toate se rulează prin `tools/dev/run.gd`:
 godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/quest_bot_runner.gd
 ```
 
-- `autopilot_runner` — joacă tot jocul cu input real (mers, scări, folosire), de la `--from=act1` la `act5`; actul III trece prin puțul lucrătorilor (liftul, camuflajul printre statui, țarcul, răbojul, poarta), iar cu `--route=gallery` prin galeria arbaletelor (armura de piatră, plăcile, trapa).
+- `autopilot_runner` — joacă tot jocul cu input real (mers, scări, folosire), de la `--from=act1` la `act5`; actul III trece prin puțul lucrătorilor (liftul, camuflajul printre statui, țarcul, răbojul, poarta), iar cu `--route=gallery` prin galeria arbaletelor (armura de piatră, plăcile, trapa); la ultima ușă îi răspunde lui Wei cu registrul, sau cu `--wei=tiger` cu tigrul.
 - `quest_bot_runner` — joacă toată povestea automat și verifică fiecare pas.
 - `checkpoint_test_runner` — salvare, moarte, reîncercare, „Continuă".
 - `pits_stealth_runner` — stealth în gropile armatei: paznicul aude liftul, printre statui nu te vede, cu lampa aprinsă sau pe culoar te observă.
+- `wei_door_runner --way=register|tiger|run` — Wei la ultima ușă, pe fiecare cale: ce ți se oferă, cum se termină, ușa liberă după, epilogul.
 - `test_player_runner`, `test_guard_runner` — mișcare, poziții, lampă; vedere, auz și atac la gardieni (au nevoie de fereastră: fără `--headless`, cu `--out=/folder`).
 - `music_test_runner` — muzica și ambianța pe zone.
 - `coop_bot_runner` — două instanțe (`--role=host` și `--role=client`, pornite în același timp) joacă toată povestea în co-op și verifică ce vede fiecare; `--from=causeway` sare direct la pod. `coop_shots_runner` face capturi din ambele perspective.

@@ -63,6 +63,7 @@ func _run() -> void:
 	_workers_shaft_and_pits()
 	_corridor_on_the_way_to_the_archives()
 	_wei_at_his_desk()
+	_wei_at_the_last_door()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -1277,6 +1278,217 @@ func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torc
 	guard.set(&"route_path", guard.get_path_to(route))
 	guard.set(&"carries_torch", torch)
 	guard.set(&"armor_tint", tint)
+
+## Act V: Wei at the last door out of the burial chamber, the south-west
+## door to the drain's tunnel, while two of his men brick it up from the
+## walkway (WeiLastDoor): the scene's area on the walkway before the door,
+## Wei and his men, their marks, the wall begun across the door, the bricks
+## and the mortar, and the beats the men keep round the walkway if the
+## craftsman runs. (The tunnel beyond is too low for them to work in.)
+func _wei_at_the_last_door() -> void:
+	for path in ["WeiLastDoor", "Guards/WeiLast", "Guards/WeiLastManA", "Guards/WeiLastManB", "Routes/LastDoorStrip", "Routes/LastDoorCauseway"]:
+		var old := root.get_node_or_null(path)
+		if old != null:
+			old.get_parent().remove_child(old)
+			old.free()
+	var door := WeiLastDoor.new()
+	door.name = "WeiLastDoor"
+	root.add_child(door)
+	door.owner = root
+	door.global_position = Vector3(-15.5, 9.0, 127.5)
+	var shape := CollisionShape3D.new()
+	shape.name = "Shape"
+	var box := BoxShape3D.new()
+	box.size = Vector3(15.0, 3.6, 8.0)
+	shape.shape = box
+	door.add_child(shape)
+	shape.owner = root
+	# Between the treasures down the walkway and its south wall, a strip
+	# clear to stand in.
+	var marks := {
+		"Post": Vector3(-12.8, 8.5, 129.95), "Watch": Vector3(-1.5, 8.5, 115.5),
+		"Work0": Vector3(-17.2, 8.5, 130.0), "Work1": Vector3(-15.3, 8.5, 130.0),
+		# Out on the causeway into the mercury, over the tiger (down its
+		# middle: lamp posts stand along its sides).
+		"Edge0": Vector3(-1.5, 8.5, 118.5), "Edge1": Vector3(-1.5, 8.5, 116.3), "Edge2": Vector3(-1.5, 8.5, 120.7),
+	}
+	for key in marks:
+		var m := Marker3D.new()
+		m.name = key
+		door.add_child(m)
+		m.owner = root
+		m.global_position = _floor_at(marks[key])
+		_log.append("last door: %s at %s" % [key, m.global_position.snapped(Vector3.ONE * 0.01)])
+	# The door's opening runs between its stone jambs, x -16.9 to -14.6.
+	var wall_at := _floor_at(Vector3(-16.5, 7.6, 130.55))
+	var wall_mark := Marker3D.new()
+	wall_mark.name = "Wall"
+	door.add_child(wall_mark)
+	wall_mark.owner = root
+	wall_mark.global_position = wall_at + Vector3.UP * 0.4
+	# Where the tiger comes down: on the mercury off the causeway's west side.
+	var float_mark := Marker3D.new()
+	float_mark.name = "Float"
+	door.add_child(float_mark)
+	float_mark.owner = root
+	float_mark.global_position = Vector3(-7.0, 0.93, 118.5)
+	# Up the walkway to the outer passage: east behind the treasures down
+	# the south walkway, and on round out of sight. (A guard's way round the
+	# chamber ends at its corner: the walkways are too narrow for him past
+	# the treasures.)
+	var leave := Node3D.new()
+	leave.name = "Leave"
+	door.add_child(leave)
+	leave.owner = root
+	var leave_points := [Vector3(-10.5, 8.5, 129.6), Vector3(8.0, 8.5, 129.5), Vector3(18.3, 8.5, 129.5)]
+	for i in leave_points.size():
+		var m := Marker3D.new()
+		m.name = "P%d" % i
+		leave.add_child(m)
+		m.owner = root
+		m.global_position = _floor_at(leave_points[i])
+	# The beats they keep if he runs, in what of the chamber they can walk
+	# (the strip behind the treasures and the causeway): one up and down the
+	# strip past the door, to be slipped by behind his back; one between the
+	# causeway and the strip's east end, by the causeway's foot both ways.
+	var beats := {
+		"LastDoorStrip": [[Vector3(-21.0, 8.5, 129.4), 2.5, true], [Vector3(-8.0, 8.5, 129.4), 2.0, true]],
+		"LastDoorCauseway": [[Vector3(-1.5, 8.5, 120.5), 2.5, true], [Vector3(-1.5, 8.5, 129.2), 0.0, false], [Vector3(12.0, 8.5, 129.4), 2.0, true], [Vector3(-1.5, 8.5, 129.2), 0.0, false]],
+	}
+	var rings: Array[NodePath] = []
+	for beat in beats:
+		var route := PatrolRoute.new()
+		route.name = beat
+		root.get_node("Routes").add_child(route)
+		route.owner = root
+		var spots: Array = beats[beat]
+		for i in spots.size():
+			var m := Marker3D.new()
+			m.name = "P%02d" % i
+			route.add_child(m)
+			m.owner = root
+			m.global_position = _floor_at(spots[i][0])
+			m.set_meta(&"wait", spots[i][1])
+			m.set_meta(&"look", spots[i][2])
+		rings.append(door.get_path_to(route))
+	# Wei as he was at his desk, and his two men with torches.
+	var scene := load("res://scenes/ai/guard.tscn") as PackedScene
+	var wei := scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Guard
+	wei.name = "WeiLast"
+	root.get_node("Guards").add_child(wei)
+	wei.owner = root
+	wei.global_position = door.get_node("Post").global_position
+	wei.armor_tint = Color(0.42, 0.22, 0.2)
+	wei.carries_ji = false
+	wei.held_scene = load("res://scenes/items/visuals/register.tscn")
+	wei.held_offset = Vector3(0.0, 0.06, 0.04)
+	wei.held_rotation = Vector3(0.0, 0.0, 90.0)
+	wei.voice = &"wei"
+	wei.own_barks = {&"lost": ["WEI_LOST_1"]}
+	var men: Array[NodePath] = []
+	for i in 2:
+		var man := scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Guard
+		man.name = "WeiLastMan%s" % ["A", "B"][i]
+		root.get_node("Guards").add_child(man)
+		man.owner = root
+		man.global_position = door.get_node("Work%d" % i).global_position
+		man.carries_torch = true
+		man.armor_tint = Color(0.95, 0.9, 0.85)
+		men.append(door.get_path_to(man))
+	door.wei_path = door.get_path_to(wei)
+	door.men_paths = men
+	door.desk_wei_path = door.get_path_to(root.get_node("Guards/Wei"))
+	door.post_path = ^"Post"
+	door.watch_path = ^"Watch"
+	var work: Array[NodePath] = [^"Work0", ^"Work1"]
+	door.work_paths = work
+	door.wall_path = ^"Wall"
+	var edges: Array[NodePath] = [^"Edge0", ^"Edge1", ^"Edge2"]
+	door.edge_paths = edges
+	door.float_path = ^"Float"
+	door.leave_path = ^"Leave"
+	door.gap_path = ^"Gap"
+	door.ring_paths = rings
+	# What they're at: the first courses across the door from its west jamb
+	# (a stride of it still open), a heap of bricks beside it and a trough
+	# of mortar.
+	var brick := load("res://assets/materials/level/brick.tres") as Material
+	var bricks := Node3D.new()
+	bricks.name = "Bricks"
+	door.add_child(bricks)
+	bricks.owner = root
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 210
+	var laid := 0
+	for course in 4:
+		var count := 2 if course < 3 else 1
+		for k in count:
+			var along := -16.88 + 0.17 + k * 0.36 + (0.09 if course % 2 else 0.0)
+			_brick(bricks, "Wall%d_%d" % [course, k], Vector3(along, wall_at.y + 0.06 + course * 0.115, wall_at.z + rng.randf_range(-0.01, 0.01)), rng.randf_range(-0.02, 0.02), brick)
+			laid += 1
+	var heap_at := _floor_at(Vector3(-19.0, 8.5, 130.25))
+	for layer in 4:
+		for k in 5 - layer:
+			_brick(bricks, "Heap%d_%d" % [layer, k], heap_at + Vector3((k - (4 - layer) * 0.5) * 0.36, 0.06 + layer * 0.115, (0.18 if k % 2 else 0.0) + rng.randf_range(-0.02, 0.02)), rng.randf_range(-0.06, 0.06), brick)
+	var trough := MeshInstance3D.new()
+	trough.name = "Trough"
+	var trough_mesh := BoxMesh.new()
+	trough_mesh.size = Vector3(0.9, 0.3, 0.5)
+	trough.mesh = trough_mesh
+	trough.material_override = load("res://assets/materials/level/timber.tres")
+	bricks.add_child(trough)
+	trough.owner = root
+	trough.global_position = _floor_at(Vector3(-18.6, 8.5, 129.25)) + Vector3.UP * 0.15
+	var mud := MeshInstance3D.new()
+	mud.name = "Mortar"
+	var mud_mesh := BoxMesh.new()
+	mud_mesh.size = Vector3(0.8, 0.04, 0.4)
+	mud.mesh = mud_mesh
+	mud.material_override = load("res://assets/materials/level/dirt.tres")
+	bricks.add_child(mud)
+	mud.owner = root
+	mud.global_position = trough.global_position + Vector3.UP * 0.14
+	# Solid, so nobody walks through them (and the navmesh goes round).
+	var body := StaticBody3D.new()
+	body.name = "Body"
+	bricks.add_child(body)
+	body.owner = root
+	for part in [["WallShape", Vector3(-16.47, wall_at.y + 0.25, wall_at.z), Vector3(0.82, 0.5, 0.22)], ["HeapShape", heap_at + Vector3(0.0, 0.23, 0.09), Vector3(1.8, 0.46, 0.5)], ["TroughShape", trough.global_position, Vector3(0.9, 0.3, 0.5)]]:
+		var cs := CollisionShape3D.new()
+		cs.name = part[0]
+		var cbox := BoxShape3D.new()
+		cbox.size = part[2]
+		cs.shape = cbox
+		body.add_child(cs)
+		cs.owner = root
+		cs.global_position = part[1]
+	# The way from the strip out onto the causeway, for their scripted
+	# walks: along the strip, then straight through the gap between the
+	# jade slabs (the navmesh would walk a guard over a slab's corner: it
+	# climbs half a metre, his body can't).
+	var gap := Node3D.new()
+	gap.name = "Gap"
+	door.add_child(gap)
+	gap.owner = root
+	for i in 2:
+		var m := Marker3D.new()
+		m.name = "P%d" % i
+		gap.add_child(m)
+		m.owner = root
+		m.global_position = _floor_at([Vector3(-1.5, 8.5, 129.3), Vector3(-1.5, 8.5, 126.5)][i])
+	_log.append("last door: Wei, two men, %d bricks laid" % laid)
+
+func _brick(parent: Node3D, brick_name: String, at: Vector3, yaw: float, mat: Material) -> void:
+	var b := MeshInstance3D.new()
+	b.name = brick_name
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.34, 0.11, 0.17)
+	b.mesh = mesh
+	b.material_override = mat
+	parent.add_child(b)
+	b.owner = root
+	b.global_position = at
+	b.rotation.y = yaw
 
 ## A LevelBox built like the workshop: stone blocks, flagstones, and boards
 ## or slabs overhead (by the ceiling's material).

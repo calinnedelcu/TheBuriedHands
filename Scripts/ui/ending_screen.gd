@@ -87,6 +87,9 @@ func _on_finished(ending: Dictionary) -> void:
 		await _card_text(line)
 	else:
 		await _card("END_NO_APPRENTICE")
+	var wei: String = ending.get("wei", "")
+	if wei != "":
+		await _card("END_WEI_" + wei.to_upper())
 	var names: Array = ending.get("names", [])
 	_names = names
 	if names.is_empty():

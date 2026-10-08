@@ -169,14 +169,20 @@ func fail(reason_key: String) -> void:
 	Dialogue.stop()
 	failed.emit(reason_key)
 
-func finish() -> void:
-	var ending := {
+## What the epilogue is made of: the choices made along the way.
+func epilogue() -> Dictionary:
+	return {
 		"evidence": bool(get_flag(&"has_evidence")),
 		"apprentice": bool(get_flag(&"apprentice_freed")),
 		"lamp": bool(get_flag(&"gave_lamp")),
+		# How it went with Wei at the last door (WeiLastDoor).
+		"wei": "turned" if get_flag(&"wei_turned") else ("tricked" if get_flag(&"wei_tricked") else ("fled" if get_flag(&"wei_fled") else "")),
 		"names": NamesDB.found(),
 		"together": Net.active,
 	}
+
+func finish() -> void:
+	var ending := epilogue()
 	_finished = true
 	# A co-op run never touches the single-player save.
 	if not Net.active:

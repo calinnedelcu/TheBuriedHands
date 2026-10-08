@@ -181,7 +181,9 @@ func _host_causeway(apprentice: Player) -> void:
 	_check("the apprentice pinned it", await _until(func(): return causeway.pinned, 30.0))
 	_check("let go of the brake by itself", await _until(func(): return me.bracing == null and not me.controls_locked(), 5.0))
 
-	# Act V. The drain's bend is the apprentice's to squeeze through.
+	# Act V. Wei waits at the last door (the bots come round to the drain
+	# another way); the drain's bend is the apprentice's to squeeze through.
+	_check("Wei and his men at the last door", _at_last_door())
 	var drain := level.get_node("Drain") as Node3D
 	me.global_position = _drain_mouth()
 	me._set_stance(Player.Stance.CRAWL, true)
@@ -325,7 +327,9 @@ func _client_causeway(master: Player) -> void:
 	await _use("Mechanism/CoopPin/Body/Usable", &"use", Vector3(-0.6, 0, -0.6))
 	_check("pinned", causeway.pinned)
 
-	# Act V: we squeeze through the drain's bend.
+	# Act V: Wei waits at the last door, here too; we squeeze through the
+	# drain's bend.
+	_check("Wei and his men at the last door (seen here)", await _until(_at_last_door, 10.0))
 	var drain := level.get_node("Drain") as Node3D
 	me.global_position = _drain_mouth()
 	me._set_stance(Player.Stance.CRAWL, true)
@@ -382,6 +386,13 @@ func _hand_over(item: StringName, partner: Player) -> void:
 		_check("the master has the %s here too" % item, await _until(func(): return partner.inventory.has_item(item), 5.0))
 
 ## In the channel, before the bend (the drain runs along its local -z).
+## Act V's Wei and his men out at the last door, the desk's Wei put away.
+func _at_last_door() -> bool:
+	for g in ["WeiLast", "WeiLastManA", "WeiLastManB"]:
+		if not (level.get_node("Guards/" + g) as Node3D).visible:
+			return false
+	return not (level.get_node("Guards/Wei") as Node3D).visible
+
 func _drain_mouth() -> Vector3:
 	var entry := level.get_node("Drain/EntryBody") as Node3D
 	return entry.global_position + entry.global_basis.z * 2.2

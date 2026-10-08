@@ -114,6 +114,8 @@ const SEQUENCES := {
 	&"evidence_found": [
 		[&"craftsman", "DLG_EVIDENCE_1"],
 		[&"craftsman", "DLG_EVIDENCE_2"],
+		# Kept for the last door (WeiLastDoor).
+		[&"craftsman", "DLG_EVIDENCE_3"],
 	],
 	&"liang_talk": [
 		[&"liang", "DLG_LIANG_1", {"anim": &"surprised"}],
@@ -220,6 +222,36 @@ const SEQUENCES := {
 	],
 	&"drain_found": [
 		[&"craftsman", "DLG_DRAIN_FOUND"],
+	],
+	# Wei at the last door, his men bricking up the drain (WeiLastDoor).
+	&"wei_last": [
+		[&"craftsman", "DLG_WEI_LAST_0"],
+		[&"wei", "WEI_LAST_1"],
+		[&"wei", "WEI_LAST_2", {"if": &"has_evidence"}],
+		[&"wei", "WEI_LAST_3", {"only": &"solo"}],
+		[&"wei", "WEI_LAST_3_COOP", {"only": &"coop"}],
+	],
+	&"wei_register": [
+		[&"craftsman", "DLG_WEI_REG_1"],
+		[&"wei", "DLG_WEI_REG_2"],
+		[&"wei", "DLG_WEI_REG_3"],
+	],
+	&"wei_register_back": [
+		[&"wei", "DLG_WEI_REG_4"],
+		[&"wei", "DLG_WEI_REG_5"],
+	],
+	&"wei_register_go": [
+		[&"wei", "DLG_WEI_REG_6"],
+	],
+	&"wei_tiger": [
+		[&"craftsman", "DLG_WEI_TIGER_1"],
+	],
+	&"wei_tiger_after": [
+		[&"wei", "DLG_WEI_TIGER_2"],
+		[&"wei", "DLG_WEI_TIGER_3"],
+	],
+	&"wei_seize": [
+		[&"wei", "DLG_WEI_SEIZE"],
 	],
 	&"collapse": [
 		[&"craftsman", "DLG_COLLAPSE_1"],

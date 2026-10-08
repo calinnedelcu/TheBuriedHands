@@ -226,6 +226,7 @@ DLG_KEPT_1,"...I'll wait for you, master.","...Vă aștept, maestre."
 DLG_ARCHIVES_ENTER,"Guards. If they see my flame, it's over. The shadows are my friends now.","Gărzi. Dacă îmi văd flacăra, s-a terminat. Umbrele îmi sunt prietene acum."
 DLG_EVIDENCE_1,"The workers' register... thousands of names. All sealed in here, like me.","Registrul lucrătorilor... mii de nume. Toți închiși aici, ca mine."
 DLG_EVIDENCE_2,Someone has to know what happened to them.,Cineva trebuie să afle ce s-a întâmplat cu ei.
+DLG_EVIDENCE_3,"The last slip is sealed. Zhao Gao's seal.","Ultima fâșie e sigilată. Sigiliul lui Zhao Gao."
 DLG_LIANG_1,You? How did you get past the guards?,Tu? Cum ai trecut de gărzi?
 DLG_LIANG_2,Through the shadows. Liang — they're sealing the tomb with us inside.,Prin umbre. Liang — sigilează mormântul cu noi înăuntru.
 DLG_LIANG_3,I know. I built half of the locks myself.,Știu. Jumătate din încuietori le-am construit eu.
@@ -266,6 +267,25 @@ DLG_TREASURY_2,Gold is worth nothing down here. South — the drain.,Aurul nu va
 DLG_COFFIN_1,"His coffin. Forty days dead, and we are to keep him company.","Sicriul lui. Mort de patruzeci de zile, și noi trebuie să-i ținem de urât."
 DLG_COFFIN_2,Let him keep his clay army. I'll take their names with me.,Să-și păstreze armata de lut. Eu le iau numele cu mine.
 DLG_DRAIN_FOUND,So narrow... I'll have to crawl.,Atât de îngust... Trebuie să mă târăsc.
+DLG_WEI_LAST_0,"Wei. At the last door.","Wei. La ultima ușă."
+WEI_LAST_1,"The master of the first workshop.","Meșterul din primul atelier."
+WEI_LAST_2,"You took my register. No matter: the last name I know by heart.","Mi-ai luat registrul. Nu contează: ultimul nume îl știu pe de rost."
+WEI_LAST_3,"Every name on my list is struck off but yours. My men are walling up the last door. You'll keep your emperor company.","Toate numele de pe lista mea sunt tăiate, în afară de al tău. Oamenii mei zidesc ultima ușă. Îi vei ține de urât împăratului tău."
+WEI_LAST_3_COOP,"Every name on my list is struck off but yours and the boy's. My men are walling up the last door. You'll keep your emperor company.","Toate numele de pe lista mea sunt tăiate, în afară de al tău și al băiatului. Oamenii mei zidesc ultima ușă. Îi veți ține de urât împăratului vostru."
+CHOICE_WEI_REGISTER,"Give him his register: the sealed last slip.","Dă-i registrul: ultima fâșie, cea sigilată."
+CHOICE_WEI_TIGER,"Throw his half of the tiger into the mercury.","Aruncă-i jumătatea de tigru în mercur."
+CHOICE_WEI_RUN,Run.,Fugi.
+DLG_WEI_REG_1,"Your register, overseer. Its last slip carries Zhao Gao's seal. Read it.","Registrul tău, supraveghetorule. Ultima fâșie poartă sigiliul lui Zhao Gao. Citește-o."
+DLG_WEI_REG_2,"""...and the overseer Wei, who keeps this list, when the last name is struck off.""","„...și supraveghetorul Wei, care ține lista, când ultimul nume e tăiat.”"
+DLG_WEI_REG_3,So the list ends with me.,Deci lista se termină cu mine.
+DLG_WEI_REG_4,Keep it. Someone should know their names.,Păstrează-l. Cineva trebuie să le știe numele.
+DLG_WEI_REG_5,"You two! Leave the bricks. Go up and tell them every name is struck off.","Voi doi! Lăsați cărămizile. Urcați și spuneți-le că toate numele sunt tăiate."
+DLG_WEI_REG_6,"Go, craftsman. Liang's drain runs out to the river. I'm taking the outer passage, before its gate comes down.","Du-te, meștere. Canalul lui Liang iese la râu. Eu o iau pe pasajul de afară, până nu cade poarta."
+DLG_WEI_TIGER_1,"Your half of the tiger, overseer. Catch.","Jumătatea ta de tigru, supraveghetorule. Prinde."
+DLG_WEI_TIGER_2,No!,Nu!
+DLG_WEI_TIGER_3,"It floats... bronze floats on it. Get it out, both of you! Get it out!","Plutește... bronzul plutește pe el. Scoateți-l, amândoi! Scoateți-l!"
+DLG_WEI_SEIZE,Seize him!,Prindeți-l!
+NOTICE_WEI_RUN,"Lose them among the statues, then slip back to the last door.","Scapă de ei printre statui, apoi strecoară-te înapoi la ultima ușă."
 DLG_COLLAPSE_1,No...!,Nu...!
 DLG_COLLAPSE_2,No way back. Only forward.,Nu mai e cale înapoi. Doar înainte.
 DLG_LIGHT,Light...,Lumină...
@@ -400,6 +420,9 @@ DLG_TALLY_GATE_OPEN,The Emperor's command... in a craftsman's lock.,Porunca Împ
 DLG_FREED_1,Master! I knew you'd come...,Maestre! Știam că o să veniți...
 DLG_FREED_2,"Run with the others. Keep to the dark, I'll find you outside.","Fugi cu ceilalți. Ține-te în întuneric, te găsesc afară."
 END_APPRENTICE_LAMP,He still had your lamp.,Încă avea lampa ta.
+END_WEI_TURNED,"Wei left by the outer passage before its gate came down, and was not seen at court again. Three years later, when Zhao Gao was cut down in the palace, it was said an old overseer had shown his killers the way.","Wei a ieșit pe pasajul de afară înainte să cadă poarta și n-a mai fost văzut la curte. Trei ani mai târziu, când Zhao Gao a fost ucis în palat, se spunea că un fost supraveghetor le arătase ucigașilor drumul."
+END_WEI_TRICKED,"Wei's men fished his tiger off the mercury, and he went up to report the tomb sealed. Zhao Gao thanked him, and had the outer passage walled in behind him.","Oamenii lui Wei i-au pescuit tigrul de pe mercur, iar el a urcat să raporteze mormântul sigilat. Zhao Gao i-a mulțumit și a pus să se zidească pasajul de afară în urma lui."
+END_WEI_FLED,"Wei reported the tomb sealed and every name on his list struck off. He was wrong about one of them.","Wei a raportat mormântul sigilat și toate numele de pe listă tăiate. Se înșela cu unul."
 SPK_WEI,Overseer Wei,Supraveghetorul Wei
 DLG_TAKEN_1,Lamps. Someone's coming. Down.,Lămpi. Vine cineva. Jos.
 DLG_TAKEN_2,Eleven names on my list for this workshop. Search every corner.,Unsprezece nume pe lista mea pentru atelierul ăsta. Căutați în fiecare colț.

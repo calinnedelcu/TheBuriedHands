@@ -233,6 +233,23 @@ func warp_to_route(index := 0) -> void:
 func play_animation(key: StringName) -> void:
 	_play(key)
 
+## Gives him another beat to walk (after a cutscene, a watch elsewhere).
+func set_route(route: PatrolRoute, index := 0) -> void:
+	_route = route
+	_route_index = index
+	_wait_timer = 0.0
+
+## Out of a cutscene and straight after `p`, as if he had just seen him.
+func chase(p: Player) -> void:
+	_scripted_target = Vector3.INF
+	_player = p
+	awareness = 1.25
+	_last_seen = p.global_position
+	_stimulus = _last_seen
+	_seen_timer = 0.0
+	_set_state(State.RETURN)
+	_start_chase()
+
 ## Another guard raised the alarm nearby.
 func hear_alarm(position: Vector3) -> void:
 	if not is_hostile() or state == State.CHASE or state == State.ATTACK:

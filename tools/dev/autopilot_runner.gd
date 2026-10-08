@@ -7,8 +7,11 @@ extends Node
 ## Act III goes down the workers' shaft (the service tunnel to the mechanism
 ## has fallen in) and past the inner wall: through the army pits and the
 ## gate with the whole tiger tally, or with --route=gallery through the
-## crossbow gallery in stone armour and up the hatch ladder.
-## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--route=gallery] [--out=/abs/dir for frames, needs a window]
+## crossbow gallery in stone armour and up the hatch ladder. In Act V, Wei
+## at the last door is answered with his register (taken in Act II), or with
+## --wei=tiger by throwing his half of the tally (kept on the gallery way)
+## into the mercury. (Running from him is wei_door_runner's.)
+## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--route=gallery] [--wei=tiger] [--out=/abs/dir for frames, needs a window]
 
 const WS := "Rooms/01_TerracottaWorkshop/"
 
@@ -20,6 +23,7 @@ var _shot_timer := 0.0
 var _shots := 0
 var _from := "act1"
 var _route := "pits"
+var _wei := "register"
 var _nav_map: RID
 var _pits_checkpoint := false
 var _verbose := false
@@ -32,6 +36,8 @@ func _ready() -> void:
 			_from = arg.substr(7)
 		elif arg.begins_with("--route="):
 			_route = arg.substr(8)
+		elif arg.begins_with("--wei="):
+			_wei = arg.substr(6)
 		elif arg == "--verbose":
 			_verbose = true
 	if out != "":
@@ -94,6 +100,12 @@ func _setup(act: String) -> void:
 			Quest.start_at(&"inspect_balance")
 			player.global_position = Vector3(0.5, 7.7, 44.5)
 		"act5":
+			# The register from Wei's desk; his half of the tally, if kept.
+			Game.set_flag(&"has_evidence")
+			player.inventory.add(&"register")
+			if _wei == "tiger":
+				Game.set_flag(&"has_tally_wei")
+				player.inventory.add(&"tally_wei")
 			Quest.start_at(&"find_drain")
 			Game.advance_sealing(2)
 			var cw := level.get_node("Mechanism/Counterweight")
@@ -238,6 +250,7 @@ func _act5() -> bool:
 		await _climb("Mechanism/Ladder2", false)
 	await _walk_to(Vector3(0.6, 7.7, 86.1), 1.5)
 	await _skip_dialogue()
+	await _last_door()
 	var entry := level.get_node("Drain/EntryBody") as Node3D
 	await _walk_to(entry.global_position, 2.5)
 	player._set_stance(Player.Stance.CRAWL)
@@ -264,6 +277,35 @@ func _act5() -> bool:
 	await _wait(3.0)
 	_check("walking out on his own (%.1f m)" % from.distance_to(player.global_position), from.distance_to(player.global_position) > 1.5)
 	return true
+
+## Round the walkway to the last door, where Wei waits while his men brick
+## it up: answered with his register or his tiger; then the way is clear.
+func _last_door() -> void:
+	var door := level.get_node("WeiLastDoor") as WeiLastDoor
+	var want := tr("CHOICE_WEI_TIGER" if _wei == "tiger" else "CHOICE_WEI_REGISTER")
+	var offered: Array[String] = []
+	Dialogue.choice_requested.connect(func(texts: PackedStringArray) -> void:
+		for t in texts:
+			offered.append(t)
+		Dialogue.choose_option.call_deferred(maxi(0, Array(texts).find(want))), CONNECT_ONE_SHOT)
+	_check("Wei and his men at the last door", (level.get_node("Guards/WeiLast") as Node3D).visible)
+	# Round to the door; the walk ends where Wei sees him (controls held).
+	await _walk_to(Vector3(-9.0, 7.6, 130.0), 1.2, func() -> bool: return door.met)
+	var t := 0.0
+	while (not door.met or player.controls_locked()) and t < 40.0:
+		_press(&"skip_line")
+		await _wait(0.4)
+		t += 0.4
+	_check("Wei had his say: %s offered, it went '%s'" % [want, door.outcome], offered.has(want) and door.outcome == (&"tricked" if _wei == "tiger" else &"turned"))
+	_check("controls back after Wei", not player.controls_locked())
+	# The door clears: his men to the edge after the tiger, or gone up.
+	await _wait(6.0)
+	var near := 0
+	for g in ["WeiLast", "WeiLastManA", "WeiLastManB"]:
+		var guard := level.get_node("Guards/" + g) as Guard
+		if guard.visible and guard.global_position.distance_to(Vector3(-15.75, 7.55, 130.6)) < 2.5:
+			near += 1
+	_check("the door clear of them", near == 0)
 
 ## Act III the other way past the inner wall: down the lift, west under the
 ## ledge into the crossbow gallery, a suit of stone armour from the armoury,
