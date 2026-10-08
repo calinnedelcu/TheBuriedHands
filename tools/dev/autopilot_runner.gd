@@ -4,9 +4,11 @@ extends Node
 ## ladders, crawls, answers the apprentice. Catches what teleporting bots
 ## can't: blocked paths, unreachable or untargetable objects, prompts.
 ## Guards are made harmless from Act II on (this tests the route, not stealth).
-## Act III goes down the workers' shaft and through the army pits (the lift,
-## the pen, the stairs): the service tunnel to the mechanism has fallen in.
-## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--out=/abs/dir for frames, needs a window]
+## Act III goes down the workers' shaft (the service tunnel to the mechanism
+## has fallen in) and past the inner wall: through the army pits and the
+## gate with the whole tiger tally, or with --route=gallery through the
+## crossbow gallery in stone armour and up the hatch ladder.
+## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--route=gallery] [--out=/abs/dir for frames, needs a window]
 
 const WS := "Rooms/01_TerracottaWorkshop/"
 
@@ -17,6 +19,7 @@ var failures := 0
 var _shot_timer := 0.0
 var _shots := 0
 var _from := "act1"
+var _route := "pits"
 var _nav_map: RID
 var _pits_checkpoint := false
 var _verbose := false
@@ -27,6 +30,8 @@ func _ready() -> void:
 			out = arg.substr(6)
 		elif arg.begins_with("--from="):
 			_from = arg.substr(7)
+		elif arg.begins_with("--route="):
+			_route = arg.substr(8)
 		elif arg == "--verbose":
 			_verbose = true
 	if out != "":
@@ -183,7 +188,12 @@ func _act3() -> bool:
 	_check("stone broken", bool(level.get_node("ShaftStone").get("broken")))
 	await _skip_dialogue()
 	await _climb("Mechanism/Ladder1", false)
-	if not await _pits():
+	var through := false
+	if _route == "gallery":
+		through = await _gallery()
+	else:
+		through = await _pits()
+	if not through:
 		return false
 	await _walk_to(Vector3(0.5, -7.4, 41.0), 1.2)
 	await _climb("Mechanism/Ladder3", true)
@@ -255,6 +265,58 @@ func _act5() -> bool:
 	_check("walking out on his own (%.1f m)" % from.distance_to(player.global_position), from.distance_to(player.global_position) > 1.5)
 	return true
 
+## Act III the other way past the inner wall: down the lift, west under the
+## ledge into the crossbow gallery, a suit of stone armour from the armoury,
+## down the aisle over every plate (the bolts glance off the stone), and up
+## the hatch ladder behind the wall; then the armour shed to crawl.
+func _gallery() -> bool:
+	const LIFT := "UnderTheMountain/ShaftLift/"
+	var lift := level.get_node(LIFT) as CounterweightLift
+	await _walk_to(Vector3(32.65, -8.6, -20.0), 1.5)
+	await _walk_to(Vector3(42.8, -8.6, -20.0), 0.6)
+	await _wait(0.3)
+	await _use(LIFT + "Platform/BallastBody", "hold")
+	await _use(LIFT + "Platform/BrakeBody")
+	var t := 0.0
+	while lift.level < 1.0 and t < 25.0:
+		await _wait(0.5)
+		t += 0.5
+	await _wait(0.6)
+	_check("down at the shaft's foot", lift.level >= 1.0)
+	await _skip_dialogue()
+	await _bake_player_nav()
+	await _walk_to(Vector3(29.5, -26.0, -17.5), 1.2)
+	await _skip_dialogue()
+	_check("into the gallery's passage: down, and on to the wall", Quest.is_at(&"past_wall"))
+	await _use("UnderTheMountain/ArmourStands/StoneArmor0")
+	await _skip_dialogue()
+	_check("in stone armour", player.wears_stone_armor())
+	var hp := player.health
+	# Down the aisle, onto every plate on purpose.
+	for i in 5:
+		var plate := level.get_node("UnderTheMountain/GalleryTraps/Plate%d" % (i + 1)) as Node3D
+		await _walk_to(plate.global_position, 0.35)
+		await _wait(0.9)
+	var fired := 0
+	for i in 5:
+		if (level.get_node("UnderTheMountain/GalleryTraps/Crossbow%d" % (i + 1)) as WallCrossbow).fired:
+			fired += 1
+	_check("the gallery's crossbows fired (%d of 5)" % fired, fired >= 4)
+	_check("and the bolts glanced off the stone (health %.1f, was %.1f)" % [player.health, hp], player.health >= hp - 0.01)
+	await _walk_to(Vector3(11.0, -26.0, 28.5), 1.2)
+	await _climb("UnderTheMountain/HatchLadder", true)
+	await _wait(0.6)
+	_check("up through the hatch behind the inner wall (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), player.global_position.y > -9.0)
+	_expect(&"reach_mechanism")
+	_check("the gate left shut: no tally this way", not (level.get_node("UnderTheMountain/InnerGate") as TallyGate).opened)
+	# Nobody crawls in stone: crawling sheds it, and up he stands again.
+	_press(&"crawl")
+	await _wait(0.6)
+	_check("shed the armour to crawl", not player.wears_stone_armor() and player.stance == Player.Stance.CRAWL)
+	_press(&"crawl")
+	await _wait(0.6)
+	return player.global_position.y > -9.0
+
 ## Act III: the tunnel south has fallen in, so the workers' shaft and its
 ## lift (too light alone, down with a stone in the ballast box), the ranks of
 ## clay soldiers, the commander's half of the tally at his post, the pen's
@@ -318,10 +380,14 @@ func _pits() -> bool:
 	await _use("UnderTheMountain/CommanderPost/PitTally")
 	await _skip_dialogue()
 	_check("the commander's half taken", player.inventory.has_item(&"tally_pit"))
-	_expect(&"open_gate")
+	_expect(&"past_wall")
+	# Alone, the objective minds him of the boy until he's out of the pen.
+	var objective := player.get_node("HUD").get(&"_objective_label") as Label
+	_check("the objective names the apprentice in the pen", objective.text == tr("OBJ_PAST_WALL_SOLO"))
 	await _use("UnderTheMountain/PenLever/Lever/Body")
 	_check("the pen's gate is up", pen.opened)
 	_check("the apprentice is free", Game.get_flag(&"apprentice_freed"))
+	_check("and the objective lets him go", objective.text == tr("OBJ_PAST_WALL"))
 	await _skip_dialogue()
 	await _walk_to(Vector3(33.0, -26.0, 38.0), 1.5)
 	_check("a checkpoint once down in the pits", _pits_checkpoint)

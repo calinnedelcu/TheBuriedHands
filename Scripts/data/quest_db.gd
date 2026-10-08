@@ -3,7 +3,8 @@ extends RefCounted
 ## The main quest as an ordered list of steps. Gameplay nodes refer to steps by
 ## id ("this pickup completes `fetch_slip`"); the order and the objective text
 ## live only here. `checkpoint` steps save the game when they start; a
-## `solo_text` replaces the objective when playing alone.
+## `solo_text` replaces the objective when playing alone, until the flag named
+## by `solo_until` (if any) is set.
 
 const STEPS := [
 	# Act I — the workshop
@@ -19,13 +20,13 @@ const STEPS := [
 	# Act II — the archives
 	{"id": &"find_liang", "text": "OBJ_FIND_LIANG", "hint": "HINT_STEALTH", "checkpoint": true},
 	{"id": &"talk_liang", "text": "OBJ_TALK_LIANG", "checkpoint": true},
-	# Wei's half of the tiger tally, if it isn't already in hand.
-	{"id": &"take_tally", "text": "OBJ_TAKE_TALLY"},
-	# Act III — under the mountain: the workers' shaft, the army pits and
-	# the inner gate that opens to a whole tiger.
+	# Act III — under the mountain: down the workers' shaft, then past the
+	# inner wall one of two ways: its gate, with the whole tiger tally (Wei's
+	# half and the commander's, in the army pits), or the crossbow gallery
+	# and the hatch behind the wall.
 	{"id": &"descend", "text": "OBJ_DESCEND", "solo_text": "OBJ_DESCEND_SOLO", "checkpoint": true},
-	{"id": &"pit_tally", "text": "OBJ_PIT_TALLY", "checkpoint": true},
-	{"id": &"open_gate", "text": "OBJ_OPEN_GATE"},
+	# Alone, the apprentice is left in the pits' pen unless his master frees him.
+	{"id": &"past_wall", "text": "OBJ_PAST_WALL", "solo_text": "OBJ_PAST_WALL_SOLO", "solo_until": &"apprentice_freed", "checkpoint": true},
 	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "checkpoint": true},
 	# Act IV — the counterweight
 	{"id": &"inspect_balance", "text": "OBJ_INSPECT_BALANCE", "checkpoint": true},

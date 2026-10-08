@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_stone_armor.png" id="1_luc52"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="2_axawe"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/stone_armor.tscn" id="3_edxbo"]
+
+[resource]
+script = ExtResource("2_axawe")
+id = &"stone_armor"
+name_key = "ITEM_STONE_ARMOR"
+description_key = "ITEM_DESC_STONE_ARMOR"
+icon = ExtResource("1_luc52")
+world_scene = ExtResource("3_edxbo")
+key_item = true
+droppable = false
+throw_noise_radius = 0.0
+mass = 15.0

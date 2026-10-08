@@ -551,6 +551,9 @@ func _kit_service_tunnels() -> void:
 		LevelOpening.make(F.CEILING, Vector2(0.03, 5.7), Vector2(3.11, 3.21)),
 		# The top of the stairs up from the army pits.
 		LevelOpening.make(F.EAST, Vector2(-0.505, 0.0), Vector2(2.0, 3.25), false),
+		# The hatch up from the crossbow gallery's ladder, over its rungs,
+		# cut down through the floor's whole thickness.
+		LevelOpening.make(F.FLOOR, Vector2(-0.005, -6.555), Vector2(1.4, 1.4)),
 	])
 	_kit_box(group, "ShaftToMechanism", Vector3(0.285, -5.29, 41.205), Vector3(3.11, 16.69, 3.21), false, 1 << F.FLOOR, [
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 12.79), Vector2(3.11, 3.9)),
@@ -690,6 +693,7 @@ func _apprentice_taken() -> void:
 	scene.owner = root
 	scene.global_position = Vector3(-43.5, 2.0, -17.2)
 	var shape := CollisionShape3D.new()
+	shape.name = "Shape"
 	var box := BoxShape3D.new()
 	box.size = Vector3(5.0, 4.0, 31.6)
 	shape.shape = box
@@ -855,10 +859,16 @@ func _workers_shaft_and_pits() -> void:
 	_dressed(_kit_box(group, "WorkersShaft", Vector3(44.0, pit_floor, -20.5), Vector3(16.0, 24.0, 13.0), false, 0, [
 		LevelOpening.make(F.WEST, Vector2(0.5, rise), Vector2(3.5, 3.43), false),
 		LevelOpening.make(F.SOUTH, Vector2(0.0, 0.0), Vector2(6.0, 4.5), false),
+		# At its foot, west under the ledge: the way to the crossbow gallery.
+		LevelOpening.make(F.WEST, Vector2(3.0, 0.0), Vector2(3.5, 3.43), false),
 	]), timber)
-	var ledge := _masonry(_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -20.5), Vector3(4.5, rise, 13.0), stone), flag)
-	# Its other sides are against the shaft's walls.
-	ledge.dressed_sides = 8
+	# The ledge of rock the top landing stands on, with the way west cut
+	# through its foot (z -19.25..-15.75). Its other sides are against the
+	# shaft's walls.
+	var cut := 3.43
+	_masonry(_kit_solid(group, "ShaftLanding", Vector3(38.25, pit_floor, -23.125), Vector3(4.5, rise, 7.75), stone), flag).dressed_sides = 8
+	_masonry(_kit_solid(group, "ShaftLandingSouth", Vector3(38.25, pit_floor, -14.875), Vector3(4.5, rise, 1.75), stone), flag).dressed_sides = 8
+	_masonry(_kit_solid(group, "ShaftLandingOverCut", Vector3(38.25, pit_floor + cut, -17.5), Vector3(4.5, rise - cut, 3.5), stone), flag).dressed_sides = 8
 	_kit_solid(group, "LandingRailNorth", Vector3(40.42, tunnel_floor, -24.7), Vector3(0.15, 1.1, 4.6), timber)
 	_kit_solid(group, "LandingRailSouth", Vector3(40.42, tunnel_floor, -15.8), Vector3(0.15, 1.1, 3.6), timber)
 	var lift := CounterweightLift.new()
@@ -985,8 +995,9 @@ func _workers_shaft_and_pits() -> void:
 		group.add_child(t)
 		t.owner = root
 		t.global_position = Vector3(44.0, pit_floor, 9.0)
-		for spot in [[Vector3(44.0, pit_floor + 2.0, -10.0), Vector3(6.0, 4.0, 2.0)], [Vector3(33.0, pit_floor + 2.0, 28.0), Vector3(3.5, 4.0, 2.0)]]:
+		for spot in [[Vector3(44.0, pit_floor + 2.0, -10.0), Vector3(6.0, 4.0, 2.0), "Shape0"], [Vector3(33.0, pit_floor + 2.0, 28.0), Vector3(3.5, 4.0, 2.0), "Shape1"]]:
 			var shape := CollisionShape3D.new()
+			shape.name = spot[2]
 			var box := BoxShape3D.new()
 			box.size = spot[1]
 			shape.shape = box
@@ -1027,7 +1038,190 @@ func _workers_shaft_and_pits() -> void:
 	group.add_child(gate)
 	gate.owner = root
 	gate.global_position = Vector3(2.42, top, 35.0)
+	# The other way past the inner wall: the crossbow gallery, west of the pits.
+	_crossbow_gallery(group, pit_floor, top)
 	_log.append("under the mountain: the workers' shaft and lift, the army pits (%d trenches), the pen, the commander's post, the stair well and the inner gate" % trench_x.size())
+
+## The other way past the inner wall: the crossbow gallery, the wall's own
+## guarded way, west of the pits (x 9..25, z -20..24). In from the foot of
+## the workers' shaft, under the ledge; plates down the middle of the floor,
+## each firing a crossbow set in a side wall (one shot; crouch and the bolt
+## goes over; stone armour and it glances off); pillars to stand behind; a
+## craftsman who didn't make it. Off its north end the armoury of stone
+## armour; out of its south end a passage to a ladder up through a hatch into
+## the tunnel behind the inner gate, by the mechanism's ladder: no tally
+## needed this way.
+func _crossbow_gallery(group: Node3D, pit_floor: float, top: float) -> void:
+	const F := LevelOpening.Face
+	var timber := load("res://assets/materials/level/timber.tres") as Material
+	var stone := load("res://assets/materials/level/walls.tres") as Material
+	var flag := load("res://assets/materials/level/floortiles1.tres") as Material
+	_dressed(_kit_box(group, "GalleryPassage", Vector3(32.75, pit_floor, -17.5), Vector3(3.5, 3.43, 15.5), true, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
+	var hall := _kit_box(group, "CrossbowGallery", Vector3(17.0, pit_floor, 2.0), Vector3(16.0, 7.0, 44.0), false, 0, [
+		LevelOpening.make(F.EAST, Vector2(-19.5, 0.0), Vector2(3.5, 3.43), false),
+		LevelOpening.make(F.NORTH, Vector2(0.0, 0.0), Vector2(3.0, 3.2), false),
+		LevelOpening.make(F.SOUTH, Vector2(-6.0, 0.0), Vector2(3.0, 3.2), false),
+	])
+	_dressed(hall, timber)
+	for k in 10:
+		_kit_solid(group, "GalleryBeam%d" % k, Vector3(17.0, pit_floor + 6.55, -18.0 + k * 4.4), Vector3(16.0, 0.45, 0.5), timber)
+	# Two rows of pillars to stand behind, between the crossbows' lines of fire.
+	for k in 6:
+		for x in [12.4, 21.6]:
+			_masonry(_kit_solid(group, "GalleryPillar%d_%d" % [k, int(x)], Vector3(x, pit_floor, -15.4 + k * 7.24), Vector3(1.1, 7.0, 1.1), stone), null)
+	# The armoury of stone armour, off the north end.
+	_dressed(_kit_box(group, "Armoury", Vector3(17.0, pit_floor, -25.0), Vector3(10.0, 4.2, 10.0), false, 0, [
+		LevelOpening.make(F.SOUTH, Vector2(0.0, 0.0), Vector2(3.0, 3.2), false),
+	]), timber)
+	var stands := Node3D.new()
+	stands.name = "ArmourStands"
+	group.add_child(stands)
+	stands.owner = root
+	var visual := load("res://scenes/items/visuals/stone_armor.tscn") as PackedScene
+	var pickup_scene := load("res://scenes/items/pickup.tscn") as PackedScene
+	var taken := 0
+	for row in 2:
+		for k in 4:
+			var at := Vector3(13.2 + k * 2.55, pit_floor, -28.2 + row * 3.6)
+			_kit_solid(stands, "Post%d_%d" % [row, k], at, Vector3(0.14, 1.85, 0.14), timber)
+			_kit_solid(stands, "Bar%d_%d" % [row, k], at + Vector3(0.0, 1.62, 0.0), Vector3(0.12, 0.12, 0.85), timber)
+			var hang := at + Vector3(0.0, 0.78, 0.0)
+			# Two to take (one each, together); the rest hang there for the dead.
+			if (row == 1 and k in [1, 2]):
+				var p := pickup_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+				p.name = "StoneArmor%d" % taken
+				stands.add_child(p)
+				p.owner = root
+				p.item_id = &"stone_armor"
+				p.dialogue = &"armour_taken" if taken == 0 else &""
+				p.global_transform = Transform3D(Basis(Vector3.UP, PI * 0.5), hang)
+				taken += 1
+			else:
+				var v := visual.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+				v.name = "Armour%d_%d" % [row, k]
+				stands.add_child(v)
+				v.owner = root
+				v.global_transform = Transform3D(Basis(Vector3.UP, PI * 0.5), hang)
+	# The traps: a plate in the aisle, its crossbow in a side wall at chest
+	# height, the sides taking turns.
+	var traps := Node3D.new()
+	traps.name = "GalleryTraps"
+	group.add_child(traps)
+	traps.owner = root
+	var plate_scene := load("res://scenes/world/pressure_plate.tscn") as PackedScene
+	var bow_scene := load("res://scenes/world/wall_crossbow.tscn") as PackedScene
+	var zs := [-11.8, -4.6, 2.8, 10.0, 17.2]
+	for i in zs.size():
+		var z: float = zs[i]
+		var x := 17.0 + (1.2 if i % 2 else -1.2)
+		var plate := plate_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+		plate.name = "Plate%d" % (i + 1)
+		traps.add_child(plate)
+		plate.owner = root
+		plate.global_position = Vector3(x, pit_floor + 0.01, z)
+		var west := i % 2 == 0
+		var bow := bow_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+		bow.name = "Crossbow%d" % (i + 1)
+		traps.add_child(bow)
+		bow.owner = root
+		# It shoots along its -z: from the west wall east, from the east wall west.
+		bow.global_transform = Transform3D(Basis(Vector3.UP, -PI * 0.5 if west else PI * 0.5), Vector3(9.5 if west else 24.5, pit_floor + 2.2, z))
+		var links: Array[NodePath] = [plate.get_path_to(bow)]
+		plate.set(&"crossbow_paths", links)
+	# One who didn't make it, shot down by the third.
+	var fallen := (load("res://scenes/ai/craftsman.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Worker
+	fallen.name = "GalleryFallen"
+	traps.add_child(fallen)
+	fallen.owner = root
+	fallen.global_position = Vector3(18.6, pit_floor, 4.1)
+	fallen.rotation.y = deg_to_rad(250.0)
+	fallen.work_anim = &"collapse"
+	fallen.after_sealing_anim = &"collapse"
+	fallen.dead = true
+	fallen.bolts = 2
+	fallen.holds_tool = false
+	# Out of the south end: a passage south, then west to the ladder's well.
+	_dressed(_kit_box(group, "GalleryExitSouth", Vector3(11.0, pit_floor, 27.5), Vector3(3.0, 3.2, 7.0), false, 1 << F.NORTH, [
+		LevelOpening.make(F.WEST, Vector2(2.0, 0.0), Vector2(3.0, 3.2), false),
+	]), stone)
+	_dressed(_kit_box(group, "GalleryExitWest", Vector3(5.625, pit_floor, 29.5), Vector3(3.0, 3.2, 7.75), true, (1 << F.NORTH) | (1 << F.SOUTH), []), stone)
+	var rise := top - pit_floor
+	# Boarded over under the tunnel's floor (its roof stops where that floor's
+	# 0.6 m begins, so nothing stands proud of it), the hatch cut through both.
+	_dressed(_kit_box(group, "HatchWell", Vector3(0.25, pit_floor, 29.5), Vector3(3.0, rise - 0.6, 3.0), false, 0, [
+		LevelOpening.make(F.EAST, Vector2(0.0, 0.0), Vector2(3.0, 3.2), false),
+		LevelOpening.make(F.CEILING, Vector2(0.0, -0.55), Vector2(1.4, 1.4), false),
+	]), timber)
+	var ladder := (load("res://scenes/world/climb_ladder.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as ClimbLadder
+	ladder.name = "HatchLadder"
+	group.add_child(ladder)
+	ladder.owner = root
+	ladder.global_position = Vector3(0.25, pit_floor, 28.42)
+	ladder.top = Vector3(0.0, rise, 0.0)
+	ladder.landing = Vector3(0.0, rise + 0.05, 2.25)
+	ladder.rungs = true
+	# The hatch's lid, swung open over its hinge on the west side of the hole
+	# and leaning back toward the tunnel wall, battens toward the hole.
+	var lid := StaticBody3D.new()
+	lid.name = "HatchLid"
+	group.add_child(lid)
+	lid.owner = root
+	lid.global_transform = Transform3D(Basis(Vector3.BACK, deg_to_rad(16.0)), Vector3(-0.45, top, 28.95))
+	var lid_shape := CollisionShape3D.new()
+	lid_shape.name = "Shape"
+	var lid_box := BoxShape3D.new()
+	lid_box.size = Vector3(0.07, 1.4, 1.4)
+	lid_shape.shape = lid_box
+	lid_shape.position = Vector3(-0.035, 0.7, 0.0)
+	lid.add_child(lid_shape)
+	lid_shape.owner = root
+	for part in [["Boards", Vector3(0.07, 1.4, 1.4), Vector3(-0.035, 0.7, 0.0)], ["Batten0", Vector3(0.05, 0.13, 1.3), Vector3(0.025, 0.3, 0.0)], ["Batten1", Vector3(0.05, 0.13, 1.3), Vector3(0.025, 1.1, 0.0)]]:
+		var board := MeshInstance3D.new()
+		board.name = part[0]
+		var mesh := BoxMesh.new()
+		mesh.size = part[1]
+		board.mesh = mesh
+		board.material_override = timber
+		board.position = part[2]
+		lid.add_child(board)
+		board.owner = root
+	# Light: lamps on the side walls, between the pillars.
+	var lamp_scene := load("res://scenes/world/wall_lamp.tscn") as PackedScene
+	for spot in [[Vector3(9.4, pit_floor + 2.6, -8.2), -PI * 0.5], [Vector3(24.6, pit_floor + 2.6, 6.4), PI * 0.5],
+			[Vector3(9.4, pit_floor + 2.6, 13.6), -PI * 0.5], [Vector3(17.0, pit_floor + 2.4, -29.6), PI],
+			[Vector3(11.0, pit_floor + 2.3, 30.6), 0.0]]:
+		var lamp := lamp_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+		group.add_child(lamp)
+		lamp.owner = root
+		lamp.global_position = spot[0]
+		lamp.rotation.y = spot[1]
+	# A word on coming in, in the armoury, and the step moving on: reaching
+	# the gallery counts as getting down; coming up through the hatch, as
+	# getting past the wall.
+	var words := [
+		["GalleryEnter", &"gallery_enter", &"talk_liang", &"", &"", Vector3(23.0, pit_floor + 2.0, -17.5), Vector3(3.0, 4.0, 3.5)],
+		["GalleryReached", &"", &"", &"descend", &"descend", Vector3(30.0, pit_floor + 2.0, -17.5), Vector3(3.0, 4.0, 3.5)],
+		["ArmouryEnter", &"armoury_enter", &"talk_liang", &"", &"", Vector3(17.0, pit_floor + 2.0, -21.5), Vector3(4.0, 4.0, 2.0)],
+		["HatchUp", &"", &"", &"past_wall", &"past_wall", Vector3(0.25, top + 1.5, 30.6), Vector3(2.8, 3.0, 1.6)],
+	]
+	for w in words:
+		var t := StoryTrigger.new()
+		t.name = String(w[0])
+		t.dialogue = w[1]
+		t.quest_from = w[2]
+		t.quest_step = w[3]
+		t.completes_step = w[4]
+		group.add_child(t)
+		t.owner = root
+		t.global_position = w[5]
+		var shape := CollisionShape3D.new()
+		shape.name = "Shape"
+		var box := BoxShape3D.new()
+		box.size = w[6]
+		shape.shape = box
+		t.add_child(shape)
+		shape.owner = root
+	_log.append("crossbow gallery: %d plates and crossbows, the armoury, the hatch ladder up behind the inner wall" % zs.size())
 
 ## The commander's post in the yard: a table with a lamp and a lacquered box,
 ## his half of the tiger tally on it.
@@ -1057,13 +1251,6 @@ func _commander_post(group: Node3D, at: Vector3) -> void:
 	half.sets_flag = &"has_tally_pit"
 	half.dialogue = &"tally_pit_taken"
 	half.global_transform = Transform3D(Basis(Vector3.UP, 0.3), at + Vector3(0.25, 1.04, 0.0))
-	var whole := RequireItems.new()
-	whole.name = "TallyWhole"
-	whole.step = &"pit_tally"
-	var items: Array[StringName] = [&"tally_pit"]
-	whole.items = items
-	post.add_child(whole)
-	whole.owner = root
 
 func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torch: bool, tint: Color, points: Array) -> void:
 	var route := PatrolRoute.new()
@@ -1667,7 +1854,7 @@ func _corridor_on_the_way_to_the_archives() -> void:
 ## tally lies on it, and the workers' register. He faces the room from
 ## behind it and only leaves it to look into a noise. A word from the
 ## craftsman as he first sees him, with the hint that a thrown shard draws a
-## guard off; and a step that waits for Wei's half if he left it there.
+## guard off.
 func _wei_at_his_desk() -> void:
 	var at := _floor_at(Vector3(8.2, 0.5, -60.3))
 	var desk := root.get_node_or_null("WeiDesk") as WeiDesk
@@ -1721,15 +1908,11 @@ func _wei_at_his_desk() -> void:
 	var register := root.get_node("Register") as Node3D
 	register.global_transform = Transform3D(Basis(Vector3.UP, 0.35), at + Vector3(-0.2, WeiDesk.TOP + 0.002, 0.05))
 	var story := root.get_node("Story")
-	var in_hand := story.get_node_or_null("TallyInHand") as RequireItems
-	if in_hand == null:
-		in_hand = RequireItems.new()
-		in_hand.name = "TallyInHand"
-		story.add_child(in_hand)
-		in_hand.owner = root
-	in_hand.step = &"take_tally"
-	var items: Array[StringName] = [&"tally_wei"]
-	in_hand.items = items
+	# The tally is one of two ways past the inner wall now, no step of its own.
+	var in_hand := story.get_node_or_null("TallyInHand")
+	if in_hand != null:
+		story.remove_child(in_hand)
+		in_hand.free()
 	var seen := story.get_node_or_null("WeiSeen") as StoryTrigger
 	if seen == null:
 		seen = StoryTrigger.new()

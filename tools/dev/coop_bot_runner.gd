@@ -124,8 +124,8 @@ func _host() -> void:
 	await _use("Liang/TalkBody/Usable", &"use")
 	await _wait_dialogue()
 	# Neither of us took Wei's half on the way: the apprentice fetches it.
-	_expect(&"take_tally")
-	_check("the apprentice took Wei's half of the tally", await _until(func(): return Quest.has_reached(&"descend"), 40.0))
+	_expect(&"descend")
+	_check("the apprentice took Wei's half of the tally", await _until(func(): return apprentice.inventory.has_item(&"tally_wei"), 40.0))
 
 	# Act III, the tunnels: the apprentice holds the wedge, the master strikes.
 	await _use("Tool_Workbench_Hammer_W/Usable", &"use")
@@ -141,9 +141,9 @@ func _host() -> void:
 	# Down in the pits the master takes the commander's half; at the inner
 	# gate each of us sets his own, and a whole tiger opens it.
 	await _enter("UnderTheMountain/PitsReached")
-	_expect(&"pit_tally")
+	_expect(&"past_wall")
 	await _use("UnderTheMountain/CommanderPost/PitTally/Usable", &"use")
-	_expect(&"open_gate")
+	_check("the master has the commander's half", me.inventory.has_item(&"tally_pit"))
 	var gate := level.get_node("UnderTheMountain/InnerGate") as TallyGate
 	await _use("UnderTheMountain/InnerGate/Sockets/Usable", &"use")
 	_check("half a tiger: the gate stays shut", gate.pit_set and not gate.opened)
@@ -280,7 +280,7 @@ func _client() -> void:
 	_check("retry: our body is ours again", me.is_local and me.name == Net.APPRENTICE_BODY)
 
 	# The master talked to Liang; Wei's half is ours to fetch from his desk.
-	_check("the master talked to Liang", await _until(func(): return Quest.has_reached(&"take_tally"), 60.0))
+	_check("the master talked to Liang", await _until(func(): return Quest.has_reached(&"descend"), 60.0))
 	await _use("WeiTally/Usable", &"use")
 	_check("we carry Wei's half", await _until(func(): return me.inventory.has_item(&"tally_wei"), 5.0))
 

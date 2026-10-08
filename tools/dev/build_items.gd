@@ -21,6 +21,8 @@ func _initialize() -> void:
 	# The two halves of the tiger tally (tools/blender/build_tally.py).
 	_item("tally_wei", "ITEM_TALLY_WEI", "ITEM_DESC_TALLY_WEI", "res://assets/ui/icons/icon_tally_wei.png", VIS + "tally_wei.tscn", 1, true, false, false, 0.0, 0.3, [])
 	_item("tally_pit", "ITEM_TALLY_PIT", "ITEM_DESC_TALLY_PIT", "res://assets/ui/icons/icon_tally_pit.png", VIS + "tally_pit.tscn", 1, true, false, false, 0.0, 0.3, [])
+	# Worn, not held (tools/blender/build_stone_armor.py).
+	_item("stone_armor", "ITEM_STONE_ARMOR", "ITEM_DESC_STONE_ARMOR", "res://assets/ui/icons/icon_stone_armor.png", VIS + "stone_armor.tscn", 1, true, false, false, 0.0, 15.0, [])
 	quit()
 
 func _sounds(names: Array) -> Array[AudioStream]:

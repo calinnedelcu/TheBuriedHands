@@ -3,14 +3,15 @@ class_name PropMaterials
 extends Node3D
 ## Gives an imported prop the game's own materials, matched by the names
 ## its Blender build gave them (tools/blender/build_treasures.py,
-## build_tally.py): bronze gets the patina shader, gold, gold inlay and jade
-## their tuned looks.
+## build_tally.py, build_stone_armor.py): bronze gets the patina shader,
+## gold, gold inlay, jade and limestone their tuned looks.
 
 const MAP := {
 	"Bronze": preload("res://assets/materials/props/bronze.tres"),
 	"Gold": preload("res://assets/materials/props/gold.tres"),
 	"GoldInlay": preload("res://assets/materials/props/gold_inlay.tres"),
 	"Jade": preload("res://assets/materials/props/jade.tres"),
+	"Limestone": preload("res://assets/materials/props/limestone.tres"),
 }
 
 func _ready() -> void:

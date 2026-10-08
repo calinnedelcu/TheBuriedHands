@@ -129,13 +129,15 @@ const SEQUENCES := {
 		# the workers' shaft, through the army pits.
 		[&"liang", "DLG_LIANG_10", {"anim": &"talk"}],
 		[&"liang", "DLG_LIANG_ROUTE", {"anim": &"talk"}],
-		# The stairs come up through the inner wall, whose gate wants a whole
-		# tiger tally: Wei's half (taken already, or on his desk) and the
-		# commander of the pits' half.
+		# From the pits the stairs come up through the inner wall, whose gate
+		# wants a whole tiger tally: Wei's half (taken already, or on his
+		# desk) and the commander of the pits' half.
 		[&"liang", "DLG_LIANG_TALLY_1", {"anim": &"talk"}],
 		[&"craftsman", "DLG_LIANG_TALLY_HAVE_1", {"if": &"has_tally_wei"}],
 		[&"liang", "DLG_LIANG_TALLY_HAVE_2", {"anim": &"talk", "if": &"has_tally_wei"}],
 		[&"liang", "DLG_LIANG_TALLY_GET", {"anim": &"talk", "unless": &"has_tally_wei"}],
+		# Or the wall's own guarded way under it.
+		[&"liang", "DLG_LIANG_GALLERY", {"anim": &"talk"}],
 		[&"liang", "DLG_LIANG_11", {"anim": &"talk"}],
 		# Alone, the craftsman tells what he saw (or learns) of his apprentice
 		# and where Wei's men took him; together, the two of them hear of the
@@ -165,6 +167,15 @@ const SEQUENCES := {
 	],
 	&"tally_pit_taken": [
 		[&"craftsman", "DLG_TALLY_PIT_TAKEN"],
+	],
+	&"gallery_enter": [
+		[&"craftsman", "DLG_GALLERY_ENTER"],
+	],
+	&"armoury_enter": [
+		[&"craftsman", "DLG_ARMOURY_ENTER"],
+	],
+	&"armour_taken": [
+		[&"craftsman", "DLG_ARMOUR_TAKEN"],
 	],
 	&"tally_gate_half": [
 		[&"craftsman", "DLG_TALLY_GATE_HALF"],

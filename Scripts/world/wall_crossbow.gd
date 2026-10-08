@@ -3,11 +3,13 @@ class_name WallCrossbow
 extends Node3D
 ## A bronze crossbow set in a wall niche, fired by linked pressure plates.
 ## One shot. The bolt flies level at the crossbow's height, so crouching or
-## crawling lets it pass overhead. Cut its string with a chisel to disarm it.
+## crawling lets it pass overhead; it glances off stone armour. Cut its
+## string with a chisel to disarm it.
 
 const FIRE_SOUND := preload("res://audio/sfx/trap/crossbow_shot.mp3")
 const HIT_WALL := [preload("res://audio/sfx/impacts/impactPlank_medium_001.ogg"), preload("res://audio/sfx/impacts/impactPlank_medium_002.ogg")]
 const CUT_SOUND := preload("res://audio/sfx/impacts/drawKnife1.ogg")
+const GLANCE := preload("res://audio/sfx/impacts/impactPlate_light_001.ogg")
 const MODEL := preload("res://assets/models/props/crossbow.glb")
 const BRONZE := preload("res://assets/materials/props/bronze.tres")
 
@@ -61,7 +63,12 @@ func _fly(bolt: Node3D) -> void:
 			if hit.collider is Player:
 				# Co-op: the bolt flies on both machines; each hurts its own player.
 				var p := hit.collider as Player
-				if p.is_local:
+				if p.wears_stone_armor():
+					# It glances off the stone plaques.
+					Sfx.play_at(GLANCE, hit.position, 2.0, 0.08, &"Tomb", 30.0)
+					if p.is_local:
+						p.add_shake(0.25)
+				elif p.is_local:
 					p.apply_damage(damage, self, "DEATH_CROSSBOW")
 					p.add_shake(0.6)
 				bolt.queue_free()

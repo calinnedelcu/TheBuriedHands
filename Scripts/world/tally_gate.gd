@@ -72,7 +72,7 @@ func usable_use(user: Node) -> void:
 	if wei_set and pit_set:
 		opened = true
 		_apply(true)
-		Story.fire(&"open_gate", &"tally_gate_open", &"inner_gate_open")
+		Story.fire(&"past_wall", &"tally_gate_open", &"inner_gate_open")
 	else:
 		_apply(false)
 		Story.fire(&"", &"tally_gate_half")

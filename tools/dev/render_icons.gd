@@ -10,6 +10,7 @@ const JOBS := [
 	# A tally half lies on its flat face; stood up here, flank and gold toward us.
 	["res://scenes/items/visuals/tally_wei.tscn", "res://assets/ui/icons/icon_tally_wei.png", Vector3(-90.0, 180.0, 0.0)],
 	["res://scenes/items/visuals/tally_pit.tscn", "res://assets/ui/icons/icon_tally_pit.png", Vector3(90.0, 0.0, 0.0)],
+	["res://scenes/items/visuals/stone_armor.tscn", "res://assets/ui/icons/icon_stone_armor.png", -60.0],
 ]
 
 func _initialize() -> void:

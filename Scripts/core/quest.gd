@@ -9,6 +9,9 @@ signal objective_changed(text_key: String, hint_key: String)
 
 var _index := -1
 
+func _ready() -> void:
+	Game.flag_changed.connect(_on_flag_changed)
+
 func current() -> StringName:
 	var data := QuestDB.step(_index)
 	return data.get("id", &"")
@@ -23,7 +26,7 @@ func has_reached(step_id: StringName) -> bool:
 
 func objective_key() -> String:
 	var step := QuestDB.step(_index)
-	if not Net.active and step.has("solo_text"):
+	if not Net.active and step.has("solo_text") and not (step.has("solo_until") and Game.get_flag(step["solo_until"])):
 		return step["solo_text"]
 	return step.get("text", "")
 
@@ -54,6 +57,11 @@ func reset() -> void:
 func index() -> int:
 	return _index
 
+## A solo objective that lasts until a flag is set gives way to the plain one.
+func _on_flag_changed(flag: StringName, _value: Variant) -> void:
+	if not Net.active and QuestDB.step(_index).get("solo_until", &"") == flag:
+		objective_changed.emit(objective_key(), hint_key())
+
 ## Co-op: the apprentice's machine follows the host's quest.
 func sync_index(to_index: int) -> void:
 	if to_index != _index and to_index >= 0:
@@ -64,6 +72,6 @@ func _go_to(to_index: int) -> void:
 	var data := QuestDB.step(_index)
 	Net.send_quest(_index)
 	step_changed.emit(data["id"])
-	objective_changed.emit(data.get("text", ""), data.get("hint", ""))
+	objective_changed.emit(objective_key(), hint_key())
 	if data.get("checkpoint", false):
 		Game.request_checkpoint.call_deferred(data["id"])

@@ -182,6 +182,14 @@ func drop_selected() -> void:
 	var origin := _player.global_position + (-_player.global_basis.z * 1.2) + Vector3.UP * 0.4
 	_drop(item.id, _floor_below(origin), randf() * TAU, _next_spawn_name("Drop"))
 
+## Puts down something carried, by id, a key item too (the stone armour,
+## shed to crawl): it lies on the floor in front of him, to take again.
+func put_down(id: StringName) -> void:
+	if not has_item(id):
+		return
+	var origin := _player.global_position + (-_player.global_basis.z * 0.9) + Vector3.UP * 0.4
+	_drop(id, _floor_below(origin), randf() * TAU, _next_spawn_name("Drop"))
+
 func throw_selected() -> void:
 	var item := selected_item()
 	if item == null or not item.throwable:

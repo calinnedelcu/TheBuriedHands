@@ -21,6 +21,7 @@ signal breath_changed(value: float, holding: bool)
 enum Stance { STAND, CROUCH, CRAWL }
 
 const FOOTSTEP_SURFACES := ["stone", "wood", "clay"]
+const ARMOR_CLATTER := [preload("res://audio/sfx/impacts/impactPlate_light_000.ogg"), preload("res://audio/sfx/impacts/impactPlate_light_001.ogg")]
 ## The characters as the other player sees them (tools/blender builds both).
 const PUPPET_MODELS := {
 	&"master": ["res://assets/models/characters/craftsman.glb", 3.1],
@@ -409,6 +410,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_released(&"crouch") and not Settings.get_value(&"crouch_toggle") and stance == Stance.CROUCH:
 		_set_stance(Stance.STAND)
 	elif event.is_action_pressed(&"crawl"):
+		# Nobody crawls in stone: he sheds it first, and it stays where it fell.
+		if stance != Stance.CRAWL and wears_stone_armor():
+			inventory.put_down(&"stone_armor")
+			notice("NOTICE_ARMOR_SHED")
 		_set_stance(Stance.STAND if stance == Stance.CRAWL else Stance.CRAWL)
 	elif event.is_action_pressed(&"jump") and _ladder != null:
 		exit_ladder(-global_transform.basis.z * -3.0 + Vector3.UP * 2.0)
@@ -494,14 +499,16 @@ func _move(delta: float) -> void:
 	_update_footsteps(delta)
 
 func _target_speed() -> float:
-	# Co-op: the full jar is heavy going.
+	# Co-op: the full jar is heavy going; so is a suit of stone.
 	var load_factor := 0.7 if carries_heavy() else 1.0
+	if wears_stone_armor():
+		load_factor *= 0.62
 	match stance:
 		Stance.CRAWL:
 			return crawl_speed * load_factor
 		Stance.CROUCH:
 			return crouch_speed * load_factor
-	if _wants_sprint() and not carries_heavy():
+	if _wants_sprint() and not carries_heavy() and not wears_stone_armor():
 		return sprint_speed
 	return walk_speed * load_factor
 
@@ -708,6 +715,13 @@ func _update_footsteps(delta: float) -> void:
 				radius = noise_sprint
 				volume = 3.0
 	radius *= {"wood": 1.25, "clay": 0.8}.get(surface, 1.0)
+	# Stone plaques clatter at every step.
+	if wears_stone_armor():
+		radius *= 2.2
+		_body_player.stream = ARMOR_CLATTER.pick_random()
+		_body_player.pitch_scale = randf_range(0.85, 1.05)
+		_body_player.volume_db = -6.0
+		_body_player.play()
 	Stealth.make_noise(global_position, radius, self)
 	_play_footstep(surface, db_to_linear(volume))
 
@@ -1263,6 +1277,11 @@ func _let_go() -> void:
 		unlock_controls(&"brace")
 		return
 	Net.use(bracing.call(&"brace_usable") as Usable, self, &"use")
+
+## A suit of stone armour from the armoury: bolts glance off it, but it is
+## slow going, it clatters, and he sheds it to crawl.
+func wears_stone_armor() -> bool:
+	return inventory.has_item(&"stone_armor")
 
 ## Co-op: the full jar of mercury takes both hands, so no lamp while carried.
 func carries_heavy() -> bool:
