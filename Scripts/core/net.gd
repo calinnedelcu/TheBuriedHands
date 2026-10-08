@@ -37,7 +37,8 @@ const BODY_RATE := 20.0
 const GUARD_RATE := 12.0
 const WORLD_SYNC_SECONDS := 4.0
 const CONNECT_TIMEOUT := 12.0
-## How long the host waits for the apprentice's level before going on alone.
+## How long the host waits for the apprentice's level before going on alone
+## (the apprentice joins in when its level comes).
 const LEVEL_WAIT := 60.0
 ## How long the partner may go without answering while a level loads. The
 ## frame the level enters the tree stops the game for seconds while the
@@ -77,6 +78,8 @@ var _body_timer := 0.0
 var _guard_timer := 0.0
 var _world_timer := 0.0
 var _partner_level_ready := false
+## The host went on alone (LEVEL_WAIT) before the apprentice's level was in.
+var _partner_late := false
 var _start_state: Dictionary = {}
 var _have_start_state := false
 ## Counts level loads, so a settle that comes too late leaves the next alone.
@@ -192,6 +195,7 @@ func leave() -> void:
 	partner_id = 0
 	phase = Phase.OFF
 	_partner_level_ready = false
+	_partner_late = false
 	_have_start_state = false
 	_mismatch.clear()
 
@@ -305,19 +309,26 @@ func prepare_level() -> void:
 			applying = false
 			_loaded()
 
-## The host has set up its world: the apprentice gets all of it at once.
+## The host has set up its world: the apprentice gets all of it at once, as
+## soon as its own level is in (now, or when it comes, if the host went on
+## alone; see _level_loaded).
 func level_started() -> void:
 	if not is_host:
 		return
 	_muted = false
-	_partner_level_ready = false
-	if partner_id != 0:
+	if partner_id == 0:
+		return
+	if _partner_level_ready:
 		_start_world.rpc_id(partner_id, Game.partner_state())
 		_loaded()
+	else:
+		_partner_late = true
 
 ## The host reloads the level after a death: the apprentice follows.
 func reload_together() -> void:
 	if is_host and partner_id != 0:
+		_partner_level_ready = false
+		_partner_late = false
 		_loading()
 		_reload.rpc_id(partner_id)
 
@@ -325,6 +336,7 @@ func _start_game() -> void:
 	phase = Phase.PLAYING
 	link.listen(false)
 	_partner_level_ready = false
+	_partner_late = false
 	_have_start_state = false
 	_loading()
 	starting.emit()
@@ -610,8 +622,14 @@ func _reload() -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _level_loaded() -> void:
-	if is_host and multiplayer.get_remote_sender_id() == partner_id:
-		_partner_level_ready = true
+	if not is_host or multiplayer.get_remote_sender_id() != partner_id:
+		return
+	_partner_level_ready = true
+	if _partner_late:
+		# In after the host gave up waiting: the world as it is by now.
+		_partner_late = false
+		_start_world.rpc_id(partner_id, Game.partner_state())
+		_loaded()
 
 @rpc("authority", "call_remote", "reliable")
 func _start_world(state: Dictionary) -> void:
