@@ -355,14 +355,27 @@ COOP_TITLE,Together,Împreună
 COOP_INTRO,"Two can go down into the tomb. Whoever hosts plays the master craftsman; whoever joins plays his apprentice — a head shorter, quicker, quieter. You will need each other.","În mormânt pot coborî doi. Cine găzduiește îl joacă pe meșter; cine se alătură, pe ucenicul lui — mai scund, mai iute, mai tăcut. O să aveți nevoie unul de altul."
 COOP_HOST,Host — play the Master,Găzduiește — joacă Meșterul
 COOP_JOIN,Join — play the Apprentice,Alătură-te — joacă Ucenicul
-COOP_ADDRESS,The master's address,Adresa meșterului
+COOP_CODE_LABEL,Your code,Codul tău
+COOP_COPY,Copy,Copiază
+COOP_COPIED,Copied,Copiat
+COOP_PASTE,Paste,Lipește
+COOP_CODE,The master's code,Codul meșterului
+COOP_OR,or,sau
+COOP_HAVE_CODE,Got a code from the master?,Ai primit codul de la meșter?
+COOP_NEED_CODE,Type or paste the code the master sent you.,Scrie sau lipește codul primit de la meșter.
+COOP_ON_NETWORK,On your network:,În rețeaua ta:
+COOP_LAN_HOST,%s's game: join as the Apprentice,Jocul lui %s: intră ca Ucenic
+COOP_OPENING,Opening the way through your router…,Se deschide drumul prin routerul tău…
+COOP_CODE_READY,Send this code to your friend: they paste it under Join. On the same network they'll see your game without it.,"Trimite codul prietenului: îl lipește la „Alătură-te”. Dacă sunteți în aceeași rețea, îți vede jocul și fără cod."
+COOP_CODE_VPN,"Your router didn't open the way, but you're on Tailscale: a friend on the same Tailscale network joins with this code.","Routerul n-a deschis drumul, dar ești în Tailscale: un prieten din aceeași rețea Tailscale intră cu codul ăsta."
+COOP_CODE_LOCAL,"Your router didn't open the way by itself, so this code only works on your own network. For a friend elsewhere: let them host instead, or both join Tailscale.","Routerul n-a deschis drumul singur, așa că acest cod merge doar în rețeaua ta. Pentru un prieten de altundeva: să găzduiască el, sau intrați amândoi în Tailscale."
+COOP_BAD_CODE,That isn't a code: check the letters.,Nu e un cod valid: verifică literele.
 COOP_BEGIN,Go down together,Coborâți împreună
-COOP_NOTE,"On the same network, join the address the host shows. Over the internet, the host opens UDP port 7735 on their router — or you both join the same Tailscale or ZeroTier network.","În aceeași rețea, conectează-te la adresa afișată de gazdă. Pe internet, gazda deschide portul UDP 7735 în router — sau intrați amândoi în aceeași rețea Tailscale ori ZeroTier."
-COOP_WAITING,Waiting for your apprentice… Your address: %s (UDP port %d).,Se așteaptă ucenicul… Adresa ta: %s (port UDP %d).
+COOP_NOTE,"The code works over the internet whenever the host's router opens the way by itself, as most home routers do. If it doesn't, swap who hosts, or both join the same Tailscale network and use the code again.","Codul merge prin internet când routerul gazdei deschide drumul singur, cum fac cele mai multe routere de acasă. Dacă nu merge, schimbați cine găzduiește, sau intrați amândoi în aceeași rețea Tailscale și folosiți din nou codul."
 COOP_CONNECTING,Knocking at %s…,Se bate la ușa lui %s…
 COOP_PARTNER_IN,Your apprentice is here.,Ucenicul tău a sosit.
 COOP_JOINED,You're at your master's side. Wait for them to lead the way down.,Ești lângă meșterul tău. Așteaptă să coborâți.
-COOP_JOIN_FAILED,Couldn't reach %s.,Nu s-a putut ajunge la %s.
+COOP_JOIN_FAILED,"Couldn't reach the master (%s). If the code is right, their router may not let you in: try it the other way round (you host), or both join Tailscale.","Nu s-a putut ajunge la meșter (%s). Dacă e codul bun, poate routerul lui nu te lasă: încercați invers (găzduiești tu), sau intrați amândoi în Tailscale."
 COOP_HOST_FAILED,Couldn't open port %d — is the game already hosting?,Portul %d nu s-a putut deschide — găzduiește deja jocul?
 COOP_VERSION,Your games are different versions.,Aveți versiuni diferite ale jocului.
 COOP_PARTNER_LEFT,Your partner left the tomb.,Tovarășul tău a părăsit mormântul.

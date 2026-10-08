@@ -14,9 +14,17 @@ extends Node
 ## Bodies: the level's "Player" is the master; in a session the level adds
 ## an "Apprentice" (the same player scene) where the apprentice stood.
 ## Single-player never touches any of this: `active` stays false.
+##
+## Finding each other (NetLink): the host gets a code to send his friend,
+## with the best address he can be reached at in it (his router asked to
+## open the way); on the same network the host shows up to be joined with a
+## click, and a code that names him is joined by his home address.
 
 signal status_changed(text: String)
 signal partner_changed(connected: bool)
+## The host's code is ready to send, and how far it reaches: "internet",
+## "vpn" (the same Tailscale network) or "local" (this network only).
+signal code_ready(code: String, reach: String)
 ## Both machines are about to load the level (the menu gets out of the way).
 signal starting
 
@@ -60,6 +68,10 @@ var phase := Phase.OFF
 
 var _peer: ENetMultiplayerPeer
 var _address := ""
+var link: NetLink
+## The host's code, once known, and how far it reaches.
+var code := ""
+var code_reach := ""
 var _connect_timer := 0.0
 var _body_timer := 0.0
 var _guard_timer := 0.0
@@ -82,6 +94,10 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	link = NetLink.new()
+	link.name = "Link"
+	add_child(link)
+	link.opened.connect(_on_link_opened)
 	_add_ping_action()
 	_build_notice()
 
@@ -100,16 +116,54 @@ func host() -> bool:
 	active = true
 	is_host = true
 	phase = Phase.HOSTING
-	status_changed.emit(tr("COOP_WAITING") % [", ".join(local_addresses()), PORT])
+	# The code comes when the router has answered (or at once, not asked).
+	code = ""
+	code_reach = ""
+	link.open(PORT, PROTOCOL)
+	status_changed.emit(tr("COOP_OPENING"))
 	return true
 
-func join(address: String) -> bool:
+## The router answered (or wasn't asked): the code to send.
+func _on_link_opened(new_code: String, reach: String) -> void:
+	if not is_host or not active:
+		return
+	code = new_code
+	code_reach = reach
+	code_ready.emit(code, reach)
+	if partner_id == 0:
+		status_changed.emit(_waiting_text())
+
+func _waiting_text() -> String:
+	match code_reach:
+		"internet":
+			return tr("COOP_CODE_READY")
+		"vpn":
+			return tr("COOP_CODE_VPN")
+	return tr("COOP_CODE_LOCAL")
+
+## Joins by a host's code, or an address ("1.2.3.4" or "1.2.3.4:7735").
+func join(text: String) -> bool:
 	leave()
-	_address = address.strip_edges()
-	if _address == "":
-		_address = "127.0.0.1"
+	var target := text.strip_edges()
+	var port := PORT
+	var decoded := CoopCode.decode(target)
+	if not decoded.is_empty():
+		# On the host's own network his router rarely lets us in by his
+		# internet address: by his home one, heard from his beacon.
+		var lan := link.lan_host_for(target)
+		target = lan if lan != "" else String(decoded["ip"])
+		port = int(decoded["port"])
+	elif target.count(":") == 1 and target.split(":")[1].is_valid_int():
+		port = int(target.split(":")[1])
+		target = target.split(":")[0]
+	elif target == "":
+		target = "127.0.0.1"
+	elif not target.is_valid_ip_address():
+		status_changed.emit(tr("COOP_BAD_CODE"))
+		return false
+	_address = target
 	_peer = ENetMultiplayerPeer.new()
-	var err := _peer.create_client(_address, PORT)
+	var err := _peer.create_client(_address, port)
 	if err != OK:
 		_peer = null
 		status_changed.emit(tr("COOP_JOIN_FAILED") % _address)
@@ -127,6 +181,9 @@ func leave() -> void:
 	if _peer != null:
 		_peer.close()
 	_peer = null
+	link.close()
+	code = ""
+	code_reach = ""
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	active = false
 	is_host = false
@@ -161,15 +218,6 @@ func story_allowed() -> bool:
 ## Whether the host should tell the apprentice's machine about a change.
 func should_send() -> bool:
 	return active and is_host and partner_id != 0 and not _muted and phase == Phase.PLAYING
-
-func local_addresses() -> PackedStringArray:
-	var out := PackedStringArray()
-	for a in IP.get_local_addresses():
-		if a.begins_with("192.168.") or a.begins_with("10.") or (a.begins_with("172.") and int(a.split(".")[1]) in range(16, 32)) or a.begins_with("100."):
-			out.append(a)
-	if out.is_empty():
-		out.append("127.0.0.1")
-	return out
 
 # --- Bodies -------------------------------------------------------------------------
 
@@ -275,6 +323,7 @@ func reload_together() -> void:
 
 func _start_game() -> void:
 	phase = Phase.PLAYING
+	link.listen(false)
 	_partner_level_ready = false
 	_have_start_state = false
 	_loading()
@@ -488,7 +537,8 @@ func _on_peer_disconnected(id: int) -> void:
 		_end_in_game("COOP_PARTNER_LEFT")
 	else:
 		phase = Phase.HOSTING
-		status_changed.emit(tr("COOP_WAITING") % [", ".join(local_addresses()), PORT])
+		link.calling = true
+		status_changed.emit(_waiting_text())
 
 func _on_connected() -> void:
 	_hello.rpc_id(1, PROTOCOL)
@@ -529,6 +579,7 @@ func _hello(protocol: int) -> void:
 		return
 	partner_id = id
 	phase = Phase.LOBBY
+	link.calling = false
 	_welcome.rpc_id(id)
 	partner_changed.emit(true)
 	status_changed.emit(tr("COOP_PARTNER_IN"))
@@ -537,6 +588,7 @@ func _hello(protocol: int) -> void:
 func _welcome() -> void:
 	partner_id = 1
 	phase = Phase.LOBBY
+	link.listen(false)
 	partner_changed.emit(true)
 	status_changed.emit(tr("COOP_JOINED"))
 

@@ -33,7 +33,11 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 
 ## Împreună (co-op online)
 
-Din meniu, **Împreună (online)**: unul găzduiește și joacă **Meșterul**, celălalt se alătură cu adresa gazdei și joacă **Ucenicul** — mai scund, mai iute, mai tăcut, dar mai firav. Conexiunea e directă (UDP 7735): în aceeași rețea merge din prima; pe internet gazda deschide portul în router sau intrați amândoi în aceeași rețea Tailscale / ZeroTier.
+Din meniu, **Împreună (online)**: unul găzduiește și joacă **Meșterul**, celălalt se alătură și joacă **Ucenicul** — mai scund, mai iute, mai tăcut, dar mai firav.
+
+- **Codul:** gazda primește un cod scurt (de forma `4H7K-QM2X-9PZ`), îl copiază cu un clic și i-l trimite prietenului. Dacă prietenul l-a copiat din mesaj, îl găsește deja completat când deschide „Împreună”: apasă „Alătură-te” și gata. O literă greșită e prinsă pe loc, iar O/0 și I/L/1 se citesc la fel. Codul poartă adresa la care poate fi găsită gazda.
+- **În aceeași rețea:** jocul gazdei apare singur în listă („Jocul lui … : intră ca Ucenic”), fără cod.
+- **Pe internet:** gazda îi cere routerului, prin UPnP, să deschidă singur drumul (portul UDP 7735), iar codul poartă atunci adresa ei de internet. Dacă routerul nu știe sau nu vrea, codul merge doar în rețeaua ei: găzduiește celălalt, sau intrați amândoi în aceeași rețea Tailscale (codul ia atunci adresa de Tailscale).
 
 - Fiecare își joacă personajul; gazda ține povestea, gardienii și capcanele, ca amândoi să vadă aceeași lume.
 - Vă vedeți unul pe altul, cu lampa și uneltele în mână (lumina lui te arată și pe tine gardienilor). Îi dai obiectul din mână sau lampa cu **E** pe el; cu **V** sau rotița mouse-ului pui un semn (此) unde te uiți sau deasupra unui gardian.
@@ -95,7 +99,7 @@ godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/
 - `gallery_watch_runner --case=gong|lamp|shoot|armour|fall` — paza galeriei: gongul îi atrage pe arbaletieri, lampa doborâtă lasă ieșirea în întuneric, arbaletierii trag (armura ține), pe sub grinda căzută doar târâș.
 - `test_player_runner`, `test_guard_runner` — mișcare, poziții, lampă; vedere, auz și atac la gardieni (au nevoie de fereastră: fără `--headless`, cu `--out=/folder`).
 - `music_test_runner` — muzica și ambianța pe zone.
-- `coop_bot_runner` — două instanțe (`--role=host` și `--role=client`, pornite în același timp) joacă toată povestea în co-op și verifică ce vede fiecare; `--from=causeway` sare direct la pod. `coop_shots_runner` face capturi din ambele perspective.
+- `coop_bot_runner` — două instanțe (`--role=host` și `--role=client`, pornite în același timp) joacă toată povestea în co-op și verifică ce vede fiecare; `--from=causeway` sare direct la pod. Ucenicul o găsește pe gazdă în rețea și intră cu codul ei (`--join=code`), dintr-un clic (`--join=lan`) sau după adresă (`--join=address`); routerul nu e atins niciodată din teste. `coop_shots_runner` face capturi din ambele perspective.
 - `level_tour_runner`, `map_render_runner`, `title_shots_runner`, `look_runner`, `sequence_shots_runner` (`--seq=opening|sealing|taken|chase|climb|causeway|ending`), `anim_sheet_runner` — capturi pentru verificare vizuală.
 - `patch_level_runner` — modificări automate în nivel, fără să piardă ce s-a editat în editor; apoi `bake_navmesh_runner --scene=res://scenes/level/mausoleum.tscn`.
 - `overlap_check_runner` — arată geometria veche care intră în spațiile făcute cu trusa de nivel (pereții lor sunt groși spre exterior și invizibili din afară).

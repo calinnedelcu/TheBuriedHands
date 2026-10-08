@@ -12,9 +12,13 @@ extends Node
 ## inner gate), a knock-down and a revive, a shared death and retry, and
 ## both walking out into the light. Losing each other while a
 ## level loads fails the run, and so does a script error anywhere.
+## The apprentice finds the master the way a player does: he hears him call
+## out on the network and joins by the code he gives (--join=code, the
+## default), or with a click on his game (--join=lan), or by the bare
+## address (--join=address). The router is never asked here (NetLink).
 ## Run the two at once (add --from=causeway to both to start at the pour):
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=host
-## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=client
+## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=client [--join=code|lan|address]
 
 const WS := "Rooms/01_TerracottaWorkshop/"
 ## On the counterweight's platform; its default +x+z side hangs over the pit.
@@ -22,6 +26,7 @@ const COUNTERWEIGHT_STAND := Vector3(-1.5, -1.5, -1.0)
 
 var role := "host"
 var from := ""
+var join_how := "code"
 var me: Player
 var level: Node
 var failures := 0
@@ -35,6 +40,8 @@ func _ready() -> void:
 			role = arg.substr(7)
 		elif arg.begins_with("--from="):
 			from = arg.substr(7)
+		elif arg.begins_with("--join="):
+			join_how = arg.substr(7)
 	OS.add_logger(_errors)
 	_run.call_deferred()
 
@@ -52,7 +59,14 @@ func _run() -> void:
 # --- The master -------------------------------------------------------------------------------
 
 func _host() -> void:
+	# Codes: an address and port there and back; a typo caught.
+	var sample := CoopCode.encode("203.0.113.7", 7735)
+	_check("a code says where the master is (%s)" % sample, CoopCode.decode(sample) == {"ip": "203.0.113.7", "port": 7735})
+	_check("read in lower case, with O for 0", CoopCode.decode(sample.to_lower().replace("0", "o")) == {"ip": "203.0.113.7", "port": 7735})
+	var typo := sample.substr(0, 2) + ("A" if sample[2] != "A" else "B") + sample.substr(3)
+	_check("a mistyped code is caught", CoopCode.decode(typo).is_empty())
 	_check("hosting", Net.host())
+	_check("a code to send", await _until(func(): return Net.code != "", 5.0))
 	if not await _until(func(): return Net.has_partner(), 40.0):
 		_check("apprentice joined", false)
 		return
@@ -215,7 +229,24 @@ func _host_causeway(apprentice: Player) -> void:
 
 func _client() -> void:
 	await _wait(1.0)
-	_check("joining", Net.join("127.0.0.1"))
+	if join_how == "address":
+		_check("joining", Net.join("127.0.0.1"))
+	else:
+		# The master calls out on the network: hear him, then join by his
+		# code or with a click on his game.
+		Net.link.listen(true)
+		if not await _until(func(): return not Net.link.hosts.is_empty(), 15.0):
+			_check("heard the master on the network", false)
+			return
+		var ip: String = Net.link.hosts.keys()[0]
+		var heard: Dictionary = Net.link.hosts[ip]
+		_log("heard %s at %s, code %s" % [heard["name"], ip, heard["code"]])
+		if join_how == "code":
+			_check("his code is a code (%s)" % heard["code"], CoopCode.is_code(heard["code"]))
+			_check("joining by his code", Net.join(heard["code"]))
+		else:
+			_check("joining his game with a click", Net.join("%s:%d" % [ip, int(heard["port"])]))
+		Net.link.listen(false)
 	# The master may begin at once: the lobby can come and go between checks.
 	if not await _until(func(): return Net.phase in [Net.Phase.LOBBY, Net.Phase.PLAYING], 30.0):
 		_check("joined the master", false)

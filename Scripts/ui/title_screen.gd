@@ -42,6 +42,13 @@ var _coop_join: Button
 var _coop_begin: Button
 var _coop_address: LineEdit
 var _coop_status: Label
+var _coop_code_row: Control
+var _coop_code: Label
+var _coop_copy: Button
+var _coop_join_box: Control
+var _coop_lan: VBoxContainer
+var _coop_lan_list: VBoxContainer
+var _coop_paste: Button
 var _fade: ColorRect
 var _busy := false
 
@@ -537,6 +544,7 @@ func _close_overlay() -> void:
 	Sfx.play_ui(BACK, -10.0)
 	if _coop.visible and Net.phase != Net.Phase.PLAYING:
 		Net.leave()
+		Net.link.listen(false)
 	_overlay.visible = false
 	for c in [_options, _credits, _confirm, _coop]:
 		(c as Control).visible = false
@@ -563,17 +571,59 @@ func _build_coop() -> Control:
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	intro.custom_minimum_size = Vector2(720, 0)
 	box.add_child(intro)
+	# Hosting: the code to send, big enough to read out, and a button to copy it.
 	_coop_host = _button("COOP_HOST", _on_coop_host, box)
+	var code_box := VBoxContainer.new()
+	code_box.add_theme_constant_override(&"separation", 2)
+	code_box.visible = false
+	box.add_child(code_box)
+	_coop_code_row = code_box
+	var code_label := Label.new()
+	code_label.theme_type_variation = &"SmallLabel"
+	code_label.text = "COOP_CODE_LABEL"
+	code_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	code_box.add_child(code_label)
+	_coop_code = Label.new()
+	_coop_code.theme_type_variation = &"HeaderLabel"
+	_coop_code.add_theme_font_size_override(&"font_size", 46)
+	_coop_code.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_coop_code.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	code_box.add_child(_coop_code)
+	_coop_copy = _button("COOP_COPY", _on_coop_copy, code_box, true)
+	_coop_copy.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	# Joining: a host on this network with a click, or anyone by his code.
+	# Out of the way while hosting: a master doesn't join anyone.
+	var join_box := VBoxContainer.new()
+	join_box.add_theme_constant_override(&"separation", 10)
+	box.add_child(join_box)
+	_coop_join_box = join_box
+	join_box.add_child(_or_rule())
+	_coop_lan = VBoxContainer.new()
+	_coop_lan.add_theme_constant_override(&"separation", 6)
+	_coop_lan.visible = false
+	join_box.add_child(_coop_lan)
+	var lan_label := Label.new()
+	lan_label.theme_type_variation = &"BodyText"
+	lan_label.text = "COOP_ON_NETWORK"
+	_coop_lan.add_child(lan_label)
+	_coop_lan_list = VBoxContainer.new()
+	_coop_lan.add_child(_coop_lan_list)
+	var ask := Label.new()
+	ask.theme_type_variation = &"BodyText"
+	ask.text = "COOP_HAVE_CODE"
+	join_box.add_child(ask)
 	var join_row := HBoxContainer.new()
-	join_row.add_theme_constant_override(&"separation", 16)
-	box.add_child(join_row)
+	join_row.add_theme_constant_override(&"separation", 14)
+	join_box.add_child(join_row)
 	_coop_address = LineEdit.new()
-	_coop_address.placeholder_text = "COOP_ADDRESS"
-	_coop_address.custom_minimum_size = Vector2(300, 0)
+	_coop_address.placeholder_text = "COOP_CODE"
+	_coop_address.custom_minimum_size = Vector2(340, 0)
 	_coop_address.text = String(Settings.get_value(&"coop_address"))
 	_coop_address.text_submitted.connect(func(_t: String): _on_coop_join())
 	join_row.add_child(_coop_address)
-	_coop_join = _button("COOP_JOIN", _on_coop_join, join_row)
+	_coop_paste = _button("COOP_PASTE", _on_coop_paste, join_row, true)
+	_coop_paste.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_coop_join = _button("COOP_JOIN", _on_coop_join, join_box)
 	_coop_status = Label.new()
 	_coop_status.theme_type_variation = &"QuoteText"
 	_coop_status.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
@@ -597,22 +647,98 @@ func _build_coop() -> Control:
 	Net.status_changed.connect(_on_coop_status)
 	Net.partner_changed.connect(_on_coop_partner)
 	Net.starting.connect(_on_coop_starting)
+	Net.code_ready.connect(_on_coop_code)
+	Net.link.hosts_changed.connect(_on_coop_lan)
 	return panel
+
+## "— or —" between hosting and joining, in the rule's gold.
+func _or_rule() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 14)
+	for i in 3:
+		if i == 1:
+			var word := Label.new()
+			word.theme_type_variation = &"SmallLabel"
+			word.text = "COOP_OR"
+			row.add_child(word)
+			continue
+		# Two pixels: one, scaled down and off the pixel grid, all but vanishes.
+		var rule := ColorRect.new()
+		rule.color = Color(0.83, 0.66, 0.38, 0.35)
+		rule.custom_minimum_size = Vector2(0, 2)
+		rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rule.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(rule)
+	return row
 
 func _show_coop() -> void:
 	_coop_status.text = ""
+	_coop_code_row.visible = false
+	# A code just copied from a message waits in the box, ready to join.
+	var clip := DisplayServer.clipboard_get().strip_edges()
+	if CoopCode.is_code(clip) and not Net.link.is_own_code(clip):
+		_coop_address.text = clip
+	Net.link.listen(true)
 	_coop_buttons()
 	_open_overlay(_coop)
 
 func _on_coop_host() -> void:
-	Net.host()
+	# Hosting, he isn't looking for anyone else's game.
+	Net.link.listen(false)
+	if not Net.host():
+		Net.link.listen(true)
 	_coop_buttons()
+
+## The code is ready: shown big, to copy and send.
+func _on_coop_code(code: String, _reach: String) -> void:
+	if not is_instance_valid(_coop_code):
+		return
+	_coop_code.text = code
+	_coop_code_row.visible = true
+	_coop_copy.text = "COOP_COPY"
+
+func _on_coop_copy() -> void:
+	DisplayServer.clipboard_set(_coop_code.text)
+	_coop_copy.text = "COOP_COPIED"
+
+func _on_coop_paste() -> void:
+	_coop_address.text = DisplayServer.clipboard_get().strip_edges()
 
 func _on_coop_join() -> void:
 	if Net.active:
 		return
-	Settings.set_value(&"coop_address", _coop_address.text.strip_edges())
-	Net.join(_coop_address.text)
+	var text := _coop_address.text.strip_edges()
+	if text == "":
+		# No code, but one master on this network: him.
+		if Net.link.hosts.size() == 1:
+			var ip: String = Net.link.hosts.keys()[0]
+			Net.join("%s:%d" % [ip, int(Net.link.hosts[ip]["port"])])
+			_coop_buttons()
+		else:
+			_coop_status.text = tr("COOP_NEED_CODE")
+			_coop_address.grab_focus()
+		return
+	Settings.set_value(&"coop_address", text)
+	Net.join(text)
+	_coop_buttons()
+
+## The hosts heard on this network, a button each.
+func _on_coop_lan() -> void:
+	if not is_instance_valid(_coop_lan_list):
+		return
+	for c in _coop_lan_list.get_children():
+		c.queue_free()
+	for ip in Net.link.hosts:
+		var host: Dictionary = Net.link.hosts[ip]
+		var where := "%s:%d" % [ip, int(host["port"])]
+		var join_him := func() -> void:
+			if not Net.active:
+				Net.join(where)
+				_coop_buttons()
+		var b := _button("", join_him, _coop_lan_list)
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		b.text = tr("COOP_LAN_HOST") % host["name"]
+	_coop_lan.visible = not Net.link.hosts.is_empty() and not Net.is_host
 	_coop_buttons()
 
 func _on_coop_begin() -> void:
@@ -640,7 +766,14 @@ func _coop_buttons() -> void:
 	var idle := not Net.active
 	_coop_host.disabled = not idle
 	_coop_join.disabled = not idle
+	_coop_paste.disabled = not idle
 	_coop_address.editable = idle
+	for b in _coop_lan_list.get_children():
+		(b as Button).disabled = not idle
+	if idle:
+		_coop_code_row.visible = false
+		Net.link.listen(true)
+	_coop_join_box.visible = not Net.is_host
 	_coop_begin.disabled = not (Net.is_host and Net.has_partner())
 
 func _show_credits() -> void:

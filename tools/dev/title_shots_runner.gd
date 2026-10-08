@@ -35,8 +35,11 @@ func _run() -> void:
 	Settings.set_value(&"language", "ro", false)
 	await get_tree().create_timer(0.5).timeout
 	await _shot(out, "t5_ro")
-	# Together (online co-op): the panel, then hosting.
+	# Together (online co-op): the panel (with a friend's game heard on the
+	# network, made up), then hosting.
 	title.call(&"_show_coop")
+	Net.link.hosts["192.168.1.23"] = {"name": "Andrei", "code": CoopCode.encode("192.168.1.23", Net.PORT), "port": Net.PORT, "seen": Time.get_ticks_msec() / 1000.0}
+	Net.link.hosts_changed.emit()
 	await get_tree().create_timer(0.4).timeout
 	await _shot(out, "t6_coop")
 	title.call(&"_on_coop_host")
