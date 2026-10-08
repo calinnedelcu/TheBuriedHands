@@ -7,9 +7,7 @@ extends Node3D
 ## string with a chisel to disarm it.
 
 const FIRE_SOUND := preload("res://audio/sfx/trap/crossbow_shot.mp3")
-const HIT_WALL := [preload("res://audio/sfx/impacts/impactPlank_medium_001.ogg"), preload("res://audio/sfx/impacts/impactPlank_medium_002.ogg")]
 const CUT_SOUND := preload("res://audio/sfx/impacts/drawKnife1.ogg")
-const GLANCE := preload("res://audio/sfx/impacts/impactPlate_light_001.ogg")
 const MODEL := preload("res://assets/models/props/crossbow.glb")
 const BRONZE := preload("res://assets/materials/props/bronze.tres")
 
@@ -42,44 +40,7 @@ func fire() -> void:
 	_bolt.visible = false
 	Sfx.play_at(FIRE_SOUND, global_position, 4.0, 0.05, &"Tomb", 50.0)
 	Stealth.make_noise(global_position, 20.0, self)
-	var bolt := _make_bolt()
-	get_tree().current_scene.add_child(bolt)
-	bolt.global_transform = Transform3D(global_basis, global_position + (-global_basis.z) * 0.5)
-	_fly(bolt)
-
-func _fly(bolt: Node3D) -> void:
-	var dir := -global_basis.z
-	var travelled := 0.0
-	var space := get_world_3d().direct_space_state
-	while travelled < max_range and is_instance_valid(bolt):
-		await get_tree().physics_frame
-		var step := bolt_speed * get_physics_process_delta_time()
-		var from := bolt.global_position
-		var to := from + dir * step
-		var params := PhysicsRayQueryParameters3D.create(from, to, 1 | 2)
-		var hit := space.intersect_ray(params)
-		if not hit.is_empty():
-			bolt.global_position = hit.position - dir * 0.15
-			if hit.collider is Player:
-				# Co-op: the bolt flies on both machines; each hurts its own player.
-				var p := hit.collider as Player
-				if p.wears_stone_armor():
-					# It glances off the stone plaques.
-					Sfx.play_at(GLANCE, hit.position, 2.0, 0.08, &"Tomb", 30.0)
-					if p.is_local:
-						p.add_shake(0.25)
-				elif p.is_local:
-					p.apply_damage(damage, self, "DEATH_CROSSBOW")
-					p.add_shake(0.6)
-				bolt.queue_free()
-			else:
-				Sfx.play_random_at(HIT_WALL, hit.position, 0.0, 0.08, &"Tomb", 30.0)
-				Stealth.make_noise(hit.position, 10.0, self)
-			return
-		bolt.global_position = to
-		travelled += step
-	if is_instance_valid(bolt):
-		bolt.queue_free()
+	Bolt.launch(get_tree().current_scene, global_position + (-global_basis.z) * 0.5, -global_basis.z, bolt_speed, damage, max_range, self)
 
 # --- Usable delegate: cut the string --------------------------------------------------------
 
@@ -138,37 +99,3 @@ func _build_visual() -> void:
 	_bolt = root.find_child("Bolt", true, false) as Node3D
 	_string.visible = armed
 	_bolt.visible = not fired
-
-func _make_bolt() -> Node3D:
-	var n := Node3D.new()
-	var mi := MeshInstance3D.new()
-	mi.mesh = _box(Vector3(0.025, 0.025, 0.65))
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.32, 0.22, 0.12)
-	mi.material_override = mat
-	n.add_child(mi)
-	var tip := MeshInstance3D.new()
-	var prism := PrismMesh.new()
-	prism.size = Vector3(0.05, 0.1, 0.03)
-	tip.mesh = prism
-	var bronze := StandardMaterial3D.new()
-	bronze.albedo_color = Color(0.5, 0.4, 0.22)
-	bronze.metallic = 0.7
-	tip.material_override = bronze
-	tip.rotation_degrees.x = -90
-	tip.position.z = -0.37
-	n.add_child(tip)
-	return n
-
-func _part(root: Node3D, mesh: Mesh, mat: Material, pos: Vector3) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = mat
-	mi.position = pos
-	root.add_child(mi)
-	return mi
-
-func _box(size: Vector3) -> BoxMesh:
-	var b := BoxMesh.new()
-	b.size = size
-	return b

@@ -89,9 +89,12 @@ func _setup(act: String) -> void:
 		"act3":
 			Quest.start_at(&"descend")
 			# Wei's men took the apprentice while his master was with Liang;
-			# Wei's half of the tally came from his desk on the way.
+			# Wei's half of the tally came from his desk on the way, and his
+			# register with it.
 			Game.set_flag(&"apprentice_taken")
 			Game.set_flag(&"has_tally_wei")
+			Game.set_flag(&"has_evidence")
+			player.inventory.add(&"register")
 			player.inventory.add(&"wedge")
 			player.inventory.add(&"hammer")
 			player.inventory.add(&"tally_wei")
@@ -309,8 +312,10 @@ func _last_door() -> void:
 
 ## Act III the other way past the inner wall: down the lift, west under the
 ## ledge into the crossbow gallery, a suit of stone armour from the armoury,
-## down the aisle over every plate (the bolts glance off the stone), and up
-## the hatch ladder behind the wall; then the armour shed to crawl.
+## the turning crossbow loosed at the lamp over the way out, down the aisle
+## over every plate (the bolts glance off the stone, the walkways' too), the
+## armour shed to crawl under the fallen roof in the dark, and up the hatch
+## ladder behind the wall.
 func _gallery() -> bool:
 	const LIFT := "UnderTheMountain/ShaftLift/"
 	var lift := level.get_node(LIFT) as CounterweightLift
@@ -333,6 +338,17 @@ func _gallery() -> bool:
 	await _use("UnderTheMountain/ArmourStands/StoneArmor0")
 	await _skip_dialogue()
 	_check("in stone armour", player.wears_stone_armor())
+	# The turning crossbow by the way in, on the lamp over the way out: the
+	# way out goes dark (crawled under its fallen roof, he'll be out of the
+	# armour there, and in sight of the walkways).
+	var swivel := level.get_node("UnderTheMountain/GallerySwivel") as SwivelCrossbow
+	var lamp := level.get_node("UnderTheMountain/ExitLamp") as WallLamp
+	_check("the turning crossbow is on the gong first", swivel.aim == 0)
+	await _use("UnderTheMountain/GallerySwivel/Body", "tap")
+	_check("turned on the lamp over the way out", swivel.aim == 1)
+	await _use("UnderTheMountain/GallerySwivel/Body", "hold")
+	await _wait(1.5)
+	_check("loosed, and the lamp is down and out", swivel.loosed and lamp.fallen and not lamp.lit)
 	var hp := player.health
 	# Down the aisle, onto every plate on purpose.
 	for i in 5:
@@ -345,18 +361,24 @@ func _gallery() -> bool:
 			fired += 1
 	_check("the gallery's crossbows fired (%d of 5)" % fired, fired >= 4)
 	_check("and the bolts glanced off the stone (health %.1f, was %.1f)" % [player.health, hp], player.health >= hp - 0.01)
+	# The way out's roof is down on a beam: under it on his belly, and nobody
+	# crawls in stone. In the dark the lamp left, he sheds it there.
+	await _walk_to(Vector3(11.0, -26.0, 23.0), 1.0)
+	_press(&"crawl")
+	await _wait(0.6)
+	_check("shed the armour to crawl", not player.wears_stone_armor() and player.stance == Player.Stance.CRAWL)
+	await _walk_to(Vector3(11.0, -26.0, 27.2), 0.8)
+	_check("crawled under the fallen beam (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), player.global_position.z > 26.0)
+	_press(&"crawl")
+	await _wait(0.6)
+	_check("up on his feet past it", player.stance == Player.Stance.STAND)
 	await _walk_to(Vector3(11.0, -26.0, 28.5), 1.2)
 	await _climb("UnderTheMountain/HatchLadder", true)
 	await _wait(0.6)
 	_check("up through the hatch behind the inner wall (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), player.global_position.y > -9.0)
 	_expect(&"reach_mechanism")
 	_check("the gate left shut: no tally this way", not (level.get_node("UnderTheMountain/InnerGate") as TallyGate).opened)
-	# Nobody crawls in stone: crawling sheds it, and up he stands again.
-	_press(&"crawl")
-	await _wait(0.6)
-	_check("shed the armour to crawl", not player.wears_stone_armor() and player.stance == Player.Stance.CRAWL)
-	_press(&"crawl")
-	await _wait(0.6)
+	_check("alive through the gallery (health %.1f)" % player.health, not Game.is_dead())
 	return player.global_position.y > -9.0
 
 ## Act III: the tunnel south has fallen in, so the workers' shaft and its

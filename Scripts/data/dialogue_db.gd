@@ -172,6 +172,13 @@ const SEQUENCES := {
 	],
 	&"gallery_enter": [
 		[&"craftsman", "DLG_GALLERY_ENTER"],
+		[&"craftsman", "DLG_GALLERY_BOWS"],
+	],
+	&"gallery_swivel": [
+		[&"craftsman", "DLG_SWIVEL_1"],
+	],
+	&"gallery_fall": [
+		[&"craftsman", "DLG_GALLERY_FALL"],
 	],
 	&"armoury_enter": [
 		[&"craftsman", "DLG_ARMOURY_ENTER"],

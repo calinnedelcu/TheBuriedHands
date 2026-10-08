@@ -413,6 +413,20 @@ DLG_PITS_ENTER_1,"The Emperor's army. Thousands of them, and not two faces alike
 DLG_PITS_ENTER_2,Wei's men keep the ones they catch somewhere down here.,"Oamenii lui Wei îi țin pe cei prinși undeva aici, jos."
 DLG_TALLY_PIT_TAKEN,The commander's half. Now the tiger is whole.,Jumătatea comandantului. Acum tigrul e întreg.
 DLG_GALLERY_ENTER,Liang's crossbows. Every one of them aimed at the floor I have to cross.,Arbaletele lui Liang. Toate țintesc podeaua pe care trebuie s-o trec.
+DLG_GALLERY_BOWS,"And men up on the walkways, with crossbows of their own.","Și oameni sus, pe galerii, cu arbalete de-ale lor."
+DLG_SWIVEL_1,"A crossbow on a turning stand. One bolt in it: the gong, or the lamp over the way out.","O arbaletă pe un stâlp care se rotește. O singură săgeată în ea: gongul sau lampa de deasupra ieșirii."
+DLG_GALLERY_FALL,"The roof's down over the way out. Under the beam, on my belly.","Tavanul s-a prăbușit peste ieșire. Pe sub grindă, pe burtă."
+XBOW_SPOTTED_1,There! On the floor!,Acolo! Jos!
+XBOW_SPOTTED_2,Down there! Loose!,"Jos, acolo! Trage!"
+XBOW_NOISE_1,What was that?,Ce-a fost asta?
+XBOW_NOISE_2,Hear that?,Ai auzit?
+XBOW_GLANCE_1,It glances off! He's in stone!,Ricoșează! E în piatră!
+XBOW_LOST_1,Gone into the dark.,S-a pierdut în întuneric.
+XBOW_CALM_1,Only the dead down there.,Jos sunt doar morții.
+PROMPT_SWIVEL_TURN,Turn it on %s,Întoarce-o spre %s
+PROMPT_SWIVEL_LOOSE,Loose at %s,Trage în %s
+SWIVEL_GONG,the gong,gong
+SWIVEL_LAMP,the lamp over the way out,lampa de deasupra ieșirii
 DLG_ARMOURY_ENTER,"Armour of stone, for soldiers of clay. No bolt goes through this... but every step will ring.","Armuri de piatră, pentru soldați de lut. Nicio săgeată nu trece prin asta... dar fiecare pas o să răsune."
 DLG_ARMOUR_TAKEN,Heavy as a millstone. I'll have to shed it to crawl.,"Grea ca o piatră de moară. Ca să mă târăsc, va trebui s-o dau jos."
 DLG_TALLY_GATE_HALF,Half a tiger. The lock wants the other half.,Jumătate de tigru. Încuietoarea o vrea și pe cealaltă.

@@ -3,9 +3,12 @@ extends Node3D
 ## A wall sconce burning from its own oil reservoir. Tap the use key to snuff
 ## it (darkness hides you) or relight it from your own flame; hold the key to
 ## pour its oil into your lamp. Lit sconces make the player visible to guards.
+## One out of reach can be shot down with a crossbow bolt (bolt_hit, through a
+## BoltTarget body of its own): it falls, its oil spilt, and stays dark.
 
 const SNUFF_SOUND := preload("res://audio/sfx/impacts/cloth3.ogg")
 const POUR_SOUND := preload("res://audio/sfx/mercury/fill.mp3")
+const FALL_SOUND := preload("res://audio/sfx/impacts/impactMetal_light_000.ogg")
 
 @export var oil := 60.0
 @export var max_oil := 100.0
@@ -25,6 +28,8 @@ const POUR_SOUND := preload("res://audio/sfx/mercury/fill.mp3")
 @onready var _audio: AudioStreamPlayer3D = $Audio
 
 var lit := true
+## Shot down: on the floor below its bracket, out for good.
+var fallen := false
 var _gust := 0.0
 var _noise := FastNoiseLite.new()
 var _t := 0.0
@@ -120,6 +125,26 @@ func usable_hold_done(_user: Node) -> void:
 	_last_progress = 0.0
 	_audio.stop()
 
+## A bolt knocks it off its bracket: the flame dies as it falls.
+func bolt_hit(_at: Vector3) -> void:
+	if fallen:
+		return
+	fallen = true
+	oil = 0.0
+	_set_lit(false, false)
+	var floor_y := _floor_below()
+	var drop := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	drop.tween_property($Model, "global_position:y", floor_y + 0.12, 0.45)
+	drop.parallel().tween_property($Model, "rotation:z", 1.4, 0.45)
+	drop.tween_callback(func() -> void:
+		Sfx.play_at(FALL_SOUND, ($Model as Node3D).global_position, 0.0, 0.1, &"Tomb", 25.0)
+		Stealth.make_noise(($Model as Node3D).global_position, 10.0, self))
+
+func _floor_below() -> float:
+	var from := global_position
+	var hit := get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(from + Vector3.DOWN * 0.3, from + Vector3.DOWN * 12.0, 1))
+	return hit.position.y if not hit.is_empty() else from.y - 3.0
+
 func _player_lamp(user: Node) -> HeldLamp:
 	var p := user as Player
 	return p.inventory.lamp() if p != null else null
@@ -127,8 +152,12 @@ func _player_lamp(user: Node) -> HeldLamp:
 # --- Persistence ------------------------------------------------------------------------
 
 func persist_save() -> Dictionary:
-	return {"oil": oil, "lit": lit}
+	return {"oil": oil, "lit": lit, "fallen": fallen}
 
 func persist_load(data: Dictionary) -> void:
 	oil = float(data.get("oil", oil))
 	_set_lit(bool(data.get("lit", lit)) and oil > 0.0, false)
+	if bool(data.get("fallen", false)) and not fallen:
+		fallen = true
+		($Model as Node3D).global_position.y = _floor_below() + 0.12
+		($Model as Node3D).rotation.z = 1.4

@@ -1,7 +1,8 @@
 extends Node
 ## Bakes the NavigationMesh of every NavigationRegion3D in a scene from its
-## static colliders (including colliders added at runtime by import helpers)
-## and saves it as <scene>_navmesh.res, then re-saves the scene.
+## static colliders (including colliders added at runtime by import helpers,
+## and the guards' own blockers) and saves it as <scene>_navmesh.res, then
+## re-saves the scene.
 ## Usage: godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/bake_navmesh_runner.gd --scene=res://scenes/level/mausoleum.tscn
 
 func _ready() -> void:
@@ -19,6 +20,8 @@ func _run() -> void:
 	for region in root.find_children("*", "NavigationRegion3D", true, false):
 		var r := region as NavigationRegion3D
 		var nm := r.navigation_mesh
+		# The level's navmesh is the guards': it goes round their blockers too.
+		nm.geometry_collision_mask |= 1 << (Guard.BLOCKERS_LAYER - 1)
 		var source := NavigationMeshSourceGeometryData3D.new()
 		var t0 := Time.get_ticks_msec()
 		NavigationServer3D.parse_source_geometry_data(nm, source, root)

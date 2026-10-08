@@ -839,7 +839,7 @@ func _workers_shaft_and_pits() -> void:
 	for c in group.get_children():
 		group.remove_child(c)
 		c.free()
-	for path in ["Guards/PitGuardRing", "Guards/PitGuardYard", "Routes/PitsRing", "Routes/PitsYard"]:
+	for path in ["Guards/PitGuardRing", "Guards/PitGuardYard", "Routes/PitsRing", "Routes/PitsYard", "Guards/GalleryBowWest", "Guards/GalleryBowEast", "Routes/GalleryBowWest", "Routes/GalleryBowEast"]:
 		var old := root.get_node_or_null(path)
 		if old != null:
 			old.get_parent().remove_child(old)
@@ -1223,6 +1223,129 @@ func _crossbow_gallery(group: Node3D, pit_floor: float, top: float) -> void:
 		t.add_child(shape)
 		shape.owner = root
 	_log.append("crossbow gallery: %d plates and crossbows, the armoury, the hatch ladder up behind the inner wall" % zs.size())
+	_gallery_watch(group, pit_floor)
+
+## The gallery's own watch, and what can be done about it: a timber walkway
+## along each long wall at mid-height with a crossbowman pacing it (he shoots
+## what he sees on the floor below, though not under his own walkway, and
+## the stone armour's clatter carries up to him); a crossbow on a turning
+## stand by the way in, one bolt in it, to be loosed at the gong in the
+## north-west corner (both men go to look at it) or at the lamp hung over
+## the way out (shot down, the way out is dark); and the way out itself,
+## its roof fallen on a beam: crawled under, and nobody crawls in stone.
+func _gallery_watch(group: Node3D, pit_floor: float) -> void:
+	var timber := load("res://assets/materials/level/timber.tres") as Material
+	var stone := load("res://assets/materials/level/walls.tres") as Material
+	var walk_top := pit_floor + 3.4
+	# West: x 9..11.2 the length of the hall. East: x 22.8..25, from south of
+	# the way in (its opening is under where the walkway would be).
+	var walks := [["WalkWest", 10.1, -17.0, 19.0, 11.15, 11.0, -16.0], ["WalkEast", 23.9, -14.5, 19.0, 22.86, 23.0, -13.0]]
+	for w in walks:
+		var length: float = w[3] - w[2]
+		var mid: float = (w[2] + w[3]) * 0.5
+		_kit_solid(group, w[0], Vector3(w[1], walk_top - 0.25, mid), Vector3(2.2, 0.25, length), timber)
+		_kit_solid(group, w[0] + "Parapet", Vector3(w[4], walk_top, mid), Vector3(0.12, 0.95, length), timber)
+		# Posts under its edge, clear of the wall crossbows' lines.
+		var k := 0
+		var z: float = w[6]
+		while z < w[3]:
+			_kit_solid(group, "%sPost%d" % [w[0], k], Vector3(w[5], pit_floor, z), Vector3(0.28, walk_top - 0.25 - pit_floor, 0.28), timber)
+			z += 6.0
+			k += 1
+	# The crossbowmen: up and down their walkway, a look over the floor at
+	# each end.
+	var scene := load("res://scenes/ai/guard.tscn") as PackedScene
+	var bows := [["GalleryBowWest", 10.1, -15.5, 17.5, Color(0.8, 0.72, 0.62)], ["GalleryBowEast", 23.9, -13.0, 17.5, Color(0.7, 0.66, 0.7)]]
+	for b in bows:
+		_pit_guard(scene, b[0], b[0], false, b[4], [[Vector3(b[1], walk_top, b[2]), 3.0, true], [Vector3(b[1], walk_top, b[3]), 3.0, true]])
+		var bow := root.get_node("Guards/" + String(b[0])) as Guard
+		bow.ranged = true
+		bow.carries_ji = false
+		bow.held_scene = load("res://scenes/items/visuals/held_crossbow.tscn")
+		bow.held_offset = Vector3(0.0, 0.05, 0.08)
+		bow.held_rotation = Vector3(0.0, 180.0, 0.0)
+		bow.sight_range = 34.0
+		bow.own_barks = {
+			&"spotted": ["XBOW_SPOTTED_1", "XBOW_SPOTTED_2"],
+			&"noise": ["XBOW_NOISE_1", "XBOW_NOISE_2"],
+			&"glance": ["XBOW_GLANCE_1"],
+			&"lost": ["XBOW_LOST_1"],
+			&"calm": ["XBOW_CALM_1"],
+		}
+	# The gong in the north-west corner, its face to the way in.
+	var gong := Gong.new()
+	gong.name = "GalleryGong"
+	group.add_child(gong)
+	gong.owner = root
+	gong.global_position = _floor_at(Vector3(11.1, pit_floor + 0.5, -18.6))
+	gong.rotation.y = PI * 0.5
+	var listeners: Array[NodePath] = []
+	for b in bows:
+		listeners.append(gong.get_path_to(root.get_node("Guards/" + String(b[0]))))
+	gong.listener_paths = listeners
+	# The lamp hung over the way out, and what a bolt hits of it.
+	var lamp := (load("res://scenes/world/wall_lamp.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+	lamp.name = "ExitLamp"
+	group.add_child(lamp)
+	lamp.owner = root
+	lamp.global_position = Vector3(11.0, pit_floor + 3.7, 23.55)
+	var target := StaticBody3D.new()
+	target.name = "BoltTarget"
+	target.collision_layer = 1
+	target.collision_mask = 0
+	lamp.add_child(target)
+	target.owner = root
+	var cs := CollisionShape3D.new()
+	cs.name = "Shape"
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.7, 0.7, 0.7)
+	cs.shape = box
+	target.add_child(cs)
+	cs.owner = root
+	cs.position = Vector3(0.0, 0.05, 0.1)
+	# The crossbow on its stand, by the way in, in the dark of the corner.
+	var swivel := SwivelCrossbow.new()
+	swivel.name = "GallerySwivel"
+	group.add_child(swivel)
+	swivel.owner = root
+	swivel.global_position = _floor_at(Vector3(20.6, pit_floor + 0.5, -18.6))
+	var targets: Array[NodePath] = [swivel.get_path_to(gong), swivel.get_path_to(lamp)]
+	swivel.target_paths = targets
+	var names: Array[String] = ["SWIVEL_GONG", "SWIVEL_LAMP"]
+	swivel.target_names = names
+	# The way out's roof down on a beam: a stack of its blocks either side, the
+	# beam across them, the rest of the roof heaped on it to the top. Under
+	# the beam, a crawl.
+	for side in [["FallStackWest", 9.95], ["FallStackEast", 12.05]]:
+		_masonry(_kit_solid(group, side[0], Vector3(side[1], pit_floor, 24.95), Vector3(0.9, 1.15, 1.0), stone), null)
+	_kit_solid(group, "FallBeam", Vector3(11.0, pit_floor + 1.15, 24.8), Vector3(3.0, 0.32, 0.4), timber)
+	var heap := Rubble.new()
+	heap.name = "FallHeap"
+	heap.size = Vector3(3.0, 3.2 - 1.47, 1.1)
+	heap.spill = 0.35
+	heap.props = 1
+	heap.material = stone
+	heap.pattern_seed = 24
+	group.add_child(heap)
+	heap.owner = root
+	heap.global_position = Vector3(11.0, pit_floor + 1.47, 24.85)
+	# Words: on the stand, and at the fall.
+	for w in [["SwivelNear", &"gallery_swivel", Vector3(20.6, pit_floor + 1.5, -17.0), Vector3(3.5, 3.0, 3.0)], ["GalleryFall", &"gallery_fall", Vector3(11.0, pit_floor + 1.5, 22.3), Vector3(4.0, 3.0, 2.0)]]:
+		var t := StoryTrigger.new()
+		t.name = String(w[0])
+		t.dialogue = w[1]
+		t.quest_from = &"descend"
+		group.add_child(t)
+		t.owner = root
+		t.global_position = w[2]
+		var shape := CollisionShape3D.new()
+		shape.name = "Shape"
+		var tbox := BoxShape3D.new()
+		tbox.size = w[3]
+		shape.shape = tbox
+		t.add_child(shape)
+		shape.owner = root
+	_log.append("crossbow gallery: two crossbowmen on walkways, the gong, the turning crossbow, the lamp over the fallen way out")
 
 ## The commander's post in the yard: a table with a lamp and a lacquered box,
 ## his half of the tiger tally on it.
@@ -1462,10 +1585,29 @@ func _wei_at_the_last_door() -> void:
 		body.add_child(cs)
 		cs.owner = root
 		cs.global_position = part[1]
+	# The jade slabs down the south walkway stand 0.4-0.6 m: a man steps onto
+	# them, a guard's body can't, and the navmesh (it climbs half a metre)
+	# would walk him onto one. Shown to the guards and their navmesh alone
+	# as what they are to them, things to go round.
+	var slabs := StaticBody3D.new()
+	slabs.name = "JadeSlabs"
+	slabs.collision_layer = 0
+	slabs.set_collision_layer_value(Guard.BLOCKERS_LAYER, true)
+	slabs.collision_mask = 0
+	door.add_child(slabs)
+	slabs.owner = root
+	for x in [[-22.1, -20.0], [-13.9, -11.8], [-5.6, -3.5], [0.6, 2.6], [8.8, 10.9], [17.1, 19.1]]:
+		var cs := CollisionShape3D.new()
+		cs.name = "Slab%d" % slabs.get_child_count()
+		var cbox := BoxShape3D.new()
+		cbox.size = Vector3(x[1] - x[0] + 0.1, 1.5, 2.1)
+		cs.shape = cbox
+		slabs.add_child(cs)
+		cs.owner = root
+		cs.global_position = Vector3((x[0] + x[1]) * 0.5, 7.54 + 0.75, 127.05)
 	# The way from the strip out onto the causeway, for their scripted
 	# walks: along the strip, then straight through the gap between the
-	# jade slabs (the navmesh would walk a guard over a slab's corner: it
-	# climbs half a metre, his body can't).
+	# jade slabs.
 	var gap := Node3D.new()
 	gap.name = "Gap"
 	door.add_child(gap)

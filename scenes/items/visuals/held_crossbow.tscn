@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://c620swwftms1g" path="res://assets/models/props/crossbow.glb" id="1_bow"]
+[ext_resource type="Script" path="res://Scripts/world/prop_materials.gd" id="2_mats"]
+
+[node name="HeldCrossbow" type="Node3D"]
+script = ExtResource("2_mats")
+
+[node name="Model" parent="." instance=ExtResource("1_bow")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0, 0)

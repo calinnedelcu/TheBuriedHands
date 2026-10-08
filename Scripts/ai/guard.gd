@@ -4,6 +4,7 @@ extends CharacterBody3D
 ## hears noises, and moves on the navmesh through these states:
 ##   PATROL -> SUSPICIOUS (stops, looks) -> INVESTIGATE (walks to the stimulus)
 ##   -> CHASE (runs, calls others) -> ATTACK, and back via SEARCH / RETURN.
+## A crossbowman (`ranged`) chases by shooting from where he stands.
 ## Before the sealing (flag `guards_hostile`) guards only go about their beat.
 ##
 ## Co-op: guards think on the host and watch both players, chasing whichever
@@ -56,6 +57,14 @@ const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 @export var attack_cooldown := 1.2
 @export var call_radius := 22.0
 
+@export_group("Crossbow")
+## A crossbowman on a walkway above: once he sees you he stands and shoots,
+## a bolt each `reload_time` (they glance off stone armour), instead of
+## closing in with a ji. He carries his crossbow, not a ji.
+@export var ranged := false
+@export var bolt_damage := 2.0
+@export var reload_time := 2.6
+
 @export_group("Look")
 ## A burning torch in the right hand: it lights the guard's surroundings
 ## (making the player visible there) and shows where the guard is.
@@ -81,6 +90,11 @@ const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 @export var own_barks: Dictionary = {}
 
 const TORCH := preload("res://scenes/ai/guard_torch.tscn")
+## Physics layer of what only guards go round (and their navmesh with them):
+## things a man steps onto that a guard's body can't, the navmesh climbing
+## half a metre (the jade slabs down the burial chamber's walkway).
+const BLOCKERS_LAYER := 7
+const CROSSBOW_SHOT := preload("res://audio/sfx/trap/crossbow_shot.mp3")
 
 @onready var _agent: NavigationAgent3D = $Agent
 @onready var _model: Node3D = $Model
@@ -119,10 +133,12 @@ var _scripted_run := false
 var _anim_key: StringName = &""
 var _net_pos := Vector3.INF
 var _net_yaw := 0.0
+var _reload := 0.0
 
 func _ready() -> void:
 	add_to_group(&"guards")
 	add_to_group(&"persistent")
+	set_collision_mask_value(BLOCKERS_LAYER, true)
 	_home = global_position
 	_desired_yaw = rotation.y
 	_anim = _first_anim_player()
@@ -427,6 +443,8 @@ func _set_state(s: State) -> void:
 				_bark(&"investigate")
 		State.CHASE:
 			_lost_timer = 0.0
+			# He takes aim before the first bolt.
+			_reload = 0.9
 		State.SEARCH:
 			_plan_search()
 		State.RETURN:
@@ -481,6 +499,9 @@ func _tick_investigate(delta: float) -> void:
 func _tick_chase(delta: float) -> void:
 	if _target_down():
 		return
+	if ranged:
+		_tick_shoot(delta)
+		return
 	if _seen_timer < 0.15:
 		_agent.target_position = _last_seen
 		_lost_timer = 0.0
@@ -505,6 +526,40 @@ func _tick_chase(delta: float) -> void:
 			return
 	if _move_along(run_speed, delta, &"run") and _seen_timer >= 0.15:
 		_set_state(State.SEARCH)
+
+## A crossbowman stands, turns to follow and shoots while he sees you; lost
+## a while, he goes to search (on the walkway, where he can).
+func _tick_shoot(delta: float) -> void:
+	_stop()
+	if _seen_timer < 0.15:
+		_lost_timer = 0.0
+		_face(_player.global_position)
+		_play(&"ready")
+		_reload -= delta
+		if _reload <= 0.0:
+			_reload = reload_time
+			_shoot(_player.chest_position())
+		return
+	_lost_timer += delta
+	if _lost_timer > 4.0:
+		_bark(&"lost")
+		_stimulus = _last_seen
+		_set_state(State.SEARCH)
+
+func _shoot(target: Vector3) -> void:
+	var from := global_position + Vector3.UP * 2.3 + (-global_basis.z) * 0.7
+	var dir := (target - from).normalized()
+	net_shoot(from, dir)
+	Net.mirror(self, &"net_shoot", [from, dir])
+
+## A bolt from his crossbow (on both co-op machines, each hurting its own).
+func net_shoot(from: Vector3, dir: Vector3) -> void:
+	Sfx.play_at(CROSSBOW_SHOT, from, 2.0, 0.08, &"Tomb", 45.0)
+	Bolt.launch(get_parent(), from, dir, 40.0, bolt_damage, 60.0, self)
+
+## His bolt glanced off a man in stone armour.
+func bolt_glanced() -> void:
+	_bark(&"glance")
 
 ## A thrust of the ji: wind up (still turning to follow), strike, recover.
 func _tick_attack(delta: float) -> void:
