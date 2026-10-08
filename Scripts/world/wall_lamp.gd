@@ -94,6 +94,10 @@ func usable_can_use(user: Node) -> bool:
 	var lamp := _player_lamp(user)
 	return lit or (lamp != null and lamp.is_lit and oil > 0.0) or (lamp != null and not lamp.is_full() and oil > 0.0)
 
+func usable_is_hold(user: Node) -> bool:
+	var lamp := _player_lamp(user)
+	return lamp != null and not lamp.is_full() and oil > 0.0
+
 func usable_tap(user: Node) -> void:
 	var lamp := _player_lamp(user)
 	if lit:

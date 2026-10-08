@@ -35,6 +35,7 @@ func _ready() -> void:
 	collision_mask = 0
 	_usable.quest_step = quest_step
 	_usable.quest_from = quest_from
+	_usable.quest_hint = true
 	_usable.used.connect(_on_used)
 	_usable.block_reason = _why_not
 	var item := ItemDB.get_item(item_id)

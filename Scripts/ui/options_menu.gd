@@ -80,6 +80,7 @@ func _game_tab() -> Control:
 	_check(g, "OPT_SUBTITLES", &"subtitles")
 	_slider(g, "OPT_SUBTITLE_SIZE", &"subtitle_scale", 0.8, 1.4, 0.05)
 	_check(g, "OPT_HINTS", &"show_hints")
+	_check(g, "OPT_OBJECTIVE", &"objective_always")
 	var s := _scroll(g)
 	s.name = "Game"
 	return s

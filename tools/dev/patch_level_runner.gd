@@ -64,6 +64,7 @@ func _run() -> void:
 	_corridor_on_the_way_to_the_archives()
 	_wei_at_his_desk()
 	_wei_at_the_last_door()
+	_exit_watch()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -2104,9 +2105,78 @@ func _makers_names() -> void:
 ## Liang talks from where he sits (liang.glb, tools/blender/build_liang.py):
 ## no more standing up for each line and dropping back onto the stool.
 func _liang_seated() -> void:
-	var liang := root.get_node("Liang")
+	var liang := root.get_node("Liang") as Node3D
 	liang.set(&"anims", {"sit": "sit", "talk": "talk", "surprised": "surprised", "frustrated": "frustrated"})
-	_log.append("liang: seated talk")
+	# His feet on the floor beside the stool he sits on (Chair_038, its seat
+	# 0.45 up): the sit pose puts him on it. He was half a metre down in the
+	# flagstones, sitting on the floor with his legs in it.
+	var beside := _floor_at(liang.global_position + liang.global_basis.x * 0.8)
+	liang.global_position.y = beside.y
+	_log.append("liang: seated talk, on his stool at %.2f" % beside.y)
+
+## Act I: the escort keeps the craftsmen in (ExitWatch). He stands in the
+## workshop's south door, the way to the trap corridor and the archives, and
+## the doorway behind him is closed to the player until the sealing, when he
+## walks in with the captain as before. The doorway is measured where the
+## passage is narrowest.
+func _exit_watch() -> void:
+	var space := root.get_world_3d().direct_space_state
+	var best := {}
+	for i in 15:
+		var z := -1.5 + i * 0.5
+		var mid := Vector3(-58.1, 1.3, z)
+		var left := _wall_along(space, mid, Vector3.LEFT, 7.0)
+		var right := _wall_along(space, mid, Vector3.RIGHT, 7.0)
+		var width := right.x - left.x
+		if best.is_empty() or width < float(best["width"]):
+			best = {"width": width, "z": z, "x": (left.x + right.x) * 0.5}
+	var gap_z: float = best["z"]
+	var gap_x: float = best["x"]
+	var width: float = best["width"]
+	var post := _floor_at(Vector3(gap_x, 0.0, gap_z - 0.9))
+	var escort := root.get_node("Guards/GuardEscort") as Node3D
+	escort.global_position = post
+	escort.rotation.y = 0.0
+	var story := root.get_node("Story")
+	var w := story.get_node_or_null("ExitWatch") as ExitWatch
+	if w == null:
+		w = ExitWatch.new()
+		w.name = "ExitWatch"
+		story.add_child(w)
+		w.owner = root
+	w.global_position = post + Vector3(0.0, 1.5, -2.0)
+	w.guard_path = w.get_path_to(escort)
+	var cs := w.get_node_or_null("Shape") as CollisionShape3D
+	if cs == null:
+		cs = CollisionShape3D.new()
+		cs.name = "Shape"
+		w.add_child(cs)
+		cs.owner = root
+	var area := BoxShape3D.new()
+	area.size = Vector3(width + 2.0, 3.0, 3.6)
+	cs.shape = area
+	var blocker := w.get_node_or_null("Blocker") as StaticBody3D
+	if blocker == null:
+		blocker = StaticBody3D.new()
+		blocker.name = "Blocker"
+		w.add_child(blocker)
+		blocker.owner = root
+		var bs := CollisionShape3D.new()
+		bs.name = "Shape"
+		blocker.add_child(bs)
+		bs.owner = root
+	blocker.collision_layer = ExitWatch.BLOCK_LAYER
+	blocker.collision_mask = 0
+	blocker.global_position = Vector3(gap_x, post.y + 1.7, gap_z)
+	var wall := BoxShape3D.new()
+	wall.size = Vector3(width + 0.4, 3.4, 0.5)
+	(blocker.get_node("Shape") as CollisionShape3D).shape = wall
+	_log.append("exit watch: the escort in the workshop's south door, %.1f m across at z %.1f" % [width, gap_z])
+
+## Where a level ray along `dir` from `from` meets a wall (or `reach` on).
+func _wall_along(space: PhysicsDirectSpaceState3D, from: Vector3, dir: Vector3, reach: float) -> Vector3:
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, from + dir * reach, 1))
+	return hit.position if not hit.is_empty() else from + dir * reach
 
 ## The lacquered chest on the treasury's island is the Emperor's coffin;
 ## stepping up to it, the craftsman says so.

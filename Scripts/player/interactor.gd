@@ -13,7 +13,7 @@ const HIGHLIGHT_MATERIAL := preload("res://assets/materials/interact_highlight.t
 @export var assist_radius := 0.14
 
 ## Releasing a hold usable faster than this counts as a tap.
-const TAP_SECONDS := 0.22
+const TAP_SECONDS := 0.3
 
 var target: Usable = null
 var _user: Node
@@ -42,12 +42,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if target == null or not target.can_use(_user):
 			return
 		get_viewport().set_input_as_handled()
-		if target.is_hold():
+		if target.is_hold_for(_user):
 			_holding = true
 			_hold_elapsed = 0.0
 		else:
 			# Through Net: in co-op the host checks the use and both run it.
-			Net.use(target, _user, &"use")
+			# A hold with nothing to hold for here is its tap, done at once.
+			Net.use(target, _user, &"tap" if target.is_hold() and target.tap_enabled else &"use")
 			_refresh_prompt(true)
 	elif event.is_action_released(&"interact") and _holding:
 		var was_tap := _hold_elapsed < TAP_SECONDS and target != null and target.tap_enabled
@@ -116,7 +117,7 @@ func _refresh_prompt(force := false) -> void:
 	if text == _prompt_cache and not force:
 		return
 	_prompt_cache = text
-	prompt_changed.emit(text, &"interact", target != null and target.is_hold(), blocked)
+	prompt_changed.emit(text, &"interact", target != null and target.is_hold_for(_user), blocked)
 
 func _update_hold(delta: float) -> void:
 	if not _holding:

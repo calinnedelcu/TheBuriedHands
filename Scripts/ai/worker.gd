@@ -19,9 +19,19 @@ extends Node3D
 ## Crossbow bolts in his back.
 @export var bolts := 0
 
+## Clips that bring the body down: craftsman.glb keeps the hips at standing
+## height in them (only the legs fold and the trunk tips), so the model is
+## lowered until its lowest bone lies on the floor, or he kneels in the air.
+const LOW_CLIPS := [&"kneel", &"collapse"]
+## Bones run inside the limbs: the lowest one stays this far off the floor.
+const GROUND_CLEARANCE := 0.07
+
 var _anim: AnimationPlayer
 var _working := false
 var _last_pos := 0.0
+var _model: Node3D
+var _skeleton: Skeleton3D
+var _model_rest := Vector3.ZERO
 
 ## Moments of the work clips (seconds into the loop) that make a sound:
 ## the tool scraping clay, the clay pressed down on the table.
@@ -34,6 +44,11 @@ const PRESS := [preload("res://audio/sfx/impacts/impactSoft_medium_000.ogg"), pr
 
 func _ready() -> void:
 	_anim = _first_anim_player()
+	_model = get_node_or_null(^"Model") as Node3D
+	if _model != null:
+		_model_rest = _model.position
+	var skeletons := find_children("*", "Skeleton3D", true, false)
+	_skeleton = skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
 	if _anim != null:
 		var last := StringName(anims.get(after_sealing_anim, after_sealing_anim))
 		for clip in _anim.get_animation_list():
@@ -51,6 +66,7 @@ func _ready() -> void:
 
 ## The sound of the work, in step with the clip, close by only.
 func _process(_delta: float) -> void:
+	_ground_pose()
 	if not _working or _anim == null or not _anim.is_playing():
 		return
 	var clip := _anim.current_animation
@@ -83,6 +99,32 @@ func _play(key: StringName, random_start: bool) -> void:
 	_anim.play(n, 0.4)
 	if random_start:
 		_anim.seek(randf() * _anim.get_animation(n).length, true)
+
+## In a low clip (or blending into one), lowers the model so the lowest bone
+## rests on the floor; back up to where it stood in any other.
+func _ground_pose() -> void:
+	if _model == null or _skeleton == null or _anim == null:
+		return
+	var clip := StringName(_anim.current_animation if _anim.current_animation != "" else _anim.assigned_animation)
+	var low_clip := false
+	for k in LOW_CLIPS:
+		low_clip = low_clip or clip == StringName(anims.get(k, k))
+	if not low_clip:
+		if _model.position != _model_rest:
+			_model.position = _model_rest
+		return
+	var xf := _skeleton.global_transform
+	var lowest := INF
+	for b in _skeleton.get_bone_count():
+		# Not the root: it stays on the floor whatever the body does.
+		if _skeleton.get_bone_parent(b) >= 0:
+			lowest = minf(lowest, (xf * _skeleton.get_bone_global_pose(b)).origin.y)
+	var drop := lowest - (global_position.y + GROUND_CLEARANCE)
+	if absf(drop) < 0.005:
+		return
+	var scale_y := maxf(global_basis.get_scale().y, 0.001)
+	# Never above where he stands: only down, as far as the pose needs.
+	_model.position.y = minf(_model_rest.y, _model.position.y - drop / scale_y)
 
 func _lie_dead() -> void:
 	# Bodies don't stand in the way.

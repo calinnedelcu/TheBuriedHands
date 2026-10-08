@@ -112,6 +112,9 @@ var _current_anim: StringName = &""
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _player: Player
 var _stimulus := Vector3.ZERO
+## Gone to see what a thrown thing was: a short look round the spot, a word,
+## then back to his round.
+var _checking_thrown := false
 var _last_seen := Vector3.ZERO
 var _seen_timer := 0.0
 var _lost_timer := 0.0
@@ -249,6 +252,10 @@ func warp_to_route(index := 0) -> void:
 func play_animation(key: StringName) -> void:
 	_play(key)
 
+## Says one of his lines of `kind` (DialogueDB.GUARD_BARKS, or his own).
+func say(kind: StringName) -> void:
+	_bark(kind, true)
+
 ## Gives him another beat to walk (after a cutscene, a watch elsewhere).
 func set_route(route: PatrolRoute, index := 0) -> void:
 	_route = route
@@ -378,19 +385,54 @@ func _on_noise(position: Vector3, radius: float, source: Node) -> void:
 		return
 	if state == State.CHASE or state == State.ATTACK:
 		return
+	var eff := _heard_within(position, radius)
+	if eff <= 0.0:
+		return
+	var d := global_position.distance_to(position)
+	_stimulus = position
+	if source is ThrownItem:
+		_heard_thrown(position, radius, d)
+		return
+	var strength := 1.0 - d / eff
+	awareness = minf(awareness + 0.25 + strength * 0.55, 0.95)
+	if not (source is Player) and _bark_cooldown <= 0.0:
+		_bark(&"noise")
+	_react()
+
+## How far a noise of `radius` at `position` carries to him (less through
+## stone), or 0 if it doesn't reach him.
+func _heard_within(position: Vector3, radius: float) -> float:
 	var eff := radius * hearing_scale
 	var d := global_position.distance_to(position)
 	if d > eff:
-		return
+		return 0.0
 	if not _has_line_of_sight(global_position + Vector3.UP * eye_height, position + Vector3.UP * 0.5):
 		eff *= 0.55
 		if d > eff:
-			return
-	var strength := 1.0 - d / eff
-	awareness = minf(awareness + 0.25 + strength * 0.55, 0.95)
-	_stimulus = position
-	if not (source is Player) and _bark_cooldown <= 0.0:
-		_bark(&"noise")
+			return 0.0
+	return eff
+
+## Whether he'd hear it and is free to go and look (who goes is the nearest).
+func can_check(position: Vector3, radius: float) -> bool:
+	if not is_hostile() or state in [State.CHASE, State.ATTACK, State.SCRIPTED]:
+		return false
+	return _heard_within(position, radius) > 0.0
+
+## Something thrown came down: not a step, a thing that fell. The nearest
+## guard who heard it goes to see what it was; the others turn to it and
+## stay where they are. That's what a stone thrown the other way is for.
+func _heard_thrown(position: Vector3, radius: float, d: float) -> void:
+	var nearest := true
+	for g in Stealth.guards():
+		if g != self and is_instance_valid(g) and (g as Node3D).global_position.distance_to(position) < d and bool(g.call(&"can_check", position, radius)):
+			nearest = false
+			break
+	_bark(&"noise")
+	if nearest:
+		_checking_thrown = true
+		awareness = maxf(awareness, 0.5)
+	else:
+		awareness = maxf(awareness, 0.3)
 	_react()
 
 ## Moves between states from the awareness level.
@@ -442,12 +484,16 @@ func _set_state(s: State) -> void:
 			if prev != State.SEARCH:
 				_bark(&"investigate")
 		State.CHASE:
+			_checking_thrown = false
 			_lost_timer = 0.0
 			# He takes aim before the first bolt.
 			_reload = 0.9
 		State.SEARCH:
 			_plan_search()
+			if _checking_thrown:
+				_bark(&"thrown", true)
 		State.RETURN:
+			_checking_thrown = false
 			_agent.target_position = _route_point() if _route != null else _home
 			if prev == State.SEARCH:
 				_bark(&"calm")
@@ -626,8 +672,11 @@ func _plan_search() -> void:
 	_search_points.clear()
 	var map := get_world_3d().navigation_map
 	_search_points.append(NavigationServer3D.map_get_closest_point(map, _stimulus))
-	for i in 3:
-		var offset := Vector3(randf_range(-7, 7), 0, randf_range(-7, 7))
+	# Only a thing that fell: one look about the spot will do.
+	var around := 1 if _checking_thrown else 3
+	var reach := 2.5 if _checking_thrown else 7.0
+	for i in around:
+		var offset := Vector3(randf_range(-reach, reach), 0, randf_range(-reach, reach))
 		_search_points.append(NavigationServer3D.map_get_closest_point(map, _stimulus + offset))
 	_look_timer = 0.0
 

@@ -32,6 +32,7 @@ OPT_LANG_RO,Română,Română
 OPT_SUBTITLES,Subtitles,Subtitrări
 OPT_SUBTITLE_SIZE,Subtitle size,Mărime subtitrări
 OPT_HINTS,Control hints,Indicii de control
+OPT_OBJECTIVE,Objective always on screen,Obiectivul mereu pe ecran
 OPT_SENSITIVITY,Mouse sensitivity,Sensibilitate mouse
 OPT_INVERT_Y,Invert vertical look,Inversează axa verticală
 OPT_CROUCH_TOGGLE,Crouch toggles,Ghemuire cu comutare
@@ -149,6 +150,8 @@ PROMPT_POUR,Pour the mercury,Toarnă mercurul
 PROMPT_NEED_FULL_VASE,You need a jar of mercury,Ai nevoie de un ulcior cu mercur
 PROMPT_PUSH,Push forward,Împinge-te înainte
 PROMPT_MUST_CRAWL,Too low — crawl,Prea jos — târăște-te
+PROMPT_FIRST,First: %s,Mai întâi: %s
+PROMPT_NOT_YET,Not yet.,Nu încă.
 PROMPT_OPEN,Open,Deschide
 PROMPT_READ,Read,Citește
 PROMPT_STRIKE_BELLS,Strike the bells,Lovește clopotele
@@ -303,6 +306,12 @@ BARK_CALM_1,Just rats.,Doar șobolani.
 BARK_CALM_2,The dark plays tricks.,Întunericul îți joacă feste.
 BARK_NOISE_1,What was that?,Ce-a fost asta?
 BARK_NOISE_2,That came from over there.,A venit de acolo.
+BARK_THROWN_1,Just a shard. Fell from somewhere.,Doar un ciob. A căzut de undeva.
+BARK_THROWN_2,Something came loose up there.,S-a desprins ceva de sus.
+BARK_THROWN_3,Nothing... only this.,Nimic... doar asta.
+BARK_KEEP_IN_1,"Back, master. Nobody leaves the workshop till the statue is done.","Înapoi, meștere. Nimeni nu iese din atelier până nu e gata statuia."
+BARK_KEEP_IN_2,Overseer Wei's orders: the craftsmen stay at their work.,"Ordinul supraveghetorului Wei: meșterii stau la lucru."
+BARK_KEEP_IN_3,You've no business in the corridor. Back to your clay.,N-ai ce căuta pe coridor. Înapoi la lut.
 DEATH_TITLE,You died,Ai murit
 DEATH_SUBTITLE,"Like thousands of other workers, you remained beneath Mount Li.","Ca mii de alți lucrători, ai rămas sub muntele Li."
 DEATH_GUARD,The guards caught you.,Gărzile te-au prins.

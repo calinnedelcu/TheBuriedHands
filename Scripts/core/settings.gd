@@ -13,6 +13,7 @@ const DEFAULTS := {
 	&"subtitles": true,
 	&"subtitle_scale": 1.0,       # 0.8 .. 1.4
 	&"show_hints": true,
+	&"objective_always": true,    # the objective stays on screen, quieter
 	# Controls
 	&"mouse_sensitivity": 1.0,    # multiplier, 0.2 .. 3.0
 	&"invert_y": false,

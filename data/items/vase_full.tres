@@ -10,6 +10,7 @@ id = &"vase_full"
 name_key = "ITEM_VASE_FULL"
 icon = ExtResource("1_wruhu")
 world_scene = ExtResource("3_ywj2v")
+hand_transform = Transform3D(0.24, 0, 0, 0, 0.24, 0, 0, 0, 0.24, 0.02, -0.19, -0.04)
 droppable = false
 throw_noise_radius = 0.0
 mass = 6.0

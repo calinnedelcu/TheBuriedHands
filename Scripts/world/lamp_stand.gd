@@ -50,6 +50,10 @@ func usable_can_use(user: Node) -> bool:
 	var p := user as Player
 	return p != null and not taken and (p.inventory.lamp() == null or (oil > 0.5 and not p.inventory.lamp().is_full()))
 
+func usable_is_hold(user: Node) -> bool:
+	var p := user as Player
+	return p != null and p.inventory.lamp() != null
+
 func usable_tap(user: Node) -> void:
 	var p := user as Player
 	if p == null or p.inventory.lamp() != null:

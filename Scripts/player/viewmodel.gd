@@ -4,7 +4,9 @@ extends Node3D
 ## selected item; each arm slides into view only while it holds something.
 ## Adds mouse sway, walk bob, breathing and a small "use" strike animation;
 ## on a ladder the hands reach up for the rungs in turn, crawling they paw
-## forward along the ground.
+## forward along the ground. A tool swung at a job (the mallet at a stone)
+## comes into the right hand for it, drawn back while the key is held and
+## brought down when the hold completes.
 
 @export_group("Arm layout (camera space)")
 ## Where each hand grips, relative to the camera.
@@ -47,6 +49,14 @@ var _sway := Vector2.ZERO
 var _bob_t := 0.0
 var _t := 0.0
 var _item_visual: Node3D
+## The tool being swung (see swing_wind), shown in place of the selection.
+var _swing_id: StringName = &""
+var _swing_visual: Node3D
+var _wind := 0.0
+var _wind_target := 0.0
+var _blow := 0.0
+var _striking := false
+var _swing_linger := 0.0
 var _climb := 0.0
 var _climb_t := 0.0
 var _crawl_t := 0.0
@@ -65,9 +75,48 @@ func _ready() -> void:
 	_on_selection_changed(inventory.selected)
 	_ready_done = true
 
-## A short forward strike, e.g. chisel taps or splitting stone.
+## A short forward strike, e.g. chisel taps.
 func play_use() -> void:
 	_use = 1.0
+
+## Draws `item_id` back for a blow, `progress` (0..1) of the way.
+func swing_wind(item_id: StringName, progress: float) -> void:
+	if _swing_id != item_id:
+		_set_swing(item_id)
+	_wind_target = clampf(progress, 0.0, 1.0)
+	_striking = false
+
+## The blow lands: the tool comes down hard, then is put away.
+func swing_strike() -> void:
+	_striking = true
+	_wind_target = 0.0
+	_swing_linger = 0.5
+
+## The hold let go before the blow: the tool goes back down unused.
+func swing_end() -> void:
+	_wind_target = 0.0
+	_striking = false
+	_swing_linger = 0.25
+
+func _set_swing(item_id: StringName) -> void:
+	if _swing_visual != null:
+		_swing_visual.queue_free()
+		_swing_visual = null
+	_swing_id = item_id
+	if _item_visual != null:
+		_item_visual.visible = item_id == &""
+	if item_id == &"":
+		return
+	var item := ItemDB.get_item(item_id)
+	var scene: PackedScene = null
+	if item != null:
+		scene = item.hand_scene if item.hand_scene != null else item.world_scene
+	if scene == null:
+		return
+	_swing_visual = scene.instantiate() as Node3D
+	_swing_visual.transform = item.hand_transform
+	_item_socket.add_child(_swing_visual)
+	ViewmodelMaterial.apply(_swing_visual)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _ready_done:
@@ -85,9 +134,10 @@ func _process(delta: float) -> void:
 	_climb = move_toward(_climb, 1.0 if climbing else 0.0, delta * 4.0)
 	_left_show = move_toward(_left_show, 1.0 if lamp != null else 0.0, delta * 3.0)
 	# A free hand comes up for the rungs; what it held goes in the belt.
-	_right_show = move_toward(_right_show, 1.0 if _item_visual != null or climbing else 0.0, delta * 4.0)
+	_right_show = move_toward(_right_show, 1.0 if _item_visual != null or climbing or _swing_visual != null else 0.0, delta * 4.0)
 	if _item_visual != null:
-		_item_visual.visible = _climb < 0.5
+		_item_visual.visible = _climb < 0.5 and _swing_visual == null
+	_tick_swing(delta)
 	_raise = lerpf(_raise, 1.0 if lamp != null and lamp.is_raised else 0.0, clampf(delta * 8.0, 0.0, 1.0))
 	_use = move_toward(_use, 0.0, delta * 3.5)
 	_sway = _sway.lerp(Vector2.ZERO, clampf(delta * 9.0, 0.0, 1.0))
@@ -123,8 +173,12 @@ func _process(delta: float) -> void:
 	var left_offset := common + raise_offset * _raise + climb_l + crawl_l + Vector3.DOWN * hidden_drop * (1.0 - _ease(_left_show))
 	_left.transform = Transform3D(_left_rest.basis, _left_rest.origin + left_offset)
 	var strike := sin(_use * PI)
-	var right_offset := common * 1.1 + Vector3(0.0, 0.03, -0.12) * strike + climb_r + crawl_r + Vector3.DOWN * hidden_drop * (1.0 - _ease(_right_show))
-	var right_basis := _right_rest.basis.rotated(Vector3.RIGHT, -0.5 * strike + 0.6 * _climb * (0.4 + reach_r))
+	# A swing: drawn up and back as the hold fills, then down and forward.
+	var wind := _ease(_wind)
+	var blow := _ease(_blow)
+	var swing := Vector3(0.03, 0.17, 0.08) * wind + Vector3(-0.02, -0.06, -0.16) * blow
+	var right_offset := common * 1.1 + Vector3(0.0, 0.03, -0.12) * strike + swing + climb_r + crawl_r + Vector3.DOWN * hidden_drop * (1.0 - _ease(_right_show))
+	var right_basis := _right_rest.basis.rotated(Vector3.RIGHT, -0.5 * strike + 1.0 * wind - 0.9 * blow + 0.6 * _climb * (0.4 + reach_r))
 	_right.transform = Transform3D(right_basis, _right_rest.origin + right_offset)
 	_left.visible = _left_show > 0.01
 	_right.visible = _right_show > 0.01
@@ -148,6 +202,22 @@ func _layout_arm(arm: Node3D, mesh: Node3D, grip: Vector3, forearm: Vector3, rol
 	var z := x.cross(y).normalized()
 	var b := Basis(x, y, z).rotated(y, deg_to_rad(roll_deg)) * Basis.from_scale(Vector3.ONE * arm_scale)
 	mesh.transform = Transform3D(b, -(b * hand_center))
+
+func _tick_swing(delta: float) -> void:
+	if _swing_id == &"":
+		return
+	# Drawn back with the hold; brought down many times faster.
+	_wind = move_toward(_wind, _wind_target, delta * (14.0 if _striking else 4.0))
+	if _striking:
+		_blow = move_toward(_blow, 1.0, delta * 12.0)
+		if _blow >= 1.0:
+			_striking = false
+	else:
+		_blow = move_toward(_blow, 0.0, delta * 3.0)
+	if _wind_target <= 0.0 and not _striking:
+		_swing_linger -= delta
+		if _swing_linger <= 0.0 and _wind <= 0.01 and _blow <= 0.01:
+			_set_swing(&"")
 
 func _ease(x: float) -> float:
 	return x * x * (3.0 - 2.0 * x)

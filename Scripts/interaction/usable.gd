@@ -23,6 +23,9 @@ signal hold_completed(user: Node)
 @export var quest_step: StringName = &""
 ## Only usable once the quest has reached this step (empty = any).
 @export var quest_from: StringName = &""
+## Ahead of the story (`quest_step` / `quest_from` not reached yet), shows
+## what to do first instead of nothing, so the aim doesn't slip past it.
+@export var quest_hint := false
 @export var body_path: NodePath = ^".."
 ## Root whose meshes get the rim highlight while looked at (default: body's parent).
 @export var highlight_root_path: NodePath = ^""
@@ -53,6 +56,8 @@ func _exit_tree() -> void:
 
 ## Localized prompt, or "" to show nothing (the object is ignored entirely).
 func get_prompt(user: Node) -> String:
+	if quest_hint and _ahead_of_story():
+		return _first_this()
 	var key := _blocked_by(user)
 	if key == "":
 		key = prompt_key
@@ -63,7 +68,20 @@ func can_use(user: Node) -> bool:
 
 ## Whether the prompt should show even when `can_use` is false (e.g. "You need a chisel").
 func shows_when_blocked(user: Node) -> bool:
+	if quest_hint and _ahead_of_story():
+		return true
 	return _available() and _blocked_by(user) != ""
+
+## Only the story stands in the way: its step is still to come.
+func _ahead_of_story() -> bool:
+	if not enabled or (single_use and _used_once):
+		return false
+	return (quest_step != &"" and not Quest.has_reached(quest_step)) or (quest_from != &"" and not Quest.has_reached(quest_from))
+
+## "First: <what the story asks now>".
+func _first_this() -> String:
+	var now := Net.objective_for(Quest.objective_key())
+	return tr("PROMPT_FIRST") % tr(now) if now != "" else tr("PROMPT_NOT_YET")
 
 func _available() -> bool:
 	if not enabled or (single_use and _used_once):
@@ -79,6 +97,12 @@ func _blocked_by(user: Node) -> String:
 
 func is_hold() -> bool:
 	return hold_time > 0.0
+
+## Whether this user must hold the key right now. A hold whose holding does
+## nothing for them (a lamp stand, to a hand with no lamp to fill) acts on
+## the press, as a tap: a long press must not swallow the only thing to do.
+func is_hold_for(_user: Node) -> bool:
+	return is_hold()
 
 func use(user: Node) -> void:
 	if not can_use(user):

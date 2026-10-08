@@ -31,6 +31,9 @@ var blows := 0
 var broken := false
 ## Co-op: whoever holds the wedge in the crack.
 var _brace: Player = null
+## The rock as it stands: blows shake it about here, the split squashes it
+## from here (the rock can be a piece of the level, anywhere in its parent).
+var _rock_rest: Transform3D
 
 func _ready() -> void:
 	add_to_group(&"persistent")
@@ -38,6 +41,7 @@ func _ready() -> void:
 	if not external_rock_path.is_empty():
 		$Rock.visible = false
 		_blocker.disabled = true
+	_rock_rest = _rock.transform
 	_apply()
 
 func _process(_delta: float) -> void:
@@ -107,28 +111,81 @@ func _let_go(p: Player) -> void:
 func usable_show_blocked(_user: Node) -> bool:
 	return not broken
 
+## Holding the key draws the mallet back; the blow lands when the hold is full.
+func usable_hold_tick(user: Node, progress: float) -> void:
+	var p := user as Player
+	if p != null and p.is_local and not (Net.active and _brace == null):
+		p.viewmodel.call(&"swing_wind", &"hammer", progress)
+
+func usable_hold_cancelled(user: Node) -> void:
+	var p := user as Player
+	if p != null and p.is_local:
+		p.viewmodel.call(&"swing_end")
+
 func usable_hold_done(user: Node) -> void:
+	var p := user as Player
 	if Net.active and _brace == null:
+		if p != null and p.is_local:
+			p.viewmodel.call(&"swing_end")
 		return
 	blows += 1
-	var p := user as Player
 	if p != null:
-		p.viewmodel.call(&"play_use")
-		p.add_shake(0.15)
+		if p.is_local:
+			p.viewmodel.call(&"swing_strike")
+		p.add_shake(0.22)
 	Sfx.play_random_at(BLOWS, global_position + Vector3.UP, 4.0, 0.06, &"Tomb", 60.0)
 	Stealth.make_noise(global_position, noise_radius, p)
+	_chips(_struck_at(p), 14, 0.9)
 	var shake := create_tween()
-	shake.tween_property(_rock, "position:x", 0.06, 0.05)
-	shake.tween_property(_rock, "position:x", 0.0, 0.08)
+	shake.tween_property(_rock, "position", _rock_rest.origin + Vector3(0.05, 0.0, 0.0), 0.05)
+	shake.tween_property(_rock, "position", _rock_rest.origin, 0.08)
 	if blows >= blows_needed:
 		_split()
+
+## Where the mallet met the stone: where the striker looks, on the stone.
+func _struck_at(p: Player) -> Vector3:
+	if p != null and p.camera != null:
+		var from := p.camera.global_position
+		var params := PhysicsRayQueryParameters3D.create(from, from - p.camera.global_basis.z * 3.0, 1 | 16)
+		params.exclude = [p.get_rid()]
+		var hit := get_world_3d().direct_space_state.intersect_ray(params)
+		if not hit.is_empty():
+			return hit.position
+	return global_position + Vector3.UP * 0.8
+
+## Stone chips and grit off a blow (and many more off the split).
+func _chips(at: Vector3, amount: int, speed: float) -> void:
+	var burst := CPUParticles3D.new()
+	burst.one_shot = true
+	burst.amount = amount
+	burst.lifetime = 1.1
+	burst.explosiveness = 1.0
+	burst.direction = Vector3.UP
+	burst.spread = 75.0
+	burst.initial_velocity_min = 1.0 * speed
+	burst.initial_velocity_max = 3.2 * speed
+	burst.gravity = Vector3(0, -14, 0)
+	burst.scale_amount_min = 0.5
+	burst.scale_amount_max = 1.6
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.035, 0.025, 0.03)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.42, 0.39, 0.35)
+	mat.roughness = 0.95
+	mesh.material = mat
+	burst.mesh = mesh
+	get_parent().add_child(burst)
+	burst.global_position = at
+	burst.emitting = true
+	burst.finished.connect(burst.queue_free)
 
 func _split() -> void:
 	broken = true
 	Sfx.play_at(SPLIT, global_position, 3.0, 0.0, &"Tomb", 60.0)
+	_chips(global_position + Vector3.UP * 0.6, 40, 1.4)
 	var tween := create_tween().set_parallel(true)
-	tween.tween_property(_rock, "scale", Vector3(1.1, 0.25, 1.1), 0.5).set_trans(Tween.TRANS_BOUNCE)
-	tween.tween_property(_rock, "position:y", -0.6, 0.5)
+	tween.tween_property(_rock, "scale", _split_scale(), 0.5).set_trans(Tween.TRANS_BOUNCE)
+	tween.tween_property(_rock, "position", _rock_rest.origin + Vector3.DOWN * 0.6, 0.5)
 	_blocker.set_deferred(&"disabled", true)
 	# The use volume goes too, or it hides whatever is behind it (the ladder
 	# down the shaft) from the player's aim.
@@ -138,10 +195,14 @@ func _split() -> void:
 		_external_body.set_deferred(&"collision_mask", 0)
 	Dialogue.play(dialogue)
 
+## Split, the stone lies in pieces, low: its own scale, flattened.
+func _split_scale() -> Vector3:
+	return _rock_rest.basis.get_scale() * Vector3(1.1, 0.25, 1.1)
+
 func _apply() -> void:
 	if broken:
-		_rock.scale = Vector3(1.1, 0.25, 1.1)
-		_rock.position.y = -0.6
+		_rock.scale = _split_scale()
+		_rock.position = _rock_rest.origin + Vector3.DOWN * 0.6
 		_blocker.disabled = true
 		($Body as CollisionObject3D).collision_layer = 0
 		if _external_body != null:

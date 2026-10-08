@@ -20,7 +20,10 @@ const OIL_SHADER := preload("res://assets/shaders/ui/oil_fill.gdshader")
 const UI_TICK := preload("res://audio/sfx/ui/click_002.ogg")
 const OBJECTIVE_SOUND := preload("res://audio/sfx/ui/confirmation_001.ogg")
 
-const OBJECTIVE_VISIBLE_SECONDS := 10.0
+const OBJECTIVE_VISIBLE_SECONDS := 12.0
+## Afterwards the objective stays, quieter (unless the setting says to let it
+## go): only its line, without the header and the hint.
+const OBJECTIVE_REST_ALPHA := 0.55
 const TYPEWRITER_CPS := 55.0
 
 var _player: Player
@@ -39,6 +42,9 @@ var _objective_header: Label
 var _objective_label: Label
 var _hint_label: Label
 var _names_label: Label
+## The header, its rule and the hint: shown with a new objective and in the
+## journal, gone when the objective rests.
+var _objective_extras: Array[Control] = []
 var _toast_box: VBoxContainer
 var _oil_fill_mat: ShaderMaterial
 var _oil_group: Control
@@ -164,6 +170,7 @@ func _build() -> void:
 	_objective_box.add_child(rule)
 	_objective_box.add_child(_objective_label)
 	_objective_box.add_child(_hint_label)
+	_objective_extras = [_objective_header, rule, _hint_label]
 	# In the journal (held key) only: how many makers' names you carry.
 	_names_label = _label("HintLabel", "")
 	_names_label.visible = false
@@ -327,11 +334,15 @@ func _process(delta: float) -> void:
 	if not _ready_done:
 		return
 	_objective_timer -= delta
-	if _objective_timer <= 0.0 and _objective_box.modulate.a > 0.0 and not Input.is_action_pressed(&"journal"):
-		_objective_box.modulate.a = move_toward(_objective_box.modulate.a, 0.0, delta * 0.7)
 	var journal := Input.is_action_pressed(&"journal")
 	if journal and _objective_label.text != "":
 		_objective_box.modulate.a = move_toward(_objective_box.modulate.a, 1.0, delta * 6.0)
+	elif _objective_timer <= 0.0:
+		var rest := OBJECTIVE_REST_ALPHA if Settings.get_value(&"objective_always") and _objective_label.text != "" else 0.0
+		_objective_box.modulate.a = move_toward(_objective_box.modulate.a, rest, delta * 0.7)
+	var extras := 1.0 if journal or _objective_timer > 0.0 else 0.0
+	for c in _objective_extras:
+		c.modulate.a = move_toward(c.modulate.a, extras, delta * (6.0 if journal else 0.7))
 	var names := NamesDB.found().size() if journal else 0
 	_names_label.visible = names > 0
 	if names > 0:
@@ -383,7 +394,9 @@ func _process(delta: float) -> void:
 func _on_objective_changed(text_key: String, hint_key: String) -> void:
 	text_key = Net.objective_for(text_key)
 	if text_key == "":
+		# Nothing to do for now (the sealing): no stale objective lingers.
 		_objective_timer = 0.0
+		_objective_label.text = ""
 		return
 	_objective_header.text = tr("HUD_NEW_OBJECTIVE").to_upper()
 	_objective_label.text = tr(text_key)
@@ -394,6 +407,8 @@ func _on_objective_changed(text_key: String, hint_key: String) -> void:
 	_hint_label.visible = hint != ""
 	_objective_timer = OBJECTIVE_VISIBLE_SECONDS
 	_objective_box.modulate.a = 0.0
+	for c in _objective_extras:
+		c.modulate.a = 1.0
 	var tween := create_tween()
 	_objective_box.position.x = 30
 	tween.set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

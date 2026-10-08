@@ -6,6 +6,7 @@ extends Usable
 ##   usable_show_blocked(user) -> bool    usable_use(user)
 ##   usable_tap(user)                     usable_hold_tick(user, progress)
 ##   usable_hold_done(user)               usable_hold_cancelled(user)
+##   usable_is_hold(user) -> bool         (whether holding does anything for them now)
 
 @export var delegate_path: NodePath = ^"../.."
 
@@ -25,6 +26,13 @@ func can_use(user: Node) -> bool:
 		return false
 	if _delegate != null and _delegate.has_method(&"usable_can_use"):
 		return _delegate.call(&"usable_can_use", user)
+	return true
+
+func is_hold_for(user: Node) -> bool:
+	if not is_hold():
+		return false
+	if _delegate != null and _delegate.has_method(&"usable_is_hold"):
+		return bool(_delegate.call(&"usable_is_hold", user))
 	return true
 
 func shows_when_blocked(user: Node) -> bool:

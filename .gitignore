@@ -25,3 +25,6 @@ Thumbs.db
 
 # Python bytecode from the Blender build scripts
 __pycache__/
+
+# Epic Online Services keys (see eos.example.cfg): kept out of the public repo
+eos.cfg

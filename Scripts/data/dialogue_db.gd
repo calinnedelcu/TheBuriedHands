@@ -277,6 +277,10 @@ const GUARD_BARKS := {
 	&"lost": ["BARK_LOST_1", "BARK_LOST_2"],
 	&"calm": ["BARK_CALM_1", "BARK_CALM_2"],
 	&"noise": ["BARK_NOISE_1", "BARK_NOISE_2"],
+	# Gone to look where something thrown came down, and found only that.
+	&"thrown": ["BARK_THROWN_1", "BARK_THROWN_2", "BARK_THROWN_3"],
+	# Act I: the soldier in the workshop door sends the craftsman back.
+	&"keep_in": ["BARK_KEEP_IN_1", "BARK_KEEP_IN_2", "BARK_KEEP_IN_3"],
 }
 
 static func sequence(id: StringName) -> Array:
