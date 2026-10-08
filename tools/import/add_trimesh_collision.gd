@@ -1,7 +1,9 @@
 @tool
 extends EditorScenePostImport
-## Import script for the big map models (MapWithoutTreasure, tunele): every
-## mesh gets a hidden StaticBody3D with a trimesh collider at import time.
+## Import script for the big map models (MapWithoutTreasure, tunele, the
+## treasury): every mesh gets a hidden StaticBody3D with a trimesh collider at
+## import time. Made here rather than at startup, they come with the scene,
+## so Game can build them for the physics before the level enters the tree.
 
 func _post_import(scene: Node) -> Node:
 	_add_collision_recursive(scene, scene)

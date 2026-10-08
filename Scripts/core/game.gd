@@ -300,18 +300,24 @@ func _change_scene(path: String) -> void:
 	level = null
 	_loading = true
 	var packed := await _load_scene(path, notes)
+	var scene: Node = null
+	if packed != null and change == _scene_changes:
+		scene = packed.instantiate()
+		await _build_collision(scene, change)
 	_loading = false
 	_loading_label.visible = false
 	if notes:
 		var out := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		out.tween_property(_note, "modulate:a", 0.0, 0.35)
 	if change != _scene_changes:
+		if scene != null:
+			scene.free()
 		return
-	if packed == null:
+	if scene == null:
 		push_error("Failed to load scene %s" % path)
 		await _fade_to(0.0, 0.3)
 		return
-	get_tree().change_scene_to_packed(packed)
+	get_tree().change_scene_to_node(scene)
 	# Two frames: one for the swap, one for _ready() chains and the first draw.
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -345,6 +351,33 @@ func _load_scene(path: String, notes: bool) -> PackedScene:
 		push_warning("Threaded load of %s failed; loading it again" % path)
 		packed = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE) as PackedScene
 	return packed
+
+## Builds the scene's collision shapes before it enters the tree, a few at a
+## time with frames in between. The physics builds a trimesh the first time
+## its body enters the world, and the level's (millions of triangles) add up
+## to seconds in a single frame otherwise: the screen freezes and a co-op
+## partner hears nothing. A built shape stays built as long as it is loaded.
+func _build_collision(scene: Node, change: int) -> void:
+	var space := get_tree().root.find_world_3d().space
+	var shapes := {}
+	for n in scene.find_children("*", "CollisionShape3D", true, false):
+		var cs := n as CollisionShape3D
+		if cs.shape != null and not cs.disabled:
+			shapes[cs.shape] = true
+	var slice := Time.get_ticks_msec()
+	for shape: Shape3D in shapes:
+		if Time.get_ticks_msec() - slice > 40:
+			await get_tree().process_frame
+			if change != _scene_changes:
+				return
+			slice = Time.get_ticks_msec()
+		# A body of its own for a moment, in this world: entering it builds the
+		# shape, and it leaves before the physics ever steps.
+		var body := PhysicsServer3D.body_create()
+		PhysicsServer3D.body_set_mode(body, PhysicsServer3D.BODY_MODE_STATIC)
+		PhysicsServer3D.body_add_shape(body, shape.get_rid())
+		PhysicsServer3D.body_set_space(body, space)
+		PhysicsServer3D.free_rid(body)
 
 func _show_note() -> void:
 	var pick := randi() % LOADING_NOTES.size()
