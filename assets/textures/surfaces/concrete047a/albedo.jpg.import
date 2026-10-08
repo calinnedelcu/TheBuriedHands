@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://toewryc5qsoy"
 path.s3tc="res://.godot/imported/albedo.jpg-32b58eb5679d4c96e495e1e663fede70.s3tc.ctex"
+path.etc2="res://.godot/imported/albedo.jpg-32b58eb5679d4c96e495e1e663fede70.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/surfaces/concrete047a/albedo.jpg"
-dest_files=["res://.godot/imported/albedo.jpg-32b58eb5679d4c96e495e1e663fede70.s3tc.ctex"]
+dest_files=["res://.godot/imported/albedo.jpg-32b58eb5679d4c96e495e1e663fede70.s3tc.ctex", "res://.godot/imported/albedo.jpg-32b58eb5679d4c96e495e1e663fede70.etc2.ctex"]
 
 [params]
 

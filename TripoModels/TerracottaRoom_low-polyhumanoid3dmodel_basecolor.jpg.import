@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cydm1og1spoid"
 path.s3tc="res://.godot/imported/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg-e9b6cde0bc501108fa31910302e58001.s3tc.ctex"
+path.etc2="res://.godot/imported/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg-e9b6cde0bc501108fa31910302e58001.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://TripoModels/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg"
-dest_files=["res://.godot/imported/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg-e9b6cde0bc501108fa31910302e58001.s3tc.ctex"]
+dest_files=["res://.godot/imported/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg-e9b6cde0bc501108fa31910302e58001.s3tc.ctex", "res://.godot/imported/TerracottaRoom_low-polyhumanoid3dmodel_basecolor.jpg-e9b6cde0bc501108fa31910302e58001.etc2.ctex"]
 
 [params]
 

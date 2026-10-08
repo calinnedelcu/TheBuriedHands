@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cy3v3u4yi14nj"
 path.s3tc="res://.godot/imported/samuraiarmor3dmodel_basecolor.JPEG-fb4b489f7d3348e6eb8f1a61c5c72de3.s3tc.ctex"
+path.etc2="res://.godot/imported/samuraiarmor3dmodel_basecolor.JPEG-fb4b489f7d3348e6eb8f1a61c5c72de3.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://TripoModels/samurai_armor_3d_model/tripo_convert_8c8823eb-5f0d-4b1b-a072-242c4197459c.fbm/samuraiarmor3dmodel_basecolor.JPEG"
-dest_files=["res://.godot/imported/samuraiarmor3dmodel_basecolor.JPEG-fb4b489f7d3348e6eb8f1a61c5c72de3.s3tc.ctex"]
+dest_files=["res://.godot/imported/samuraiarmor3dmodel_basecolor.JPEG-fb4b489f7d3348e6eb8f1a61c5c72de3.s3tc.ctex", "res://.godot/imported/samuraiarmor3dmodel_basecolor.JPEG-fb4b489f7d3348e6eb8f1a61c5c72de3.etc2.ctex"]
 
 [params]
 

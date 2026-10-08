@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4lem2mdfhb6q"
 path.s3tc="res://.godot/imported/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg-e0afa01863accff8cf4fdcf504a54dee.s3tc.ctex"
+path.etc2="res://.godot/imported/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg-e0afa01863accff8cf4fdcf504a54dee.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://TripoModels/viewmodel/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg"
-dest_files=["res://.godot/imported/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg-e0afa01863accff8cf4fdcf504a54dee.s3tc.ctex"]
+dest_files=["res://.godot/imported/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg-e0afa01863accff8cf4fdcf504a54dee.s3tc.ctex", "res://.godot/imported/bound_arms_pov_low-polyboundarms3dmodel_basecolor.jpg-e0afa01863accff8cf4fdcf504a54dee.etc2.ctex"]
 
 [params]
 

@@ -71,6 +71,8 @@ Proiectul e pentru **Godot 4.7.2** (Forward+). Deschide folderul în editor și 
 
 Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 
+Versiuni de dat altora (cu șabloanele de export Godot 4.7.2 instalate): `godot --headless --path . --export-release "Windows Desktop" build/windows/TheBuriedHands.exe` și `godot --headless --path . --export-release "macOS" build/macos/TheBuriedHands.zip` (universal: Intel și Apple Silicon; semnat ad-hoc, deci la prima pornire pe alt Mac: clic dreapta → Open). Texturile se importă și în ETC2/ASTC, cerute de exportul pentru Apple Silicon.
+
 ## Structura proiectului
 
 - `Scripts/core/` — autoload-uri: `Settings`, `Net` (co-op online), `Sfx`, `Dialogue`, `Quest`, `Stealth`, `Game` (salvări, checkpoint-uri, moarte, final), `Music`.

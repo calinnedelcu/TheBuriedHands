@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3p1wxvjfp2hu"
 path.s3tc="res://.godot/imported/woodworker+3d+model_woodworker3dmodel_basecolor.jpg-e64d0f4db2f0ac68e96b8284b89909d9.s3tc.ctex"
+path.etc2="res://.godot/imported/woodworker+3d+model_woodworker3dmodel_basecolor.jpg-e64d0f4db2f0ac68e96b8284b89909d9.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://TripoModels/woodworker+3d+model_woodworker3dmodel_basecolor.jpg"
-dest_files=["res://.godot/imported/woodworker+3d+model_woodworker3dmodel_basecolor.jpg-e64d0f4db2f0ac68e96b8284b89909d9.s3tc.ctex"]
+dest_files=["res://.godot/imported/woodworker+3d+model_woodworker3dmodel_basecolor.jpg-e64d0f4db2f0ac68e96b8284b89909d9.s3tc.ctex", "res://.godot/imported/woodworker+3d+model_woodworker3dmodel_basecolor.jpg-e64d0f4db2f0ac68e96b8284b89909d9.etc2.ctex"]
 
 [params]
 

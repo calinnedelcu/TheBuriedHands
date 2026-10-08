@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cy55lwhp8ok80"
 path.s3tc="res://.godot/imported/TerracottaRoom2_matsimple.png-488781d61ba837691770ec07777c2453.s3tc.ctex"
+path.etc2="res://.godot/imported/TerracottaRoom2_matsimple.png-488781d61ba837691770ec07777c2453.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://scenes/items/TerracottaRoom2_matsimple.png"
-dest_files=["res://.godot/imported/TerracottaRoom2_matsimple.png-488781d61ba837691770ec07777c2453.s3tc.ctex"]
+dest_files=["res://.godot/imported/TerracottaRoom2_matsimple.png-488781d61ba837691770ec07777c2453.s3tc.ctex", "res://.godot/imported/TerracottaRoom2_matsimple.png-488781d61ba837691770ec07777c2453.etc2.ctex"]
 
 [params]
 
