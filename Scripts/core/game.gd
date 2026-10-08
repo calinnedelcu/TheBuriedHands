@@ -38,6 +38,9 @@ var _fade: ColorRect
 var _loading_label: Label
 var _note: Label
 var _note_index := -1
+## Counts scene changes: one that started earlier gives way to a later one.
+var _scene_changes := 0
+var _loading := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -273,32 +276,31 @@ func _delete_save() -> void:
 # --- Transitions --------------------------------------------------------------------
 
 func _change_scene(path: String) -> void:
+	_scene_changes += 1
+	var change := _scene_changes
 	get_tree().paused = false
 	await _fade_to(1.0, 0.45)
+	# One load at a time (two at once can lock up the same way as below), and
+	# the latest change wins: back to the menu while the level loads must not
+	# end with the level over the menu.
+	while _loading:
+		await get_tree().process_frame
+	if change != _scene_changes:
+		return
 	_loading_label.visible = true
 	var notes := path == LEVEL_SCENE
 	if notes:
 		_show_note()
 	level = null
-	ResourceLoader.load_threaded_request(path)
-	var shown := Time.get_ticks_msec()
-	while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		# A long first load (shaders compiling) gets a second note.
-		if notes and Time.get_ticks_msec() - shown > 9000:
-			shown = Time.get_ticks_msec()
-			_show_note()
-		await get_tree().process_frame
-	var packed := ResourceLoader.load_threaded_get(path) as PackedScene
-	if packed == null:
-		# A threaded load can (rarely) fail to resolve one of the scene's
-		# resources; a plain load right after has always worked.
-		push_warning("Threaded load of %s failed; loading it again" % path)
-		await get_tree().process_frame
-		packed = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE) as PackedScene
+	_loading = true
+	var packed := await _load_scene(path, notes)
+	_loading = false
 	_loading_label.visible = false
 	if notes:
 		var out := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		out.tween_property(_note, "modulate:a", 0.0, 0.35)
+	if change != _scene_changes:
+		return
 	if packed == null:
 		push_error("Failed to load scene %s" % path)
 		await _fade_to(0.0, 0.3)
@@ -307,7 +309,36 @@ func _change_scene(path: String) -> void:
 	# Two frames: one for the swap, one for _ready() chains and the first draw.
 	await get_tree().process_frame
 	await get_tree().process_frame
-	await _fade_to(0.0, 0.8)
+	if change == _scene_changes:
+		await _fade_to(0.0, 0.8)
+
+## Loads a scene without stopping the game: on a thread of our own, so the
+## loading screen moves and a co-op partner keeps hearing from us. Not with
+## load_threaded_request: in the engine's worker pool a script's preload()
+## goes to another worker while the one compiling the script holds the
+## script cache, and now and then the two wait on each other for good
+## (Godot 4.7.2). Headless runs (the dev runners) load in place: their dummy
+## renderer keeps its resources without the locks the real ones have, and a
+## load on another thread has crashed it.
+func _load_scene(path: String, notes: bool) -> PackedScene:
+	if DisplayServer.get_name() == "headless":
+		return ResourceLoader.load(path) as PackedScene
+	var loader := Thread.new()
+	loader.start(ResourceLoader.load.bind(path))
+	var shown := Time.get_ticks_msec()
+	while loader.is_alive():
+		# A long first load (shaders compiling) gets a second note.
+		if notes and Time.get_ticks_msec() - shown > 9000:
+			shown = Time.get_ticks_msec()
+			_show_note()
+		await get_tree().process_frame
+	var packed := loader.wait_to_finish() as PackedScene
+	if packed == null:
+		# A load off the main thread can (rarely) fail to resolve one of the
+		# scene's resources; a plain load right after has always worked.
+		push_warning("Threaded load of %s failed; loading it again" % path)
+		packed = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE) as PackedScene
+	return packed
 
 func _show_note() -> void:
 	var pick := randi() % LOADING_NOTES.size()
