@@ -7,6 +7,9 @@ const JOBS := [
 	["res://scenes/items/visuals/jar.tscn", "res://assets/ui/icons/icon_jar.png", 25.0],
 	["res://scenes/items/visuals/jar_full.tscn", "res://assets/ui/icons/icon_jar_full.png", 25.0],
 	["res://scenes/items/visuals/register.tscn", "res://assets/ui/icons/icon_register.png", 35.0],
+	# A tally half lies on its flat face; stood up here, flank and gold toward us.
+	["res://scenes/items/visuals/tally_wei.tscn", "res://assets/ui/icons/icon_tally_wei.png", Vector3(-90.0, 180.0, 0.0)],
+	["res://scenes/items/visuals/tally_pit.tscn", "res://assets/ui/icons/icon_tally_pit.png", Vector3(90.0, 0.0, 0.0)],
 ]
 
 func _initialize() -> void:
@@ -51,7 +54,11 @@ func _run() -> void:
 	vp.add_child(cam)
 	for job in JOBS:
 		var model: Node3D = (load(job[0]) as PackedScene).instantiate()
-		model.rotation_degrees.y = job[2]
+		# A turn about y, or a whole rotation in degrees.
+		if job[2] is Vector3:
+			model.rotation_degrees = job[2]
+		else:
+			model.rotation_degrees.y = job[2]
 		vp.add_child(model)
 		await process_frame
 		var box := _aabb(model)

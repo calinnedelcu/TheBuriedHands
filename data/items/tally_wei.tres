@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_tally_wei.png" id="1_dxdwu"]
+[ext_resource type="Script" path="res://Scripts/items/item_data.gd" id="2_7ih16"]
+[ext_resource type="PackedScene" path="res://scenes/items/visuals/tally_wei.tscn" id="3_e5u7f"]
+
+[resource]
+script = ExtResource("2_7ih16")
+id = &"tally_wei"
+name_key = "ITEM_TALLY_WEI"
+description_key = "ITEM_DESC_TALLY_WEI"
+icon = ExtResource("1_dxdwu")
+world_scene = ExtResource("3_e5u7f")
+key_item = true
+droppable = false
+throw_noise_radius = 0.0
+mass = 0.3

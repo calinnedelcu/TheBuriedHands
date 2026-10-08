@@ -31,7 +31,13 @@ func _run() -> void:
 	Game.set_flag(&"guards_hostile")
 	Game.advance_sealing(1)
 	var register := Game.level.get_node("Register") as Pickup
+	# Beside the register (on Wei's desk): let him come down to the floor.
 	player.global_position = register.global_position + Vector3(1.0, 0.0, 1.0)
+	await _wait(0.3)
+	var t := 0.0
+	while not player.is_on_floor() and t < 3.0:
+		await _wait(0.1)
+		t += 0.1
 	await _wait(0.3)
 	register.get_node("Usable").call(&"use", player)
 	player.inventory.take_lamp(42.0, true)

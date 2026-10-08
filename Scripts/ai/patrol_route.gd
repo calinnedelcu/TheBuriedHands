@@ -3,7 +3,8 @@
 class_name PatrolRoute
 extends Node3D
 ## A guard's beat: its Marker3D children in order. A marker can carry metadata
-## `wait` (seconds to pause) and `look` (true = look around while paused).
+## `wait` (seconds to pause), `look` (true = look around while paused) and
+## `face` (true = turn the way the marker faces while paused: a post).
 ## In the editor the route is drawn as a line so it is easy to tweak.
 
 @export var loop := true
@@ -27,6 +28,13 @@ func wait_at(index: int) -> float:
 func looks_at(index: int) -> bool:
 	var pts := points()
 	return index >= 0 and index < pts.size() and bool(pts[index].get_meta(&"look", false))
+
+## The way a guard faces paused at this point, or NAN to keep his own.
+func facing(index: int) -> float:
+	var pts := points()
+	if index < 0 or index >= pts.size() or not bool(pts[index].get_meta(&"face", false)):
+		return NAN
+	return pts[index].global_rotation.y
 
 func _ready() -> void:
 	if Engine.is_editor_hint():

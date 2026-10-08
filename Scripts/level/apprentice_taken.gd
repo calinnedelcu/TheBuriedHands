@@ -8,6 +8,9 @@ extends Area3D
 ## apprentice is the other player: nothing happens here.
 ##
 ## The area is a band across the workshop he must cross going east.
+##
+## Wei keeps his desk in the archives (WeiDesk) the rest of the time: the
+## scene takes him from it, out of sight, and sends him back to it after.
 
 @export var wei_path: NodePath
 @export var men_paths: Array[NodePath] = []
@@ -51,10 +54,10 @@ func _actors() -> Array[Guard]:
 	out.append_array(_men)
 	return out
 
-## Wei and his men are nowhere until their scene: not seen, not saved, not
-## patrolling, not in the way.
+## His men are nowhere until their scene: not seen, not saved, not
+## patrolling, not in the way. Wei stays at his desk.
 func _away() -> void:
-	for g in _actors():
+	for g in _men:
 		g.remove_from_group(&"persistent")
 		g.set_scripted(true)
 		_show(g, false)
@@ -179,12 +182,15 @@ func _escort(apprentice: Node3D, out: Array[Vector3]) -> void:
 			_walk(_men[1], out)
 		await tw.finished
 		at = p
-	# Gone once nobody sees them go.
+	# Gone once nobody sees them go: the men to the pits with him, Wei back
+	# to his desk in the archives.
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	while player != null and is_inside_tree() and player.camera.is_position_in_frustum(at + Vector3.UP * 1.5) and player.global_position.distance_to(at) < 30.0:
 		await get_tree().create_timer(0.5, false).timeout
-	for g in _actors():
+	for g in _men:
 		_show(g, false)
+	_wei.warp_to_route(0)
+	_wei.set_scripted(false)
 	apprentice.set(&"_talking", false)
 	apprentice.call(&"_taken")
 

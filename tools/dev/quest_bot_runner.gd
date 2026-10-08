@@ -76,15 +76,31 @@ func _run() -> void:
 	_check("Wei's men took the apprentice from the kiln", Game.get_flag(&"apprentice_taken") and not apprentice.visible)
 	await _use("Liang/TalkBody/Usable")
 	await _wait_dialogue()
-	_expect(&"reach_mechanism")
+	# He came without Wei's half: Liang says where it lies, and the story
+	# waits for it.
+	_expect(&"take_tally")
+	await _use("WeiTally/Usable")
+	await _wait(0.3)
+	_check("Wei's half in hand", player.inventory.has_item(&"tally_wei"))
+	_expect(&"descend")
 
-	# Tunnels route: tools, stone.
+	# Tools, stone, and down to the pits.
 	for p in level.find_children("Tool_*", "", false, false):
 		await _use(String(level.get_path_to(p)) + "/Usable")
 	_check("has wedge + hammer", player.inventory.has_item(&"wedge") and player.inventory.has_item(&"hammer"))
 	for i in 4:
 		await _hold("ShaftStone/Body/Usable")
 	_check("stone broken", level.get_node("ShaftStone").get("broken"))
+	await _enter("UnderTheMountain/PitsReached")
+	_expect(&"pit_tally")
+	# The commander's half, then the whole tiger in the inner gate.
+	await _use("UnderTheMountain/CommanderPost/PitTally/Usable")
+	await _wait(0.3)
+	_expect(&"open_gate")
+	await _use("UnderTheMountain/InnerGate/Sockets/Usable")
+	await _wait(0.3)
+	_check("the inner gate opened", (level.get_node("UnderTheMountain/InnerGate") as TallyGate).opened)
+	_expect(&"reach_mechanism")
 
 	await _enter("Story/MechanismEnter")
 	_expect(&"inspect_balance")

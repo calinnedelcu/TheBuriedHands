@@ -8,8 +8,9 @@ extends Node
 ## co-op jobs (the apprentice fetches and hands over, the master works the
 ## clay; the wedge held while the master strikes; the full jar taking both
 ## hands; the brake held while the apprentice pins the causeway; the drain's
-## bend only the apprentice fits), a knock-down and a revive, a shared death
-## and retry, and both walking out into the light. Losing each other while a
+## bend only the apprentice fits; a half of the tiger tally each, set in the
+## inner gate), a knock-down and a revive, a shared death and retry, and
+## both walking out into the light. Losing each other while a
 ## level loads fails the run, and so does a script error anywhere.
 ## Run the two at once (add --from=causeway to both to start at the pour):
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/coop_bot_runner.gd --role=host
@@ -122,7 +123,9 @@ func _host() -> void:
 	_expect(&"talk_liang")
 	await _use("Liang/TalkBody/Usable", &"use")
 	await _wait_dialogue()
-	_expect(&"reach_mechanism")
+	# Neither of us took Wei's half on the way: the apprentice fetches it.
+	_expect(&"take_tally")
+	_check("the apprentice took Wei's half of the tally", await _until(func(): return Quest.has_reached(&"descend"), 40.0))
 
 	# Act III, the tunnels: the apprentice holds the wedge, the master strikes.
 	await _use("Tool_Workbench_Hammer_W/Usable", &"use")
@@ -135,6 +138,17 @@ func _host() -> void:
 		await _use("ShaftStone/Body/Usable", &"hold")
 	_check("the stone split", bool(stone.get("broken")))
 	_check("the apprentice let go of the wedge", await _until(func(): return apprentice.bracing == null, 5.0))
+	# Down in the pits the master takes the commander's half; at the inner
+	# gate each of us sets his own, and a whole tiger opens it.
+	await _enter("UnderTheMountain/PitsReached")
+	_expect(&"pit_tally")
+	await _use("UnderTheMountain/CommanderPost/PitTally/Usable", &"use")
+	_expect(&"open_gate")
+	var gate := level.get_node("UnderTheMountain/InnerGate") as TallyGate
+	await _use("UnderTheMountain/InnerGate/Sockets/Usable", &"use")
+	_check("half a tiger: the gate stays shut", gate.pit_set and not gate.opened)
+	_check("the apprentice set Wei's half: the gate opened", await _until(func(): return gate.opened, 40.0))
+	_expect(&"reach_mechanism")
 
 	# Act IV, the balance.
 	await _enter("Story/MechanismEnter")
@@ -265,14 +279,26 @@ func _client() -> void:
 	_check("retry: back at find_liang here", Quest.has_reached(&"find_liang"))
 	_check("retry: our body is ours again", me.is_local and me.name == Net.APPRENTICE_BODY)
 
+	# The master talked to Liang; Wei's half is ours to fetch from his desk.
+	_check("the master talked to Liang", await _until(func(): return Quest.has_reached(&"take_tally"), 60.0))
+	await _use("WeiTally/Usable", &"use")
+	_check("we carry Wei's half", await _until(func(): return me.inventory.has_item(&"tally_wei"), 5.0))
+
 	# Act III: we hold the wedge while the master strikes.
-	_check("the master talked to Liang", await _until(func(): return Quest.has_reached(&"reach_mechanism"), 60.0))
 	await _use("Tool_Workbench_Wedge_W2/Usable", &"use")
 	_check("we have the wedge", me.inventory.has_item(&"wedge"))
 	await _use("ShaftStone/Body/Usable", &"use")
 	_check("holding the wedge in the crack", me.bracing != null and me.controls_locked())
 	_check("the master split the stone", await _until(func(): return bool(level.get_node("ShaftStone").get("broken")), 40.0))
 	_check("free to move again", await _until(func(): return me.bracing == null and not me.controls_locked(), 5.0))
+	# At the inner gate the master sets the commander's half; we set Wei's.
+	var gate := level.get_node("UnderTheMountain/InnerGate") as TallyGate
+	_check("the master set the commander's half", await _until(func(): return gate.pit_set, 60.0))
+	# Let him see half a tiger keep it shut first.
+	await _wait(2.5)
+	await _use("UnderTheMountain/InnerGate/Sockets/Usable", &"use")
+	_check("a whole tiger: the gate opened (seen here)", await _until(func(): return gate.opened, 10.0))
+	_check("Wei's half is in its socket", not me.inventory.has_item(&"tally_wei"))
 
 	# Act IV: we take the jar, fill it (both hands: no lamp), and pour it.
 	_check("the master examined the balance", await _until(func(): return Quest.has_reached(&"get_vase"), 60.0))

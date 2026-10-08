@@ -75,11 +75,14 @@ func _setup(act: String) -> void:
 			Quest.start_at(&"find_liang")
 			player.global_position = Vector3(6.0, 0.2, -6.0)
 		"act3":
-			Quest.start_at(&"reach_mechanism")
-			# Wei's men took the apprentice while his master was with Liang.
+			Quest.start_at(&"descend")
+			# Wei's men took the apprentice while his master was with Liang;
+			# Wei's half of the tally came from his desk on the way.
 			Game.set_flag(&"apprentice_taken")
+			Game.set_flag(&"has_tally_wei")
 			player.inventory.add(&"wedge")
 			player.inventory.add(&"hammer")
+			player.inventory.add(&"tally_wei")
 			player.global_position = Vector3(37.8, 0.4, -27.5)
 		"act4":
 			Quest.start_at(&"inspect_balance")
@@ -146,16 +149,23 @@ func _act2() -> bool:
 	for g in get_tree().get_nodes_in_group(&"guards"):
 		(g as Guard).sight_range = 0.0
 		(g as Guard).hearing_scale = 0.0
+	var desk := level.get_node("WeiDesk") as WeiDesk
+	_check("Wei at his desk, reading out names", desk.reading())
 	await _use("Register")
 	_check("evidence taken", Game.get_flag(&"has_evidence"))
+	await _skip_dialogue()
+	await _use("WeiTally")
+	_check("Wei's half of the tally taken", player.inventory.has_item(&"tally_wei") and Game.get_flag(&"has_tally_wei"))
 	await _skip_dialogue()
 	await _walk_to(Vector3(37.8, 0.2, -26.2), 1.2)
 	await _wait(0.5)
 	_expect(&"talk_liang")
 	await _use("Liang/TalkBody")
 	await _skip_dialogue()
-	_expect(&"reach_mechanism")
-	return Quest.is_at(&"reach_mechanism")
+	await _wait(0.3)
+	# With Wei's half already in hand, the step that asks for it passes.
+	_expect(&"descend")
+	return Quest.is_at(&"descend")
 
 func _act3() -> bool:
 	for g in get_tree().get_nodes_in_group(&"guards"):
@@ -246,8 +256,8 @@ func _act5() -> bool:
 
 ## Act III: the tunnel south has fallen in, so the workers' shaft and its
 ## lift (too light alone, down with a stone in the ballast box), the ranks of
-## clay soldiers, the pen's lever across the yard, and the stairs up to the
-## mechanism's tunnel.
+## clay soldiers, the commander's half of the tally at his post, the pen's
+## lever across the yard, and the stairs up to the inner gate.
 func _pits() -> bool:
 	const LIFT := "UnderTheMountain/ShaftLift/"
 	var lift := level.get_node(LIFT) as CounterweightLift
@@ -303,6 +313,11 @@ func _pits() -> bool:
 	player.inventory.lamp().toggle()
 	player.global_position = back
 	await _wait(1.5)
+	# Walking in from the shaft he reached the pits (a step, and a checkpoint).
+	await _use("UnderTheMountain/CommanderPost/PitTally")
+	await _skip_dialogue()
+	_check("the commander's half taken", player.inventory.has_item(&"tally_pit"))
+	_expect(&"open_gate")
 	await _use("UnderTheMountain/PenLever/Lever/Body")
 	_check("the pen's gate is up", pen.opened)
 	_check("the apprentice is free", Game.get_flag(&"apprentice_freed"))
@@ -311,6 +326,14 @@ func _pits() -> bool:
 	_check("a checkpoint once down in the pits", _pits_checkpoint)
 	var up := await _walk_to(Vector3(4.8, -8.5, 35.0), 1.2)
 	_check("up the stairs (%s)" % player.global_position.snapped(Vector3.ONE * 0.1), up and player.global_position.y > -9.0)
+	# The inner gate: the whole tiger in its sockets, and it opens.
+	var gate := level.get_node("UnderTheMountain/InnerGate") as TallyGate
+	_check("the inner gate is shut", not gate.opened)
+	await _use("UnderTheMountain/InnerGate/Sockets")
+	await _skip_dialogue()
+	_check("the whole tiger opened the inner gate", gate.opened and gate.wei_set and gate.pit_set)
+	_expect(&"reach_mechanism")
+	await _wait(4.5)
 	await _walk_to(Vector3(0.3, -8.5, 35.0), 1.0)
 	return player.global_position.y > -9.0
 

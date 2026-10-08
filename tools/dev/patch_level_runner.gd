@@ -62,6 +62,7 @@ func _run() -> void:
 	# would reshuffle what the patches above scatter.
 	_workers_shaft_and_pits()
 	_corridor_on_the_way_to_the_archives()
+	_wei_at_his_desk()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -960,20 +961,25 @@ func _workers_shaft_and_pits() -> void:
 	seen.name = "PitsEnter"
 	seen.dialogue = &"pits_enter"
 	seen.quest_from = &"talk_liang"
-	# The pits are the way on, and guarded: a fall there doesn't send him
-	# back up to Liang's.
-	seen.checkpoint = true
-	group.add_child(seen)
-	seen.owner = root
-	seen.global_position = Vector3(44.0, pit_floor, 9.0)
-	for spot in [[Vector3(44.0, pit_floor + 2.0, -10.0), Vector3(6.0, 4.0, 2.0)], [Vector3(33.0, pit_floor + 2.0, 28.0), Vector3(3.5, 4.0, 2.0)]]:
-		var shape := CollisionShape3D.new()
-		var box := BoxShape3D.new()
-		box.size = spot[1]
-		shape.shape = box
-		seen.add_child(shape)
-		shape.owner = root
-		shape.global_position = spot[0]
+	# Reaching them is a step of its own (a checkpoint follows it: they are
+	# guarded, and a fall there doesn't send him back up to Liang's). It
+	# waits for that step, so going down early and coming back still counts.
+	var reached := StoryTrigger.new()
+	reached.name = "PitsReached"
+	reached.quest_step = &"descend"
+	reached.completes_step = &"descend"
+	for t in [seen, reached]:
+		group.add_child(t)
+		t.owner = root
+		t.global_position = Vector3(44.0, pit_floor, 9.0)
+		for spot in [[Vector3(44.0, pit_floor + 2.0, -10.0), Vector3(6.0, 4.0, 2.0)], [Vector3(33.0, pit_floor + 2.0, 28.0), Vector3(3.5, 4.0, 2.0)]]:
+			var shape := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			box.size = spot[1]
+			shape.shape = box
+			t.add_child(shape)
+			shape.owner = root
+			shape.global_position = spot[0]
 	# Light. A wall lamp's back (+z) goes against the wall.
 	var lamp_scene := load("res://scenes/world/wall_lamp.tscn") as PackedScene
 	for spot in [
@@ -981,7 +987,7 @@ func _workers_shaft_and_pits() -> void:
 			[Vector3(36.0, pit_floor + 2.6, -11.6), PI], [Vector3(30.4, pit_floor + 2.6, 2.0), -PI * 0.5],
 			[Vector3(30.4, pit_floor + 2.6, 20.0), -PI * 0.5], [Vector3(69.6, pit_floor + 2.6, 18.5), PI * 0.5],
 			[Vector3(34.35, pit_floor + 2.4, 40.0), PI * 0.5], [Vector3(10.62, pit_floor + step + 2.2, 34.5), PI * 0.5],
-			[Vector3(3.42, pit_floor + step * 2.0 + 2.2, 45.5), -PI * 0.5]]:
+			[Vector3(3.42, pit_floor + step * 2.0 + 2.2, 45.5), -PI * 0.5], [Vector3(3.42, top + 2.3, 37.6), -PI * 0.5]]:
 		var lamp := lamp_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
 		group.add_child(lamp)
 		lamp.owner = root
@@ -996,9 +1002,55 @@ func _workers_shaft_and_pits() -> void:
 	_pit_guard(guard_scene, "PitGuardRing", "PitsRing", true, Color(0.95, 0.85, 0.78), [
 		[Vector3(31.3, pit_floor, -9.0), 2.5, true], [Vector3(62.2, pit_floor, -9.0), 2.0, true],
 		[Vector3(62.2, pit_floor, 27.0), 1.0, false], [Vector3(31.3, pit_floor, 27.0), 2.5, true]])
-	_pit_guard(guard_scene, "PitGuardYard", "PitsYard", false, Color(1.1, 0.92, 0.72), [
-		[Vector3(64.0, pit_floor, -1.0), 4.0, true], [Vector3(63.6, pit_floor, 15.0), 3.0, true]])
-	_log.append("under the mountain: the workers' shaft and lift, the army pits (%d trenches), the pen, the stair well" % trench_x.size())
+	# The yard's is the commander of the pits: he walks the yard and stands
+	# a while at his post, the table where he keeps his half of the tally.
+	_pit_guard(guard_scene, "PitGuardYard", "PitsYard", false, Color(0.62, 0.5, 0.46), [
+		[Vector3(64.0, pit_floor, -1.0), 4.0, true], [Vector3(63.6, pit_floor, 15.0), 3.0, true],
+		[Vector3(67.4, pit_floor, 24.4), 7.0, false, PI]])
+	_commander_post(group, Vector3(67.4, pit_floor, 25.6))
+	# The inner gate in the doorway at the top of the stairs.
+	var gate := TallyGate.new()
+	gate.name = "InnerGate"
+	group.add_child(gate)
+	gate.owner = root
+	gate.global_position = Vector3(2.42, top, 35.0)
+	_log.append("under the mountain: the workers' shaft and lift, the army pits (%d trenches), the pen, the commander's post, the stair well and the inner gate" % trench_x.size())
+
+## The commander's post in the yard: a table with a lamp and a lacquered box,
+## his half of the tiger tally on it.
+func _commander_post(group: Node3D, at: Vector3) -> void:
+	var timber := load("res://assets/materials/level/timber.tres") as Material
+	var red := load("res://assets/materials/props/lacquer_red.tres") as Material
+	var post := Node3D.new()
+	post.name = "CommanderPost"
+	group.add_child(post)
+	post.owner = root
+	post.global_position = at
+	_kit_solid(post, "Top", at + Vector3(0.0, 0.86, 0.0), Vector3(1.4, 0.06, 0.8), timber)
+	for k in 4:
+		var corner := Vector3(-0.6 if k % 2 == 0 else 0.6, 0.0, -0.32 if k < 2 else 0.32)
+		_kit_solid(post, "Leg%d" % k, at + corner, Vector3(0.08, 0.86, 0.08), timber)
+	_kit_solid(post, "Box", at + Vector3(0.25, 0.92, 0.0), Vector3(0.36, 0.12, 0.26), red)
+	var lamp := (load("res://scenes/world/oil_lamp_prop.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
+	lamp.name = "Lamp"
+	post.add_child(lamp)
+	lamp.owner = root
+	lamp.global_position = at + Vector3(-0.45, 0.92, 0.1)
+	var half := (load("res://scenes/items/pickup.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+	half.name = "PitTally"
+	post.add_child(half)
+	half.owner = root
+	half.item_id = &"tally_pit"
+	half.sets_flag = &"has_tally_pit"
+	half.dialogue = &"tally_pit_taken"
+	half.global_transform = Transform3D(Basis(Vector3.UP, 0.3), at + Vector3(0.25, 1.04, 0.0))
+	var whole := RequireItems.new()
+	whole.name = "TallyWhole"
+	whole.step = &"pit_tally"
+	var items: Array[StringName] = [&"tally_pit"]
+	whole.items = items
+	post.add_child(whole)
+	whole.owner = root
 
 func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torch: bool, tint: Color, points: Array) -> void:
 	var route := PatrolRoute.new()
@@ -1013,6 +1065,10 @@ func _pit_guard(scene: PackedScene, guard_name: String, route_name: String, torc
 		m.global_position = points[i][0]
 		m.set_meta(&"wait", points[i][1])
 		m.set_meta(&"look", points[i][2])
+		# A post: he stands facing this way.
+		if points[i].size() > 3:
+			m.rotation.y = points[i][3]
+			m.set_meta(&"face", true)
 	var guard := scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Node3D
 	guard.name = guard_name
 	root.get_node("Guards").add_child(guard)
@@ -1591,3 +1647,91 @@ func _corridor_on_the_way_to_the_archives() -> void:
 	shards.count = 3
 	shards.global_transform = Transform3D(Basis(Vector3.UP, 0.6), _floor_at(Vector3(-60.6, 0.2, 7.0)) + Vector3.UP * 0.02)
 	_log.append("corridor: its word on entering from the workshop (Act II), shards by the door, the barred door to the Mercury Hall")
+
+## Act II: Overseer Wei keeps his desk at the far end of the archives,
+## before the sealed door between the two tripod lamps, reading out the
+## names on his list and striking them off (WeiDesk). His half of the tiger
+## tally lies on it, and the workers' register. He faces the room from
+## behind it and only leaves it to look into a noise. A word from the
+## craftsman as he first sees him, with the hint that a thrown shard draws a
+## guard off; and a step that waits for Wei's half if he left it there.
+func _wei_at_his_desk() -> void:
+	var at := _floor_at(Vector3(8.2, 0.5, -60.3))
+	var desk := root.get_node_or_null("WeiDesk") as WeiDesk
+	if desk == null:
+		desk = WeiDesk.new()
+		desk.name = "WeiDesk"
+		root.add_child(desk)
+		desk.owner = root
+	desk.global_position = at
+	var routes := root.get_node("Routes")
+	var route := routes.get_node_or_null("WeiDesk") as PatrolRoute
+	if route == null:
+		route = PatrolRoute.new()
+		route.name = "WeiDesk"
+		routes.add_child(route)
+		route.owner = root
+		var m := Marker3D.new()
+		m.name = "Post"
+		route.add_child(m)
+		m.owner = root
+	var post := route.get_node("Post") as Marker3D
+	post.global_position = at + Vector3(0.0, 0.0, -1.05)
+	post.rotation.y = PI
+	post.set_meta(&"wait", 600.0)
+	post.set_meta(&"look", false)
+	post.set_meta(&"face", true)
+	var wei := root.get_node("Guards/Wei") as Guard
+	wei.route_path = wei.get_path_to(route)
+	wei.global_position = post.global_position
+	wei.rotation.y = PI
+	# He speaks for himself: he knows whose name is still on his list.
+	wei.voice = &"wei"
+	wei.own_barks = {
+		&"spotted": ["WEI_SPOTTED_1", "WEI_SPOTTED_2"],
+		&"noise": ["WEI_NOISE_1"],
+		&"calm": ["WEI_CALM_1"],
+		&"lost": ["WEI_LOST_1"],
+	}
+	desk.wei_path = desk.get_path_to(wei)
+	# On the desk: his half of the tally, and the register beside it.
+	var half := root.get_node_or_null("WeiTally") as Pickup
+	if half == null:
+		half = (load("res://scenes/items/pickup.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+		half.name = "WeiTally"
+		root.add_child(half)
+		half.owner = root
+	half.item_id = &"tally_wei"
+	half.sets_flag = &"has_tally_wei"
+	half.dialogue = &"tally_wei_taken"
+	half.global_transform = Transform3D(Basis(Vector3.UP, -0.25), at + Vector3(0.32, WeiDesk.TOP + 0.002, 0.08))
+	var register := root.get_node("Register") as Node3D
+	register.global_transform = Transform3D(Basis(Vector3.UP, 0.35), at + Vector3(-0.2, WeiDesk.TOP + 0.002, 0.05))
+	var story := root.get_node("Story")
+	var in_hand := story.get_node_or_null("TallyInHand") as RequireItems
+	if in_hand == null:
+		in_hand = RequireItems.new()
+		in_hand.name = "TallyInHand"
+		story.add_child(in_hand)
+		in_hand.owner = root
+	in_hand.step = &"take_tally"
+	var items: Array[StringName] = [&"tally_wei"]
+	in_hand.items = items
+	var seen := story.get_node_or_null("WeiSeen") as StoryTrigger
+	if seen == null:
+		seen = StoryTrigger.new()
+		seen.name = "WeiSeen"
+		story.add_child(seen)
+		seen.owner = root
+		var cs := CollisionShape3D.new()
+		cs.name = "Shape"
+		var box := BoxShape3D.new()
+		box.size = Vector3(36.0, 3.0, 3.0)
+		cs.shape = box
+		seen.add_child(cs)
+		cs.owner = root
+	seen.global_position = Vector3(8.2, 1.5, -49.5)
+	seen.quest_from = &"find_liang"
+	seen.dialogue = &"wei_seen"
+	seen.hint = "HINT_THROW"
+	_log.append("archives: Wei at his desk, with his half of the tally and the register")

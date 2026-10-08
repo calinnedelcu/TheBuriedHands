@@ -18,6 +18,9 @@ func _initialize() -> void:
 	_item("vase_full", "ITEM_VASE_FULL", "", "res://assets/ui/icons/icon_jar_full.png", "res://scenes/items/visuals/jar_full.tscn", 1, false, false, false, 0.0, 6.0, [])
 	_item("cloth", "ITEM_CLOTH", "ITEM_DESC_CLOTH", ICONS + "icon_wet_cloth.png", VIS + "cloth.tscn", 1, true, false, false, 0.0, 0.2, [])
 	_item("register", "ITEM_REGISTER", "ITEM_DESC_REGISTER", "res://assets/ui/icons/icon_register.png", VIS + "register.tscn", 1, true, false, false, 0.0, 0.4, [])
+	# The two halves of the tiger tally (tools/blender/build_tally.py).
+	_item("tally_wei", "ITEM_TALLY_WEI", "ITEM_DESC_TALLY_WEI", "res://assets/ui/icons/icon_tally_wei.png", VIS + "tally_wei.tscn", 1, true, false, false, 0.0, 0.3, [])
+	_item("tally_pit", "ITEM_TALLY_PIT", "ITEM_DESC_TALLY_PIT", "res://assets/ui/icons/icon_tally_pit.png", VIS + "tally_pit.tscn", 1, true, false, false, 0.0, 0.3, [])
 	quit()
 
 func _sounds(names: Array) -> Array[AudioStream]:

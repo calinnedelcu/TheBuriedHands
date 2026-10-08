@@ -74,6 +74,12 @@ const THRUST := preload("res://audio/sfx/impacts/drawKnife1.ogg")
 @export var held_offset := Vector3.ZERO
 @export var held_rotation := Vector3.ZERO
 
+@export_group("Voice")
+## Who speaks his barks (a speaker id in DialogueDB), and lines of his own
+## for some of them ({kind: [text keys]}); the rest are any guard's.
+@export var voice: StringName = &"guard"
+@export var own_barks: Dictionary = {}
+
 const TORCH := preload("res://scenes/ai/guard_torch.tscn")
 
 @onready var _agent: NavigationAgent3D = $Agent
@@ -436,7 +442,10 @@ func _tick_patrol(delta: float) -> void:
 		return
 	if _move_along(walk_speed, delta):
 		_wait_timer = _route.wait_at(_route_index)
-		_look_base_yaw = rotation.y
+		var post := _route.facing(_route_index)
+		if not is_nan(post):
+			_desired_yaw = post
+		_look_base_yaw = rotation.y if is_nan(post) else post
 
 func _tick_suspicious(delta: float) -> void:
 	_stop()
@@ -645,9 +654,10 @@ func _bark(kind: StringName, force := false) -> void:
 	if not near:
 		return
 	_bark_cooldown = 6.0
-	var key := DialogueDB.random_bark(kind)
+	var own: Array = own_barks.get(kind, [])
+	var key: String = own.pick_random() if not own.is_empty() else DialogueDB.random_bark(kind)
 	if key != "":
-		Dialogue.say(&"guard", key, Dialogue.Priority.AMBIENT)
+		Dialogue.say(voice, key, Dialogue.Priority.AMBIENT)
 
 # --- Co-op ---------------------------------------------------------------------------
 

@@ -9,8 +9,8 @@ Jocul e în **română și engleză** (se schimbă din meniu sau din Opțiuni).
 ## Povestea, pe scurt
 
 1. **Atelierul.** Termini un soldat de lut. Poarta de bronz se închide; doi gardieni discută ordinul. Ucenicul tău îți cere lampa — i-o dai sau nu. În drum spre Liang, ghemuit în umbră, îl vezi pe supraveghetorul Wei venind cu lista și cu doi oameni: îl scot pe ucenic din cuptorul rece și îl duc în gropile armatei.
-2. **Arhivele.** Din atelier ieși în marele coridor, cu plăci de presiune, arbalete și dale care se prăbușesc (un ciob aruncat pe o placă o face să tragă în gol). Apoi arhivele, unde gardieni cu torțe patrulează printre mesele scribilor. Găsește-l pe Liang, inginerul mecanismelor; registrul lucrătorilor e o dovadă, dacă ai curaj să-l iei.
-3. **Sub munte.** O piatră de spart cu pana și ciocanul, apoi tunelurile de serviciu. Tunelul spre mecanism s-a surpat când s-a închis poarta, așa că singurul drum e în jos: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut. Oamenii lui Wei își țin acolo prizonierii într-un țarc (printre ei, ucenicul tău), iar scara lucrătorilor urcă din gropi înapoi la camera mecanismului.
+2. **Arhivele.** Din atelier ieși în marele coridor, cu plăci de presiune, arbalete și dale care se prăbușesc (un ciob aruncat pe o placă o face să tragă în gol). Apoi arhivele, unde gardieni cu torțe patrulează printre mesele scribilor. În capătul lor, la masa lui lăcuită, supraveghetorul Wei citește numele de pe listă și le taie; pe masă stau jumătatea lui din răbojul-tigru și registrul lucrătorilor. Îl atragi de la masă cu un zgomot și iei răbojul (registrul e o dovadă, dacă ai curaj). Apoi Liang, inginerul mecanismelor.
+3. **Sub munte.** O piatră de spart cu pana și ciocanul, apoi tunelurile de serviciu. Tunelul spre mecanism s-a surpat când s-a închis poarta, așa că singurul drum e în jos: puțul lucrătorilor, cu un lift pe contragreutate, coboară în gropile armatei de lut. Oamenii lui Wei își țin acolo prizonierii într-un țarc (printre ei, ucenicul tău), iar comandantul gropilor își păzește, la postul lui din curte, cealaltă jumătate a răbojului. Scara lucrătorilor urcă din gropi la poarta de bronz a zidului interior, care se deschide doar unui tigru întreg.
 4. **Râuri de argint viu.** Sala Mercurului: harta imperiului cu râuri de mercur sub o boltă înstelată. Umple ulciorul fără să te otrăvești, înclină marea balanță și ridică podul de piatră.
 5. **Tezaurul.** Canalul de scurgere, apoi lumina zilei.
 
@@ -25,6 +25,7 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 - **Mercurul:** vaporii te otrăvesc; cârpa umedă ajută, ținutul respirației la fel.
 - **Armata de lut:** printre soldații din gropi, dacă stai nemișcat și fără flacără, pentru un gardian ești încă o statuie (până nu vine să te atingă).
 - **Liftul cu contragreutate:** coboară doar dacă platforma trage mai greu decât coșul cu pietre. Un om singur e prea ușor: pui pietre în ladă sau cobori cu cineva; scârțâie tot drumul și gardienii de jos îl aud.
+- **Răbojul-tigru (虎符):** un tigru de bronz tăiat în două; o jumătate o ține Wei, cealaltă comandantul gropilor. Ca un ordin militar Qin, poarta zidului interior se deschide doar când amândouă jumătățile sunt puse în locașurile ei (în co-op, fiecare o poate pune pe a lui).
 - **Inventar:** 4 sloturi în mâini plus obiecte în traistă; uneltele (daltă, pană, ciocan) au mai multe întrebuințări.
 - **Numele meșteșugarilor:** ca pe soldații reali de teracotă, unele statui poartă numele celor care le-au făcut, apăsate în lut. Citește-le pe drum: epilogul spune câte nume ai scos din munte.
 - **Checkpoint-uri:** la momentele importante; după moarte reîncepi de acolo, iar „Continuă" din meniu încarcă ultimul.
@@ -75,7 +76,7 @@ Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 - `scenes/level/mausoleum.tscn` — nivelul; `scenes/menu/title.tscn` — meniul; `scenes/dev/test_room.tscn` — camera de test.
 - `localization/strings.csv` — toate textele, EN + RO (`tools/dev/edit_strings.py` le editează sigur).
 - `assets/` — shadere, materiale, texturi, fonturi, tema UI, modele (`assets/models/`); `audio/` — sunet și muzică.
-- `tools/blender/` — scripturi Blender care construiesc modelele și animațiile (gardianul Qin cu halebarda *ji*, meșteșugarii, ucenicul, bunurile funerare din tezaur, orașele în miniatură de pe harta imperiului, versiunile ușoare ale hărții și arhivelor). Se rulează cu `blender -b --python tools/blender/<script>.py`, apoi `godot --headless --import`.
+- `tools/blender/` — scripturi Blender care construiesc modelele și animațiile (gardianul Qin cu halebarda *ji*, meșteșugarii, ucenicul, bunurile funerare din tezaur, orașele în miniatură de pe harta imperiului, cele două jumătăți ale răbojului-tigru, versiunile ușoare ale hărții și arhivelor). Se rulează cu `blender -b --python tools/blender/<script>.py`, apoi `godot --headless --import`.
 
 ## Unelte și teste
 

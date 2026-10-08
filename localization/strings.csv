@@ -95,7 +95,12 @@ OBJ_FINISH_STATUE,Set the joint with the chisel.,Fixează îmbinarea cu dalta.
 OBJ_ANSWER_APPRENTICE,Speak to your apprentice.,Vorbește cu ucenicul.
 OBJ_FIND_LIANG,Cross the great corridor and slip through the archives to Liang's workshop.,Traversează marele coridor și strecoară-te prin arhive până la atelierul lui Liang.
 OBJ_TALK_LIANG,Talk to Liang.,Vorbește cu Liang.
-OBJ_REACH_MECHANISM,Reach the mechanism chamber: down the workers' shaft and across the army pits.,Ajunge în camera mecanismelor: pe puțul lucrătorilor în jos și prin gropile armatei.
+OBJ_TAKE_TALLY,"Take Wei's half of the tiger tally from his desk, at the far end of the archives.","Ia jumătatea lui Wei din răbojul-tigru de pe masa lui, din capătul arhivelor."
+OBJ_DESCEND,Go down the workers' shaft to the army pits.,Coboară pe puțul lucrătorilor în gropile armatei.
+OBJ_DESCEND_SOLO,"Go down the workers' shaft to the army pits, where your apprentice is held.","Coboară pe puțul lucrătorilor în gropile armatei, unde e ținut ucenicul tău."
+OBJ_PIT_TALLY,Take the commander's half of the tally from his post in the yard.,Ia jumătatea comandantului din răboj de la postul lui din curte.
+OBJ_OPEN_GATE,Open the inner gate at the top of the pits' stairs with the whole tiger.,"Deschide poarta zidului interior, din capul scării gropilor, cu tigrul întreg."
+OBJ_REACH_MECHANISM,Climb to the mechanism chamber.,Urcă în camera mecanismelor.
 OBJ_INSPECT_BALANCE,Examine the great counterweight.,Cercetează marea contragreutate.
 OBJ_GET_VASE,Take the clay jar and the cloth.,Ia ulciorul de lut și cârpa.
 OBJ_FILL_VASE,Fill the jar with mercury in the Mercury Hall.,Umple ulciorul cu mercur în Sala Mercurului.
@@ -174,6 +179,8 @@ ITEM_VASE,Clay jar,Ulcior de lut
 ITEM_VASE_FULL,Jar of mercury,Ulcior cu mercur
 ITEM_CLOTH,Damp cloth,Cârpă umedă
 ITEM_REGISTER,Workers' register,Registrul lucrătorilor
+ITEM_TALLY_WEI,Tiger tally (Wei's half),Răbojul-tigru (jumătatea lui Wei)
+ITEM_TALLY_PIT,Tiger tally (the commander's half),Răbojul-tigru (jumătatea comandantului)
 ITEM_DESC_LAMP,Clay lamp with a cotton wick. Spills oil if you run.,Lampă de lut cu fitil de bumbac. Varsă ulei dacă alergi.
 ITEM_DESC_CHISEL,Sharp enough to cut a crossbow's string.,Destul de ascuțită cât să taie coarda unei arbalete.
 ITEM_DESC_WEDGE,Jams plates and splits stone.,Blochează plăci și despică piatra.
@@ -181,6 +188,8 @@ ITEM_DESC_HAMMER,Heavy and loud.,Greu și zgomotos.
 ITEM_DESC_CERAMIC,Throw them to make noise somewhere else.,Aruncă-le ca să faci zgomot în altă parte.
 ITEM_DESC_CLOTH,"Over mouth and nose, it slows the poison of the fumes.","Pusă peste gură și nas, încetinește otrava vaporilor."
 ITEM_DESC_REGISTER,Bamboo slips with the names of everyone sealed inside.,Fâșii de bambus cu numele tuturor celor închiși înăuntru.
+ITEM_DESC_TALLY_WEI,"Half of a bronze tiger. Matched with its other half, it carries the Emperor's command: gates open to it.",Jumătate de tigru de bronz. Împreună cu cealaltă jumătate poartă porunca Împăratului: porțile i se deschid.
+ITEM_DESC_TALLY_PIT,"The other half of the bronze tiger. It fits Wei's half, and only Wei's.","Cealaltă jumătate a tigrului de bronz. Se potrivește cu jumătatea lui Wei, și numai cu ea."
 PICKUP_ITEM,Take: {item},Ia: {item}
 INVENTORY_FULL,Your hands are full,Ai mâinile pline
 PICKUP_ALREADY_HAVE,You already have one,Ai deja așa ceva
@@ -227,6 +236,10 @@ DLG_LIANG_8,Come with me.,Vino cu mine.
 DLG_LIANG_9,On these knees? I'd bury us both. A stone blocks the shaft — split it with a wedge and a mallet.,Cu genunchii ăștia? Ne-aș îngropa pe amândoi. O piatră blochează puțul — despic-o cu pana și ciocanul.
 DLG_LIANG_10,But the tunnel fell in when the gate shut. I felt it through the floor.,Dar tunelul s-a surpat când s-a închis poarta. L-am simțit prin podea.
 DLG_LIANG_ROUTE,"Go down the workers' shaft instead, east off the tunnel, to the army pits. From there, their stairs climb back up to the mechanism.","Coboară în schimb pe puțul lucrătorilor, la est de tunel, până în gropile armatei. De acolo, scara lor urcă înapoi la mecanism."
+DLG_LIANG_TALLY_1,"But the stairs come up through the inner wall, and its gate opens only to a whole tiger: two bronze halves that fit no others.","Dar scara urcă prin zidul interior, iar poarta lui se deschide doar unui tigru întreg: două jumătăți de bronz care nu se potrivesc cu altele."
+DLG_LIANG_TALLY_HAVE_1,Like this one? It was on Wei's desk.,Ca asta? Era pe masa lui Wei.
+DLG_LIANG_TALLY_HAVE_2,"Wei's half. The other is below, with the commander of the pits.","Jumătatea lui Wei. Cealaltă e jos, la comandantul gropilor."
+DLG_LIANG_TALLY_GET,"Wei keeps one half on his desk, at the far end of the archives. The commander of the pits keeps the other.","Wei ține o jumătate pe masa lui, în capătul arhivelor. Cealaltă o ține comandantul gropilor."
 DLG_LIANG_11,And beware the Mercury Hall. The air there kills slowly.,Și ferește-te de Sala Mercurului. Aerul de acolo omoară încet.
 DLG_LIANG_12,"Thank you, old friend.","Mulțumesc, prietene."
 DLG_LIANG_13,Get out. And tell them who built this place.,Ieși de aici. Și spune-le cine a construit locul ăsta.
@@ -235,6 +248,8 @@ DLG_TUNNELS_ENTER,The service tunnels. Guards never come down here... and neithe
 DLG_TUNNEL_FALLEN,"Fallen in, as Liang said. Only the workers' shaft is left.","Surpat, cum zicea Liang. A rămas doar puțul lucrătorilor."
 DLG_CORRIDOR_ENTER,Pressure plates — I know this work. Spot them in time and I can step around them. Or throw a shard and let them waste their shot.,"Plăci de presiune — știu lucrătura asta. Dacă le văd la timp, le pot ocoli. Sau arunc un ciob și le las să tragă degeaba."
 DLG_BARRED_DOOR,Nailed shut. The Mercury Hall is on the other side.,Bătută în cuie. Dincolo e Sala Mercurului.
+DLG_WEI_SEEN,Wei. Reading out the names... and striking them off.,Wei. Citește numele... și le taie.
+DLG_TALLY_WEI_TAKEN,"Half a bronze tiger. Without its other half, no gate of the palace opens.","Jumătate de tigru de bronz. Fără cealaltă jumătate, nicio poartă a palatului nu se deschide."
 DLG_MECH_ENTER,Liang's counterweight. A clay jar... and a cloth. For the air.,Contragreutatea lui Liang. Un ulcior de lut... și o cârpă. Pentru aer.
 DLG_BALANCE_1,Something heavy...,Ceva greu...
 DLG_BALANCE_2,Mercury. Nothing under heaven is heavier than mercury.,Mercur. Nimic de sub cer nu e mai greu decât mercurul.
@@ -374,9 +389,11 @@ DLG_LIANG_PITS_3,"Then he's in the pits by now, on your way. The lift runs on a 
 DLG_LIANG_PITS_COOP,The lift runs on a counterweight: one man is too light for it. The two of you will do.,Liftul merge pe contragreutate: un om singur e prea ușor pentru el. Voi doi ajungeți.
 DLG_PITS_ENTER_1,"The Emperor's army. Thousands of them, and not two faces alike.","Armata Împăratului. Mii de soldați, și nici două chipuri la fel."
 DLG_PITS_ENTER_2,Wei's men keep the ones they catch somewhere down here.,"Oamenii lui Wei îi țin pe cei prinși undeva aici, jos."
+DLG_TALLY_PIT_TAKEN,The commander's half. Now the tiger is whole.,Jumătatea comandantului. Acum tigrul e întreg.
+DLG_TALLY_GATE_HALF,Half a tiger. The lock wants the other half.,Jumătate de tigru. Încuietoarea o vrea și pe cealaltă.
+DLG_TALLY_GATE_OPEN,The Emperor's command... in a craftsman's lock.,Porunca Împăratului... într-o încuietoare de meșter.
 DLG_FREED_1,Master! I knew you'd come...,Maestre! Știam că o să veniți...
 DLG_FREED_2,"Run with the others. Keep to the dark, I'll find you outside.","Fugi cu ceilalți. Ține-te în întuneric, te găsesc afară."
-OBJ_REACH_MECHANISM_SOLO,"Reach the mechanism chamber: down the workers' shaft and across the army pits, where your apprentice is held.","Ajunge în camera mecanismelor: pe puțul lucrătorilor în jos și prin gropile armatei, unde e ținut ucenicul tău."
 END_APPRENTICE_LAMP,He still had your lamp.,Încă avea lampa ta.
 SPK_WEI,Overseer Wei,Supraveghetorul Wei
 DLG_TAKEN_1,Lamps. Someone's coming. Down.,Lămpi. Vine cineva. Jos.
@@ -387,3 +404,16 @@ DLG_TAKEN_5,Then no one will miss you. Down to the pits with the others: you can
 DLG_TAKEN_6,Not now... not against three of them. Liang will know where they take them.,Nu acum... nu împotriva a trei. Liang o să știe unde-i duc.
 DLG_LIANG_TAKEN_1,"They took my apprentice. An overseer with a list. Wei, they called him.",Mi-au luat ucenicul. Un supraveghetor cu o listă. Wei îi spuneau.
 DLG_LIANG_TAKEN_2,"Wei is Zhao Gao's man. Whoever is on his list goes down to the army pits, penned beside the clay soldiers, to be sealed in with them.","Wei e omul lui Zhao Gao. Cine e pe lista lui coboară în gropile armatei, într-un țarc lângă soldații de lut, să fie zidit odată cu ei."
+WEI_READ_1,"Gong Jiang, of the palace workshops. Struck off.","Gong Jiang, din atelierele palatului. Tăiat."
+WEI_READ_2,"Yi, potter of Xianyang. Struck off.","Yi, olar din Xianyang. Tăiat."
+WEI_READ_3,Gong De... taken in the third workshop. Struck off.,Gong De... prins în al treilea atelier. Tăiat.
+WEI_READ_4,"Ye, potter. Not found. The pits will have him by morning.","Ye, olar. Negăsit. Până dimineață îl au gropile."
+WEI_READ_5,"Qing, potter of Xianyang. Struck off.","Qing, olar din Xianyang. Tăiat."
+WEI_READ_6,A master of the first workshop... not yet found.,Un meșter din primul atelier... încă negăsit.
+WEI_SPOTTED_1,The master of the first workshop. You're on my list.,Meșterul din primul atelier. Ești pe lista mea.
+WEI_SPOTTED_2,There you are. Seize him!,Aici erai. Prindeți-l!
+WEI_NOISE_1,Something fell. In my archives?,A căzut ceva. În arhivele mele?
+WEI_CALM_1,Rats. Back to the names.,Șobolani. Înapoi la nume.
+WEI_LOST_1,He won't get far. Every gate is shut.,N-o să ajungă departe. Toate porțile sunt închise.
+PROMPT_TALLY_SET,Set the tiger half in the lock,Pune jumătatea de tigru în încuietoare
+PROMPT_TALLY_WANTS,The lock wants a whole tiger,Încuietoarea vrea un tigru întreg

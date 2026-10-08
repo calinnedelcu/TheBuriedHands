@@ -19,8 +19,14 @@ const STEPS := [
 	# Act II — the archives
 	{"id": &"find_liang", "text": "OBJ_FIND_LIANG", "hint": "HINT_STEALTH", "checkpoint": true},
 	{"id": &"talk_liang", "text": "OBJ_TALK_LIANG", "checkpoint": true},
-	# Act III — under the mountain: the workers' shaft and the army pits
-	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "solo_text": "OBJ_REACH_MECHANISM_SOLO", "checkpoint": true},
+	# Wei's half of the tiger tally, if it isn't already in hand.
+	{"id": &"take_tally", "text": "OBJ_TAKE_TALLY"},
+	# Act III — under the mountain: the workers' shaft, the army pits and
+	# the inner gate that opens to a whole tiger.
+	{"id": &"descend", "text": "OBJ_DESCEND", "solo_text": "OBJ_DESCEND_SOLO", "checkpoint": true},
+	{"id": &"pit_tally", "text": "OBJ_PIT_TALLY", "checkpoint": true},
+	{"id": &"open_gate", "text": "OBJ_OPEN_GATE"},
+	{"id": &"reach_mechanism", "text": "OBJ_REACH_MECHANISM", "checkpoint": true},
 	# Act IV — the counterweight
 	{"id": &"inspect_balance", "text": "OBJ_INSPECT_BALANCE", "checkpoint": true},
 	{"id": &"get_vase", "text": "OBJ_GET_VASE"},
