@@ -10,10 +10,12 @@ extends Node
 ## crossbow gallery in stone armour and up the hatch ladder. In Act V, Wei
 ## at the last door is answered with his register (taken in Act II), or with
 ## --wei=tiger by throwing his half of the tally (kept on the gallery way)
-## into the mercury. (Running from him is wei_door_runner's.)
+## into the mercury. (Running from him is wei_door_runner's.) A failed check
+## or a script error anywhere fails the run (exit code 1).
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/autopilot_runner.gd [--from=act2|act3|act4|act5] [--route=gallery] [--wei=tiger] [--out=/abs/dir for frames, needs a window]
 
 const WS := "Rooms/01_TerracottaWorkshop/"
+const ScriptErrors := preload("res://tools/dev/script_errors.gd")
 
 var player: Player
 var level: Node3D
@@ -27,6 +29,7 @@ var _wei := "register"
 var _nav_map: RID
 var _pits_checkpoint := false
 var _verbose := false
+var _errors := ScriptErrors.new()
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -42,6 +45,7 @@ func _ready() -> void:
 			_verbose = true
 	if out != "":
 		DirAccess.make_dir_recursive_absolute(out)
+	OS.add_logger(_errors)
 	_run.call_deferred()
 
 func _process(delta: float) -> void:
@@ -72,9 +76,12 @@ func _run() -> void:
 			# An act that stops short (or dies on a script error) is a failure.
 			_check("%s finished" % acts[i], false)
 			break
+	OS.remove_logger(_errors)
+	if _errors.count > 0:
+		_check("no script errors (%d, the first: %s)" % [_errors.count, _errors.first], false)
 	print("RESULT: %d failure(s)" % failures)
 	Game._delete_save()
-	get_tree().quit()
+	get_tree().quit(1 if failures > 0 else 0)
 
 ## Jump-starts a later act: the state it would be in, standing where it begins.
 func _setup(act: String) -> void:

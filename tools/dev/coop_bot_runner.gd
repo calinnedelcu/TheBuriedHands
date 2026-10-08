@@ -23,6 +23,7 @@ extends Node
 const WS := "Rooms/01_TerracottaWorkshop/"
 ## On the counterweight's platform; its default +x+z side hangs over the pit.
 const COUNTERWEIGHT_STAND := Vector3(-1.5, -1.5, -1.0)
+const ScriptErrors := preload("res://tools/dev/script_errors.gd")
 
 var role := "host"
 var from := ""
@@ -504,20 +505,3 @@ func _check(label: String, ok: bool) -> void:
 
 func _log(text: String) -> void:
 	print("[%s] %s" % [role, text])
-
-## Counts script errors. One ends the function it happens in, and the bot
-## would go on from where that was called as if nothing had gone wrong.
-class ScriptErrors extends Logger:
-	var count := 0
-	var first := ""
-	var _lock := Mutex.new()
-
-	func _log_error(_function: String, file: String, line: int, code: String, rationale: String,
-			_editor_notify: bool, error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
-		if error_type != ERROR_TYPE_SCRIPT:
-			return
-		_lock.lock()
-		count += 1
-		if first == "":
-			first = "%s (%s:%d)" % [rationale if rationale != "" else code, file.get_file(), line]
-		_lock.unlock()
