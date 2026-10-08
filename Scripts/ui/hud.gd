@@ -42,6 +42,9 @@ var _objective_header: Label
 var _objective_label: Label
 var _hint_label: Label
 var _names_label: Label
+## In the journal too: what is known of the masons' song (MasonsSong).
+var _song_label: Label
+var _song_timer := 0.0
 ## The header, its rule and the hint: shown with a new objective and in the
 ## journal, gone when the objective rests.
 var _objective_extras: Array[Control] = []
@@ -175,6 +178,11 @@ func _build() -> void:
 	_names_label = _label("HintLabel", "")
 	_names_label.visible = false
 	_objective_box.add_child(_names_label)
+	_song_label = _label("HintLabel", "")
+	_song_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_song_label.custom_minimum_size = Vector2(560, 0)
+	_song_label.visible = false
+	_objective_box.add_child(_song_label)
 	_objective_box.modulate.a = 0.0
 	_root.add_child(_objective_box)
 
@@ -347,6 +355,13 @@ func _process(delta: float) -> void:
 	_names_label.visible = names > 0
 	if names > 0:
 		_names_label.text = tr("NAMES_COUNT") % [names, NamesDB.NAMES.size()]
+	# The song, rebuilt now and then while the journal is held.
+	_song_timer -= delta
+	if journal and _song_timer <= 0.0:
+		_song_timer = 0.5
+		var song := MasonsSong.journal_text()
+		_song_label.text = (tr("SONG_TITLE").to_upper() + "\n" + song) if song != "" else ""
+	_song_label.visible = journal and _song_label.text != ""
 
 	_item_name_timer -= delta
 	if _item_name_timer <= 0.0:

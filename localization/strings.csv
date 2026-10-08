@@ -116,7 +116,7 @@ HINT_CROUCH,{crouch} crouch  ·  {crawl} crawl,{crouch} ghemuit  ·  {crawl} tâ
 HINT_HIDE,{crouch} crouch out of sight,"{crouch} ghemuiește-te, să nu te vadă"
 HINT_STEALTH,Light gives you away. Snuff your lamp with {toggle_lamp} and keep to the shadows.,Lumina te trădează. Stinge-ți lampa cu {toggle_lamp} și ține-te în umbră.
 HINT_THROW,{throw} throw the selected item to distract,{throw} aruncă obiectul selectat ca să distragi
-HINT_PLATES,"{crouch} crouched, {interact} knock on a stone  ·  {throw} a shard thrown on a stone spends the volley, till the winch winds it again","{crouch} ghemuit, {interact} bați în piatră  ·  {throw} un ciob aruncat pe o piatră consumă salva, până o încarcă troliul la loc"
+HINT_PLATES,"{crouch} crouched, {interact} knock on a stone  ·  {throw} a shard on a stone spends the volley  ·  {journal} what you know of the masons' song","{crouch} ghemuit, {interact} bați în piatră  ·  {throw} un ciob pe o piatră consumă salva  ·  {journal} ce știi din cântecul zidarilor"
 HINT_BREATH,Hold {hold_breath} to hold your breath in the fumes,Ține {hold_breath} ca să-ți ții respirația în vapori
 HINT_REFILL,Hold {interact} at a wall lamp to refill your oil,Ține {interact} la o lampă de perete ca să-ți reumpli uleiul
 HINT_CRAWL,{crawl} crawl  ·  {interact} push forward,{crawl} târâș  ·  {interact} împinge-te înainte
@@ -158,8 +158,49 @@ KNOCK_TRIGGER,A faint click of bronze under it. It gives.,"Sub ea, un clinchet s
 KNOCK_HOLLOW,Hollow. There's nothing under it.,Sună a gol. Sub ea nu e nimic.
 PROMPT_TRAP_PIN,Drive in the builders' pin,Bate știftul constructorilor
 PROMPT_TRAP_BRAKE,Bear on the winch's brake,Apasă frâna troliului
-PROMPT_OPEN,Open,Deschide
+SPK_BAI,"Bai, the mason","Bai, zidarul"
+SPK_MOURNER,A craftsman,Un meșter
 PROMPT_READ,Read,Citește
+PROMPT_SEARCH_BODY,Search him,Caută-l
+PROMPT_TOO_DARK_TO_READ,Too dark to make anything out,Prea întuneric ca să deslușești ceva
+PROMPT_NICHE_PRY,Prise the loose stones out with the chisel,Desprinde pietrele slăbite cu dalta
+PROMPT_NICHE_NEED_CHISEL,Air seeps through the joints: these stones are loose. A chisel would have them out.,Trage aer prin rosturi: pietrele astea sunt slăbite. Cu o daltă le-ai scoate.
+PROMPT_WINCH_BRAKE,Bear on the winch's brake,Apasă frâna troliului
+PROMPT_WINCH_JAM,jam the pawl with the chisel,înțepenește clichetul cu dalta
+NOTICE_WINCH_JAMMED,The chisel is wedged in the pawl. The battery won't wind again.,Dalta e înfiptă în clichet. Bateria nu se mai încarcă.
+NOTICE_SONG_LEARNED,You learn lines of the masons' song (hold {journal}).,Afli versuri din cântecul zidarilor (ține {journal} apăsat).
+SONG_TITLE,The masons' song,Cântecul zidarilor
+SONG_FLOOR_WEST,The first floor:,Prima pardoseală:
+SONG_FLOOR_EAST,The floor over the pits:,Pardoseala de peste gropi:
+VERSE_START,begin on the %s stone from the river wall,începe pe %s piatră de la zidul râului
+VERSE_EAST,%s toward the sunrise,%s spre răsărit
+VERSE_RIVER,%s toward the river,%s spre râu
+VERSE_MOUNTAIN,%s toward the mountain,%s spre munte
+VERSE_END,", and you stand beyond",", și ești dincolo"
+VERSE_ORD_1,first,prima
+VERSE_ORD_2,second,a doua
+VERSE_ORD_3,third,a treia
+VERSE_ORD_4,fourth,a patra
+VERSE_ORD_5,fifth,a cincea
+VERSE_ORD_6,sixth,a șasea
+VERSE_ORD_7,seventh,a șaptea
+VERSE_ORD_8,eighth,a opta
+VERSE_ORD_9,ninth,a noua
+VERSE_ORD_10,tenth,a zecea
+VERSE_N_1,one stone,o piatră
+VERSE_N_2,two stones,două pietre
+VERSE_N_3,three stones,trei pietre
+VERSE_N_4,four stones,patru pietre
+VERSE_N_5,five stones,cinci pietre
+VERSE_N_6,six stones,șase pietre
+VERSE_N_7,seven stones,șapte pietre
+VERSE_N_8,eight stones,opt pietre
+VERSE_N_9,nine stones,nouă pietre
+VERSE_N_10,ten stones,zece pietre
+VERSE_N_11,eleven stones,unsprezece pietre
+VERSE_N_12,twelve stones,douăsprezece pietre
+VERSE_N_MANY,%d stones,%d de pietre
+PROMPT_OPEN,Open,Deschide
 PROMPT_STRIKE_BELLS,Strike the bells,Lovește clopotele
 PROMPT_READ_NAME,Read the name pressed in the clay,Citește numele apăsat în lut
 NAME_READ,"A name, pressed into the clay: %s","Un nume, apăsat în lut: %s"
@@ -258,7 +299,24 @@ DLG_LIANG_13,Get out. And tell them who built this place.,Ieși de aici. Și spu
 DLG_STONE_BROKEN,The way is open.,Drumul e liber.
 DLG_TUNNELS_ENTER,The service tunnels. Guards never come down here... and neither does light.,Tunelurile de serviciu. Gărzile nu coboară niciodată aici... și nici lumina.
 DLG_TUNNEL_FALLEN,"Fallen in, as Liang said. Only the workers' shaft is left.","Surpat, cum zicea Liang. A rămas doar puțul lucrătorilor."
-DLG_CORRIDOR_ENTER,"Our workshop laid this floor. That's our sign, on some of the stones: those are the ones to tread on. Under the rest, cords run to the crossbows in the walls.","Pardoseala asta am pus-o noi, atelierul nostru. Semnul nostru e pe unele pietre: pe alea se calcă. Sub celelalte, sforile duc la arbaletele din ziduri."
+DLG_CORRIDOR_ENTER,"This floor... every stone the same. Bai's crew laid it, and only they know which stones to tread on.","Pardoseala asta... toate pietrele la fel. Echipa lui Bai a pus-o, și numai ei știu pe care pietre se calcă."
+DLG_BAI_WORK_1,"Clay, always clay. I'm a mason, master, not a modeller. The corridor floor out there is mine: my crew laid it.","Lut, tot lut. Eu sunt zidar, meștere, nu modelator. Pardoseala coridorului de afară e a mea: echipa mea a pus-o."
+DLG_BAI_WORK_2,The corridor with the crossbows?,Coridorul cu arbaletele?
+DLG_BAI_WORK_3,"We call it the singing floor. Nobody treads it without our song. You face the sunrise, the river on your left, the mountain on your right, and count from the river wall. It goes:","Noi îi zicem pardoseala care cântă. Nimeni nu calcă pe ea fără cântecul nostru. Stai cu fața spre răsărit, râul la stânga, muntele la dreapta, și numeri de la zidul râului. Merge așa:"
+DLG_BAI_WORK_4,"The rest is my crew's. My boys cut it into the bench behind me, so they'd never forget it.","Restul e al echipei mele. Băieții l-au scrijelit pe bancul din spatele meu, să nu-l uite niciodată."
+DLG_BAI_AFTER_1,They've shut the gate... My son went out into the corridor to see if there's still a way out. He hasn't come back.,"Au închis poarta... Băiatul meu a ieșit pe coridor, să vadă dacă mai e vreo ieșire. Nu s-a mai întors."
+DLG_BAI_AFTER_2,He has the song: I wrote it out for him on a strip of bamboo. But in the dark...,"Are cântecul, i l-am scris pe o fâșie de bambus. Dar pe întuneric..."
+DLG_BAI_AFTER_START,"You don't even know how it starts? Listen, then:","Nu știi nici cum începe? Ascultă, atunci:"
+DLG_BAI_AFTER_3,"We wound the crossbows from inside the wall, from a hollow pillar at the near end. A flame will show you which: that's where the air comes through.","Noi încărcam arbaletele din zid, dintr-un stâlp gol de la capătul dinspre atelier. O flacără ți-l arată: pe acolo trage aerul."
+DLG_BAI_GRIEF_1,You've been to him. Don't... don't tell me.,Ai fost la el. Nu... nu-mi spune.
+DLG_BAI_GRIEF_2,"Take it, then, all of it, so nobody else dies on my stones. The floor over the pits ends like this:","Ia-l atunci, tot, să nu mai moară nimeni pe pietrele mele. Pardoseala de peste gropi se termină așa:"
+DLG_BAI_GRIEF_3,"And past it, the pin in the wall. Drive it home, for whoever comes after you.","Iar după ea, știftul din zid. Bate-l până la capăt, pentru cine vine după tine."
+DLG_MOURNER_1,"Don't come near... He trod wrong. One stone, that's all.",Nu te apropia... A călcat greșit. O singură piatră.
+DLG_MOURNER_2,"Bai's boy. He kept saying the second floor's verse over, so he wouldn't forget it:","Băiatul lui Bai. Tot spunea strofa pardoselii a doua, ca să n-o uite:"
+DLG_MOURNER_3,"I don't dare go on, or back. His strip of bamboo is at his belt.","Eu nu mai îndrăznesc nici înainte, nici înapoi. Fâșia lui e la brâu."
+DLG_BENCH_1,"Scratched along the bench's edge with a chisel point, in a mason's hand:","Zgâriat pe muchia bancului cu vârful daltei, cu scris de zidar:"
+DLG_SLIP_1,"Bai's strip of bamboo, in his hand, for the boy:","Fâșia lui Bai, scrisă de mâna lui, pentru băiat:"
+DLG_SLIP_2,"The rest is torn away, and soaked through.",Restul e rupt și îmbibat de sânge.
 DLG_BARRED_DOOR,Nailed shut. The Mercury Hall is on the other side.,Bătută în cuie. Dincolo e Sala Mercurului.
 DLG_WEI_SEEN,Wei. Reading out the names... and striking them off.,Wei. Citește numele... și le taie.
 DLG_TALLY_WEI_TAKEN,"Half a bronze tiger. Without its other half, no gate of the palace opens.","Jumătate de tigru de bronz. Fără cealaltă jumătate, nicio poartă a palatului nu se deschide."

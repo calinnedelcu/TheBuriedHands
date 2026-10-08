@@ -66,6 +66,7 @@ func _run() -> void:
 	_wei_at_the_last_door()
 	_exit_watch()
 	_corridor_mechanisms()
+	_masons_song()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -2226,27 +2227,21 @@ func _corridor_mechanisms() -> void:
 	var no_slabs: Array[TiltSlab] = []
 	var west := _trap_field(traps, space, "West", -50.5, -26.5, no_slabs, 31, -1)
 	var east := _trap_field(traps, space, "East", -18.5, 7.0, slabs, 47, 0)
-	# Their controls: the brake before each stretch, the pin past it.
-	_trap_lever(traps, "BrakeWest", TrapLever.Kind.BRAKE, west, Vector3(-51.4, 0.0, west.global_position.z + 0.45), 0.0)
+	# Their pins past each stretch (the brake is the winch's, in its niche).
 	_trap_lever(traps, "PinWest", TrapLever.Kind.PIN, west, Vector3(-25.6, 0.0, west.global_position.z + 0.45), 0.0)
-	_trap_lever(traps, "BrakeEast", TrapLever.Kind.BRAKE, east, Vector3(-19.4, 0.0, east.global_position.z + 0.45), 0.0)
 	_trap_lever(traps, "PinEast", TrapLever.Kind.PIN, east, Vector3(7.9, 0.0, east.global_position.z - 0.9), -PI * 0.5)
-	# The sign on the workshop's floor: by the master's statue, by its door.
-	var marks := root.get_node("Rooms/01_TerracottaWorkshop")
-	var spots := [Vector3(-66.6, 0.0, -5.4), Vector3(-69.2, 0.0, -8.0), Vector3(-56.4, 0.0, -3.6)]
-	for k in spots.size():
-		var name := "WorkshopSign%d" % k
-		var m := marks.get_node_or_null(name) as MeshInstance3D
-		if m == null:
-			m = MeshInstance3D.new()
-			m.name = name
-			marks.add_child(m)
-			m.owner = root
-		m.mesh = TrapField.mark_mesh()
-		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var at := _floor_at(spots[k])
-		m.global_transform = Transform3D(Basis(Vector3.UP, 0.3 * k - 0.2), at + Vector3.UP * 0.003)
-	_log.append("corridor: two trapped stretches (%d and %d stones on the builders' way), %d tipping slabs, brakes and pins" % [west.safe_path().size(), east.safe_path().size(), slabs.size()])
+	for gone in ["BrakeWest", "BrakeEast"]:
+		var old := traps.get_node_or_null(gone)
+		if old != null:
+			traps.remove_child(old)
+			old.free()
+	var workshop := root.get_node("Rooms/01_TerracottaWorkshop")
+	for k in 3:
+		var sign := workshop.get_node_or_null("WorkshopSign%d" % k)
+		if sign != null:
+			workshop.remove_child(sign)
+			sign.free()
+	_log.append("corridor: two trapped stretches (ways of %d and %d stones), %d tipping slabs, pins" % [west.way.size(), east.way.size(), slabs.size()])
 
 ## One trapped stretch of the corridor from x0 to x1: its stones measured
 ## between the walls, the builders' way laid across them, its battery in
@@ -2361,6 +2356,10 @@ func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0
 	field.heights = heights
 	field.cells = cells
 	field.stone_seed = seed_value
+	var order := PackedInt32Array()
+	for v in way:
+		order.append(v.y * columns + v.x)
+	field.way = order
 	var slab_paths: Array[NodePath] = []
 	for slab in slabs:
 		slab_paths.append(field.get_path_to(slab))
@@ -2407,6 +2406,150 @@ func _trap_lever(traps: Node, lever_name: String, kind: TrapLever.Kind, field: T
 	lever.rotation.y = yaw
 	var paths: Array[NodePath] = [lever.get_path_to(field)]
 	lever.field_paths = paths
+
+## The corridor's trapped floors are crossed by the masons' work song
+## (MasonsSong), found a few lines at a time. Old Bai, who laid them, works
+## in the workshop (Sculptor2, a TalkingWorker now), and his crew cut the
+## middle of the first verse into the stone bench beside him. His son lies
+## on the first floor's way, halfway across, with the strip of bamboo at his
+## belt; the craftsman who watched him die kneels a stone off the way (the
+## Mourner, talking too). By the first floor's west end, three pillars stand
+## against the walls, alike; the north one nearest the floor is hollow: the
+## battery's winch (WinchNiche), found by the draught on a lamp's flame.
+## (North of the entry the wall runs only from the workshop's passage to the
+## floor: room for the one; the two alike stand across, on the south wall.)
+func _masons_song() -> void:
+	var west := root.get_node("CorridorTraps/FieldWest") as TrapField
+	var room := root.get_node("Rooms/01_TerracottaWorkshop")
+	var bai := _make_talker(room.get_node("Sculptor2") as Worker, &"bai")
+	# The masons' bench: a block of dressed stone behind him, scratched.
+	var bench := room.get_node_or_null("MasonsBench") as LevelSolid
+	if bench == null:
+		bench = LevelSolid.new()
+		bench.name = "MasonsBench"
+		room.add_child(bench)
+		bench.owner = root
+	bench.size = Vector3(1.3, 0.55, 0.5)
+	bench.material = load("res://assets/materials/level/walls.tres")
+	bench.masonry = true
+	var bench_at := _floor_at(bai.global_position + Vector3(1.5, 0.0, 0.7))
+	bench.global_position = bench_at
+	bench.rotation = Vector3.ZERO
+	var lines := bench.get_node_or_null("Scratches") as MeshInstance3D
+	if lines == null:
+		lines = MeshInstance3D.new()
+		lines.name = "Scratches"
+		bench.add_child(lines)
+		lines.owner = root
+	lines.mesh = _scratches_mesh()
+	lines.position = Vector3(0.0, 0.551, 0.12)
+	var read := bench.get_node_or_null("Verse") as Readable
+	if read == null:
+		read = Readable.new()
+		read.name = "Verse"
+		bench.add_child(read)
+		read.owner = root
+	read.source = &"bench"
+	read.position = Vector3(0.0, 0.6, 0.0)
+	# The son, on the way halfway across, as he fell; the man who saw it, a
+	# stone off the way beside him.
+	var fallen := root.get_node("TheFallen")
+	var son := fallen.get_node("ShotAtPlate3") as Worker
+	var k := int(west.way.size() * 0.45)
+	var at := west.centre_global(west.way[k])
+	var ahead := west.centre_global(west.way[mini(k + 1, west.way.size() - 1)])
+	son.global_position = Vector3(at.x, at.y - TrapField.LIFT, at.z)
+	son.rotation = Vector3(0.0, atan2(ahead.x - at.x, ahead.z - at.z) + PI * 0.5, 0.0)
+	var slip := son.get_node_or_null("Slip") as Readable
+	if slip == null:
+		slip = Readable.new()
+		slip.name = "Slip"
+		son.add_child(slip)
+		slip.owner = root
+	slip.source = &"slip"
+	slip.search = true
+	slip.radius = 0.6
+	slip.position = Vector3(0.0, 0.3, 0.0)
+	var mourner := _make_talker(fallen.get_node("Mourner") as Worker, &"mourner")
+	var spot := _off_the_way(west, k)
+	mourner.global_position = Vector3(spot.x, spot.y - TrapField.LIFT, spot.z)
+	mourner.rotation = Vector3(0.0, atan2(at.x - spot.x, at.z - spot.z) - PI * 0.5, 0.0)
+	# The pillars: the hollow one north, nearest the floor; two alike.
+	var traps := root.get_node("CorridorTraps")
+	var space := root.get_world_3d().direct_space_state
+	var gone := traps.get_node_or_null("PillarNorth")
+	if gone != null:
+		traps.remove_child(gone)
+		gone.free()
+	var pillars := [["Winch", -53.2, true, false], ["PillarSouthWest", -57.4, false, true], ["PillarSouth", -53.2, false, true]]
+	for p in pillars:
+		var niche := traps.get_node_or_null(String(p[0])) as WinchNiche
+		if niche == null:
+			niche = WinchNiche.new()
+			niche.name = String(p[0])
+			traps.add_child(niche)
+			niche.owner = root
+		var x: float = p[1]
+		var floor_y := _floor_at(Vector3(x, 0.0, 15.5)).y
+		var wall := _wall_along(space, Vector3(x, floor_y + 1.2, 15.5), Vector3.BACK if p[3] else Vector3.FORWARD, 9.0)
+		niche.global_position = Vector3(x, floor_y, wall.z)
+		niche.rotation = Vector3(0.0, PI if p[3] else 0.0, 0.0)
+		niche.real = p[2]
+		if p[2]:
+			niche.field_path = niche.get_path_to(west)
+	_log.append("the masons' song: Bai at his bench, the bench, his son on the way (stone %d of %d), the mourner, the hollow pillar" % [k, west.way.size()])
+
+## A craftsman who can be talked to, his clips and his place kept.
+func _make_talker(w: Worker, talker: StringName) -> TalkingWorker:
+	if not (w is TalkingWorker):
+		var keep := {}
+		for prop in ["anims", "work_anim", "after_sealing_anim", "freeze_after", "holds_tool", "dead", "bolts"]:
+			keep[prop] = w.get(prop)
+		w.set_script(load("res://Scripts/ai/talking_worker.gd"))
+		for prop in keep:
+			w.set(prop, keep[prop])
+	w.set(&"talker", talker)
+	return w as TalkingWorker
+
+## A safe stone beside the way near its `k`th stone, but not on it (where
+## someone can kneel without standing in the way); else the stone before.
+func _off_the_way(field: TrapField, k: int) -> Vector3:
+	var on_way := {}
+	for i in field.way:
+		on_way[i] = true
+	var here := field.way[k]
+	var best := -1
+	var best_d := INF
+	for i in field.cells.size():
+		if field.kind(i) != TrapField.Cell.SAFE or on_way.has(i):
+			continue
+		var d := field.centre(i).distance_to(field.centre(here))
+		if d < best_d:
+			best_d = d
+			best = i
+	if best >= 0 and best_d < field.cell * 3.0:
+		return field.centre_global(best)
+	return field.centre_global(field.way[maxi(k - 2, 0)])
+
+## Lines scratched along the top of the masons' bench: their verse.
+func _scratches_mesh() -> Mesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for row in 4:
+		var z := -0.15 + row * 0.07
+		var w := 0.95 - 0.12 * float(row % 2)
+		for seg in 5:
+			var x0 := -w * 0.5 + seg * (w / 5.0) + 0.02
+			var x1 := x0 + w / 5.0 - 0.05
+			st.set_normal(Vector3.UP)
+			for v in [Vector3(x0, 0.0, z), Vector3(x1, 0.0, z), Vector3(x1, 0.0, z + 0.012), Vector3(x0, 0.0, z), Vector3(x1, 0.0, z + 0.012), Vector3(x0, 0.0, z + 0.012)]:
+				st.add_vertex(v)
+	var mesh := st.commit()
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.1, 0.085, 0.07)
+	mat.roughness = 1.0
+	mesh.surface_set_material(0, mat)
+	return mesh
 
 ## Where a level ray along `dir` from `from` meets a wall (or `reach` on).
 func _wall_along(space: PhysicsDirectSpaceState3D, from: Vector3, dir: Vector3, reach: float) -> Vector3:

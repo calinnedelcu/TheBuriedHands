@@ -15,6 +15,8 @@ const SPEAKERS := {
 	&"guard_b": "SPK_GUARD",
 	&"guard": "SPK_GUARD",
 	&"wei": "SPK_WEI",
+	&"bai": "SPK_BAI",
+	&"mourner": "SPK_MOURNER",
 }
 
 const SEQUENCES := {

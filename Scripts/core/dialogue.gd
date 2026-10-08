@@ -62,6 +62,21 @@ func _for_this_game(entry: Array) -> bool:
 		return false
 	return true
 
+## Plays lines put together at the time (`lines` as in DialogueDB), under
+## `sequence_id`; a line's text may be a key or "@verse/..." (MasonsSong).
+func play_lines(sequence_id: StringName, lines: Array, priority := Priority.STORY) -> bool:
+	if not Net.story_allowed():
+		return false
+	var shown := lines.filter(_for_this_game)
+	if shown.is_empty():
+		return false
+	return await _run(sequence_id, shown, priority)
+
+## A line's text: a verse of the masons' song, or a translation key.
+static func text_of(text_key: String) -> String:
+	var verse := MasonsSong.resolve(text_key)
+	return verse if verse != "" else TranslationServer.translate(text_key)
+
 ## Plays one line as its own tiny sequence.
 func say(speaker_id: StringName, text_key: String, priority := Priority.HINT) -> bool:
 	if not Net.story_allowed():
@@ -121,7 +136,7 @@ func _run(id: StringName, lines: Array, priority: int) -> bool:
 	sequence_started.emit(id)
 	for entry in lines:
 		var speaker_id: StringName = entry[0]
-		var text := tr(String(entry[1]))
+		var text := text_of(String(entry[1]))
 		var extras: Dictionary = entry[2] if entry.size() > 2 else {}
 		var duration: float = extras.get("duration", line_duration(text))
 		_line_token += 1
@@ -158,7 +173,7 @@ func apply_remote(kind: StringName, data: Array) -> void:
 		&"line":
 			var speaker_id: StringName = data[0]
 			_line_active = true
-			line_started.emit(speaker_id, DialogueDB.speaker_name(speaker_id), tr(String(data[1])), float(data[2]), data[3])
+			line_started.emit(speaker_id, DialogueDB.speaker_name(speaker_id), text_of(String(data[1])), float(data[2]), data[3])
 		&"line_end":
 			if _line_active:
 				_line_active = false

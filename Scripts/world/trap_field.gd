@@ -5,13 +5,14 @@ extends Node3D
 ## flagstones that all look alike. Most are trigger stones, corded under the
 ## floor to a battery of crossbows (TrapBattery) that looses at whoever
 ## stands on one; some lie over pits and tip under a foot (TiltSlab, laid
-## by the slabs themselves). The builders had to walk out once it was armed:
-## their way is marked, faintly, with their workshop's sign (工), the
-## master's own. Crouched, you can knock on a stone and hear what it is.
-## A shard thrown onto a trigger stone spends the volley, and the winch winds
-## it again a few seconds later. At the far end the builders' pin locks it
-## all for good (TrapLever); at the near end their brake, held, keeps the
-## battery slack and the slabs level while someone else crosses.
+## by the slabs themselves). Nothing marks the stones you may tread on: the
+## builders, old Bai's crew of masons, walked out by their work song, which
+## counts the way across (`way`, `moves()`; MasonsSong puts it into words
+## and hands it out a few lines at a time). Crouched, you can knock on a
+## stone and hear what it is. A shard thrown onto a trigger stone spends the
+## volley, and the winch winds it again a few seconds later. At the far end
+## the builders' pin locks it all for good (TrapLever); their winch, behind
+## a false face in the wall (WinchNiche), can be jammed or held slack.
 ##
 ## Local space: x along the corridor (columns), z across it (rows), y up,
 ## the field's origin at the corner of column 0, row 0. `cells` is the
@@ -29,7 +30,6 @@ const CLICK := preload("res://audio/sfx/impacts/impactPlate_light_000.ogg")
 const KNOCK := preload("res://audio/sfx/impacts/impactSoft_medium_000.ogg")
 const KNOCK_HOLLOW := preload("res://audio/sfx/impacts/impactPlank_medium_001.ogg")
 const KNOCK_TRIGGER := preload("res://audio/sfx/impacts/impactMetal_light_000.ogg")
-const MARK_COLOR := Color(0.09, 0.075, 0.06)
 ## How high above its stone a body may be and still weigh on it.
 const STANDING := 0.45
 ## The stones' tops above the floor they're laid on (no flicker where the
@@ -63,6 +63,9 @@ const LIFT := 0.025
 @export var battery_path: NodePath
 ## The tilting slabs over this field's pits.
 @export var slab_paths: Array[NodePath] = []
+## The builders' way across, cell by cell in the order they walked it (from
+## the near, west edge to the far one). Stones by its turns are safe too.
+@export var way := PackedInt32Array()
 
 ## The builders' pin is in: nothing looses, nothing tips.
 var locked := false
@@ -118,14 +121,43 @@ func centre(index: int) -> Vector3:
 func centre_global(index: int) -> Vector3:
 	return to_global(centre(index))
 
-## The builders' way across, stone by stone (for the bots and the tests).
+## The builders' way across, stone by stone in walking order (for the bots
+## and the tests); without a recorded way, every safe stone west to east.
 func safe_path() -> PackedVector3Array:
 	var out := PackedVector3Array()
+	if not way.is_empty():
+		for i in way:
+			out.append(centre_global(i))
+		return out
 	for column in columns:
 		for row in rows:
 			var i := index_of(column, row)
 			if kind(i) == Cell.SAFE:
 				out.append(centre_global(i))
+	return out
+
+## The way as the masons counted it: [&"start", row from the river (north)
+## wall, 1 first], then runs of [&"east" / &"river" / &"mountain", stones].
+## Facing the sunrise (east), the Wei river is on the left, Mount Li on the
+## right, as the tomb lies.
+func moves() -> Array:
+	var out: Array = []
+	if way.is_empty():
+		return out
+	@warning_ignore("integer_division")
+	out.append([&"start", way[0] / columns + 1])
+	for k in range(1, way.size()):
+		var a := way[k - 1]
+		var b := way[k]
+		var dir := &"east"
+		if b - a == -columns:
+			dir = &"river"
+		elif b - a == columns:
+			dir = &"mountain"
+		if out.size() > 1 and out[out.size() - 1][0] == dir:
+			out[out.size() - 1][1] += 1
+		else:
+			out.append([dir, 1])
 	return out
 
 # --- Looks --------------------------------------------------------------------------
@@ -140,36 +172,18 @@ func _build() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = stone_seed
 	var batch := Masonry.Batch.new()
-	var marks: Array[Transform3D] = []
 	var pits := _slab_rects()
 	for i in cells.size():
 		var k := kind(i)
 		if k == Cell.NONE or k == Cell.PIT:
 			continue
-		# The workshop's flagstones, all alike but for the sign on a few; a
-		# stone by a pit's slab is cut round it.
+		# The workshop's flagstones, all alike; a stone by a pit's slab is
+		# cut round it.
 		var top := centre(i)
 		var whole := Rect2(top.x - cell * 0.5, top.z - cell * 0.5, cell, cell)
 		for piece in _cut_round(whole, pits):
 			_lay(batch, rng, piece, top.y)
-		if k == Cell.SAFE:
-			# Cut small and off the middle, as a mason signs his stone.
-			var off := Vector3(rng.randf_range(-0.3, 0.3), 0.002, rng.randf_range(-0.3, 0.3)) * (cell / 1.5)
-			marks.append(Transform3D(Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)), top + off))
 	batch.build(self)
-	if not marks.is_empty():
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = mark_mesh()
-		mm.instance_count = marks.size()
-		for m in marks.size():
-			mm.set_instance_transform(m, marks[m])
-		var mmi := MultiMeshInstance3D.new()
-		mmi.name = "Marks"
-		mmi.multimesh = mm
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.set_meta(&"generated", true)
-		add_child(mmi)
 
 ## One flagstone over `r` (x, z in the field's space), its top at `top`.
 func _lay(batch: Masonry.Batch, rng: RandomNumberGenerator, r: Rect2, top: float) -> void:
@@ -218,28 +232,6 @@ func _cut_round(r: Rect2, pits: Array[Rect2]) -> Array[Rect2]:
 			if p.size.x > 0.18 and p.size.y > 0.18:
 				pieces.append(p)
 	return pieces
-
-## The builders' sign, 工 ("work"), as grooves cut into a stone's top: three
-## dark strokes about a hand across, lying just on the stone.
-static func mark_mesh() -> Mesh:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for stroke in [[Vector3(0, 0, -0.11), Vector3(0.3, 0.004, 0.035)], [Vector3(0, 0, 0), Vector3(0.035, 0.004, 0.2)], [Vector3(0, 0, 0.11), Vector3(0.36, 0.004, 0.04)]]:
-		var c: Vector3 = stroke[0]
-		var h: Vector3 = stroke[1] * 0.5
-		var a := Vector3(c.x - h.x, 0.003, c.z - h.z)
-		var b := Vector3(c.x + h.x, 0.003, c.z - h.z)
-		var d := Vector3(c.x + h.x, 0.003, c.z + h.z)
-		var e := Vector3(c.x - h.x, 0.003, c.z + h.z)
-		st.set_normal(Vector3.UP)
-		for p in [a, b, d, a, d, e]:
-			st.add_vertex(p)
-	var mesh := st.commit()
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = MARK_COLOR
-	mat.roughness = 1.0
-	mesh.surface_set_material(0, mat)
-	return mesh
 
 # --- Running ------------------------------------------------------------------------
 

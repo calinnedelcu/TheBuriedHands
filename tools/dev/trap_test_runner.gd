@@ -7,8 +7,9 @@ extends Node
 ##   till the winch winds it again, then it kills again;
 ##   a knock tells a stone: solid, a trigger, hollow over a pit;
 ##   a pit's slab tips him onto the spikes;
-##   the brake held keeps it all slack (a partner crosses), and the pin
-##   locks it for good;
+##   the winch's brake held (in the hollow pillar) keeps the first floor
+##   slack (a partner crosses); a chisel in its pawl kills it for good, and
+##   the far pin locks the second floor for good;
 ##   the navmesh keeps to the marked way (guards and bots walk it).
 ## Also the east end's old single plates still fire their crossbows.
 ## godot --headless --path . -s res://tools/dev/run.gd -- --runner=res://tools/dev/trap_test_runner.gd
@@ -133,25 +134,34 @@ func _slab_tips() -> void:
 	await _wait(4.0)
 	_check("a slab tips him onto the spikes (y %.1f)" % player.global_position.y, Game.is_dead())
 
-## The brake held: the stones click and nothing comes of it, the slabs
-## hold (the partner crosses); let go, armed again. The pin: locked.
+## The hollow pillar's winch: its brake held, the first floor's stones click
+## and nothing comes of it (the partner crosses); let go, armed again; the
+## chisel in its pawl, never again (and the chisel is gone). The second
+## floor's pin: locked, slabs and all.
 func _brake_and_pin() -> void:
-	var brake := level.get_node(T + "BrakeEast") as TrapLever
-	var pin := level.get_node(T + "PinEast") as TrapLever
-	player.global_position = brake.global_position + Vector3(0.0, 0.3, 1.2)
+	var niche := level.get_node(T + "Winch") as WinchNiche
+	niche.felt = true
+	player.inventory.add(&"chisel")
+	player.global_position = niche.global_position + niche.global_basis.z * 2.0 + Vector3.UP * 0.3
 	await _wait(0.3)
-	brake.usable_use(player)
-	_check("the brake held: the east floor slack", east.slack)
-	var slab := level.get_node(T + "Slab2") as TiltSlab
-	_stand(east.centre_global(_first_of(east, TrapField.Cell.TRIGGER, 2)))
+	niche.usable_hold_done(player)
+	_check("the chisel has the loose stones out", niche.opened)
+	niche.usable_tap(player)
+	_check("the winch's brake held: the first floor slack", west.slack)
+	_stand(west.centre_global(_first_of(west, TrapField.Cell.TRIGGER, 2)))
 	await _wait(0.8)
-	_stand(slab.global_position + Vector3(0.3, 0.0, 0.0))
-	await _wait(1.5)
-	_check("held: a trigger stone and a slab do nothing (alive, y %.1f)" % player.global_position.y, not Game.is_dead() and player.global_position.y > slab.global_position.y - 0.5)
-	brake.usable_use(player)
-	_check("let go: armed again", not east.slack)
+	_check("held: a trigger stone does nothing (alive)", not Game.is_dead() and player.health > 0.0)
+	niche.usable_tap(player)
+	_check("let go: armed again", not west.slack)
+	niche.usable_hold_done(player)
+	_check("the chisel in the pawl: never again, and no chisel", west.locked and niche.jammed and not player.inventory.has_item(&"chisel"))
+	_stand(west.centre_global(_first_of(west, TrapField.Cell.TRIGGER, 7)))
+	await _wait(0.8)
+	_check("jammed: a trigger stone does nothing", not Game.is_dead() and player.health > 0.0)
+	var pin := level.get_node(T + "PinEast") as TrapLever
+	var slab := level.get_node(T + "Slab2") as TiltSlab
 	pin.usable_hold_done(player)
-	_check("the pin locks it for good", east.locked and pin.pulled)
+	_check("the far pin locks the second floor for good", east.locked and pin.pulled)
 	player.health = player.max_health
 	_stand(east.centre_global(_first_of(east, TrapField.Cell.TRIGGER, 6)))
 	await _wait(0.8)
