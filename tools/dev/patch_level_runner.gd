@@ -131,6 +131,19 @@ func _zone_sound() -> void:
 	(zones.get_node("Treasury") as AtmosphereZone).music = &"mercury"
 	_zone("Archives", Vector3(16.0, 4.0, -30.0), Vector3(56.0, 14.0, 64.0)).music = &"archives"
 	_zone("Corridor", Vector3(-10.0, 3.0, 15.0), Vector3(84.0, 10.0, 22.0)).music = &"archives"
+	# The army pits: still air thick with clay dust, the lamps hazy in it,
+	# and no music, only the tomb.
+	var pits := _zone("Pits", Vector3(50.0, -22.5, 9.0), Vector3(44.0, 9.0, 48.0))
+	pits.zone_priority = 1
+	pits.fog_color = Color(0.018, 0.013, 0.009)
+	pits.fog_density = 0.02
+	pits.volumetric_density = 0.022
+	pits.volumetric_albedo = Color(0.86, 0.72, 0.56)
+	pits.ambient_color = Color(0.03, 0.025, 0.02)
+	pits.ambient_energy = 0.75
+	pits.saturation = 0.9
+	pits.music = &"silence"
+	pits.ambience = &"tomb"
 	_log.append("zones: music and ambience set")
 
 ## Some patrols carry torches: moving light that shows where they are and

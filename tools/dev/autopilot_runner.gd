@@ -58,7 +58,8 @@ func _run() -> void:
 		print("--- ", acts[i])
 		var ok: bool = await call("_" + acts[i])
 		if not ok:
-			print("  (stopping: %s did not finish)" % acts[i])
+			# An act that stops short (or dies on a script error) is a failure.
+			_check("%s finished" % acts[i], false)
 			break
 	print("RESULT: %d failure(s)" % failures)
 	Game._delete_save()
@@ -523,10 +524,15 @@ func _follow(path: PackedVector3Array, target: Vector3, stop_dist: float, until:
 			best = INF
 			continue
 		# A scene has the controls (Wei's men at the kiln): wait it out, as a
-		# player would, skipping its lines.
+		# player would, skipping its lines. The walk out into the light keeps
+		# them for good: the game is over, the walk is done.
 		if player.controls_locked():
 			Input.action_release(&"move_forward")
+			if Game.is_over():
+				return "done"
 			while player.controls_locked():
+				if Game.is_over():
+					return "done"
 				if Dialogue.is_busy():
 					_press(&"skip_line")
 				await _wait(0.4)

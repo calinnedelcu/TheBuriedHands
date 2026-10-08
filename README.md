@@ -23,7 +23,7 @@ Fiecare capitol se deschide cu un titlu pe ecran. Epilogul — scris cu cerneal�
 - **Lampa cu ulei:** se golește mai repede dacă alergi; o reumpli din opaițe (ține apăsat). Fără ea ești orb.
 - **Poziții:** în picioare, ghemuit, târâș (prin locuri joase).
 - **Mercurul:** vaporii te otrăvesc; cârpa umedă ajută, ținutul respirației la fel.
-- **Armata de lut:** printre soldații din gropi, dacă stai nemișcat și fără flacără, pentru un gardian ești încă o statuie (până nu vine să te atingă).
+- **Armata de lut:** printre soldații din gropi, dacă stai nemișcat și fără flacără, pentru un gardian ești încă o statuie (până nu vine să te atingă). Ca în gropile reale, nu sunt doi la fel: infanteriști cu mâinile împreunate și războinici în armură, fiecare ars puțin altfel, un ofițer mai înalt în fruntea tranșeei, câțiva rupți la șold, cu capul căzut lângă ei.
 - **Liftul cu contragreutate:** coboară doar dacă platforma trage mai greu decât coșul cu pietre. Un om singur e prea ușor: pui pietre în ladă sau cobori cu cineva; scârțâie tot drumul și gardienii de jos îl aud.
 - **Răbojul-tigru (虎符):** un tigru de bronz tăiat în două; o jumătate o ține Wei, cealaltă comandantul gropilor. Ca un ordin militar Qin, poarta zidului interior se deschide doar când amândouă jumătățile sunt puse în locașurile ei (în co-op, fiecare o poate pune pe a lui).
 - **Inventar:** 4 sloturi în mâini plus obiecte în traistă; uneltele (daltă, pană, ciocan) au mai multe întrebuințări.
@@ -76,7 +76,7 @@ Modelele `.glb` sunt în Git LFS: după clonare rulează `git lfs pull`.
 - `scenes/level/mausoleum.tscn` — nivelul; `scenes/menu/title.tscn` — meniul; `scenes/dev/test_room.tscn` — camera de test.
 - `localization/strings.csv` — toate textele, EN + RO (`tools/dev/edit_strings.py` le editează sigur).
 - `assets/` — shadere, materiale, texturi, fonturi, tema UI, modele (`assets/models/`); `audio/` — sunet și muzică.
-- `tools/blender/` — scripturi Blender care construiesc modelele și animațiile (gardianul Qin cu halebarda *ji*, meșteșugarii, ucenicul, bunurile funerare din tezaur, orașele în miniatură de pe harta imperiului, cele două jumătăți ale răbojului-tigru, versiunile ușoare ale hărții și arhivelor). Se rulează cu `blender -b --python tools/blender/<script>.py`, apoi `godot --headless --import`.
+- `tools/blender/` — scripturi Blender care construiesc modelele și animațiile (gardianul Qin cu halebarda *ji*, meșteșugarii, ucenicul, bunurile funerare din tezaur, orașele în miniatură de pe harta imperiului, cele două jumătăți ale răbojului-tigru, celelalte statui din gropi (scoase din atelierul jam-ului), versiunile ușoare ale hărții și arhivelor). Se rulează cu `blender -b --python tools/blender/<script>.py`, apoi `godot --headless --import`.
 
 ## Unelte și teste
 
