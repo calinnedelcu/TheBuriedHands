@@ -116,7 +116,7 @@ HINT_CROUCH,{crouch} crouch  ·  {crawl} crawl,{crouch} ghemuit  ·  {crawl} tâ
 HINT_HIDE,{crouch} crouch out of sight,"{crouch} ghemuiește-te, să nu te vadă"
 HINT_STEALTH,Light gives you away. Snuff your lamp with {toggle_lamp} and keep to the shadows.,Lumina te trădează. Stinge-ți lampa cu {toggle_lamp} și ține-te în umbră.
 HINT_THROW,{throw} throw the selected item to distract,{throw} aruncă obiectul selectat ca să distragi
-HINT_PLATES,{throw} throw the selected item: a shard on a plate makes its crossbow shoot at nothing,{throw} aruncă obiectul selectat: un ciob pe o placă face arbaleta să tragă în gol
+HINT_PLATES,"{crouch} crouched, {interact} knock on a stone  ·  {throw} a shard thrown on a stone spends the volley, till the winch winds it again","{crouch} ghemuit, {interact} bați în piatră  ·  {throw} un ciob aruncat pe o piatră consumă salva, până o încarcă troliul la loc"
 HINT_BREATH,Hold {hold_breath} to hold your breath in the fumes,Ține {hold_breath} ca să-ți ții respirația în vapori
 HINT_REFILL,Hold {interact} at a wall lamp to refill your oil,Ține {interact} la o lampă de perete ca să-ți reumpli uleiul
 HINT_CRAWL,{crawl} crawl  ·  {interact} push forward,{crawl} târâș  ·  {interact} împinge-te înainte
@@ -152,6 +152,12 @@ PROMPT_PUSH,Push forward,Împinge-te înainte
 PROMPT_MUST_CRAWL,Too low — crawl,Prea jos — târăște-te
 PROMPT_FIRST,First: %s,Mai întâi: %s
 PROMPT_NOT_YET,Not yet.,Nu încă.
+PROMPT_KNOCK,Knock on the stone,Bate în piatră
+KNOCK_SOLID,Solid. It's set in the floor.,Sună plin. E prinsă în pardoseală.
+KNOCK_TRIGGER,A faint click of bronze under it. It gives.,"Sub ea, un clinchet slab de bronz. Cedează."
+KNOCK_HOLLOW,Hollow. There's nothing under it.,Sună a gol. Sub ea nu e nimic.
+PROMPT_TRAP_PIN,Drive in the builders' pin,Bate știftul constructorilor
+PROMPT_TRAP_BRAKE,Bear on the winch's brake,Apasă frâna troliului
 PROMPT_OPEN,Open,Deschide
 PROMPT_READ,Read,Citește
 PROMPT_STRIKE_BELLS,Strike the bells,Lovește clopotele
@@ -252,7 +258,7 @@ DLG_LIANG_13,Get out. And tell them who built this place.,Ieși de aici. Și spu
 DLG_STONE_BROKEN,The way is open.,Drumul e liber.
 DLG_TUNNELS_ENTER,The service tunnels. Guards never come down here... and neither does light.,Tunelurile de serviciu. Gărzile nu coboară niciodată aici... și nici lumina.
 DLG_TUNNEL_FALLEN,"Fallen in, as Liang said. Only the workers' shaft is left.","Surpat, cum zicea Liang. A rămas doar puțul lucrătorilor."
-DLG_CORRIDOR_ENTER,Pressure plates — I know this work. Spot them in time and I can step around them. Or throw a shard and let them waste their shot.,"Plăci de presiune — știu lucrătura asta. Dacă le văd la timp, le pot ocoli. Sau arunc un ciob și le las să tragă degeaba."
+DLG_CORRIDOR_ENTER,"Our workshop laid this floor. That's our sign, on some of the stones: those are the ones to tread on. Under the rest, cords run to the crossbows in the walls.","Pardoseala asta am pus-o noi, atelierul nostru. Semnul nostru e pe unele pietre: pe alea se calcă. Sub celelalte, sforile duc la arbaletele din ziduri."
 DLG_BARRED_DOOR,Nailed shut. The Mercury Hall is on the other side.,Bătută în cuie. Dincolo e Sala Mercurului.
 DLG_WEI_SEEN,Wei. Reading out the names... and striking them off.,Wei. Citește numele... și le taie.
 DLG_TALLY_WEI_TAKEN,"Half a bronze tiger. Without its other half, no gate of the palace opens.","Jumătate de tigru de bronz. Fără cealaltă jumătate, nicio poartă a palatului nu se deschide."

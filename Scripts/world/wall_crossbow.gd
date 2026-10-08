@@ -14,6 +14,9 @@ const BRONZE := preload("res://assets/materials/props/bronze.tres")
 @export var damage := 3.0
 @export var bolt_speed := 42.0
 @export var max_range := 40.0
+## Within a hand's reach of the floor, to cut its string. A battery's (high
+## in the wall behind a grille) is not.
+@export var reachable := true
 
 var armed := true
 ## Shot (rather than disarmed): its bolt is gone from the groove.
@@ -42,20 +45,39 @@ func fire() -> void:
 	Stealth.make_noise(global_position, 20.0, self)
 	Bolt.launch(get_tree().current_scene, global_position + (-global_basis.z) * 0.5, -global_basis.z, bolt_speed, damage, max_range, self)
 
+## A battery's winch: the string drawn back, a new bolt in the groove.
+func rearm() -> void:
+	armed = true
+	fired = false
+	_string.visible = true
+	_bolt.visible = true
+
+## Looses its bolt at `target` (a battery's, at the stone pressed).
+func loose_at(target: Vector3, bolt_damage: float) -> void:
+	if not armed:
+		return
+	armed = false
+	fired = true
+	_string.visible = false
+	_bolt.visible = false
+	Sfx.play_at(FIRE_SOUND, global_position, 4.0, 0.08, &"Tomb", 50.0)
+	var from := global_position + (-global_basis.z) * 0.5
+	Bolt.launch(get_tree().current_scene, from, (target - from).normalized(), bolt_speed, bolt_damage, max_range, self)
+
 # --- Usable delegate: cut the string --------------------------------------------------------
 
 func usable_prompt(user: Node) -> String:
-	if not armed:
+	if not armed or not reachable:
 		return ""
 	var p := user as Player
 	return tr("PROMPT_DISARM") if p != null and p.inventory.has_item(&"chisel") else tr("PROMPT_NEED_CHISEL_DISARM")
 
 func usable_can_use(user: Node) -> bool:
 	var p := user as Player
-	return armed and p != null and p.inventory.has_item(&"chisel")
+	return armed and reachable and p != null and p.inventory.has_item(&"chisel")
 
 func usable_show_blocked(_user: Node) -> bool:
-	return armed
+	return armed and reachable
 
 func usable_hold_done(user: Node) -> void:
 	armed = false

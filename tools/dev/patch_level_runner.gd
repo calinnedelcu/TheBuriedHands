@@ -65,6 +65,7 @@ func _run() -> void:
 	_wei_at_his_desk()
 	_wei_at_the_last_door()
 	_exit_watch()
+	_corridor_mechanisms()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -2110,7 +2111,9 @@ func _liang_seated() -> void:
 	# His feet on the floor beside the stool he sits on (Chair_038, its seat
 	# 0.45 up): the sit pose puts him on it. He was half a metre down in the
 	# flagstones, sitting on the floor with his legs in it.
-	var beside := _floor_at(liang.global_position + liang.global_basis.x * 0.8)
+	# (From under the table beside him, and the same every run.)
+	var at := liang.global_position + liang.global_basis.x * 0.8
+	var beside := _floor_at(Vector3(at.x, -1.1, at.z))
 	liang.global_position.y = beside.y
 	_log.append("liang: seated talk, on his stool at %.2f" % beside.y)
 
@@ -2172,6 +2175,238 @@ func _exit_watch() -> void:
 	wall.size = Vector3(width + 0.4, 3.4, 0.5)
 	(blocker.get_node("Shape") as CollisionShape3D).shape = wall
 	_log.append("exit watch: the escort in the workshop's south door, %.1f m across at z %.1f" % [width, gap_z])
+
+## Act II: the great corridor's traps, rethought as the builders' machines.
+## The old single plates (each with its crossbow, to be stepped round or cut)
+## and the cracking tiles (marked with a seal) were easy to pass. Now two
+## stretches of floor are laid as one trap each (TrapField): flagstones all
+## alike, most of them corded to a battery of crossbows high in the walls
+## (TrapBattery) that looses at whoever stands there, at the chest, the
+## waist and the knee. The builders' own way across is marked with their
+## workshop's sign, the master's; crouched, he can knock and hear what a
+## stone is; a shard spends a volley for the few seconds the winch takes.
+## The east stretch lies over the old pits: their stones tip (TiltSlab). At
+## each stretch's near end the builders' brake, held, keeps it all slack
+## (co-op: one holds, the other crosses); at its far end their pin locks it
+## for good (TrapLever). The pits keep their spikes; the dead keep their
+## places. The workshop's floor bears the same sign, for him to know it.
+func _corridor_mechanisms() -> void:
+	var traps := root.get_node("CorridorTraps")
+	var space := root.get_world_3d().direct_space_state
+	for n in ["Plate1", "Plate2", "Plate3", "Crossbow1", "Crossbow2", "Crossbow3"]:
+		var old := traps.get_node_or_null(n)
+		if old != null:
+			traps.remove_child(old)
+			old.free()
+	# The pits: where the tiles lay (first run) or where their slabs are.
+	var holes: Array[Vector3] = []
+	for i in range(1, 8):
+		var tile := traps.get_node_or_null("Tile%d" % i) as Node3D
+		var slab := traps.get_node_or_null("Slab%d" % i) as Node3D
+		if tile != null:
+			holes.append(tile.global_position)
+			traps.remove_child(tile)
+			tile.free()
+		elif slab != null:
+			holes.append(slab.global_position)
+	var slabs: Array[TiltSlab] = []
+	for i in holes.size():
+		var slab := traps.get_node_or_null("Slab%d" % (i + 1)) as TiltSlab
+		if slab == null:
+			slab = TiltSlab.new()
+			slab.name = "Slab%d" % (i + 1)
+			traps.add_child(slab)
+			slab.owner = root
+		# Level with the floor beside the pit.
+		var beside := _floor_at(holes[i] + Vector3(1.4, 0.0, 0.0))
+		slab.global_position = Vector3(holes[i].x, beside.y, holes[i].z)
+		slab.size = 1.5
+		slab.stone_seed = 700 + i
+		slabs.append(slab)
+	var no_slabs: Array[TiltSlab] = []
+	var west := _trap_field(traps, space, "West", -50.5, -26.5, no_slabs, 31, -1)
+	var east := _trap_field(traps, space, "East", -18.5, 7.0, slabs, 47, 0)
+	# Their controls: the brake before each stretch, the pin past it.
+	_trap_lever(traps, "BrakeWest", TrapLever.Kind.BRAKE, west, Vector3(-51.4, 0.0, west.global_position.z + 0.45), 0.0)
+	_trap_lever(traps, "PinWest", TrapLever.Kind.PIN, west, Vector3(-25.6, 0.0, west.global_position.z + 0.45), 0.0)
+	_trap_lever(traps, "BrakeEast", TrapLever.Kind.BRAKE, east, Vector3(-19.4, 0.0, east.global_position.z + 0.45), 0.0)
+	_trap_lever(traps, "PinEast", TrapLever.Kind.PIN, east, Vector3(7.9, 0.0, east.global_position.z - 0.9), -PI * 0.5)
+	# The sign on the workshop's floor: by the master's statue, by its door.
+	var marks := root.get_node("Rooms/01_TerracottaWorkshop")
+	var spots := [Vector3(-66.6, 0.0, -5.4), Vector3(-69.2, 0.0, -8.0), Vector3(-56.4, 0.0, -3.6)]
+	for k in spots.size():
+		var name := "WorkshopSign%d" % k
+		var m := marks.get_node_or_null(name) as MeshInstance3D
+		if m == null:
+			m = MeshInstance3D.new()
+			m.name = name
+			marks.add_child(m)
+			m.owner = root
+		m.mesh = TrapField.mark_mesh()
+		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var at := _floor_at(spots[k])
+		m.global_transform = Transform3D(Basis(Vector3.UP, 0.3 * k - 0.2), at + Vector3.UP * 0.003)
+	_log.append("corridor: two trapped stretches (%d and %d stones on the builders' way), %d tipping slabs, brakes and pins" % [west.safe_path().size(), east.safe_path().size(), slabs.size()])
+
+## One trapped stretch of the corridor from x0 to x1: its stones measured
+## between the walls, the builders' way laid across them, its battery in
+## both walls. `end_row`: the row the way must leave by at the east end (-1:
+## any).
+func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0: float, x1: float, slabs: Array[TiltSlab], seed_value: int, end_row: int) -> TrapField:
+	const CELL := 1.5
+	var columns := int(round((x1 - x0) / CELL))
+	# The walls: where level rays across the corridor stop, the usual value.
+	var norths: Array[float] = []
+	var souths: Array[float] = []
+	for c in columns:
+		var x := x0 + (c + 0.5) * CELL
+		var floor_y := _floor_at(Vector3(x, 0.0, 15.5)).y
+		var mid := Vector3(x, floor_y + 1.2, 15.5)
+		norths.append(_wall_along(space, mid, Vector3.FORWARD, 9.0).z)
+		souths.append(_wall_along(space, mid, Vector3.BACK, 9.0).z)
+	norths.sort()
+	souths.sort()
+	var z_north: float = norths[norths.size() / 2]
+	var z_south: float = souths[souths.size() / 2]
+	var rows := int(floor((z_south - z_north - 0.3) / CELL))
+	var z0 := z_north + ((z_south - z_north) - rows * CELL) * 0.5
+	var field := traps.get_node_or_null("Field" + side) as TrapField
+	if field == null:
+		field = TrapField.new()
+		field.name = "Field" + side
+		traps.add_child(field)
+		field.owner = root
+	field.global_position = Vector3(x0, 0.0, z0)
+	field.columns = columns
+	field.rows = rows
+	field.cell = CELL
+	# Each stone's floor; a stone that would overlap a pit's slab is laid
+	# round it (TRIGGER: what's left of it still gives).
+	var heights := PackedFloat32Array()
+	var cells := PackedByteArray()
+	heights.resize(columns * rows)
+	cells.resize(columns * rows)
+	var blocked := {}
+	for r in rows:
+		for c in columns:
+			var i := r * columns + c
+			var centre := Vector3(x0 + (c + 0.5) * CELL, 0.0, z0 + (r + 0.5) * CELL)
+			heights[i] = _floor_at(centre + Vector3.UP * 0.6).y
+			cells[i] = TrapField.Cell.TRIGGER
+			for slab in slabs:
+				if absf(slab.global_position.x - centre.x) < (CELL + slab.size) * 0.5 - 0.05 and absf(slab.global_position.z - centre.z) < (CELL + slab.size) * 0.5 - 0.05:
+					blocked[i] = true
+					heights[i] = slab.global_position.y
+	# Laid level across each column, on the highest of the old floor under
+	# it: no stone sunk in it, none standing proud of its neighbours.
+	for c in columns:
+		var top := -INF
+		for r in rows:
+			if not blocked.has(r * columns + c):
+				top = maxf(top, heights[r * columns + c])
+		for r in rows:
+			if not blocked.has(r * columns + c) and top > -INF:
+				heights[r * columns + c] = top
+	# The builders' way: west to east, a column at a time, now and then a
+	# step or two across, stone to stone by their sides (never corner to
+	# corner), and never by a pit.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var row := rng.randi_range(1, rows - 2)
+	while blocked.has(row * columns):
+		row = (row + 1) % rows
+	var way: Array[Vector2i] = []
+	for c in columns:
+		cells[row * columns + c] = TrapField.Cell.SAFE
+		way.append(Vector2i(c, row))
+		var goal := row
+		if c == columns - 1:
+			if end_row >= 0:
+				goal = end_row
+		elif rng.randf() < 0.6:
+			goal = clampi(row + rng.randi_range(-2, 2), 0, rows - 1)
+		# How far this column can be walked along from here.
+		var lo := row
+		while lo > 0 and not blocked.has((lo - 1) * columns + c):
+			lo -= 1
+		var hi := row
+		while hi < rows - 1 and not blocked.has((hi + 1) * columns + c):
+			hi += 1
+		goal = clampi(goal, lo, hi)
+		# And the next column open where this one is left.
+		if c < columns - 1:
+			var best := -1
+			for d in rows:
+				for cand in [goal - d, goal + d]:
+					if best < 0 and cand >= lo and cand <= hi and not blocked.has(cand * columns + c + 1):
+						best = cand
+			if best >= 0:
+				goal = best
+		while row != goal:
+			row += 1 if goal > row else -1
+			cells[row * columns + c] = TrapField.Cell.SAFE
+			way.append(Vector2i(c, row))
+	# Where the way turns, the stone in the corner is the builders' too: a
+	# turn two stones wide, nothing to clip going round it (and room for the
+	# navmesh, which keeps an agent's width off every trigger stone).
+	for k in range(1, way.size() - 1):
+		var a := way[k - 1]
+		var b := way[k]
+		var c2 := way[k + 1]
+		if (b - a) != (c2 - b):
+			var corner := a + (c2 - b)
+			var ci := corner.y * columns + corner.x
+			if corner.x >= 0 and corner.x < columns and corner.y >= 0 and corner.y < rows and not blocked.has(ci):
+				cells[ci] = TrapField.Cell.SAFE
+	field.heights = heights
+	field.cells = cells
+	field.stone_seed = seed_value
+	var slab_paths: Array[NodePath] = []
+	for slab in slabs:
+		slab_paths.append(field.get_path_to(slab))
+	field.slab_paths = slab_paths
+	# The battery: a crossbow every three stones in each wall, high up.
+	var battery := traps.get_node_or_null("Battery" + side) as TrapBattery
+	if battery == null:
+		battery = TrapBattery.new()
+		battery.name = "Battery" + side
+		traps.add_child(battery)
+		battery.owner = root
+	battery.global_position = Vector3(x0, 0.0, z0)
+	var bow_scene := load("res://scenes/world/wall_crossbow.tscn") as PackedScene
+	var k := 0
+	for c in range(1, columns, 3):
+		for wall in 2:
+			var name := "Bow%d" % k
+			k += 1
+			var bow := battery.get_node_or_null(name) as WallCrossbow
+			if bow == null:
+				bow = bow_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as WallCrossbow
+				bow.name = name
+				battery.add_child(bow)
+				bow.owner = root
+			var x := x0 + (c + 0.5) * CELL + (0.75 if wall == 1 else 0.0)
+			var floor_y := _floor_at(Vector3(x, 0.0, 15.5)).y
+			# North wall faces south (+z), south wall north; it looses along -z.
+			var z := (z_north + 0.25) if wall == 0 else (z_south - 0.25)
+			bow.global_position = Vector3(x, floor_y + 2.7, z)
+			bow.rotation = Vector3(0.0, PI if wall == 0 else 0.0, 0.0)
+			bow.reachable = false
+	field.battery_path = field.get_path_to(battery)
+	return field
+
+func _trap_lever(traps: Node, lever_name: String, kind: TrapLever.Kind, field: TrapField, at: Vector3, yaw: float) -> void:
+	var lever := traps.get_node_or_null(lever_name) as TrapLever
+	if lever == null:
+		lever = TrapLever.new()
+		lever.name = lever_name
+		traps.add_child(lever)
+		lever.owner = root
+	lever.kind = kind
+	lever.global_position = _floor_at(at)
+	lever.rotation.y = yaw
+	var paths: Array[NodePath] = [lever.get_path_to(field)]
+	lever.field_paths = paths
 
 ## Where a level ray along `dir` from `from` meets a wall (or `reach` on).
 func _wall_along(space: PhysicsDirectSpaceState3D, from: Vector3, dir: Vector3, reach: float) -> Vector3:
