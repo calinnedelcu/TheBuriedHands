@@ -127,9 +127,11 @@ func _ground_pose() -> void:
 	_model.position.y = minf(_model_rest.y, _model.position.y - drop / scale_y)
 
 func _lie_dead() -> void:
-	# Bodies don't stand in the way.
+	# Bodies don't stand in the way (but what's on them can still be
+	# looked at: a strip of bamboo at the belt, a Readable).
 	for shape in find_children("*", "CollisionShape3D", true, false):
-		(shape as CollisionShape3D).disabled = true
+		if not (shape.get_parent() is Readable):
+			(shape as CollisionShape3D).disabled = true
 	if _anim != null:
 		var n := StringName(anims.get(work_anim, work_anim))
 		if _anim.has_animation(n):

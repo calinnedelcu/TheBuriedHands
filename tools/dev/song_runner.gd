@@ -65,6 +65,7 @@ func _run() -> void:
 	var son := level.get_node("TheFallen/ShotAtPlate3") as Node3D
 	var west := level.get_node("CorridorTraps/FieldWest") as TrapField
 	_check("the son lies on the first floor's way", west.kind_at(son.global_position + Vector3.UP * 0.1) == TrapField.Cell.SAFE)
+	await _aim_at_slip(son)
 	await _read(son.get_node("Slip") as Readable)
 	_check("the strip: the rest of the first verse", _known(&"west", MasonsSong.part(&"west", 2)) and MasonsSong.known_count(&"west") == MasonsSong.line_count(&"west"))
 	_check("and the start of the second", _known(&"east", MasonsSong.part(&"east", 0)) and Game.get_flag(MasonsSong.SON_FOUND))
@@ -121,6 +122,15 @@ func _the_hollow_pillar() -> void:
 	_check("with the chisel, they come out", real.usable_can_use(player))
 	real.usable_hold_done(player)
 	_check("the face is off", real.opened)
+
+## As a player: standing by the body, looking at it, with a lit lamp.
+func _aim_at_slip(son: Node3D) -> void:
+	player.global_position = son.global_position + Vector3(1.0, 0.0, 0.4)
+	player.look_at_point(son.global_position + Vector3.UP * 0.3, 0.01)
+	for i in 20:
+		await get_tree().physics_frame
+	var t: Usable = player.interactor.target
+	_check("the aim finds the strip on the body ('%s')" % (t.get_prompt(player) if t != null else ""), t != null and t.get_parent().name == &"Slip" and t.get_prompt(player) == tr("PROMPT_SEARCH_BODY"))
 
 func _talk(w: TalkingWorker) -> void:
 	await _until_quiet()
