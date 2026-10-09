@@ -37,6 +37,7 @@ func _run() -> void:
 	_liang()
 	await _stone()
 	await _thrown()
+	_lift_box()
 	print("RESULT: %d failure(s)" % failures)
 	Game._delete_save()
 	get_tree().quit()
@@ -166,6 +167,16 @@ func _thrown() -> void:
 			reached = true
 			break
 	_check("he gets to the spot", reached)
+
+## The lift's ballast box: full, a long press takes a stone off at once (a
+## hold has nothing to add); with room, holding adds.
+func _lift_box() -> void:
+	var lift := level.get_node("UnderTheMountain/ShaftLift") as CounterweightLift
+	var usable := lift.get_node("Platform/BallastBody/Usable") as Usable
+	lift.ballast = CounterweightLift.MAX_BALLAST
+	_check("lift box full: a press acts at once (no hold)", not usable.is_hold_for(player))
+	lift.ballast = 1
+	_check("with room: holding adds a stone", usable.is_hold_for(player))
 
 ## Turns the player to look straight at `path` from a step away; the usable
 ## the aim settles on.

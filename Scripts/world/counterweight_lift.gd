@@ -196,6 +196,11 @@ func ballast_prompt(_user: Node) -> String:
 func ballast_can_use(_user: Node) -> bool:
 	return moving == 0
 
+## Holding adds a stone; with the box full there's nothing to add, and a
+## press (however long held) takes one out instead.
+func ballast_is_hold(_user: Node) -> bool:
+	return ballast < MAX_BALLAST
+
 func ballast_tap(_user: Node) -> void:
 	if ballast <= 0 or moving != 0:
 		return

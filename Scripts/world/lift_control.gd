@@ -13,6 +13,10 @@ func usable_prompt(user: Node) -> String:
 func usable_can_use(user: Node) -> bool:
 	return _ask(&"can_use", user, false)
 
+## Whether holding the key does anything now (else a press acts at once).
+func usable_is_hold(user: Node) -> bool:
+	return bool(_ask(&"is_hold", user, true))
+
 func usable_use(user: Node) -> void:
 	_ask(&"use", user, null)
 
