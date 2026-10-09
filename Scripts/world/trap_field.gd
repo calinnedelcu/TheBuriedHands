@@ -137,10 +137,9 @@ func safe_path() -> PackedVector3Array:
 				out.append(centre_global(i))
 	return out
 
-## The way as the masons counted it: [&"start", row from the river (north)
-## wall, 1 first], then runs of [&"east" / &"river" / &"mountain", stones].
-## Facing the sunrise (east), the Wei river is on the left, Mount Li on the
-## right, as the tomb lies.
+## The way as the masons counted it: [&"start", row from the wall of waves
+## (north), 1 first], then runs of [&"east" (toward the archives) / &"river"
+## (toward the waves) / &"mountain" (toward the peaks), stones].
 func moves() -> Array:
 	var out: Array = []
 	if way.is_empty():

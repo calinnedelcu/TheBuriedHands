@@ -66,6 +66,7 @@ func _run() -> void:
 	_wei_at_the_last_door()
 	_exit_watch()
 	_corridor_mechanisms()
+	_corridor_friezes()
 	_masons_song()
 	# The rooms the kit builds register their colliders with the physics
 	# only after a frame: wait for them before looking for floor in them.
@@ -2672,6 +2673,41 @@ func _free_row(centre: Vector3, count: int, ignore: Array[RID] = []) -> PackedVe
 				if row.size() == count:
 					return row
 	return PackedVector3Array()
+
+## The masons carved their bearings on the corridor's walls: the Wei river's
+## waves along the north wall, Mount Li's peaks along the south one (the
+## song counts "from the wall of waves", "toward the waves / the peaks"), a
+## band at the height of a man's chest, so that a man in the dark can tell
+## his sides by feel and by lamp, with nobody to ask. Their ends are the
+## corridor's: from the workshop door to the archives' turn.
+func _corridor_friezes() -> void:
+	var space := root.get_world_3d().direct_space_state
+	var traps := root.get_node("CorridorTraps")
+	var x0 := -56.5
+	var x1 := 7.4
+	var north: Array[float] = []
+	var south: Array[float] = []
+	for i in 14:
+		var x := x0 + (x1 - x0) * (i + 0.5) / 14.0
+		var floor_y := _floor_at(Vector3(x, 0.0, 15.5)).y
+		north.append(_wall_along(space, Vector3(x, floor_y + 1.6, 15.5), Vector3.FORWARD, 12.0).z)
+		south.append(_wall_along(space, Vector3(x, floor_y + 1.6, 15.5), Vector3.BACK, 12.0).z)
+	north.sort()
+	south.sort()
+	var floor_here := _floor_at(Vector3(-30.0, 0.0, 15.5)).y
+	var specs := [["FriezeWaves", WallFrieze.Motif.WAVES, x0, north[north.size() / 2], 0.0], ["FriezePeaks", WallFrieze.Motif.PEAKS, x1, south[south.size() / 2], PI]]
+	for s in specs:
+		var f := traps.get_node_or_null(String(s[0])) as WallFrieze
+		if f == null:
+			f = WallFrieze.new()
+			f.name = String(s[0])
+			traps.add_child(f)
+			f.owner = root
+		f.motif = s[1]
+		f.length = x1 - x0
+		f.global_position = Vector3(float(s[2]), floor_here + 1.2, float(s[3]))
+		f.rotation = Vector3(0.0, float(s[4]), 0.0)
+	_log.append("corridor: waves along the north wall, peaks along the south (walls at z %.2f and %.2f)" % [north[north.size() / 2], south[south.size() / 2]])
 
 ## Where a level ray along `dir` from `from` meets a wall (or `reach` on).
 func _wall_along(space: PhysicsDirectSpaceState3D, from: Vector3, dir: Vector3, reach: float) -> Vector3:

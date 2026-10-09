@@ -2,9 +2,11 @@ class_name MasonsSong
 extends RefCounted
 ## Old Bai's crew of masons laid the great corridor's trapped floors, and
 ## walked out of them by their work song: a verse for each floor, counting
-## the stones of the way across ("begin on the second stone from the river
-## wall; three toward the sunrise; one toward the mountain..."), facing the
-## sunrise as they worked, the Wei river on the left, Mount Li on the right.
+## the stones of the way across ("begin on the second stone from the wall of
+## waves; three toward the archives; one toward the peaks..."), facing the
+## archives as they worked, the corridor's wall of waves (the Wei river,
+## carved by the masons: WallFrieze) on the left, the wall of peaks (Mount
+## Li) on the right.
 ## Nobody alive has it whole. The player gathers it a few lines at a time:
 ## Bai himself at his bench in the workshop, the lines his crew cut into the
 ## bench's edge, the strip of bamboo his son carried into the corridor, the

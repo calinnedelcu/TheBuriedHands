@@ -41,6 +41,7 @@ func _run() -> void:
 	Quest.start_at(&"fetch_slip")
 	player.inventory.take_lamp(100.0, true)
 	_verses_walk_their_ways()
+	_the_walls_carry_the_bearings()
 	# Act I: Bai at his bench, then the bench.
 	var bai := level.get_node(WS + "Sculptor2") as TalkingWorker
 	_check("Bai can be talked to", bai != null and MasonsSong.can_talk(&"bai"))
@@ -105,6 +106,17 @@ func _verses_walk_their_ways() -> void:
 			var t := MasonsSong.line_text(floor, i)
 			words = words and t.length() > 8 and not t.contains("VERSE_")
 		_check("%s: %d lines, all in words ('%s')" % [floor, MasonsSong.line_count(floor), MasonsSong.line_text(floor, 0)], words)
+
+## The verse names no compass point: the corridor's own walls carry the
+## bearings it uses (waves along the north wall, peaks along the south), and
+## the verse's words are those.
+func _the_walls_carry_the_bearings() -> void:
+	var waves := level.get_node("CorridorTraps/FriezeWaves") as WallFrieze
+	var peaks := level.get_node("CorridorTraps/FriezePeaks") as WallFrieze
+	var west := MasonsSong.field(&"west")
+	_check("waves on the north wall, peaks on the south, along the corridor", waves.motif == WallFrieze.Motif.WAVES and peaks.motif == WallFrieze.Motif.PEAKS and waves.global_position.z < west.global_position.z and peaks.global_position.z > west.global_position.z + west.rows * west.cell)
+	var words := MasonsSong.line_text(&"west", 0) + MasonsSong.line_text(&"east", 1)
+	_check("the verse speaks of the waves, the peaks, the archives (no sunrise, river or mountain)", not (words.contains("sunrise") or words.contains("răsărit") or words.contains("river") or words.contains("mountain")))
 
 ## Near the real pillar a lamp gutters; near the others, nothing.
 func _the_hollow_pillar() -> void:
