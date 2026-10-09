@@ -67,6 +67,12 @@ func _run() -> void:
 	_exit_watch()
 	_corridor_mechanisms()
 	_masons_song()
+	# The rooms the kit builds register their colliders with the physics
+	# only after a frame: wait for them before looking for floor in them.
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_spare_tools()
 	get_tree().root.remove_child(root)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -170,14 +176,22 @@ func _floor_at(p: Vector3) -> Vector3:
 func _apprentice_kiln() -> void:
 	var ws := root.get_node("Rooms/01_TerracottaWorkshop")
 	var spot := ws.get_node("ApprenticeHideSpot") as Marker3D
-	spot.global_transform = Transform3D(Basis(Vector3.UP, 3.0 * PI / 4.0), _floor_at(Vector3(-34.4, 0.0, -6.6)))
+	# The kiln's mouth is raised: its lip at about 1.1 m, the cavity's floor
+	# level with it, the vault over it, opening toward the south-west. The boy
+	# crouches inside, half a metre in from the lip, not on the lip with his
+	# legs out over the floor (a ray from above found the lip first).
+	var yaw := Basis(Vector3.UP, 3.0 * PI / 4.0)
+	var lip := Transform3D(yaw, _floor_at(Vector3(-34.4, 0.0, -6.6)))
+	var lamp_world := lip * Vector3(0.35, 0.0, 0.8)
+	spot.global_transform = Transform3D(yaw, _floor_at(Vector3(-33.24, 0.7, -5.53)))
 	var lamp := spot.get_node_or_null("KilnLamp") as Node3D
 	if lamp == null:
 		lamp = (load("res://scenes/world/oil_lamp_prop.tscn") as PackedScene).instantiate() as Node3D
 		lamp.name = "KilnLamp"
 		spot.add_child(lamp)
 		lamp.owner = root
-	lamp.position = Vector3(0.35, 0.0, 0.8)
+	# His lamp burns where it did: on the lip, by his side.
+	lamp.global_position = lamp_world
 	var appr := ws.get_node("Apprentice")
 	appr.set(&"lamp_prop_path", appr.get_path_to(lamp))
 	_log.append("apprentice: hides in the cold kiln at %s" % spot.global_position.snapped(Vector3.ONE * 0.1))
@@ -2225,8 +2239,10 @@ func _corridor_mechanisms() -> void:
 		slab.stone_seed = 700 + i
 		slabs.append(slab)
 	var no_slabs: Array[TiltSlab] = []
-	var west := _trap_field(traps, space, "West", -50.5, -26.5, no_slabs, 31, -1)
-	var east := _trap_field(traps, space, "East", -18.5, 7.0, slabs, 47, 0)
+	# The wall's niches (where the jam's own crossbows stood: x of the three
+	# on the north wall, and two more beside them), the same on the south.
+	var west := _trap_field(traps, space, "West", -50.5, -26.5, no_slabs, 31, -1, [-48.66, -36.18])
+	var east := _trap_field(traps, space, "East", -18.5, 7.0, slabs, 47, 0, [-23.17, -10.5, 2.5])
 	# Their pins past each stretch (the brake is the winch's, in its niche).
 	_trap_lever(traps, "PinWest", TrapLever.Kind.PIN, west, Vector3(-25.6, 0.0, west.global_position.z + 0.45), 0.0)
 	_trap_lever(traps, "PinEast", TrapLever.Kind.PIN, east, Vector3(7.9, 0.0, east.global_position.z - 0.9), -PI * 0.5)
@@ -2247,7 +2263,7 @@ func _corridor_mechanisms() -> void:
 ## between the walls, the builders' way laid across them, its battery in
 ## both walls. `end_row`: the row the way must leave by at the east end (-1:
 ## any).
-func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0: float, x1: float, slabs: Array[TiltSlab], seed_value: int, end_row: int) -> TrapField:
+func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0: float, x1: float, slabs: Array[TiltSlab], seed_value: int, end_row: int, niches: Array[float]) -> TrapField:
 	const CELL := 1.5
 	var columns := int(round((x1 - x0) / CELL))
 	# The walls: where level rays across the corridor stop, the usual value.
@@ -2282,26 +2298,39 @@ func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0
 	heights.resize(columns * rows)
 	cells.resize(columns * rows)
 	var blocked := {}
+	var ground: Array[float] = []
+	var under: Array[float] = []
+	under.resize(columns * rows)
 	for r in rows:
 		for c in columns:
 			var i := r * columns + c
 			var centre := Vector3(x0 + (c + 0.5) * CELL, 0.0, z0 + (r + 0.5) * CELL)
-			heights[i] = _floor_at(centre + Vector3.UP * 0.6).y
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(centre.x, 1.8, centre.z), Vector3(centre.x, -2.4, centre.z), 1))
+			under[i] = hit.position.y if not hit.is_empty() else NAN
+			if not is_nan(under[i]):
+				ground.append(under[i])
 			cells[i] = TrapField.Cell.TRIGGER
 			for slab in slabs:
 				if absf(slab.global_position.x - centre.x) < (CELL + slab.size) * 0.5 - 0.05 and absf(slab.global_position.z - centre.z) < (CELL + slab.size) * 0.5 - 0.05:
 					blocked[i] = true
-					heights[i] = slab.global_position.y
-	# Laid level across each column, on the highest of the old floor under
-	# it: no stone sunk in it, none standing proud of its neighbours.
-	for c in columns:
-		var top := -INF
-		for r in rows:
-			if not blocked.has(r * columns + c):
-				top = maxf(top, heights[r * columns + c])
-		for r in rows:
-			if not blocked.has(r * columns + c) and top > -INF:
-				heights[r * columns + c] = top
+	# The whole stretch is paved level, on the old floor's highest ordinary
+	# patch (it varies by a few centimetres): its stones are real, walked on
+	# at exactly the height they show. Where something stands on the floor
+	# (a plinth against the wall), or the floor is a hole no slab covers,
+	# there is no stone.
+	ground.sort()
+	var median: float = ground[ground.size() / 2]
+	var paving := median
+	for g in ground:
+		if absf(g - median) <= 0.08:
+			paving = maxf(paving, g)
+	for i in cells.size():
+		heights[i] = paving
+		if not blocked.has(i) and (is_nan(under[i]) or absf(under[i] - median) > 0.12):
+			cells[i] = TrapField.Cell.NONE
+			blocked[i] = true
+	for slab in slabs:
+		slab.global_position.y = paving + TrapField.LIFT
 	# The builders' way: west to east, a column at a time, now and then a
 	# step or two across, stone to stone by their sides (never corner to
 	# corner), and never by a pit.
@@ -2364,7 +2393,8 @@ func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0
 	for slab in slabs:
 		slab_paths.append(field.get_path_to(slab))
 	field.slab_paths = slab_paths
-	# The battery: a crossbow every three stones in each wall, high up.
+	# The battery: a crossbow in each niche of both walls, set in the niche's
+	# back, a hand's depth in from it, where the jam's own stood.
 	var battery := traps.get_node_or_null("Battery" + side) as TrapBattery
 	if battery == null:
 		battery = TrapBattery.new()
@@ -2374,7 +2404,8 @@ func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0
 	battery.global_position = Vector3(x0, 0.0, z0)
 	var bow_scene := load("res://scenes/world/wall_crossbow.tscn") as PackedScene
 	var k := 0
-	for c in range(1, columns, 3):
+	for nx in niches:
+		var floor_y := _floor_at(Vector3(nx, 0.0, 15.5)).y
 		for wall in 2:
 			var name := "Bow%d" % k
 			k += 1
@@ -2384,13 +2415,17 @@ func _trap_field(traps: Node, space: PhysicsDirectSpaceState3D, side: String, x0
 				bow.name = name
 				battery.add_child(bow)
 				bow.owner = root
-			var x := x0 + (c + 0.5) * CELL + (0.75 if wall == 1 else 0.0)
-			var floor_y := _floor_at(Vector3(x, 0.0, 15.5)).y
-			# North wall faces south (+z), south wall north; it looses along -z.
-			var z := (z_north + 0.25) if wall == 0 else (z_south - 0.25)
-			bow.global_position = Vector3(x, floor_y + 2.7, z)
+			# North wall faces south (it looses along +z); the south wall, north.
+			var back := _wall_along(space, Vector3(nx, floor_y + 2.2, 15.5), Vector3.FORWARD if wall == 0 else Vector3.BACK, 12.0)
+			var z := back.z + (0.5 if wall == 0 else -0.5)
+			bow.global_position = Vector3(nx, floor_y + 2.2, z)
 			bow.rotation = Vector3(0.0, PI if wall == 0 else 0.0, 0.0)
 			bow.reachable = false
+	# Any left from a layout with more.
+	for c in battery.get_children():
+		if c is WallCrossbow and String(c.name).begins_with("Bow") and int(String(c.name).trim_prefix("Bow")) >= k:
+			battery.remove_child(c)
+			c.free()
 	field.battery_path = field.get_path_to(battery)
 	return field
 
@@ -2458,7 +2493,7 @@ func _masons_song() -> void:
 	var k := int(west.way.size() * 0.45)
 	var at := west.centre_global(west.way[k])
 	var ahead := west.centre_global(west.way[mini(k + 1, west.way.size() - 1)])
-	son.global_position = Vector3(at.x, at.y - TrapField.LIFT, at.z)
+	son.global_position = at
 	son.rotation = Vector3(0.0, atan2(ahead.x - at.x, ahead.z - at.z) + PI * 0.5, 0.0)
 	var slip := son.get_node_or_null("Slip") as Readable
 	if slip == null:
@@ -2472,7 +2507,7 @@ func _masons_song() -> void:
 	slip.position = Vector3(0.0, 0.3, 0.0)
 	var mourner := _make_talker(fallen.get_node("Mourner") as Worker, &"mourner")
 	var spot := _off_the_way(west, k)
-	mourner.global_position = Vector3(spot.x, spot.y - TrapField.LIFT, spot.z)
+	mourner.global_position = spot
 	mourner.rotation = Vector3(0.0, atan2(at.x - spot.x, at.z - spot.z) - PI * 0.5, 0.0)
 	# The pillars: the hollow one north, nearest the floor; two alike.
 	var traps := root.get_node("CorridorTraps")
@@ -2550,6 +2585,93 @@ func _scratches_mesh() -> Mesh:
 	mat.roughness = 1.0
 	mesh.surface_set_material(0, mat)
 	return mesh
+
+## There was one of each tool in the whole tomb: a hammer thrown into a pit,
+## a wedge spent on a plate (it stays under it), a chisel left in a winch,
+## and no other to be found, with the way on shut behind. Now each place that
+## needs them has a set (a chisel, a hammer, a wedge) lying in the open on the
+## floor, where the men who worked there left them: by the masons' bench, in
+## Liang's room beside the other tools, at the foot of the workers' lift
+## (where its crews kept theirs) and in the armoury. They come out once the
+## sealing has begun (so Act I's one chisel stays the only one to find).
+## Each set is on a free stretch of floor found by search, not on a guess.
+func _spare_tools() -> void:
+	var holder := root.get_node_or_null("SpareTools") as Node3D
+	if holder == null:
+		holder = Node3D.new()
+		holder.name = "SpareTools"
+		root.add_child(holder)
+		holder.owner = root
+	var lift := root.get_node("UnderTheMountain/ShaftLift") as Node3D
+	var bench := root.get_node("Rooms/01_TerracottaWorkshop/MasonsBench") as Node3D
+	var armour := root.get_node("UnderTheMountain/ArmourStands/StoneArmor0") as Node3D
+	var sets := {
+		"Masons": bench.global_position + Vector3(1.4, 0.0, 0.6),
+		"Liang": Vector3(41.5, 0.1, -31.0),
+		"Lift": lift.global_position + Vector3(-1.6, -17.4, 3.6),
+		"Armoury": armour.global_position + Vector3(0.0, 0.0, 1.8),
+	}
+	var tools := [&"chisel", &"hammer", &"wedge"]
+	var placed := PackedStringArray()
+	# The sets already there (an earlier run) don't take up the floor.
+	var own: Array[RID] = []
+	for c in holder.get_children():
+		own.append((c as CollisionObject3D).get_rid())
+	for set_name in sets:
+		var spots := _free_row(sets[set_name], tools.size(), own)
+		if spots.is_empty():
+			push_warning("spare tools: no free floor near %s" % set_name)
+			continue
+		for k in tools.size():
+			var node_name := "Spare_%s_%s" % [set_name, tools[k]]
+			var item := holder.get_node_or_null(node_name) as Pickup
+			if item == null:
+				item = (load("res://scenes/items/pickup.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+				item.name = node_name
+				holder.add_child(item)
+				item.owner = root
+			item.item_id = tools[k]
+			item.quest_from = &"sealing"
+			item.global_position = spots[k]
+			item.rotation = Vector3(0.0, float(hash(node_name) % 628) / 100.0, 0.0)
+		placed.append("%s at %s" % [set_name, spots[0].snapped(Vector3.ONE * 0.1)])
+	_log.append("spare tools: " + "; ".join(placed))
+
+## `count` free spots in a row on the floor, near `centre`, a stride apart:
+## the first stretch of level floor, clear of anything solid, that a ring
+## search around the centre finds.
+func _free_row(centre: Vector3, count: int, ignore: Array[RID] = []) -> PackedVector3Array:
+	var space := root.get_world_3d().direct_space_state
+	# `centre` is at floor height give or take half a metre: the first
+	# surface under it (a ray from higher would hit a ceiling's top).
+	var ground := space.intersect_ray(PhysicsRayQueryParameters3D.create(centre + Vector3.UP * 0.5, centre + Vector3.DOWN * 3.0, 1))
+	if ground.is_empty():
+		return PackedVector3Array()
+	var base: float = ground.position.y
+	var ball := SphereShape3D.new()
+	ball.radius = 0.3
+	for ring: float in [0.0, 0.6, 1.2, 1.8, 2.4, 3.0, 3.6]:
+		for a in 16:
+			var ang := TAU * a / 16.0
+			var start: Vector3 = centre + Vector3(cos(ang), 0.0, sin(ang)) * ring
+			for dir: Vector3 in [Vector3.RIGHT, Vector3.BACK, Vector3.LEFT, Vector3.FORWARD]:
+				var row := PackedVector3Array()
+				for k in count:
+					var p: Vector3 = start + dir * (0.5 * k)
+					var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(p.x, base + 1.4, p.z), Vector3(p.x, base - 1.0, p.z), 1))
+					if hit.is_empty() or absf(hit.position.y - base) > 0.08:
+						break
+					var query := PhysicsShapeQueryParameters3D.new()
+					query.shape = ball
+					query.transform = Transform3D(Basis(), Vector3(p.x, hit.position.y + 0.42, p.z))
+					query.collision_mask = 1 | 16
+					query.exclude = ignore
+					if not space.intersect_shape(query, 1).is_empty():
+						break
+					row.append(hit.position)
+				if row.size() == count:
+					return row
+	return PackedVector3Array()
 
 ## Where a level ray along `dir` from `from` meets a wall (or `reach` on).
 func _wall_along(space: PhysicsDirectSpaceState3D, from: Vector3, dir: Vector3, reach: float) -> Vector3:

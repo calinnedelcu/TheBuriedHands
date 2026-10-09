@@ -36,6 +36,8 @@ func _wait(s: float) -> void:
 func _run() -> void:
 	await _fresh()
 	_check("two trapped floors, each with a way across", west.safe_path().size() > 10 and east.safe_path().size() > 10)
+	_paving_is_level_and_walked_on()
+	_crossbows_in_their_niches()
 	await _trigger_kills()
 	await _fresh()
 	await _the_way_across(west)
@@ -53,6 +55,64 @@ func _run() -> void:
 	print("RESULT: %d failure(s)" % failures)
 	Game._delete_save()
 	get_tree().quit()
+
+## Every stone is walked on at the height it shows, none floating or sunk:
+## a ray down onto each stone's middle meets the paving at its top.
+func _paving_is_level_and_walked_on() -> void:
+	var space := level.get_world_3d().direct_space_state
+	for field in [west, east]:
+		var f := field as TrapField
+		var off := 0
+		var n := 0
+		var spread := 0.0
+		for i in f.cells.size():
+			if f.kind(i) == TrapField.Cell.NONE or f.kind(i) == TrapField.Cell.PIT:
+				continue
+			var c := f.centre_global(i)
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(c + Vector3.UP * 1.0, c + Vector3.DOWN * 2.0, 1))
+			n += 1
+			# A stone beside a pit's slab can have no middle: skip those.
+			if hit.is_empty() or hit.collider.get_parent() != f.get_node("Paving"):
+				continue
+			spread = maxf(spread, absf(hit.position.y - c.y))
+			if absf(hit.position.y - c.y) > 0.01:
+				off += 1
+		_check("%s: %d stones all walked on at the height they show (worst %.3f m, %d off)" % [f.name, n, spread, off], off == 0)
+
+## The battery's crossbows sit in the wall's niches: behind the wall's face,
+## not in front of it, none inside the masonry.
+func _crossbows_in_their_niches() -> void:
+	var space := level.get_world_3d().direct_space_state
+	var bad := 0
+	var total := 0
+	for b in ["BatteryWest", "BatteryEast"]:
+		for bow in level.get_node(T + b).get_children():
+			if not (bow is WallCrossbow):
+				continue
+			total += 1
+			var p := (bow as Node3D).global_position
+			# Nothing solid within a hand of it (it isn't buried), and the
+			# corridor's open on its firing side.
+			var ball := SphereShape3D.new()
+			ball.radius = 0.12
+			var q := PhysicsShapeQueryParameters3D.new()
+			q.shape = ball
+			q.transform = Transform3D(Basis(), p)
+			q.collision_mask = 1
+			# (The jam's own decorative crossbows, hidden, keep their colliders
+			# in the old niches: not walls.)
+			var inside := space.intersect_shape(q, 4)
+			var buried := false
+			for r in inside:
+				if not String((r.collider as Node).name).contains("crossbow"):
+					buried = true
+			var dir := -(bow as Node3D).global_basis.z
+			var ahead := space.intersect_ray(PhysicsRayQueryParameters3D.create(p + dir * 0.4, p + dir * 3.0, 1))
+			var clear := ahead.is_empty() or (ahead.position as Vector3).distance_to(p) > 2.0
+			if buried or not clear:
+				bad += 1
+				print("  bow %s at %s buried %s clear %s" % [bow.name, p, buried, clear])
+	_check("%d battery crossbows, each in its niche (%d wrong)" % [total, bad], total >= 10 and bad == 0)
 
 ## A new game at Act II's start, the player out of harm's way.
 func _fresh() -> void:

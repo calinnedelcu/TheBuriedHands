@@ -18,6 +18,10 @@ func _ready() -> void:
 		_lamp_prop.visible = false
 	Quest.step_changed.connect(_on_step_changed)
 
+## Cowering keeps the hips where he stands: lowered onto the floor.
+func _low_clips() -> Array[StringName]:
+	return [&"cower"]
+
 func _on_step_changed(step_id: StringName) -> void:
 	if step_id == &"talk_liang" and not Net.active:
 		Game.set_flag(&"apprentice_taken")
@@ -85,8 +89,10 @@ func _snap_to_hide_spot() -> void:
 	global_position = spot.global_position
 	rotation.y = spot.global_rotation.y
 	_base_yaw = rotation.y
-	# Curled up in the kiln mouth, as far from the door as he can get.
-	play(&"cower")
+	# Hidden in the kiln mouth, as far from the door as he can get: its vault
+	# is 1.3 m under, too low for any sitting pose (his cower is 1.4 high
+	# even set on the floor), so he crouches on hands and knees in it.
+	play(&"crawl_idle")
 	# The lamp you gave him burns beside him in the kiln mouth.
 	_set_has_lamp(bool(Game.get_flag(&"gave_lamp")))
 

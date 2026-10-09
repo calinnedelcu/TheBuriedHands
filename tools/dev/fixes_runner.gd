@@ -38,6 +38,7 @@ func _run() -> void:
 	await _stone()
 	await _thrown()
 	_lift_box()
+	await _spare_tools()
 	print("RESULT: %d failure(s)" % failures)
 	Game._delete_save()
 	get_tree().quit()
@@ -167,6 +168,25 @@ func _thrown() -> void:
 			reached = true
 			break
 	_check("he gets to the spot", reached)
+
+## No tool is the only one: each place that needs them has a set lying on
+## the floor, takeable once the sealing has begun, and not before.
+func _spare_tools() -> void:
+	var holder := level.get_node("SpareTools")
+	var count := {&"chisel": 0, &"hammer": 0, &"wedge": 0}
+	for p in holder.get_children():
+		if p is Pickup:
+			count[(p as Pickup).item_id] += 1
+	_check("spare tools: %d each of chisel, hammer, wedge" % count[&"hammer"], count[&"chisel"] >= 4 and count[&"hammer"] >= 4 and count[&"wedge"] >= 4)
+	var set_in_workshop := holder.get_node("Spare_Masons_hammer") as Pickup
+	var usable := set_in_workshop.get_node("Usable") as Usable
+	# The hammer is lost: another can be taken (but not while you have one).
+	for id in [&"hammer"]:
+		player.inventory.remove(id, 99)
+	_check("lost your hammer: a spare can be taken", usable.can_use(player))
+	player.inventory.add(&"hammer")
+	_check("with one in hand it can't be taken twice", not usable.can_use(player))
+	player.inventory.remove(&"hammer", 99)
 
 ## The lift's ballast box: full, a long press takes a stone off at once (a
 ## hold has nothing to add); with room, holding adds.

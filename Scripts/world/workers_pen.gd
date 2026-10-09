@@ -32,6 +32,8 @@ var opened := false
 var _gate: Node3D
 var _gate_shape: CollisionShape3D
 var _people: Array[Node3D] = []
+## Bones run inside the limbs: the lowest one stays this far off the floor.
+const GROUND_CLEARANCE := 0.05
 var _apprentice: Node3D
 
 func _ready() -> void:
@@ -88,6 +90,9 @@ func _flee(person: Node3D, points: Array[Vector3], delay: float) -> void:
 	if not is_instance_valid(person):
 		return
 	_play(person, &"walk", 1.6)
+	# On his feet again: back up from where he knelt.
+	if person.has_meta(&"rest_y"):
+		person.position.y = person.get_meta(&"rest_y")
 	var at := person.global_position
 	for p in points:
 		var to := Vector3(p.x, at.y if absf(p.y - at.y) < 0.6 else p.y, p.z)
@@ -101,6 +106,29 @@ func _flee(person: Node3D, points: Array[Vector3], delay: float) -> void:
 			return
 		at = to
 	person.queue_free()
+
+## Kneeling and cowering fold the legs but keep the hips where a man stands
+## (the clips of craftsman.glb and apprentice.glb): each is lowered until
+## his lowest bone (not the root) rests on the floor, or he kneels in the air.
+func _process(delta: float) -> void:
+	for p in _people:
+		if not is_instance_valid(p):
+			continue
+		var skeletons := p.find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			continue
+		var sk := skeletons[0] as Skeleton3D
+		if not p.has_meta(&"rest_y"):
+			p.set_meta(&"rest_y", p.position.y)
+		var rest: float = p.get_meta(&"rest_y")
+		var xf := sk.global_transform
+		var lowest := INF
+		for b in sk.get_bone_count():
+			if sk.get_bone_parent(b) >= 0:
+				lowest = minf(lowest, (xf * sk.get_bone_global_pose(b)).origin.y)
+		var rel := lowest - p.global_position.y
+		var target := rest - maxf(rel - GROUND_CLEARANCE, 0.0)
+		p.position.y = move_toward(p.position.y, target, delta * 4.0)
 
 func _play(person: Node3D, clip: StringName, speed := 1.0) -> void:
 	var anims := person.find_children("*", "AnimationPlayer", true, false)

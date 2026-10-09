@@ -25,7 +25,13 @@ signal talked
 
 @onready var _usable: DelegateUsable = get_node_or_null("TalkBody/Usable")
 
+## Bones run inside the limbs: the lowest one stays this far off the floor.
+const GROUND_CLEARANCE := 0.05
+
 var _anim: AnimationPlayer
+var _model: Node3D
+var _skeleton: Skeleton3D
+var _model_rest := Vector3.ZERO
 var _current: StringName = &""
 var _base_yaw := 0.0
 var _talking := false
@@ -33,6 +39,11 @@ var _turn_tween: Tween
 
 func _ready() -> void:
 	_anim = _first_anim_player()
+	_model = get_node_or_null(^"Model") as Node3D
+	if _model != null:
+		_model_rest = _model.position
+	var skeletons := find_children("*", "Skeleton3D", true, false)
+	_skeleton = skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
 	for key in anims:
 		var n := StringName(anims[key])
 		if _anim != null and _anim.has_animation(n):
@@ -43,6 +54,29 @@ func _ready() -> void:
 		_usable.prompt_key = prompt_key
 	Dialogue.line_started.connect(_on_line_started)
 	Dialogue.sequence_finished.connect(_on_sequence_finished)
+
+## Poses that fold the legs but keep the hips at standing height (cowering):
+## while one plays, the model is lowered until its lowest bone (not the root)
+## rests on the floor, or he hangs in the air a metre up.
+func _low_clips() -> Array[StringName]:
+	return []
+
+func _process(delta: float) -> void:
+	if _model == null or _skeleton == null:
+		return
+	var low := false
+	for k in _low_clips():
+		low = low or _current == StringName(anims.get(k, k))
+	var target := _model_rest.y
+	if low:
+		var xf := _skeleton.global_transform
+		var lowest := INF
+		for b in _skeleton.get_bone_count():
+			if _skeleton.get_bone_parent(b) >= 0:
+				lowest = minf(lowest, (xf * _skeleton.get_bone_global_pose(b)).origin.y)
+		var drop := lowest - (global_position.y + GROUND_CLEARANCE)
+		target = minf(_model_rest.y, _model.position.y - drop / maxf(global_basis.get_scale().y, 0.001))
+	_model.position.y = move_toward(_model.position.y, target, delta * 4.0)
 
 func play(key: StringName, blend := 0.3) -> void:
 	if _anim == null:

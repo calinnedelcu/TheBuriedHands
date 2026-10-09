@@ -32,9 +32,10 @@ const KNOCK_HOLLOW := preload("res://audio/sfx/impacts/impactPlank_medium_001.og
 const KNOCK_TRIGGER := preload("res://audio/sfx/impacts/impactMetal_light_000.ogg")
 ## How high above its stone a body may be and still weigh on it.
 const STANDING := 0.45
-## The stones' tops above the floor they're laid on (no flicker where the
-## two meet).
+## The stones' tops above the old floor they're laid on (no flicker where
+## the two meet), and how thick they are (down past any unevenness under).
 const LIFT := 0.025
+const THICK := 0.5
 
 @export var columns := 16:
 	set(v):
@@ -188,8 +189,8 @@ func _build() -> void:
 ## One flagstone over `r` (x, z in the field's space), its top at `top`.
 func _lay(batch: Masonry.Batch, rng: RandomNumberGenerator, r: Rect2, top: float) -> void:
 	var slabs := Masonry.stones("floor")
-	var size := Vector3(r.size.x - 0.04, 0.24, r.size.y - 0.04)
-	var at := Vector3(r.get_center().x, top - 0.12 + rng.randf_range(-0.006, 0.006), r.get_center().y)
+	var size := Vector3(r.size.x - 0.04, THICK, r.size.y - 0.04)
+	var at := Vector3(r.get_center().x, top - THICK * 0.5 + rng.randf_range(-0.004, 0.004), r.get_center().y)
 	var turn := 1.0 if rng.randf() < 0.5 else -1.0
 	var shade := rng.randf_range(0.86, 1.1)
 	var mat: Material = FLOOR_MATERIALS[rng.randi() % FLOOR_MATERIALS.size()]
@@ -259,6 +260,27 @@ func _make_runtime() -> void:
 			_bodies.append(b))
 	watch.body_exited.connect(func(b: Node3D) -> void:
 		_bodies.erase(b))
+	# The paving itself: a body for the stones (and what's left of one beside
+	# a pit's slab), their tops where they show.
+	var paving := StaticBody3D.new()
+	paving.name = "Paving"
+	paving.collision_layer = 1
+	paving.collision_mask = 0
+	var pits := _slab_rects()
+	for i in cells.size():
+		var k := kind(i)
+		if k == Cell.NONE or k == Cell.PIT:
+			continue
+		var top_c := centre(i)
+		var whole := Rect2(top_c.x - cell * 0.5, top_c.z - cell * 0.5, cell, cell)
+		for piece in _cut_round(whole, pits):
+			var ps := CollisionShape3D.new()
+			var pb := BoxShape3D.new()
+			pb.size = Vector3(piece.size.x, THICK, piece.size.y)
+			ps.shape = pb
+			ps.position = Vector3(piece.get_center().x, top_c.y - THICK * 0.5, piece.get_center().y)
+			paving.add_child(ps)
+	add_child(paving)
 	# What a knock lands on: the interaction's aim sees it, nobody walks on it.
 	var surface := StaticBody3D.new()
 	surface.name = "Surface"
@@ -335,7 +357,11 @@ func net_press(index: int, who: String) -> void:
 	if locked or slack:
 		return
 	var at := centre_global(index)
-	if body != null and is_instance_valid(body):
+	# A shard that broke on the stone is gone by now: the volley goes where
+	# it landed.
+	if not is_instance_valid(body):
+		body = null
+	if body != null:
 		at = body.global_position
 	battery.loose_at(body, at)
 
