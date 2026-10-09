@@ -115,7 +115,21 @@ func _kneel() -> void:
 
 func _liang() -> void:
 	var liang := level.get_node("Liang") as Node3D
-	_check("Liang's feet on the floor (y %.2f)" % liang.global_position.y, absf(liang.global_position.y - (-0.6)) < 0.05)
+	# The sit clip's feet are 0.49 above his origin, his hips 1.45: feet on
+	# the room's floor, seat a hand under his hips, a stool there to take him.
+	var space := level.get_world_3d().direct_space_state
+	var floor_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(liang.global_position.x, 0.7, liang.global_position.z), Vector3(liang.global_position.x, -2.0, liang.global_position.z), 1))
+	var feet_y := liang.global_position.y + 0.49
+	_check("Liang's feet on the floor (feet %.2f, floor %.2f)" % [feet_y, floor_hit.position.y], absf(feet_y - floor_hit.position.y) < 0.04)
+	var seat := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(liang.global_position.x + 0.2, liang.global_position.y + 1.45, liang.global_position.z), Vector3(liang.global_position.x + 0.2, liang.global_position.y, liang.global_position.z), 1))
+	_check("a stool seat right under his hips (%.2f below)" % (liang.global_position.y + 1.45 - seat.position.y if not seat.is_empty() else 9.9), not seat.is_empty() and absf(liang.global_position.y + 1.45 - seat.position.y - 0.12) < 0.08)
+	# His room's door: walking in at the south end already finds him.
+	var t := level.get_node("Story/LiangRoomEnter") as Area3D
+	var box := (t.get_node("Shape") as CollisionShape3D).shape as BoxShape3D
+	var door := t.to_local(Vector3(42.0, 0.5, -3.0))
+	var inside := t.to_local(Vector3(37.8, 0.5, -26.2))
+	var far := t.to_local(Vector3(55.0, 0.5, -50.0))
+	_check("the room's trigger takes in its south door, the middle and the far end", absf(door.x) < box.size.x * 0.5 and absf(door.z) < box.size.z * 0.5 and absf(inside.z) < box.size.z * 0.5 and absf(far.z) < box.size.z * 0.5 and absf(far.x) < box.size.x * 0.5)
 
 ## Four blows: the stone stays put through three, gives on the fourth.
 func _stone() -> void:
@@ -134,6 +148,8 @@ func _stone() -> void:
 		if i < 3:
 			_check("blow %d: still whole, still where it was" % (i + 1), not stone.get("broken") and rock.position.distance_to(at) < 0.01)
 	_check("the fourth blow splits it", stone.get("broken"))
+	await _wait(1.0)
+	_check("and no piece of it is left standing in the way", not rock.visible)
 
 ## A shard thrown past a guard: he goes to see what fell; the farther one
 ## who heard it only turns.
@@ -156,6 +172,7 @@ func _thrown() -> void:
 	shard.global_position = spot + Vector3.UP * 1.5
 	await _wait(1.5)
 	_check("the nearest guard goes to look (state %s)" % Guard.State.keys()[near.state], near.state == Guard.State.INVESTIGATE or near.state == Guard.State.SEARCH)
+	_check("and it raised no alert in him (awareness %.2f)" % near.awareness, near.awareness < 0.35)
 	var goers := 0
 	for g in guards:
 		if g.state == Guard.State.INVESTIGATE:
@@ -178,6 +195,17 @@ func _spare_tools() -> void:
 		if p is Pickup:
 			count[(p as Pickup).item_id] += 1
 	_check("spare tools: %d each of chisel, hammer, wedge" % count[&"hammer"], count[&"chisel"] >= 4 and count[&"hammer"] >= 4 and count[&"wedge"] >= 4)
+	# On the benches, not the floor: each a good way up from the ground.
+	var space := level.get_world_3d().direct_space_state
+	var on_floor := 0
+	for p in holder.get_children():
+		if p is Pickup:
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create((p as Node3D).global_position + Vector3.DOWN * 0.15, (p as Node3D).global_position + Vector3.DOWN * 3.0, 1))
+			if not hit.is_empty() and (p as Node3D).global_position.y - hit.position.y < 0.6:
+				on_floor += 1
+	_check("the spare tools lie on benches, none on the floor (%d on it)" % on_floor, on_floor == 0)
+	var shards := level.get_node("Shards").get_child_count()
+	_check("shards of porcelain lie about the floors (%d)" % shards, shards >= 10)
 	var set_in_workshop := holder.get_node("Spare_Masons_hammer") as Pickup
 	var usable := set_in_workshop.get_node("Usable") as Usable
 	# The hammer is lost: another can be taken (but not while you have one).

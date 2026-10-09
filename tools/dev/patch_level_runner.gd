@@ -66,6 +66,7 @@ func _run() -> void:
 	_wei_at_the_last_door()
 	_exit_watch()
 	_corridor_mechanisms()
+	_liang_room_trigger()
 	_corridor_friezes()
 	_masons_song()
 	# The rooms the kit builds register their colliders with the physics
@@ -2124,14 +2125,79 @@ func _makers_names() -> void:
 func _liang_seated() -> void:
 	var liang := root.get_node("Liang") as Node3D
 	liang.set(&"anims", {"sit": "sit", "talk": "talk", "surprised": "surprised", "frustrated": "frustrated"})
-	# His feet on the floor beside the stool he sits on (Chair_038, its seat
-	# 0.45 up): the sit pose puts him on it. He was half a metre down in the
-	# flagstones, sitting on the floor with his legs in it.
-	# (From under the table beside him, and the same every run.)
-	var at := liang.global_position + liang.global_basis.x * 0.8
-	var beside := _floor_at(Vector3(at.x, -1.1, at.z))
-	liang.global_position.y = beside.y
-	_log.append("liang: seated talk, on his stool at %.2f" % beside.y)
+	# His seat. The room's floor is at 0.18 (a measure from below it had put
+	# him 0.8 m down in the flagstones, with his legs through them), and the
+	# chair there (Chair_038) has a seat 0.45 up, a child's to the sit clip:
+	# it puts his hips 1.45 above his origin and his feet 0.49 above it, so
+	# his feet reach the floor from a seat a metre up. He sits on a stool of
+	# that height, a timber one, his feet on the flagstones; the chair is gone.
+	const SIT_FEET := 0.49
+	const SIT_HIP := 1.45
+	# (A ray from just over the floor: from higher it finds the desk's top.)
+	var floor_hit := root.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(liang.global_position.x, 0.7, liang.global_position.z), Vector3(liang.global_position.x, -2.0, liang.global_position.z), 1))
+	var room_floor: float = floor_hit.position.y if not floor_hit.is_empty() else 0.18
+	var feet := room_floor - SIT_FEET + 0.01
+	liang.global_position.y = feet
+	var seat_top := feet + SIT_HIP - 0.12
+	var chair := root.get_node_or_null("MapWithoutTreasure/Chair_038") as Node3D
+	if chair != null:
+		chair.visible = false
+		for body in chair.find_children("*", "CollisionObject3D", true, false):
+			(body as CollisionObject3D).collision_layer = 0
+	var stool := root.get_node_or_null("LiangStool") as Node3D
+	if stool != null:
+		root.remove_child(stool)
+		stool.free()
+	stool = Node3D.new()
+	stool.name = "LiangStool"
+	root.add_child(stool)
+	stool.owner = root
+	stool.global_position = Vector3(liang.global_position.x, room_floor, liang.global_position.z)
+	stool.rotation.y = liang.rotation.y
+	var timber := load("res://assets/materials/level/timber.tres") as Material
+	var seat_height := seat_top - room_floor
+	var parts := [["Seat", Vector3(0.0, seat_height - 0.06, 0.0), Vector3(1.0, 0.12, 1.0)]]
+	for sx in [-1, 1]:
+		for sz in [-1, 1]:
+			parts.append(["Leg%d%d" % [sx, sz], Vector3(0.36 * sx, (seat_height - 0.12) * 0.5, 0.36 * sz), Vector3(0.14, seat_height - 0.12, 0.14)])
+	parts.append(["Rail", Vector3(0.0, 0.32, 0.0), Vector3(0.82, 0.07, 0.07)])
+	for p in parts:
+		var mi := MeshInstance3D.new()
+		mi.name = String(p[0])
+		var box := BoxMesh.new()
+		box.size = p[2]
+		mi.mesh = box
+		mi.material_override = timber
+		mi.position = p[1]
+		stool.add_child(mi)
+		mi.owner = root
+	var body := StaticBody3D.new()
+	body.name = "Body"
+	body.collision_layer = 1
+	stool.add_child(body)
+	body.owner = root
+	var shape := CollisionShape3D.new()
+	shape.name = "Shape"
+	var bx := BoxShape3D.new()
+	bx.size = Vector3(1.0, seat_height, 1.0)
+	shape.shape = bx
+	shape.position = Vector3(0.0, seat_height * 0.5, 0.0)
+	body.add_child(shape)
+	shape.owner = root
+	_log.append("liang: on a %.2f m timber stool, feet on the floor at %.2f" % [seat_height, room_floor])
+
+## Entering Liang's workshop is entering it: the trigger was a 14 by 6 m
+## stretch in the middle of the room, 20 m in from its south door, so the
+## checkpoint of finding him came only after walking round. It now covers
+## the whole room, from wall to wall (it has more than one way in).
+func _liang_room_trigger() -> void:
+	var t := root.get_node("Story/LiangRoomEnter") as Area3D
+	t.global_position = Vector3(45.2, 2.0, -28.7)
+	var cs := t.get_node("Shape") as CollisionShape3D
+	var box := BoxShape3D.new()
+	box.size = Vector3(29.0, 4.0, 56.5)
+	cs.shape = box
+	_log.append("liang: his room's trigger now takes in the whole room")
 
 ## Act I: the escort keeps the craftsmen in (ExitWatch). He stands in the
 ## workshop's south door, the way to the trap corridor and the archives, and
@@ -2590,12 +2656,13 @@ func _scratches_mesh() -> Mesh:
 ## There was one of each tool in the whole tomb: a hammer thrown into a pit,
 ## a wedge spent on a plate (it stays under it), a chisel left in a winch,
 ## and no other to be found, with the way on shut behind. Now each place that
-## needs them has a set (a chisel, a hammer, a wedge) lying in the open on the
-## floor, where the men who worked there left them: by the masons' bench, in
-## Liang's room beside the other tools, at the foot of the workers' lift
-## (where its crews kept theirs) and in the armoury. They come out once the
-## sealing has begun (so Act I's one chisel stays the only one to find).
-## Each set is on a free stretch of floor found by search, not on a guess.
+## needs them has a set (a chisel, a hammer, a wedge) lying on a workbench
+## where the men who worked there left them: by the masons' bench, in
+## Liang's room, at the foot of the workers' lift (where its crews kept
+## theirs) and in the armoury. They can be taken once the sealing has begun
+## (so Act I's one chisel stays the only one to find). Each bench is on a
+## free stretch of floor found by search, not on a guess. The floor, on the
+## other hand, has shards of porcelain on it, here and there (_shards).
 func _spare_tools() -> void:
 	var holder := root.get_node_or_null("SpareTools") as Node3D
 	if holder == null:
@@ -2603,26 +2670,67 @@ func _spare_tools() -> void:
 		holder.name = "SpareTools"
 		root.add_child(holder)
 		holder.owner = root
+	# Benches are rebuilt each run; the sets already there (an earlier run)
+	# don't take up the floor.
+	for c in holder.get_children():
+		if String(c.name).begins_with("Bench_"):
+			holder.remove_child(c)
+			c.free()
 	var lift := root.get_node("UnderTheMountain/ShaftLift") as Node3D
 	var bench := root.get_node("Rooms/01_TerracottaWorkshop/MasonsBench") as Node3D
 	var armour := root.get_node("UnderTheMountain/ArmourStands/StoneArmor0") as Node3D
 	var sets := {
-		"Masons": bench.global_position + Vector3(1.4, 0.0, 0.6),
+		"Masons": bench.global_position + Vector3(2.4, 0.0, 0.4),
 		"Liang": Vector3(41.5, 0.1, -31.0),
 		"Lift": lift.global_position + Vector3(-1.6, -17.4, 3.6),
 		"Armoury": armour.global_position + Vector3(0.0, 0.0, 1.8),
 	}
 	var tools := [&"chisel", &"hammer", &"wedge"]
 	var placed := PackedStringArray()
-	# The sets already there (an earlier run) don't take up the floor.
 	var own: Array[RID] = []
-	for c in holder.get_children():
-		own.append((c as CollisionObject3D).get_rid())
+	for body in holder.find_children("*", "CollisionObject3D", true, false):
+		own.append((body as CollisionObject3D).get_rid())
+	var timber := load("res://assets/materials/level/timber.tres") as Material
 	for set_name in sets:
-		var spots := _free_row(sets[set_name], tools.size(), own)
-		if spots.is_empty():
-			push_warning("spare tools: no free floor near %s" % set_name)
+		var spot := _free_bench_spot(sets[set_name], Vector3(1.9, 0.9, 0.9), own)
+		if spot.is_empty():
+			push_warning("spare tools: no free floor for a bench near %s" % set_name)
 			continue
+		var table := Node3D.new()
+		table.name = "Bench_" + set_name
+		holder.add_child(table)
+		table.owner = root
+		table.global_position = spot["pos"]
+		table.rotation.y = float(spot["yaw"])
+		var top_y := 0.9
+		var parts := [["Top", Vector3(0.0, top_y - 0.05, 0.0), Vector3(1.9, 0.1, 0.9)]]
+		for sx in [-1, 1]:
+			for sz in [-1, 1]:
+				parts.append(["Leg%d%d" % [sx, sz], Vector3(0.83 * sx, (top_y - 0.1) * 0.5, 0.35 * sz), Vector3(0.12, top_y - 0.1, 0.12)])
+		parts.append(["Shelf", Vector3(0.0, 0.3, 0.0), Vector3(1.7, 0.06, 0.7)])
+		for part in parts:
+			var mi := MeshInstance3D.new()
+			mi.name = String(part[0])
+			var box := BoxMesh.new()
+			box.size = part[2]
+			mi.mesh = box
+			mi.material_override = timber
+			mi.position = part[1]
+			table.add_child(mi)
+			mi.owner = root
+		var body := StaticBody3D.new()
+		body.name = "Body"
+		body.collision_layer = 1
+		table.add_child(body)
+		body.owner = root
+		var shape := CollisionShape3D.new()
+		shape.name = "Shape"
+		var bx := BoxShape3D.new()
+		bx.size = Vector3(1.9, top_y, 0.9)
+		shape.shape = bx
+		shape.position = Vector3(0.0, top_y * 0.5, 0.0)
+		body.add_child(shape)
+		shape.owner = root
 		for k in tools.size():
 			var node_name := "Spare_%s_%s" % [set_name, tools[k]]
 			var item := holder.get_node_or_null(node_name) as Pickup
@@ -2633,10 +2741,85 @@ func _spare_tools() -> void:
 				item.owner = root
 			item.item_id = tools[k]
 			item.quest_from = &"sealing"
-			item.global_position = spots[k]
-			item.rotation = Vector3(0.0, float(hash(node_name) % 628) / 100.0, 0.0)
-		placed.append("%s at %s" % [set_name, spots[0].snapped(Vector3.ONE * 0.1)])
-	_log.append("spare tools: " + "; ".join(placed))
+			item.global_position = table.global_transform * Vector3(-0.6 + 0.6 * k, top_y, 0.0)
+			item.rotation = Vector3(0.0, table.rotation.y + float(hash(node_name) % 200) / 100.0 - 1.0, 0.0)
+		placed.append("%s at %s" % [set_name, Vector3(spot["pos"]).snapped(Vector3.ONE * 0.1)])
+	_log.append("spare tools on benches: " + "; ".join(placed))
+	_shards()
+
+## Shards of porcelain lie about the floors of the tomb (a throw, a plate, a
+## distraction to find in passing): a few to a room, and along the way.
+func _shards() -> void:
+	var holder := root.get_node_or_null("Shards") as Node3D
+	if holder == null:
+		holder = Node3D.new()
+		holder.name = "Shards"
+		root.add_child(holder)
+		holder.owner = root
+	var own: Array[RID] = []
+	for body in holder.find_children("*", "CollisionObject3D", true, false):
+		own.append((body as CollisionObject3D).get_rid())
+	# Where a few lie: the workshop, the corridor's ends and the gap between
+	# its floors, the archives, Liang's room, the tunnels, the pits' yard.
+	var centres := [
+		Vector3(-61.0, 0.2, -22.0), Vector3(-38.0, 0.2, -27.0), Vector3(-74.0, 0.2, -10.0), Vector3(-52.0, 0.2, -6.0),
+		Vector3(-55.0, 0.2, 20.5), Vector3(-22.5, 0.2, 13.0), Vector3(-22.5, 0.2, 19.0),
+		Vector3(-24.0, 0.2, -40.0), Vector3(-8.0, 0.2, -22.0), Vector3(4.0, 0.2, -48.0),
+		Vector3(46.0, 0.2, -20.0), Vector3(54.0, 0.2, -44.0),
+		Vector3(38.0, -26.0, -14.0), Vector3(60.0, -26.0, -2.0), Vector3(21.0, -25.9, -14.0), Vector3(16.0, -26.0, -20.0),
+	]
+	var n := 0
+	for i in centres.size():
+		var spots := _free_row(centres[i], 1, own)
+		if spots.is_empty():
+			continue
+		var node_name := "Shard%d" % i
+		var item := holder.get_node_or_null(node_name) as Pickup
+		if item == null:
+			item = (load("res://scenes/items/pickup.tscn") as PackedScene).instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as Pickup
+			item.name = node_name
+			holder.add_child(item)
+			item.owner = root
+		item.item_id = &"ceramic"
+		item.global_position = spots[0]
+		item.rotation = Vector3(0.0, float(hash(node_name) % 628) / 100.0, 0.0)
+		n += 1
+	_log.append("shards of porcelain on the floors: %d lying about" % n)
+
+## A free stretch of floor near `centre` for a bench of `size` (x by z, its
+## height not counting): flat under it, nothing solid within a hand of it,
+## either way round. {"pos": floor point of its middle, "yaw"} or {}.
+func _free_bench_spot(centre: Vector3, size: Vector3, ignore: Array[RID]) -> Dictionary:
+	var space := root.get_world_3d().direct_space_state
+	var ground := space.intersect_ray(PhysicsRayQueryParameters3D.create(centre + Vector3.UP * 0.5, centre + Vector3.DOWN * 3.0, 1))
+	if ground.is_empty():
+		return {}
+	var base: float = ground.position.y
+	var box := BoxShape3D.new()
+	box.size = Vector3(size.x + 0.5, 1.6, size.z + 0.5)
+	for ring: float in [0.0, 0.8, 1.6, 2.4, 3.2, 4.0, 5.0]:
+		for a in 16:
+			var ang := TAU * a / 16.0
+			var p: Vector3 = centre + Vector3(cos(ang), 0.0, sin(ang)) * ring
+			for yaw: float in [0.0, PI * 0.5]:
+				var basis := Basis(Vector3.UP, yaw)
+				var flat := true
+				for corner in [Vector3.ZERO, Vector3(1, 0, 1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(-1, 0, -1)]:
+					var q: Vector3 = p + basis * (Vector3(corner.x * size.x * 0.5, 0.0, corner.z * size.z * 0.5))
+					var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, base + 1.4, q.z), Vector3(q.x, base - 1.0, q.z), 1))
+					if hit.is_empty() or absf(hit.position.y - base) > 0.06:
+						flat = false
+						break
+				if not flat:
+					continue
+				var query := PhysicsShapeQueryParameters3D.new()
+				query.shape = box
+				query.transform = Transform3D(basis, Vector3(p.x, base + 0.95, p.z))
+				query.collision_mask = 1 | 16
+				query.exclude = ignore
+				if space.intersect_shape(query, 1).is_empty():
+					return {"pos": Vector3(p.x, base, p.z), "yaw": yaw}
+	return {}
 
 ## `count` free spots in a row on the floor, near `centre`, a stride apart:
 ## the first stretch of level floor, clear of anything solid, that a ring

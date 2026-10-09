@@ -183,9 +183,12 @@ func _split() -> void:
 	broken = true
 	Sfx.play_at(SPLIT, global_position, 3.0, 0.0, &"Tomb", 60.0)
 	_chips(global_position + Vector3.UP * 0.6, 40, 1.4)
+	# It comes apart and is gone: no piece left standing in the way (the
+	# shaft's ladder is behind it).
 	var tween := create_tween().set_parallel(true)
 	tween.tween_property(_rock, "scale", _split_scale(), 0.5).set_trans(Tween.TRANS_BOUNCE)
 	tween.tween_property(_rock, "position", _rock_rest.origin + Vector3.DOWN * 0.6, 0.5)
+	tween.chain().tween_callback(func() -> void: _rock.visible = false)
 	_blocker.set_deferred(&"disabled", true)
 	# The use volume goes too, or it hides whatever is behind it (the ladder
 	# down the shaft) from the player's aim.
@@ -203,6 +206,7 @@ func _apply() -> void:
 	if broken:
 		_rock.scale = _split_scale()
 		_rock.position = _rock_rest.origin + Vector3.DOWN * 0.6
+		_rock.visible = false
 		_blocker.disabled = true
 		($Body as CollisionObject3D).collision_layer = 0
 		if _external_body != null:

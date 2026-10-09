@@ -147,7 +147,22 @@ func register_level(level_root: Node) -> void:
 		# Fresh start (also when running the level scene directly from the editor).
 		Quest.start_at(QuestDB.STEPS[0]["id"])
 	Net.level_started()
+	_log_level_stats()
 	level_ready.emit(level_root)
+
+## One line in the log at each level load: what a retry that gets slower and
+## slower would be piling up (nodes, objects, resources, memory, the guards
+## and lights the stealth system holds, the frame time), to compare from one
+## retry to the next.
+func _log_level_stats() -> void:
+	print("[level] nodes %d, objects %d, resources %d, orphans %d, mem %.0f MB, guards %d, lights %d, fps %d, retries %d" % [
+		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+		int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+		int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
+		int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
+		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Stealth.guards().size(), Stealth.lights().size(),
+		int(Performance.get_monitor(Performance.TIME_FPS)), _scene_changes])
 
 func is_dead() -> bool:
 	return _is_dead

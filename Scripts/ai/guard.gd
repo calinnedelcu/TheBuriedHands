@@ -115,6 +115,8 @@ var _stimulus := Vector3.ZERO
 ## Gone to see what a thrown thing was: a short look round the spot, a word,
 ## then back to his round.
 var _checking_thrown := false
+## How much of his usual sight-gain a guard keeps while he goes to see it.
+const DISTRACTED_SIGHT := 0.3
 var _last_seen := Vector3.ZERO
 var _seen_timer := 0.0
 var _lost_timer := 0.0
@@ -338,9 +340,12 @@ func _perceive(dt: float) -> void:
 			seen = f
 			_player = p
 	if seen > 0.0:
-		awareness = minf(awareness + dt * sight_gain * seen, 1.25)
+		# Gone to look at something thrown: his eye is on the spot, and it
+		# takes him a good while to take in a man in the corner of it.
+		awareness = minf(awareness + dt * sight_gain * seen * (DISTRACTED_SIGHT if _checking_thrown else 1.0), 1.25)
 		_last_seen = _player.global_position
-		_stimulus = _last_seen
+		if not _checking_thrown or awareness >= 0.85:
+			_stimulus = _last_seen
 		_seen_timer = 0.0
 	else:
 		_seen_timer += dt
@@ -421,6 +426,9 @@ func can_check(position: Vector3, radius: float) -> bool:
 ## Something thrown came down: not a step, a thing that fell. The nearest
 ## guard who heard it goes to see what it was; the others turn to it and
 ## stay where they are. That's what a stone thrown the other way is for.
+## It is the thing he means to look at, not the thrower: no alert is raised
+## by it (the guard isn't more watchful of him afterwards), and while he
+## goes to look his eye is on the spot (see `_perceive`).
 func _heard_thrown(position: Vector3, radius: float, d: float) -> void:
 	var nearest := true
 	for g in Stealth.guards():
@@ -430,10 +438,9 @@ func _heard_thrown(position: Vector3, radius: float, d: float) -> void:
 	_bark(&"noise")
 	if nearest:
 		_checking_thrown = true
-		awareness = maxf(awareness, 0.5)
+		_set_state(State.INVESTIGATE)
 	else:
-		awareness = maxf(awareness, 0.3)
-	_react()
+		_set_state(State.SUSPICIOUS)
 
 ## Moves between states from the awareness level.
 func _react() -> void:
