@@ -170,12 +170,13 @@ PROMPT_WINCH_JAM,jam the pawl with the chisel,înțepenește clichetul cu dalta
 NOTICE_WINCH_JAMMED,The chisel is wedged in the pawl. The battery won't wind again.,Dalta e înfiptă în clichet. Bateria nu se mai încarcă.
 NOTICE_SONG_LEARNED,You learn lines of the masons' song (hold {journal}).,Afli versuri din cântecul zidarilor (ține {journal} apăsat).
 SONG_TITLE,The masons' song,Cântecul zidarilor
+SONG_BEARINGS,"Facing the sunrise (on, away from the workshop): the river wall on your left, the mountain wall on your right.","Cu fața spre răsărit (înainte, departe de atelier): zidul râului în stânga, cel al muntelui în dreapta."
 SONG_FLOOR_WEST,The first floor:,Prima pardoseală:
 SONG_FLOOR_EAST,The floor over the pits:,Pardoseala de peste gropi:
-VERSE_START,begin on the %s stone from the wall of waves,începe pe %s piatră de la zidul cu valuri
-VERSE_EAST,%s toward the archives,%s spre arhive
-VERSE_RIVER,%s toward the waves,%s spre valuri
-VERSE_MOUNTAIN,%s toward the peaks,%s spre piscuri
+VERSE_START,begin on the %s stone from the river wall,începe pe %s piatră de la zidul râului
+VERSE_EAST,%s toward the sunrise,%s spre răsărit
+VERSE_RIVER,%s toward the river,%s spre râu
+VERSE_MOUNTAIN,%s toward the mountain,%s spre munte
 VERSE_END,", and you stand beyond",", și ești dincolo"
 VERSE_ORD_1,first,prima
 VERSE_ORD_2,second,a doua
@@ -302,11 +303,13 @@ DLG_TUNNEL_FALLEN,"Fallen in, as Liang said. Only the workers' shaft is left.","
 DLG_CORRIDOR_ENTER,"This floor... every stone the same. Bai's crew laid it, and only they know which stones to tread on.","Pardoseala asta... toate pietrele la fel. Echipa lui Bai a pus-o, și numai ei știu pe care pietre se calcă."
 DLG_BAI_WORK_1,"Clay, always clay. I'm a mason, master, not a modeller. The corridor floor out there is mine: my crew laid it.","Lut, tot lut. Eu sunt zidar, meștere, nu modelator. Pardoseala coridorului de afară e a mea: echipa mea a pus-o."
 DLG_BAI_WORK_2,The corridor with the crossbows?,Coridorul cu arbaletele?
-DLG_BAI_WORK_3,"We call it the singing floor. Nobody treads it without our song. The corridor's walls say which is which: waves on the one side, for the Wei, peaks on the other, for Mount Li. You count from the wall of waves, facing the archives. It goes:","Noi îi zicem pardoseala care cântă. Nimeni nu calcă pe ea fără cântecul nostru. Zidurile coridorului îți spun care e care: valuri pe o parte, pentru Wei, piscuri pe cealaltă, pentru muntele Li. Numeri de la zidul cu valuri, cu fața spre arhive. Merge așa:"
+DLG_BAI_WORK_3,"We call it the singing floor. Nobody treads it without our song. We sing it facing the sunrise, and we count from the river wall. It goes:",Noi îi zicem pardoseala care cântă. Nimeni nu calcă pe ea fără cântecul nostru. Îl cântăm cu fața spre răsărit și numărăm de la zidul râului. Merge așa:
+DLG_BAI_WORK_3B,"The sunrise? Down there, under the earth?","Răsăritul? Acolo jos, sub pământ?"
+DLG_BAI_WORK_3C,"The tomb's gate looks east, and the corridor runs from this room to it. So the sunrise is always on, ahead of you, away from here. The river is on your left hand: we cut its waves into that wall. The mountain on your right: we cut its peaks into the other. A man can find his sides in the dark by touch.","Poarta mormântului se uită spre est, iar coridorul pleacă de-aici spre ea. Deci răsăritul e mereu înainte, departe de-aici. Râul îți rămâne în stânga: i-am săpat valurile pe zidul de-acolo. Muntele în dreapta: i-am săpat piscurile pe celălalt zid. Un om își găsește părțile și pe întuneric, pe pipăite."
 DLG_BAI_WORK_4,"The rest is my crew's. My boys cut it into the bench behind me, so they'd never forget it.","Restul e al echipei mele. Băieții l-au scrijelit pe bancul din spatele meu, să nu-l uite niciodată."
 DLG_BAI_AFTER_1,They've shut the gate... My son went out into the corridor to see if there's still a way out. He hasn't come back.,"Au închis poarta... Băiatul meu a ieșit pe coridor, să vadă dacă mai e vreo ieșire. Nu s-a mai întors."
 DLG_BAI_AFTER_2,He has the song: I wrote it out for him on a strip of bamboo. But in the dark...,"Are cântecul, i l-am scris pe o fâșie de bambus. Dar pe întuneric..."
-DLG_BAI_AFTER_START,"You don't even know how it starts? Listen, then:","Nu știi nici cum începe? Ascultă, atunci:"
+DLG_BAI_AFTER_START,"You don't even know how it starts? Listen, then. Always facing the sunrise, which is on, away from here, down the corridor; the river on your left, the mountain on your right; and you count from the river wall:","Nu știi nici cum începe? Ascultă, atunci. Mereu cu fața spre răsărit, adică mai departe, în josul coridorului, departe de-aici; râul în stânga, muntele în dreapta; și numeri de la zidul râului:"
 DLG_BAI_AFTER_3,"We wound the crossbows from inside the wall, from a hollow pillar at the near end. A flame will show you which: that's where the air comes through.","Noi încărcam arbaletele din zid, dintr-un stâlp gol de la capătul dinspre atelier. O flacără ți-l arată: pe acolo trage aerul."
 DLG_BAI_GRIEF_1,You've been to him. Don't... don't tell me.,Ai fost la el. Nu... nu-mi spune.
 DLG_BAI_GRIEF_2,"Take it, then, all of it, so nobody else dies on my stones. The floor over the pits ends like this:","Ia-l atunci, tot, să nu mai moară nimeni pe pietrele mele. Pardoseala de peste gropi se termină așa:"

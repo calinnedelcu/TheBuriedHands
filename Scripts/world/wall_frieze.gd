@@ -6,7 +6,7 @@ extends Node3D
 ## Along the great corridor the masons carved the Wei river's waves on one
 ## wall and Mount Li's peaks on the other, as the tomb lies under the one
 ## and beside the other, so a man can tell his sides in the dark. (Bai's
-## song names them: "from the wall of waves", "toward the peaks".)
+## song names them: "from the river wall", "toward the mountain".)
 ##
 ## Local space: x along the wall, y up, +z out of the wall into the room; the
 ## origin is at the wall's face, at the band's lower edge. Rebuilt from its

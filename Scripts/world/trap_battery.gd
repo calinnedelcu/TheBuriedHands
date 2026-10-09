@@ -3,17 +3,21 @@ extends Node3D
 ## The crossbows set in a trapped floor's walls, high up behind bronze
 ## grilles, all wound by one winch. A trigger stone looses the ones nearest
 ## to it at whoever stands there, at the chest, the waist and the knee (no
-## stance is safe from a battery), and a bolt from that close goes through a
-## man. The winch winds them again a few seconds later: a volley spent on a
-## thrown shard buys only that long. Locked (the builders' pin), the battery
-## never looses again; held slack (their brake), it can't.
+## stance is safe from a battery). A volley is one hit: the bolts come within
+## a breath of each other, inside the player's moment of grace, and one costs
+## a third of a man's strength, so a wrong stone hurts and the third kills.
+## The winch winds them again a few seconds later: a volley spent on a thrown
+## shard buys only that long. Locked (the builders' pin), the battery never
+## looses again; held slack (their brake), it can't.
 ##
 ## Its crossbows are the WallCrossbow children (out of reach: no cutting).
 
 const WINCH := preload("res://audio/sfx/impacts/impactPlank_medium_002.ogg")
 const AIM_HEIGHTS := [1.35, 0.85, 0.45, 1.1, 0.6]
 
-@export var bolt_damage := 6.0
+## A third of the player's health (6, or 5 on the hardest setting): three
+## volleys kill, two do not.
+@export var bolt_damage := 2.0
 @export var reload_time := 7.0
 ## Crossbows loosed per volley (the nearest to the stone).
 @export var per_volley := 4

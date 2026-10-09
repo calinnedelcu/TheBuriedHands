@@ -55,6 +55,9 @@ func _run() -> void:
 	await _read(bench)
 	_check("the bench has its middle", _known(&"west", MasonsSong.part(&"west", 1)))
 	_check("the journal shows the song", MasonsSong.journal_text().contains(MasonsSong.line_text(&"west", 0)))
+	_check("and says where the sunrise lies (on, away from the workshop)", MasonsSong.journal_text().contains(tr("SONG_BEARINGS")) and tr("SONG_BEARINGS") != "SONG_BEARINGS")
+	var said := tr("DLG_BAI_WORK_3B") + tr("DLG_BAI_WORK_3C")
+	_check("Bai answers 'the sunrise, down here?' in words (no raw keys)", not said.contains("DLG_BAI") and (said.to_lower().contains("sunrise") or said.to_lower().contains("răsărit")))
 	# After the sealing.
 	Game.set_flag(&"guards_hostile")
 	Game.advance_sealing(1)
@@ -107,16 +110,25 @@ func _verses_walk_their_ways() -> void:
 			words = words and t.length() > 8 and not t.contains("VERSE_")
 		_check("%s: %d lines, all in words ('%s')" % [floor, MasonsSong.line_count(floor), MasonsSong.line_text(floor, 0)], words)
 
-## The verse names no compass point: the corridor's own walls carry the
-## bearings it uses (waves along the north wall, peaks along the south), and
-## the verse's words are those.
+## The corridor's walls carry the river's waves (north) and the mountain's
+## peaks (south); the verse counts from the river wall, toward the sunrise,
+## the river and the mountain, and Bai and the journal say which way each lies.
 func _the_walls_carry_the_bearings() -> void:
 	var waves := level.get_node("CorridorTraps/FriezeWaves") as WallFrieze
 	var peaks := level.get_node("CorridorTraps/FriezePeaks") as WallFrieze
 	var west := MasonsSong.field(&"west")
 	_check("waves on the north wall, peaks on the south, along the corridor", waves.motif == WallFrieze.Motif.WAVES and peaks.motif == WallFrieze.Motif.PEAKS and waves.global_position.z < west.global_position.z and peaks.global_position.z > west.global_position.z + west.rows * west.cell)
-	var words := MasonsSong.line_text(&"west", 0) + MasonsSong.line_text(&"east", 1)
-	_check("the verse speaks of the waves, the peaks, the archives (no sunrise, river or mountain)", not (words.contains("sunrise") or words.contains("răsărit") or words.contains("river") or words.contains("mountain")))
+	# The verse counts the way the masons sang it: from the river wall, toward
+	# the sunrise, the river, the mountain (never the archives), and the
+	# walls and Bai say which is which.
+	var words := ""
+	for floor in [&"west", &"east"]:
+		for i in MasonsSong.line_count(floor):
+			words += MasonsSong.line_text(floor, i) + " "
+	var low := words.to_lower()
+	_check("the verse speaks of the sunrise, the river and the mountain", (low.contains("sunrise") or low.contains("răsărit")) and (low.contains("river") or low.contains("râu")) and (low.contains("mountain") or low.contains("munte")))
+	_check("the verse names no archives, waves or peaks", not (low.contains("archive") or low.contains("arhive") or low.contains("waves") or low.contains("valuri") or low.contains("peaks") or low.contains("piscuri")))
+	_check("the verse has no raw keys", not words.contains("VERSE_"))
 
 ## Near the real pillar a lamp gutters; near the others, nothing.
 func _the_hollow_pillar() -> void:

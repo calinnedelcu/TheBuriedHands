@@ -1,10 +1,11 @@
 extends Node
 ## Dev test: the great corridor's trapped floors (TrapField) against the
 ## real player, one thing at a time from a fresh start of Act II:
-##   a trigger stone kills (the battery's volley, whatever his stance);
+##   a trigger stone hurts (the battery's volley, whatever his stance, one
+##   hit of three); the third wrong stone kills;
 ##   the builders' marked way across is safe, stone by stone;
 ##   a shard thrown on a trigger stone spends the volley, the field is safe
-##   till the winch winds it again, then it kills again;
+##   till the winch winds it again, then it looses again;
 ##   a knock tells a stone: solid, a trigger, hollow over a pit;
 ##   a pit's slab tips him onto the spikes;
 ##   the winch's brake held (in the hollow pillar) keeps the first floor
@@ -138,12 +139,32 @@ func _stand(at: Vector3) -> void:
 	player.global_position = at + Vector3.UP * 0.05
 	player.velocity = Vector3.ZERO
 
-## Off the way, on a trigger stone: dead, standing or crouched.
+## Off the way, on a trigger stone: a volley is one hit, a third of his
+## strength; three wrong stones kill him (not one).
 func _trigger_kills() -> void:
-	var cell := _first_of(west, TrapField.Cell.TRIGGER, 5)
-	_stand(west.centre_global(cell))
-	await _wait(1.0)
-	_check("a trigger stone: the volley kills (health %.1f)" % player.health, Game.is_dead() or player.health <= 0.0)
+	var battery := west.get_node(west.battery_path) as TrapBattery
+	player.health = player.max_health
+	var hits := 0
+	for n in 3:
+		var cell := _first_of(west, TrapField.Cell.TRIGGER, 5 + n * 4)
+		_stand(Vector3(-54.0, 0.4, 15.5))
+		await _wait(0.5)
+		_wind(battery)
+		var before := player.health
+		_stand(west.centre_global(cell))
+		await _wait(1.3)
+		if n < 2:
+			_check("wrong stone %d: hurt by a volley (health %.1f -> %.1f), alive" % [n + 1, before, player.health], not Game.is_dead() and player.health < before - 0.5 and player.health > 0.0)
+			hits += 1
+		else:
+			_check("the third wrong stone kills (health %.1f)" % player.health, Game.is_dead() or player.health <= 0.0)
+	_check("a volley took about a third of his health each time", hits == 2)
+
+## The winch wound (another volley ready), as if the reload time had run.
+func _wind(battery: TrapBattery) -> void:
+	battery.armed = true
+	for cb in battery.crossbows():
+		cb.rearm()
 
 ## Stone by stone along the marked way: alive at the far side.
 func _the_way_across(field: TrapField) -> void:
@@ -173,9 +194,10 @@ func _shard_spends_it() -> void:
 	_stand(Vector3(-54.0, 0.4, 15.5))
 	await _wait(battery.reload_time)
 	_check("wound again", battery.armed)
+	var before := player.health
 	_stand(west.centre_global(other))
 	await _wait(1.0)
-	_check("and it kills again", Game.is_dead() or player.health <= 0.0)
+	_check("and it looses again (health %.1f -> %.1f)" % [before, player.health], player.health < before - 0.5)
 
 ## A knock answers what a stone is.
 func _knocks() -> void:

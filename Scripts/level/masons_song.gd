@@ -2,11 +2,13 @@ class_name MasonsSong
 extends RefCounted
 ## Old Bai's crew of masons laid the great corridor's trapped floors, and
 ## walked out of them by their work song: a verse for each floor, counting
-## the stones of the way across ("begin on the second stone from the wall of
-## waves; three toward the archives; one toward the peaks..."), facing the
-## archives as they worked, the corridor's wall of waves (the Wei river,
-## carved by the masons: WallFrieze) on the left, the wall of peaks (Mount
-## Li) on the right.
+## the stones of the way across ("begin on the second stone from the river
+## wall; three toward the sunrise; one toward the mountain..."), facing the
+## sunrise as they worked: on, away from the workshop, the way the tomb's gate
+## looks (east), the Wei river on the left, Mount Li on the right. The masons
+## carved the river's waves and the mountain's peaks into the corridor's
+## walls (WallFrieze); where the sunrise lies Bai says plainly (and the
+## journal says it again).
 ## Nobody alive has it whole. The player gathers it a few lines at a time:
 ## Bai himself at his bench in the workshop, the lines his crew cut into the
 ## bench's edge, the strip of bamboo his son carried into the corridor, the
@@ -156,11 +158,11 @@ static func say_part(speaker: StringName, floor: StringName, which: int) -> Arra
 		out.append([speaker, key(floor, i)])
 	return out
 
-## What the journal shows of the song: per floor, the known lines and "…"
-## for the rest ("" while nothing is known).
+## What the journal shows of the song: how it is faced, then per floor the
+## known lines and "…" for the rest ("" while nothing is known).
 static func journal_text() -> String:
 	var any := false
-	var out := PackedStringArray()
+	var out := PackedStringArray([TranslationServer.translate("SONG_BEARINGS")])
 	for floor in [&"west", &"east"]:
 		var n := line_count(floor)
 		if n == 0:
